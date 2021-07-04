@@ -367,11 +367,11 @@
         { "name": "description",          "type": "String",                                "default": "\"\"",         "since": "0.0.1" },
         { "name": "homepage",             "type": "Option[java.net.URI]",                  "default": "None",         "since": "0.0.1" },
         { "name": "startYear",            "type": "Option[Int]",                           "default": "None",         "since": "0.0.1" },
-        { "name": "licenses",             "type": "scala.Tuple2[String, java.net.URI]*",   "default": "Vector.empty", "since": "0.0.1" },
+        { "name": "licenses",             "type": "sbt.librarymanagement.License*",    "default": "Vector.empty", "since": "2.0.0" },
         { "name": "organizationName",     "type": "String",                                "default": "\"\"",         "since": "0.0.1" },
         { "name": "organizationHomepage", "type": "Option[java.net.URI]",                  "default": "None",         "since": "0.0.1" },
         { "name": "scmInfo",              "type": "Option[sbt.librarymanagement.ScmInfo]", "default": "None",         "since": "0.0.1" },
-        { "name": "developers",           "type": "sbt.librarymanagement.Developer*",      "default": "Vector.empty",     "since": "0.0.1" }
+        { "name": "developers",           "type": "sbt.librarymanagement.Developer*",      "default": "Vector.empty", "since": "0.0.1" }
       ]
     },
     {
@@ -732,6 +732,20 @@
         { "name": "connection",    "type": "String"                                           },
         { "name": "devConnection", "type": "String?",     "default": "None", "since": "0.0.1" }
       ]
+    },
+    {
+      "name": "License",
+      "namespace": "sbt.librarymanagement",
+      "target": "Scala",
+      "type": "record",
+      "doc": "Basic license information for a project module",
+      "fields": [
+        { "name": "spdxId",        "type": "String"       },
+        { "name": "uri",           "type": "java.net.URI" },
+        { "name": "distribution",  "type": "String?", "default": "None", "since": "0.0.1" },
+        { "name": "comments",      "type": "String?", "default": "None", "since": "0.0.1" }
+      ],
+      "parentsCompanion": "sbt.librarymanagement.LicenseFunctions"
     },
     {
       "name": "SshAuthentication",
