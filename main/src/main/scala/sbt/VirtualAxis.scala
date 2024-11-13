@@ -66,11 +66,10 @@ object VirtualAxis {
     isScala2Scala3Sandwich(str(sbv1), str(sbv2))
   }
 
-  private[sbt] def isScala2Scala3Sandwich(sbv1: String, sbv2: String): Boolean = {
+  private[sbt] def isScala2Scala3Sandwich(sbv1: String, sbv2: String): Boolean =
     def compare(a: String, b: String): Boolean =
-      a == "2.13" && (b.startsWith("0.") || b.startsWith("3."))
+      a == "2.13" && (b == "3" || b.startsWith("3."))
     compare(sbv1, sbv2) || compare(sbv2, sbv1)
-  }
 
   // This admits partial Scala version
   private[sbt] def isPartialVersionEquals(ax1: VirtualAxis, ax2: VirtualAxis): Boolean = {

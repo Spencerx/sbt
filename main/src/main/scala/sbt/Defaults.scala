@@ -4116,35 +4116,34 @@ object Classpaths {
 
   private[sbt] def isScala213(sv: String) = sv.startsWith("2.13.")
 
-  private[sbt] def isScala2Scala3Sandwich(sbv1: String, sbv2: String): Boolean = {
-    def compare(a: String, b: String): Boolean =
-      a == "2.13" && (b.startsWith("0.") || b.startsWith("3"))
-    compare(sbv1, sbv2) || compare(sbv2, sbv1)
-  }
-
   def projectDependenciesTask: Initialize[Task[Seq[ModuleID]]] =
     Def.task {
       val sbv = scalaBinaryVersion.value
       val ref = thisProjectRef.value
       val data = settingsData.value
       val deps = buildDependencies.value
-      deps.classpath(ref) flatMap { dep =>
-        for {
-          depProjId <- (dep.project / projectID).get(data)
-          depSBV <- (dep.project / scalaBinaryVersion).get(data)
-          depCross <- (dep.project / crossVersion).get(data)
-        } yield {
-          depCross match {
-            case b: CrossVersion.Binary if isScala2Scala3Sandwich(sbv, depSBV) =>
+      deps
+        .classpath(ref)
+        .flatMap: dep =>
+          for
+            depProjId <- (dep.project / projectID).get(data)
+            depSBV <- (dep.project / scalaBinaryVersion).get(data)
+            depCross <- (dep.project / crossVersion).get(data)
+            depAuto <- (dep.project / autoScalaLibrary).get(data)
+          yield depCross match
+            case b: CrossVersion.Binary
+                if depAuto && VirtualAxis.isScala2Scala3Sandwich(sbv, depSBV) =>
               depProjId
                 .withCrossVersion(CrossVersion.constant(b.prefix + depSBV))
                 .withConfigurations(dep.configuration)
                 .withExplicitArtifacts(Vector.empty)
+            case _ if depAuto && VirtualAxis.isScala2Scala3Sandwich(sbv, depSBV) =>
+              depProjId
+                .withCrossVersion(CrossVersion.constant(depSBV))
+                .withConfigurations(dep.configuration)
+                .withExplicitArtifacts(Vector.empty)
             case _ =>
               depProjId.withConfigurations(dep.configuration).withExplicitArtifacts(Vector.empty)
-          }
-        }
-      }
     }
 
   private[sbt] def depMap: Initialize[Task[Map[ModuleRevisionId, ModuleDescriptor]]] =
