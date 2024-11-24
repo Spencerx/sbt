@@ -333,7 +333,6 @@ object ProjectMatrix {
       name := self.id,
       sourceDirectory := base.getAbsoluteFile / "src",
       unmanagedBase := base.getAbsoluteFile / "lib",
-      projectDependencies := projectDependenciesTask.value,
       projectMatrixBaseDirectory := base,
     )
 
