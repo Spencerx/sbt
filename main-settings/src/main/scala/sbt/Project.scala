@@ -11,6 +11,7 @@ import java.io.File
 import java.util.Locale
 import sbt.librarymanagement.Configuration
 import sbt.Def.{ Initialize, ScopedKey, Setting }
+import sbt.ScopeAxis.Select
 import sbt.internal.util.Dag
 import sbt.internal.util.complete.Parser
 import sbt.internal.util.complete.DefaultParsers

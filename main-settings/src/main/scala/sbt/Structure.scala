@@ -16,6 +16,7 @@ import sbt.internal.util.TupleMapExtension.*
 import sbt.util.OptJsonWriter
 import sbt.ConcurrentRestrictions.Tag
 import sbt.Def.{ Initialize, ScopedKey, Setting, setting }
+import sbt.ScopeAxis.Select
 import std.TaskMacro
 import std.TaskExtra.{ task => mktask, _ }
 import scala.reflect.ClassTag

@@ -11,6 +11,7 @@ package sbt
 import sbt.Def.{ Initialize, ScopedKey }
 import sbt.Previous._
 import sbt.Scope.Global
+import sbt.ScopeAxis.Select
 import sbt.SlashSyntax0.given
 import sbt.internal.util._
 import sbt.std.TaskExtra._

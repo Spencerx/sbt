@@ -32,6 +32,7 @@ import sbt.Project.{
 }
 import sbt.ProjectExtra.*
 import sbt.Scope.{ GlobalScope, ThisBuildScope, ThisScope, fillTaskAxis }
+import sbt.ScopeAxis.{ Select, This, Zero }
 import sbt.State.StateOpsImpl
 import sbt.coursierint._
 import sbt.internal.CommandStrings.ExportStream

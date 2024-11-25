@@ -12,6 +12,7 @@ package test
 import hedgehog.*
 import hedgehog.runner.*
 import Scope.{ Global, ThisScope }
+import ScopeAxis.{ Select, This, Zero }
 import SlashSyntax0.given
 import BuildSettingsInstances.given
 import _root_.sbt.internal.util.AttributeKey
@@ -19,6 +20,7 @@ import _root_.sbt.internal.util.AttributeKey
 object SlashSyntaxSpec extends Properties:
   override def tests: List[Test] = List(
     property("Global / key", propGlobalKey),
+    example("Zero / compile", zeroCompile),
     property("Reference / key", propReferenceKey),
     property("Reference / Config / key", propReferenceConfigKey),
     property("Reference / task.key / key", propReferenceAttrKeyKey),
@@ -42,6 +44,7 @@ object SlashSyntaxSpec extends Properties:
   )
 
   def gen[A1: Gen]: Gen[A1] = summon[Gen[A1]]
+  lazy val compile: TaskKey[Unit] = TaskKey[Unit]("compile", "compile")
 
   def propGlobalKey: Property =
     for
@@ -57,6 +60,10 @@ object SlashSyntaxSpec extends Properties:
         (if k.scope == ThisScope then actual.scope == Global
          else true)
     )
+
+  def zeroCompile: Result =
+    val actual = Zero / compile
+    Result.assert(actual.scope.project == Zero && actual.key == compile.key)
 
   def propReferenceKey: Property =
     for

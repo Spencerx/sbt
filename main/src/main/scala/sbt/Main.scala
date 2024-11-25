@@ -18,6 +18,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 
 import sbt.Project.LoadAction
 import sbt.ProjectExtra.*
+import sbt.ScopeAxis.Select
 import sbt.internal.Aggregation.AnyKeys
 import sbt.internal._
 import sbt.internal.client.BspClient

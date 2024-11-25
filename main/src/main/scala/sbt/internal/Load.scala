@@ -15,6 +15,7 @@ import sbt.Keys._
 import sbt.Project.inScope
 import sbt.ProjectExtra.{ prefixConfigs, setProject, showLoadingKey, structure }
 import sbt.Scope.GlobalScope
+import sbt.ScopeAxis.{ Select, Zero }
 import sbt.SlashSyntax0.given
 import sbt.internal.BuildStreams._
 import sbt.internal.inc.classpath.ClasspathUtil

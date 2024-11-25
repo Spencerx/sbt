@@ -21,6 +21,7 @@ import sbt.Keys._
 import sbt.Project.{ inConfig => _, * }
 import sbt.ProjectExtra.*
 import sbt.ScopeFilter.Make._
+import sbt.ScopeAxis.Select
 import sbt.SlashSyntax0.given
 import sbt.coursierint.LMCoursier
 import sbt.internal.inc.{ HashUtil, JarUtils }

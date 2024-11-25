@@ -14,6 +14,7 @@ import java.net.URI
 import sbt.internal.util.AttributeKey
 import sbt.io.IO
 import sbt.librarymanagement.Configuration
+import sbt.ScopeAxis.{ Select, This }
 import sbt.SlashSyntax.RichConfiguration
 
 // in all of these, the URI must be resolved and normalized before it is definitive

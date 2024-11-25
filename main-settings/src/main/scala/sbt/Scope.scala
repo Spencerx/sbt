@@ -12,6 +12,7 @@ import java.net.URI
 
 import sbt.internal.util.{ AttributeKey, AttributeMap, Dag }
 import sbt.internal.util.Util._
+import sbt.ScopeAxis.{ Select, This, Zero }
 
 import sbt.io.IO
 import scala.collection.concurrent.TrieMap

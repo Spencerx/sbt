@@ -13,6 +13,7 @@ import sbt.Def._
 import sbt.Keys._
 // import sbt.Project.richInitializeTask
 import sbt.ProjectExtra.*
+import sbt.ScopeAxis.Zero
 import sbt.SlashSyntax0.given
 import sbt.internal.io.Source
 import sbt.internal.nio.Globs

@@ -10,6 +10,7 @@ package sbt
 package internal
 
 import Def.{ ScopedKey, Setting }
+import sbt.ScopeAxis.{ Select, Zero }
 import sbt.internal.util.{ AttributeKey, Relation }
 import sbt.internal.util.Types.{ const, some }
 import sbt.internal.util.complete.Parser

@@ -12,6 +12,7 @@ import sbt.internal.TestBuild._
 import sbt.internal.util.complete.Parser
 import sbt.internal.{ Resolve, TestBuild }
 import sbt.ProjectExtra.equalKeys
+import sbt.ScopeAxis.{ Select, Zero }
 import hedgehog._
 import hedgehog.core.{ ShrinkLimit, SuccessCount }
 import hedgehog.runner._

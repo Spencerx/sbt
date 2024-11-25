@@ -10,6 +10,7 @@ package sbt
 
 import sbt.librarymanagement.Configuration
 import sbt.internal.util.AttributeKey
+import sbt.ScopeAxis.{ Select, This }
 
 /**
  * SlashSyntax implements the slash syntax to scope keys for build.sbt DSL.

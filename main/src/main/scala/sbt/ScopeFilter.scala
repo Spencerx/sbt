@@ -13,6 +13,7 @@ import sbt.internal.util.{ AttributeKey, Dag }
 import sbt.librarymanagement.{ ConfigRef, Configuration }
 import sbt.internal.util.Types.const
 import Def.Initialize
+import sbt.ScopeAxis.{ Select, Zero }
 import java.net.URI
 
 sealed abstract class ScopeFilter { self =>
