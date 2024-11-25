@@ -35,12 +35,6 @@ trait SlashSyntax:
   given Conversion[ScopeAxis[Reference], RichReference] =
     (a: ScopeAxis[Reference]) => RichReference(Scope(a, This, This, This))
 
-  given [A](using Conversion[A, Reference]): Conversion[A, RichReference] =
-    (a: A) => Select(a: Reference)
-
-  given Conversion[Reference, RichReference] =
-    (r: Reference) => Select(r)
-
   given Conversion[ConfigKey, RichConfiguration] =
     (c: ConfigKey) => RichConfiguration(Scope(This, Select(c), This, This))
 
