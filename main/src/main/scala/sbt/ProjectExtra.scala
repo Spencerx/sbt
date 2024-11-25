@@ -38,7 +38,6 @@ import Keys.{
 import Project.LoadAction
 import Scope.{ Global, ThisScope }
 import sbt.ScopeAxis.Select
-import sbt.SlashSyntax0.given
 import Def.{ Flattened, Initialize, ScopedKey, Setting }
 import sbt.internal.{
   Load,

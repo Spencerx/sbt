@@ -9,8 +9,12 @@
 package sbt
 
 import sbt.internal.util.Util.*
+import sbt.librarymanagement.Configuration
+import sbt.internal.util.AttributeKey
 
 enum ScopeAxis[+A1]:
+  import ScopeAxis.RefThenConfig
+
   /**
    * Select is a type constructor that is used to wrap type `S`
    * to make a scope component, equivalent of Some in Option.
@@ -46,6 +50,19 @@ enum ScopeAxis[+A1]:
 
   def map[A2](f: A1 => A2): ScopeAxis[A2] =
     foldStrict(s => Select(f(s)): ScopeAxis[A2], Zero: ScopeAxis[A2], This: ScopeAxis[A2])
+
+  def asScope(using A1 <:< Reference): Scope =
+    Scope(this.asInstanceOf[ScopeAxis[Reference]], This, This, This)
+
+  inline def /[K](key: Scoped.ScopingSetting[K])(using A1 <:< Reference): K = key.rescope(asScope)
+
+  inline def /(c: ConfigKey)(using A1 <:< Reference): RefThenConfig =
+    RefThenConfig(asScope.rescope(c))
+  inline def /(c: Configuration)(using A1 <:< Reference): RefThenConfig =
+    RefThenConfig(asScope.rescope(c))
+  // This is for handling `Zero / Zero / name`.
+  inline def /(configAxis: ScopeAxis[ConfigKey])(using A1 <:< Reference): RefThenConfig =
+    RefThenConfig(asScope.copy(config = configAxis))
 end ScopeAxis
 
 object ScopeAxis:
@@ -55,4 +72,15 @@ object ScopeAxis:
   def fromOption[A1](o: Option[A1]): ScopeAxis[A1] = o match
     case Some(v) => ScopeAxis.Select(v)
     case None    => ScopeAxis.Zero
+
+  /** Temporary data structure to capture first two axis using slash syntax. */
+  class RefThenConfig(val scope: Scope):
+    override def toString(): String = scope.toString()
+    inline def /[K](key: Scoped.ScopingSetting[K]): K = scope / key
+
+    inline def /(task: AttributeKey[?]): Scope = scope.copy(task = Select(task))
+
+    /** This is for handling `Zero / Zero / Zero / name`. */
+    inline def /(taskAxis: ScopeAxis[AttributeKey[?]]): Scope = scope.copy(task = taskAxis)
+  end RefThenConfig
 end ScopeAxis

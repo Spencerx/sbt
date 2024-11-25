@@ -16,7 +16,7 @@ import sbt.Project.inScope
 import sbt.ProjectExtra.{ prefixConfigs, setProject, showLoadingKey, structure }
 import sbt.Scope.GlobalScope
 import sbt.ScopeAxis.{ Select, Zero }
-import sbt.SlashSyntax0.given
+import sbt.SlashSyntax0.*
 import sbt.internal.BuildStreams._
 import sbt.internal.inc.classpath.ClasspathUtil
 import sbt.internal.inc.{ MappedFileConverter, ScalaInstance, ZincLmUtil, ZincUtil }

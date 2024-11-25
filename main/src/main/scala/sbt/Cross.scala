@@ -13,7 +13,6 @@ import sbt.Def.{ ScopedKey, Setting }
 import sbt.Keys._
 import sbt.ProjectExtra.extract
 import sbt.ScopeAxis.{ Select, Zero }
-import sbt.SlashSyntax0.given
 import sbt.internal.Act
 import sbt.internal.CommandStrings._
 import sbt.internal.inc.ScalaInstance

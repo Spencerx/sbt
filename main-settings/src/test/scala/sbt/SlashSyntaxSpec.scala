@@ -13,7 +13,7 @@ import hedgehog.*
 import hedgehog.runner.*
 import Scope.{ Global, ThisScope }
 import ScopeAxis.{ Select, This, Zero }
-import SlashSyntax0.given
+import SlashSyntax0.*
 import BuildSettingsInstances.given
 import _root_.sbt.internal.util.AttributeKey
 
@@ -23,6 +23,7 @@ object SlashSyntaxSpec extends Properties:
     example("Zero / compile", zeroCompile),
     property("Reference / key", propReferenceKey),
     property("Reference / Config / key", propReferenceConfigKey),
+    example("Zero / Zero / compile", zeroZeroCompile),
     property("Reference / task.key / key", propReferenceAttrKeyKey),
     property("Reference / task / key", propReferenceTaskKey),
     property("Reference / inputtask / key", propReferenceInputTaskKey),
@@ -37,6 +38,7 @@ object SlashSyntaxSpec extends Properties:
     property("task / key", propTaskKey),
     property("inputtask / key", propInputTaskKey),
     property("Scope / key", propScopeKey),
+    property("Reference / Config? / key", propReferenceConfigAxisKey),
     property("Reference? / key", propReferenceAxisKey),
     property("Reference? / Config? / key", propReferenceAxisConfigAxisKey),
     // property("Reference? / task.key? / key", propReferenceAxisAttrKeyAxisKey),
@@ -63,6 +65,10 @@ object SlashSyntaxSpec extends Properties:
 
   def zeroCompile: Result =
     val actual = Zero / compile
+    Result.assert(actual.scope.project == Zero && actual.key == compile.key)
+
+  def zeroZeroCompile: Result =
+    val actual = Zero / Zero / compile
     Result.assert(actual.scope.project == Zero && actual.key == compile.key)
 
   def propReferenceKey: Property =
@@ -327,6 +333,23 @@ object SlashSyntaxSpec extends Properties:
         // Only if the incoming scope is This/This/This,
         // Global scoping is effective.
         (if k.scope == ThisScope then actual.scope == scope
+         else true)
+    )
+
+  def propReferenceConfigAxisKey: Property =
+    for
+      ref <- gen[Reference].forAll
+      config <- gen[ScopeAxis[ConfigKey]].forAll
+      k <- genKey[Unit].forAll
+      actual = k match
+        case k: InputKey[?]   => ref / config / k
+        case k: TaskKey[?]    => ref / config / k
+        case k: SettingKey[?] => ref / config / k
+    yield Result.assert(
+      actual.key == k.key &&
+        (if k.scope.project == This then actual.scope.project == Select(ref)
+         else true) &&
+        (if k.scope.config == This then actual.scope.config == config
          else true)
     )
 

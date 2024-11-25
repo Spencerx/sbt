@@ -13,88 +13,32 @@ import sbt.internal.util.AttributeKey
 import sbt.ScopeAxis.{ Select, This }
 
 /**
- * SlashSyntax implements the slash syntax to scope keys for build.sbt DSL.
- * The implicits are set up such that the order that the scope components
- * must appear in the order of the project axis, the configuration axis, and
- * the task axis. This ordering is the same as the shell syntax.
+ * SlashSyntax implements part of the slash syntax to scope keys for build.sbt DSL.
  *
  * @example
  *  {{{
- *  Global / cancelable := true
- *  ThisBuild / scalaVersion := "2.12.2"
  *  Test / test := ()
- *  console / scalacOptions += "-deprecation"
+ *  console.key / scalacOptions += "-deprecation"
  *  Compile / console / scalacOptions += "-Ywarn-numeric-widen"
- *  projA / Compile / console / scalacOptions += "-feature"
- *  Zero / Zero / name := "foo"
  *  }}}
  */
 trait SlashSyntax:
-  import SlashSyntax.*
-
-  given Conversion[ScopeAxis[Reference], RichReference] =
-    (a: ScopeAxis[Reference]) => RichReference(Scope(a, This, This, This))
-
-  given Conversion[ConfigKey, RichConfiguration] =
-    (c: ConfigKey) => RichConfiguration(Scope(This, Select(c), This, This))
-
-  given Conversion[Configuration, RichConfiguration] =
-    (c: Configuration) => (c: ConfigKey)
-
   /**
-   * This handles task scoping an existing scoped key (such as `Compile / test`)
-   * into a task scoping in `(Compile / test) / name`.
+   * Handles slash syntax for `key.key / key`.
    */
-  given Conversion[Scoped, Scope] =
-    (t: Scoped) => t.scope.copy(task = Select(t.key))
+  extension [A1](a: AttributeKey[A1])
+    def asScope: Scope = Scope(This, This, Select(a), This)
+    def /[K](key: Scoped.ScopingSetting[K]): K = a.asScope.scope(key)
 
-  given Conversion[Scoped, RichScope] =
-    (t: Scoped) => RichScope(t: Scope)
+  extension (c: ConfigKey)
+    def asScope: Scope = Scope(This, Select(c), This, This)
+    def /[K](key: Scoped.ScopingSetting[K]): K = c.asScope.scope(key)
+    def /(task: AttributeKey[?]): Scope = c.asScope.copy(task = Select(task))
 
-  given [A1]: Conversion[AttributeKey[A1], Scope] =
-    (a: AttributeKey[A1]) => Scope(This, This, Select(a), This)
-
-  given [A1]: Conversion[AttributeKey[A1], RichScope] =
-    (a: AttributeKey[A1]) => RichScope(a: Scope)
-
-  given Conversion[Scope, RichScope] =
-    (scope: Scope) => RichScope(scope)
-end SlashSyntax
-
-object SlashSyntax:
-
-  sealed trait HasSlashKey {
-    protected def scope: Scope
-    def /[K](key: Scoped.ScopingSetting[K]): K = key.rescope(scope)
-  }
-
-  sealed trait HasSlashKeyOrAttrKey extends HasSlashKey {
-    def /(key: AttributeKey[?]): Scope = scope.rescope(key)
-  }
-
-  /** RichReference wraps a reference to provide the `/` operator for scoping. */
-  final class RichReference(protected val scope: Scope) extends HasSlashKeyOrAttrKey {
-    def /(c: ConfigKey): RichConfiguration = new RichConfiguration(scope.rescope(c))
-
-    def /(c: Configuration): RichConfiguration = new RichConfiguration(scope.rescope(c))
-
-    // This is for handling `Zero / Zero / name`.
-    def /(configAxis: ScopeAxis[ConfigKey]): RichConfiguration =
-      new RichConfiguration(scope.copy(config = configAxis))
-  }
-
-  /** RichConfiguration wraps a configuration to provide the `/` operator for scoping. */
-  final class RichConfiguration(protected val scope: Scope) extends HasSlashKeyOrAttrKey {
-    // This is for handling `Zero / Zero / Zero / name`.
-    def /(taskAxis: ScopeAxis[AttributeKey[?]]): Scope =
-      scope.copy(task = taskAxis)
-  }
-
-  /**
-   * RichScope wraps a general scope to provide the `/` operator for scoping.
-   */
-  final class RichScope(protected val scope: Scope) extends HasSlashKeyOrAttrKey
-
+  extension (c: Configuration)
+    def asScope: Scope = (c: ConfigKey).asScope
+    def /[K](key: Scoped.ScopingSetting[K]): K = (c: ConfigKey) / key
+    def /(task: AttributeKey[?]): Scope = (c: ConfigKey) / task
 end SlashSyntax
 
 private[sbt] object SlashSyntax0 extends SlashSyntax

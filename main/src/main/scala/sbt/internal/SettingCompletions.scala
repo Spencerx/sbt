@@ -17,7 +17,6 @@ import ProjectExtra.{ relation }
 import Def.{ ScopedKey, Setting }
 import Scope.Global
 import sbt.ScopeAxis.{ Select, This, Zero }
-import sbt.SlashSyntax0.given
 import complete._
 import DefaultParsers._
 

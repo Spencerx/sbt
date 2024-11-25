@@ -19,7 +19,6 @@ import sbt.Cross._
 import sbt.Def.{ ScopedKey, Setting }
 import sbt.ProjectExtra.extract
 import sbt.ScopeAxis.{ Select, Zero }
-import sbt.SlashSyntax0.given
 import sbt.internal.util.complete.DefaultParsers._
 import sbt.internal.util.AttributeKey
 import sbt.internal.util.complete.{ DefaultParsers, Parser }

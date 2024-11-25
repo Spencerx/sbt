@@ -33,6 +33,9 @@ sealed trait Scoped extends Equals:
     })
 
   override def hashCode(): Int = (scope, key).##
+
+  final def /[K](subkey: Scoped.ScopingSetting[K]): K =
+    scope.copy(task = Select(key)).scope(subkey)
 end Scoped
 
 /** A SettingKey, TaskKey or `Initialize[Task]` that can be converted into an `Initialize[Task]`. */
@@ -75,9 +78,6 @@ sealed abstract class SettingKey[A1]
 
   private[sbt] final inline def rescope(scope: Scope): SettingKey[A1] =
     Scoped.scopedSetting(Scope.replaceThis(this.scope)(scope), this.key)
-
-  final def /[A1](subkey: Scoped.ScopingSetting[A1]): A1 =
-    subkey.rescope(scope.copy(task = Select(key)))
 
   /** Internal function for the setting macro. */
   inline def settingMacro[A](inline a: A): Initialize[A] =
@@ -156,9 +156,6 @@ sealed abstract class TaskKey[A1]
 
   private[sbt] final inline def rescope(scope: Scope): TaskKey[A1] =
     Scoped.scopedTask(Scope.replaceThis(this.scope)(scope), this.key)
-
-  final def /[A1](subkey: Scoped.ScopingSetting[A1]): A1 =
-    subkey.rescope(scope.copy(task = Select(key)))
 
   inline def +=[A2](inline v: A2)(using Append.Value[A1, A2]): Setting[Task[A1]] =
     append1[A2](taskMacro(v))
@@ -239,9 +236,6 @@ sealed trait InputKey[A1]
 
   private[sbt] final inline def rescope(scope: Scope): InputKey[A1] =
     Scoped.scopedInput(Scope.replaceThis(this.scope)(scope), this.key)
-
-  final def /[A1](subkey: Scoped.ScopingSetting[A1]): A1 =
-    subkey.rescope(scope.copy(task = Select(key)))
 
   private inline def inputTaskMacro[A2](inline a: A2): Def.Initialize[InputTask[A2]] =
     ${ std.InputTaskMacro.inputTaskMacroImpl('a) }

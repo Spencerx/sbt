@@ -14,7 +14,6 @@ import sbt.Keys._
 import Scope.GlobalScope
 import Def.ScopedKey
 import sbt.ScopeAxis.Select
-import sbt.SlashSyntax0.given
 import sbt.internal.Load
 import sbt.internal.CommandStrings._
 import Cross.{ spacedFirst, requireSession }

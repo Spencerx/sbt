@@ -23,7 +23,6 @@ import java.util.concurrent.atomic.{ AtomicBoolean, AtomicReference }
 
 import sbt.BasicCommandStrings.{ Shutdown, TerminateAction }
 import sbt.ProjectExtra.extract
-import sbt.SlashSyntax0.given
 import sbt.internal.langserver.{ CancelRequestParams, ErrorCodes, LogMessageParams, MessageType }
 import sbt.internal.protocol.{
   JsonRpcNotificationMessage,

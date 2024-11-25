@@ -32,6 +32,9 @@ final case class Scope private (
   def rescope(config: ConfigKey): Scope = copy(config = Select(config))
   def rescope(task: AttributeKey[?]): Scope = copy(task = Select(task))
 
+  final def /[K](key: Scoped.ScopingSetting[K]): K = scope(key)
+  def scope[K](key: Scoped.ScopingSetting[K]): K = key.rescope(this)
+
   def copy(
       project: ScopeAxis[Reference] = this.project,
       config: ScopeAxis[ConfigKey] = this.config,

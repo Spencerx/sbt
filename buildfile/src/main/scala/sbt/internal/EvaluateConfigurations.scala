@@ -16,7 +16,6 @@ import java.nio.file.Path
 import sbt.internal.util.complete.DefaultParsers.validID
 import Def.{ ScopedKey, Setting, Settings }
 import Scope.GlobalScope
-import sbt.SlashSyntax0.given
 import sbt.internal.parser.SbtParser
 import sbt.io.IO
 import scala.jdk.CollectionConverters.*
