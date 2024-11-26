@@ -430,4 +430,23 @@ object Scope:
         t <- withZeroAxis(scope.task)
         e <- withZeroAxis(scope.extra)
       } yield Scope(Zero, c, t, e)
+
+  /**
+   * Temporary data structure to capture first two axis using slash syntax.
+   * In theory, we might be able to express this as type parameters of Scope,
+   * like Scope[Select[ThisBuild.type], Select[ConfigKey], This, This] but then
+   * scope becomes more complicated to deal with.
+   */
+  opaque type RefThenConfig = (ScopeAxis[Reference], ScopeAxis[ConfigKey])
+
+  object RefThenConfig:
+    def apply(project: ScopeAxis[Reference], config: ScopeAxis[ConfigKey]): RefThenConfig =
+      (project, config)
+    def apply(project: ScopeAxis[Reference], config: ConfigKey): RefThenConfig =
+      (project, Select(config))
+
+    extension (in: RefThenConfig)
+      def project: ScopeAxis[Reference] = in._1
+      def config: ScopeAxis[ConfigKey] = in._2
+  end RefThenConfig
 end Scope

@@ -18,6 +18,7 @@ import sbt.Def.Initialize
 import sbt.internal.util.{ Attributed, Dag }
 import sbt.librarymanagement.{ Configuration, TrackLevel }
 import sbt.librarymanagement.Configurations.names
+import sbt.SlashSyntax0.*
 import sbt.std.TaskExtra._
 import sbt.util._
 import scala.jdk.CollectionConverters.*

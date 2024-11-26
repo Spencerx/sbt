@@ -14,7 +14,8 @@ import java.net.URI
 import sbt.internal.util.AttributeKey
 import sbt.io.IO
 import sbt.librarymanagement.Configuration
-import sbt.ScopeAxis.{ Select, This, RefThenConfig }
+import sbt.Scope.RefThenConfig
+import sbt.ScopeAxis.{ Select, This }
 
 // in all of these, the URI must be resolved and normalized before it is definitive
 
@@ -25,13 +26,13 @@ sealed trait Reference:
   private[sbt] def asScope: Scope =
     Scope(asScopeAxis, This, This, This)
 
-  def /(c: ConfigKey): RefThenConfig = RefThenConfig(asScope.rescope(c))
+  def /(c: ConfigKey): RefThenConfig = RefThenConfig(asScopeAxis, c)
 
-  def /(c: Configuration): RefThenConfig = RefThenConfig(asScope.rescope(c))
+  def /(c: Configuration): RefThenConfig = RefThenConfig(asScopeAxis, c: ConfigKey)
 
   // This is for handling `Zero / Zero / name`.
   def /(configAxis: ScopeAxis[ConfigKey]): RefThenConfig =
-    RefThenConfig(asScope.copy(config = configAxis))
+    RefThenConfig(asScopeAxis, configAxis)
 
   final def /[K](key: Scoped.ScopingSetting[K]): K = asScope.scope(key)
 

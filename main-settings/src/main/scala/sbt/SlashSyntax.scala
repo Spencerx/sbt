@@ -11,6 +11,8 @@ package sbt
 import sbt.librarymanagement.Configuration
 import sbt.internal.util.AttributeKey
 import sbt.ScopeAxis.{ Select, This }
+import sbt.Scope.RefThenConfig
+import sbt.Scope.RefThenConfig.{ project, config }
 
 /**
  * SlashSyntax implements part of the slash syntax to scope keys for build.sbt DSL.
@@ -39,6 +41,15 @@ trait SlashSyntax:
     def asScope: Scope = (c: ConfigKey).asScope
     def /[K](key: Scoped.ScopingSetting[K]): K = (c: ConfigKey) / key
     def /(task: AttributeKey[?]): Scope = (c: ConfigKey) / task
+
+  extension (in: RefThenConfig)
+    def asScope: Scope = in.project.asScope.copy(config = in.config)
+    def toString(): String = asScope.toString()
+    def /[K](key: Scoped.ScopingSetting[K]): K = asScope / key
+    def /(task: AttributeKey[?]): Scope = asScope.copy(task = Select(task))
+
+    /** This is for handling `Zero / Zero / Zero / name`. */
+    def /(taskAxis: ScopeAxis[AttributeKey[?]]): Scope = asScope.copy(task = taskAxis)
 end SlashSyntax
 
 private[sbt] object SlashSyntax0 extends SlashSyntax
