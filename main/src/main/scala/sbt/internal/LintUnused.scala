@@ -14,7 +14,6 @@ import sbt.internal.util.{ FilePosition, NoPosition, SourcePosition }
 import java.io.File
 import ProjectExtra.{ extract, scopedKeyData }
 import Scope.Global
-import sbt.SlashSyntax0.given
 import sbt.Def._
 
 object LintUnused {

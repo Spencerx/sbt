@@ -12,6 +12,7 @@ import java.net.URI
 
 import sbt.internal.util.{ AttributeKey, AttributeMap, Dag }
 import sbt.internal.util.Util._
+import sbt.ScopeAxis.{ Select, This, Zero }
 
 import sbt.io.IO
 import scala.collection.concurrent.TrieMap
@@ -30,6 +31,9 @@ final case class Scope private (
   def rescope(project: Reference): Scope = copy(project = Select(project))
   def rescope(config: ConfigKey): Scope = copy(config = Select(config))
   def rescope(task: AttributeKey[?]): Scope = copy(task = Select(task))
+
+  final def /[K](key: Scoped.ScopingSetting[K]): K = scope(key)
+  def scope[K](key: Scoped.ScopingSetting[K]): K = key.rescope(this)
 
   def copy(
       project: ScopeAxis[Reference] = this.project,
@@ -426,4 +430,23 @@ object Scope:
         t <- withZeroAxis(scope.task)
         e <- withZeroAxis(scope.extra)
       } yield Scope(Zero, c, t, e)
+
+  /**
+   * Temporary data structure to capture first two axis using slash syntax.
+   * In theory, we might be able to express this as type parameters of Scope,
+   * like Scope[Select[ThisBuild.type], Select[ConfigKey], This, This] but then
+   * scope becomes more complicated to deal with.
+   */
+  opaque type RefThenConfig = (ScopeAxis[Reference], ScopeAxis[ConfigKey])
+
+  object RefThenConfig:
+    def apply(project: ScopeAxis[Reference], config: ScopeAxis[ConfigKey]): RefThenConfig =
+      (project, config)
+    def apply(project: ScopeAxis[Reference], config: ConfigKey): RefThenConfig =
+      (project, Select(config))
+
+    extension (in: RefThenConfig)
+      def project: ScopeAxis[Reference] = in._1
+      def config: ScopeAxis[ConfigKey] = in._2
+  end RefThenConfig
 end Scope

@@ -10,6 +10,7 @@ package sbt
 import java.net.URI
 
 import sbt.Def._
+import sbt.ScopeAxis.{ Select, Zero }
 import sbt.internal.TestBuild
 import sbt.internal.TestBuild._
 import sbt.internal.util.AttributeKey

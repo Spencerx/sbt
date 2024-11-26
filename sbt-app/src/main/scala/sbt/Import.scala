@@ -34,6 +34,9 @@ trait Import {
   type ClasspathDependency = ClasspathDep.ClasspathDependency
   val ResolvedClasspathDependency = ClasspathDep.ResolvedClasspathDependency
   type ResolvedClasspathDependency = ClasspathDep.ResolvedClasspathDependency
+  val Select = ScopeAxis.Select
+  val This = ScopeAxis.This
+  val Zero = ScopeAxis.Zero
   // sbt.testing
   type TestResult = sbt.protocol.testing.TestResult
   val TestResult = sbt.protocol.testing.TestResult

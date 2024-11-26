@@ -10,13 +10,13 @@ package sbt
 
 import sbt.internal.{ Load, BuildStructure, Act, Aggregation, SessionSettings }
 import Scope.GlobalScope
+import sbt.ScopeAxis.This
 import Def.{ ScopedKey, Setting }
 import sbt.internal.util.complete.Parser
 import sbt.util.Show
 import std.Transform.DummyTaskMap
 import sbt.EvaluateTask.extractedTaskConfig
 import sbt.ProjectExtra.setProject
-import sbt.SlashSyntax0.given
 
 final case class Extracted(
     structure: BuildStructure,

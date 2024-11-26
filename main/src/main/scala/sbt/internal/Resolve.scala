@@ -10,6 +10,7 @@ package sbt
 package internal
 
 import sbt.internal.util.AttributeKey
+import sbt.ScopeAxis.{ Select, This, Zero }
 
 object Resolve {
   def apply(

@@ -12,9 +12,11 @@ import java.io.File
 import sjsonnew._
 import sbt.Def.{ Setting, inputKey, settingKey, taskKey }
 import sbt.Scope.Global
+import sbt.ScopeAxis.Zero
+import sbt.SlashSyntax0.*
 import sbt.librarymanagement.ModuleID
 import sbt.librarymanagement.syntax._
-import sbt.{ LocalProject, ProjectReference, ThisBuild, Zero }
+import sbt.{ LocalProject, ProjectReference, ThisBuild }
 
 object SlashSyntaxTest extends sbt.SlashSyntax {
   final case class Proj(id: String)

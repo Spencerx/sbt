@@ -16,7 +16,7 @@ import java.net.URI
 import Def.{ ScopeLocal, ScopedKey, Setting, displayFull }
 import BuildPaths.outputDirectory
 import Scope.GlobalScope
-import sbt.SlashSyntax0.given
+import sbt.ScopeAxis.{ Select, This, Zero }
 import BuildStreams.Streams
 import sbt.io.syntax._
 import sbt.internal.inc.MappedFileConverter

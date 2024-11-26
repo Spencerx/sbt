@@ -16,7 +16,7 @@ import sbt.Def._
 import sbt.Keys._
 // import sbt.Project.richInitializeTask
 import sbt.ProjectExtra.*
-import sbt.SlashSyntax0.given
+import sbt.ScopeAxis.Zero
 import sbt.io.syntax._
 import sbt.nio.Keys._
 import sbt.nio.file._
@@ -161,7 +161,7 @@ private[sbt] object Clean {
   ): Def.Initialize[Task[Unit]] =
     (Def
       .task {
-        taskKey.scope / taskKey.key
+        taskKey.scope.rescope(taskKey.key)
       })
       .flatMapTask { case scope =>
         Def.task {

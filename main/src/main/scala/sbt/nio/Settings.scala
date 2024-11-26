@@ -13,7 +13,7 @@ import java.nio.file.{ Files, Path }
 import java.util.concurrent.ConcurrentHashMap
 
 import sbt.Keys._
-import sbt.SlashSyntax0.given
+import sbt.ScopeAxis.{ Select, Zero }
 import sbt.internal.Clean.ToSeqPath
 import sbt.internal.Continuous.FileStampRepository
 import sbt.internal.util.KeyTag

@@ -14,6 +14,7 @@ import hedgehog.*
 import scala.annotation.nowarn
 import scala.reflect.ClassTag
 import _root_.sbt.io.IO
+import _root_.sbt.ScopeAxis.{ Select, This, Zero }
 import _root_.sbt.Scoped.ScopingSetting
 import _root_.sbt.librarymanagement.syntax.*
 import _root_.sbt.internal.util.{ AttributeKey, AttributeMap }

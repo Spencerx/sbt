@@ -15,6 +15,7 @@ import sbt.internal.util.complete.{ DefaultParsers, Parser }
 import Aggregation.{ KeyValue, Values }
 import DefaultParsers._
 import sbt.internal.util.Types.idFun
+import sbt.ScopeAxis.{ Select, Zero }
 import sbt.ProjectExtra.{ failure => _, * }
 import java.net.URI
 import sbt.internal.CommandStrings.{ MultiTaskCommand, ShowCommand, PrintCommand }

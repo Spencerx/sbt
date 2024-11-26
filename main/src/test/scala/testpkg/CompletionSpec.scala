@@ -10,6 +10,7 @@ package testpkg
 import java.net.URI
 
 import sbt.{ Result => _, _ }
+import sbt.ScopeAxis.{ Select, Zero }
 import sbt.Def._
 import sbt.internal.TestBuild
 import sbt.internal.TestBuild._

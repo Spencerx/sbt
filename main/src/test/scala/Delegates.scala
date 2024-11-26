@@ -10,6 +10,7 @@ package sbt
 
 import sbt.internal.util.Types.idFun
 import sbt.internal.TestBuild._
+import sbt.ScopeAxis.{ Select, This, Zero }
 import hedgehog._
 import hedgehog.Result.{ all, assert, failure, success }
 import hedgehog.runner._

@@ -11,6 +11,7 @@ package internal
 
 import java.nio.file.{ Path => NioPath }
 
+import sbt.ScopeAxis.Select
 import sbt.nio.Keys._
 import sbt.nio.{ FileChanges, FileStamp }
 
@@ -100,6 +101,6 @@ object FileChangesMacro:
   private def getTaskScope[A: Type](in: Expr[TaskKey[A]])(using qctx: Quotes): Expr[sbt.Scope] =
     '{
       if $in.scope.task.toOption.isDefined then $in.scope
-      else $in.scope.copy(task = sbt.Select($in.key))
+      else $in.scope.copy(task = Select($in.key))
     }
 end FileChangesMacro
