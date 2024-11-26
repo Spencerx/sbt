@@ -76,11 +76,11 @@ object ScopeAxis:
   /** Temporary data structure to capture first two axis using slash syntax. */
   class RefThenConfig(val scope: Scope):
     override def toString(): String = scope.toString()
-    inline def /[K](key: Scoped.ScopingSetting[K]): K = scope / key
+    def /[K](key: Scoped.ScopingSetting[K]): K = scope / key
 
-    inline def /(task: AttributeKey[?]): Scope = scope.copy(task = Select(task))
+    def /(task: AttributeKey[?]): Scope = scope.copy(task = Select(task))
 
     /** This is for handling `Zero / Zero / Zero / name`. */
-    inline def /(taskAxis: ScopeAxis[AttributeKey[?]]): Scope = scope.copy(task = taskAxis)
+    def /(taskAxis: ScopeAxis[AttributeKey[?]]): Scope = scope.copy(task = taskAxis)
   end RefThenConfig
 end ScopeAxis

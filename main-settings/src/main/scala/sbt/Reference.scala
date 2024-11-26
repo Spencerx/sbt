@@ -33,7 +33,7 @@ sealed trait Reference:
   def /(configAxis: ScopeAxis[ConfigKey]): RefThenConfig =
     RefThenConfig(asScope.copy(config = configAxis))
 
-  final def /[K](key: Scoped.ScopingSetting[K]): K = key.rescope(asScope)
+  final def /[K](key: Scoped.ScopingSetting[K]): K = asScope.scope(key)
 
   final def /(key: AttributeKey[?]): Scope = asScope.rescope(key)
 end Reference
