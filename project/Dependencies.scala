@@ -76,8 +76,6 @@ object Dependencies {
   val sjsonNewMurmurhash = sjsonNew("sjson-new-murmurhash")
   val sjsonNewCore = sjsonNew("sjson-new-core")
 
-  val eval = ("com.eed3si9n.eval" % "eval" % "0.3.0").cross(CrossVersion.full)
-
   // JLine 3 version must be coordinated together with JAnsi version
   // and the JLine 2 fork version, which uses the same JAnsi
   val jline =
@@ -88,7 +86,6 @@ object Dependencies {
   val jline3JNA = "org.jline" % "jline-terminal-jna" % jline3Version
   val jline3Reader = "org.jline" % "jline-reader" % jline3Version
   val jline3Builtins = "org.jline" % "jline-builtins" % jline3Version
-  val jansi = "org.fusesource.jansi" % "jansi" % "2.4.1"
   val scalatest = "org.scalatest" %% "scalatest" % "3.2.19"
   val scalacheck = "org.scalacheck" %% "scalacheck" % "1.18.1"
   val junit = "junit" % "junit" % "4.13.1"
@@ -104,7 +101,6 @@ object Dependencies {
   val scalaParsers = "org.scala-lang.modules" %% "scala-parser-combinators" % "2.1.0"
   val scalaReflect = "org.scala-lang" % "scala-reflect" % scala213
   val scalaPar = "org.scala-lang.modules" %% "scala-parallel-collections" % "1.0.4"
-  val scalaCollectionCompat = "org.scala-lang.modules" %% "scala-collection-compat" % "2.11.0"
 
   // specify all of log4j modules to prevent misalignment
   def log4jModule = (n: String) => "org.apache.logging.log4j" % n % "2.17.1"
@@ -117,8 +113,6 @@ object Dependencies {
 
   val hedgehog = "qa.hedgehog" %% "hedgehog-sbt" % "0.7.0"
   val disruptor = "com.lmax" % "disruptor" % "3.4.2"
-  val kindProjector = ("org.typelevel" % "kind-projector" % "0.13.3").cross(CrossVersion.full)
-  val zeroAllocationHashing = "net.openhft" % "zero-allocation-hashing" % "0.10.1"
   val ivy = "org.scala-sbt.ivy" % "ivy" % "2.3.0-sbt-396a783bba347016e7fe30dacc60d355be607fe2"
 
   // lm dependencies
