@@ -10,7 +10,7 @@ package sbt
 
 import java.nio.file.{ Path => NioPath }
 import java.io.File
-import java.net.{ URL, URI }
+import java.net.URI
 import lmcoursier.definitions.{ CacheLogger, ModuleMatchers, Reconciliation }
 import lmcoursier.{ CoursierConfiguration, FallbackDependency }
 import org.apache.ivy.core.module.descriptor.ModuleDescriptor
@@ -379,18 +379,18 @@ object Keys {
   val name = settingKey[String]("Project name.").withRank(APlusSetting)
   val normalizedName = settingKey[String]("Project name transformed from mixed case and spaces to lowercase and dash-separated.").withRank(BSetting)
   val description = settingKey[String]("Project description.").withRank(BSetting)
-  val homepage = settingKey[Option[URL]]("Project homepage.").withRank(BSetting)
+  val homepage = settingKey[Option[URI]]("Project homepage.").withRank(BSetting)
   val startYear = settingKey[Option[Int]]("Year in which the project started.").withRank(BMinusSetting)
-  val licenses = settingKey[Seq[(String, URL)]]("Project licenses as (name, url) pairs.").withRank(BMinusSetting)
+  val licenses = settingKey[Seq[(String, URI)]]("Project licenses as (name, url) pairs.").withRank(BMinusSetting)
   val organization = settingKey[String]("Organization/group ID.").withRank(APlusSetting)
   val organizationName = settingKey[String]("Organization full/formal name.").withRank(BMinusSetting)
-  val organizationHomepage = settingKey[Option[URL]]("Organization homepage.").withRank(BMinusSetting)
+  val organizationHomepage = settingKey[Option[URI]]("Organization homepage.").withRank(BMinusSetting)
   val developers = settingKey[List[Developer]]("List of developers implicated in the project").withRank(BMinusSetting)
-  val apiURL = settingKey[Option[URL]]("Base URL for API documentation.").withRank(BMinusSetting)
+  val apiURL = settingKey[Option[URI]]("Base URI for API documentation.").withRank(BMinusSetting)
   val entryApiURL = StringAttributeKey("entryApiURL") // , "Base URL for the API documentation for a classpath entry.")
-  val apiMappings = taskKey[Map[HashedVirtualFileRef, URL]]("Mappings from classpath entry to API documentation base URL.").withRank(BMinusSetting)
+  val apiMappings = taskKey[Map[HashedVirtualFileRef, URI]]("Mappings from classpath entry to API documentation base URL.").withRank(BMinusSetting)
   val autoAPIMappings = settingKey[Boolean]("If true, automatically manages mappings to the API doc URL.").withRank(BMinusSetting)
-  val releaseNotesURL = settingKey[Option[URL]]("URL for release notes.").withRank(BMinusSetting)
+  val releaseNotesURL = settingKey[Option[URI]]("URL for release notes.").withRank(BMinusSetting)
   val scmInfo = settingKey[Option[ScmInfo]]("Basic SCM information for the project.").withRank(BMinusSetting)
   val projectInfo = settingKey[ModuleInfo]("Addition project information like formal name, homepage, licenses etc.").withRank(CSetting)
   val defaultConfiguration = settingKey[Option[Configuration]]("Defines the configuration used when none is specified for a dependency in ivyXML.").withRank(CSetting)

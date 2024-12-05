@@ -8,6 +8,7 @@
 package sbt
 
 import java.io.File
+import java.net.URI
 import java.time.OffsetDateTime
 import java.util.jar.{ Attributes, Manifest }
 import scala.jdk.CollectionConverters.*
@@ -196,7 +197,7 @@ object Pkg:
   def addImplManifestAttributes(
       name: String,
       version: String,
-      homepage: Option[java.net.URL],
+      homepage: Option[URI],
       org: String,
       orgName: String
   ): PackageOption = {
