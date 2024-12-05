@@ -11,6 +11,7 @@ ThisBuild / organization     := "com.example"
 ThisBuild / organizationName := "example"
 ThisBuild / csrCacheDirectory := (ThisBuild / baseDirectory).value / "coursier-cache"
 ThisBuild / licenses         += License.Apache2
+ThisBuild / licenses         += ("foo", uri("https://example.com/"))
 
 lazy val Dev = config("dev").extend(Compile)
   .describedAs("Dependencies required for development environments")
