@@ -39,7 +39,7 @@ trait LibraryManagementSyntax
   final val Optional = C.Optional
 
   given Conversion[(String, URI), License] with
-    def apply(x: (String, URI)): License = License(x._1, x._2)
+    inline def apply(x: (String, URI)): License = License(x._1, x._2)
 }
 
 object syntax extends LibraryManagementSyntax
