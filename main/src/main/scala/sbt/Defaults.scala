@@ -9,7 +9,6 @@
 package sbt
 
 import java.io.{ File, PrintWriter }
-import java.net.URL
 import java.nio.file.{ Files, Paths, Path => NioPath }
 import java.util.Optional
 import java.util.concurrent.TimeUnit
@@ -2060,8 +2059,8 @@ object Defaults extends BuildCommon {
         apiMappings ++= {
           val dependencyCp = dependencyClasspath.value
           val log = streams.value.log
-          if (autoAPIMappings.value) APIMappings.extract(dependencyCp, log).toMap
-          else Map.empty[HashedVirtualFileRef, URL]
+          if autoAPIMappings.value then APIMappings.extract(dependencyCp, log).toMap
+          else Map.empty[HashedVirtualFileRef, URI]
         },
         fileInputOptions := Seq("-doc-root-content", "-diagrams-dot-path"),
         scalacOptions := {
@@ -3088,11 +3087,11 @@ object Classpaths {
     projectInfo := ModuleInfo(
       name.value,
       description.value,
-      homepage.value.map(_.toURI),
+      homepage.value,
       startYear.value,
-      licenses.value.map((name, url) => (name, url.toURI)).toVector,
+      licenses.value.toVector,
       organizationName.value,
-      organizationHomepage.value.map(_.toURI),
+      organizationHomepage.value,
       scmInfo.value,
       developers.value.toVector
     ),
@@ -3517,21 +3516,18 @@ object Classpaths {
     val p0 = ModuleID(organization.value, moduleName.value, version.value)
       .cross((projectID / crossVersion).value)
       .artifacts(artifacts.value*)
-    val p1 = apiURL.value match {
-      case Some(u) => p0.extra(SbtPomExtraProperties.POM_API_KEY -> u.toExternalForm)
+    val p1 = apiURL.value match
+      case Some(u) => p0.extra(SbtPomExtraProperties.POM_API_KEY -> u.toURL().toExternalForm)
       case _       => p0
-    }
-    val p2 = versionScheme.value match {
+    val p2 = versionScheme.value match
       case Some(x) =>
         VersionSchemes.validateScheme(x)
         p1.extra(SbtPomExtraProperties.VERSION_SCHEME_KEY -> x)
       case _ => p1
-    }
-    val p3 = releaseNotesURL.value match {
+    val p3 = releaseNotesURL.value match
       case Some(u) =>
-        p2.extra(SbtPomExtraProperties.POM_RELEASE_NOTES_KEY -> u.toExternalForm)
+        p2.extra(SbtPomExtraProperties.POM_RELEASE_NOTES_KEY -> u.toURL().toExternalForm)
       case _ => p2
-    }
     p3
   }
   def pluginProjectID: Initialize[ModuleID] =

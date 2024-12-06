@@ -309,8 +309,8 @@ trait Import {
   given Conversion[DependencyBuilders.OrganizationArtifactName, InclExclRule] =
     InclExclRule.organizationArtifactNameToExclusionRule
 
-  // todo: fix
-  // val License = sbt.librarymanagement.License
+  type License = sbt.librarymanagement.License
+  val License = sbt.librarymanagement.License
 
   type LogicalClock = sbt.librarymanagement.LogicalClock
   val LogicalClock = sbt.librarymanagement.LogicalClock

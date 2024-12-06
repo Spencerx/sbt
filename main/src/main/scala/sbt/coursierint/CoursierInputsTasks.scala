@@ -9,7 +9,7 @@
 package sbt
 package coursierint
 
-import java.net.URL
+import java.net.URI
 import sbt.librarymanagement._
 import sbt.util.Logger
 import sbt.Keys._
@@ -46,10 +46,10 @@ object CoursierInputsTasks {
       configurations: Seq[sbt.librarymanagement.Configuration],
       sv: String,
       sbv: String,
-      auOpt: Option[URL],
-      rnOpt: Option[URL],
+      auOpt: Option[URI],
+      rnOpt: Option[URI],
       description: String,
-      homepage: Option[URL],
+      homepage: Option[URI],
       vsOpt: Option[String],
       projectPlatform: Option[String],
       log: Logger

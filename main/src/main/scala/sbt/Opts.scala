@@ -12,7 +12,7 @@ import sbt.librarymanagement.{ MavenRepository, Resolver }
 import sbt.librarymanagement.ivy.Credentials
 
 import java.io.File
-import java.net.URL
+import java.net.URI
 
 import sbt.io.Path
 import Path._
@@ -33,11 +33,11 @@ object Opts {
     def sourceUrl(u: String): Seq[String] = Seq("-doc-source-url", u)
     def title(t: String): Seq[String] = Seq("-doc-title", t)
     def version(v: String): Seq[String] = Seq("-doc-version", v)
-    def externalAPI(mappings: Iterable[(File, URL)]): Seq[String] =
+    def externalAPI(mappings: Iterable[(File, URI)]): Seq[String] =
       if (mappings.isEmpty) Nil
       else
         mappings
-          .map { case (f, u) => s"${f.getAbsolutePath}#${u.toExternalForm}" }
+          .map { case (f, u) => s"${f.getAbsolutePath}#${u.toURL().toExternalForm}" }
           .mkString("-doc-external-doc:", ",", "") :: Nil
   }
   object resolver {

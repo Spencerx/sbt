@@ -9,7 +9,7 @@
 package sbt
 package internal
 
-import java.net.{ MalformedURLException, URI, URL }
+import java.net.{ MalformedURLException, URI }
 
 import sbt.internal.librarymanagement.mavenint.SbtPomExtraProperties
 import sbt.librarymanagement.ModuleID
@@ -21,15 +21,15 @@ private[sbt] object APIMappings {
   def extract(
       cp: Seq[Attributed[HashedVirtualFileRef]],
       log: Logger
-  ): Seq[(HashedVirtualFileRef, URL)] =
+  ): Seq[(HashedVirtualFileRef, URI)] =
     cp.flatMap(entry => extractFromEntry(entry, log))
 
   def extractFromEntry(
       entry: Attributed[HashedVirtualFileRef],
       log: Logger
-  ): Option[(HashedVirtualFileRef, URL)] =
+  ): Option[(HashedVirtualFileRef, URI)] =
     entry.get(Keys.entryApiURL) match
-      case Some(u) => Some((entry.data, URI(u).toURL))
+      case Some(u) => Some((entry.data, URI(u)))
       case None =>
         entry.get(Keys.moduleIDStr).flatMap { str =>
           val mid = Classpaths.moduleIdJsonKeyFormat.read(str)
@@ -40,22 +40,20 @@ private[sbt] object APIMappings {
       entry: HashedVirtualFileRef,
       mid: ModuleID,
       log: Logger
-  ): Option[(HashedVirtualFileRef, URL)] =
+  ): Option[(HashedVirtualFileRef, URI)] =
     for
       urlString <- mid.extraAttributes.get(SbtPomExtraProperties.POM_API_KEY)
-      u <- parseURL(urlString, entry, log)
+      u <- parseURI(urlString, entry, log)
     yield (entry, u)
 
-  private def parseURL(s: String, forEntry: HashedVirtualFileRef, log: Logger): Option[URL] =
-    try
-      Some(new URI(s).toURL)
-    catch {
+  private def parseURI(s: String, forEntry: HashedVirtualFileRef, log: Logger): Option[URI] =
+    try Some(new URI(s))
+    catch
       case e: MalformedURLException =>
-        log.warn(s"Invalid API base URL '$s' for classpath entry '$forEntry': ${e.toString}")
+        log.warn(s"Invalid API base URI '$s' for classpath entry '$forEntry': ${e.toString}")
         None
-    }
 
-  def store[A](attr: Attributed[A], entryAPI: Option[URL]): Attributed[A] =
+  def store[A](attr: Attributed[A], entryAPI: Option[URI]): Attributed[A] =
     entryAPI match
       case None    => attr
       case Some(u) => attr.put(Keys.entryApiURL, u.toString)
