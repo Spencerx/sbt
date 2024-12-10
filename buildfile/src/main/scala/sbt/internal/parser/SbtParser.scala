@@ -10,6 +10,7 @@ package internal
 package parser
 
 import sbt.internal.util.{ LineRange, MessageOnlyException }
+import sbt.internal.io.Retry
 import java.io.File
 import java.nio.charset.StandardCharsets
 import java.util.concurrent.ConcurrentHashMap
@@ -132,7 +133,9 @@ private[sbt] object SbtParser:
   private[sbt] var scalacGlobalInitReporter: Option[ConsoleReporter] = None
 
   private[sbt] val globalReporter = UniqueParserReporter()
-  private[sbt] val defaultGlobalForParser = ParseDriver()
+  // Retry since Scala 3 compiler initialization can fail due to sys.props change
+  private[sbt] val defaultGlobalForParser: ParseDriver =
+    Retry(ParseDriver())
   private[sbt] final class ParseDriver extends Driver:
     override protected val sourcesRequired: Boolean = false
     val compileCtx0 = initCtx.fresh
@@ -171,15 +174,17 @@ private[sbt] object SbtParser:
     parsedTrees
 end SbtParser
 
-private class SbtParserInit {
-  new Thread("sbt-parser-init-thread") {
+/**
+ * This gives JVM a head start to JIT Scala 3 compiler JAR.
+ * Called by sbt.internal.ClassLoaderWarmup.
+ */
+private class SbtParserInit:
+  val t = new Thread("sbt-parser-init-thread"):
     setDaemon(true)
-    start()
-    override def run(): Unit = {
+    override def run(): Unit =
       val _ = SbtParser.defaultGlobalForParser
-    }
-  }
-}
+  t.start()
+end SbtParserInit
 
 /**
  * This method solely exists to add scaladoc to members in SbtParser which
@@ -222,8 +227,6 @@ private[sbt] case class SbtParser(path: VirtualFileRef, lines: Seq[String])
   // parsed trees.
   val (imports, settings, settingsTrees) = splitExpressions(path, lines)
 
-  import SbtParser.defaultGlobalForParser.*
-
   private def splitExpressions(
       path: VirtualFileRef,
       lines: Seq[String]
@@ -239,7 +242,7 @@ private[sbt] case class SbtParser(path: VirtualFileRef, lines: Seq[String])
       VirtualFile(reporterId, wrapCode.getBytes(StandardCharsets.UTF_8)),
       scala.io.Codec.UTF8
     )
-    given Context = compileCtx.fresh.setSource(sourceFile)
+    given Context = SbtParser.defaultGlobalForParser.compileCtx.fresh.setSource(sourceFile)
     val parsedTrees = parse(fileName, reporterId)
 
     // Check No val (a,b) = foo *or* val a,b = foo as these are problematic to range positions and the WHOLE architecture.
