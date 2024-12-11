@@ -51,6 +51,8 @@ Global / semanticdbVersion := "4.9.9"
 Global / excludeLintKeys += Utils.componentID
 Global / excludeLintKeys += scriptedBufferLog
 Global / excludeLintKeys += checkPluginCross
+Global / excludeLintKeys += nativeImageVersion
+Global / excludeLintKeys += nativeImageJvm
 ThisBuild / evictionErrorLevel := Level.Info
 
 def commonSettings: Seq[Setting[_]] = Def.settings(
@@ -686,6 +688,7 @@ lazy val protocolProj = (project in file("protocol"))
     testedBaseSettings,
     name := "Protocol",
     libraryDependencies ++= Seq(sjsonNewScalaJson.value, sjsonNewCore.value, ipcSocket),
+    Compile / scalacOptions += "-source:3.7",
     Compile / managedSourceDirectories +=
       baseDirectory.value / "src" / "main" / "contraband-scala",
     Compile / generateContrabands / sourceManaged := baseDirectory.value / "src" / "main" / "contraband-scala",

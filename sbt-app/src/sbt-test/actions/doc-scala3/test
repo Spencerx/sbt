@@ -2,6 +2,6 @@
 
 # there shouldn't be two api/ directories
 # see https://github.com/lampepfl/dotty/issues/11412
-$ exists target/out/jvm/scala-3.5.2/a/api/index.html
-$ exists target/out/jvm/scala-3.5.2/a/api/foo/A$.html
-$ exists target/out/jvm/scala-3.5.2/a/api/foo.html
+$ exists target/**/a/api/index.html
+$ exists target/**/a/api/foo/A$.html
+$ exists target/**/a/api/foo.html
