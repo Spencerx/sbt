@@ -8,6 +8,7 @@
 
 package sbt.internal.util
 
+import java.nio.file.{ Path, Paths }
 import java.util.Locale
 
 import scala.reflect.macros.blackbox
@@ -121,4 +122,8 @@ object Util {
         case g: ThreadId @unchecked => g.threadId
       }
     }
+
+  lazy val javaHome: Path =
+    if (sys.props("java.home").endsWith("jre")) Paths.get(sys.props("java.home")).getParent()
+    else Paths.get(sys.props("java.home"))
 }
