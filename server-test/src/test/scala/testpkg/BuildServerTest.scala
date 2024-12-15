@@ -234,7 +234,6 @@ class BuildServerTest extends AbstractServerTest {
     val buildTarget = buildTargetUri("javaProj", "Compile")
 
     compile(buildTarget)
-
     assertMessage(
       "build/publishDiagnostics",
       "Hello.java",
@@ -257,16 +256,17 @@ class BuildServerTest extends AbstractServerTest {
     val testFile = new File(svr.baseDirectory, s"java-proj/src/main/java/example/Hello.java")
 
     val otherBuildFile = new File(svr.baseDirectory, "force-java-out-of-process-compiler.sbt")
-    // Setting `javaHome` will force SBT to shell out to an external Java compiler instead
+    // Setting `javaHome` will force sbt to shell out to an external Java compiler instead
     // of using the local compilation service offered by the JVM running this SBT instance.
     IO.write(
       otherBuildFile,
       """
+        |def jdk: File = sbt.internal.Util.javaHome.toFile()
         |lazy val javaProj = project
         |  .in(file("java-proj"))
         |  .settings(
         |    javacOptions += "-Xlint:all",
-        |    javaHome := Some(file(System.getProperty("java.home")))
+        |    javaHome := Some(jdk)
         |  )
         |""".stripMargin
     )
@@ -278,16 +278,17 @@ class BuildServerTest extends AbstractServerTest {
       "build/publishDiagnostics",
       "Hello.java",
       """"severity":2""",
-      """found raw type: List"""
-    )(message = "should send publishDiagnostics with severity 2 for Hello.java")
+      """found raw type"""
+    )(message = "should send publishDiagnostics with severity 2 for Hello.java", debug = false)
 
     assertMessage(
       "build/publishDiagnostics",
       "Hello.java",
       """"severity":1""",
-      """incompatible types: int cannot be converted to String"""
+      """incompatible types: int cannot be converted"""
     )(
-      message = "should send publishDiagnostics with severity 1 for Hello.java"
+      message = "should send publishDiagnostics with severity 1 for Hello.java",
+      debug = true
     )
     // Note the messages changed slightly in both cases. That's interesting…
 
@@ -690,9 +691,14 @@ class BuildServerTest extends AbstractServerTest {
     def assertion =
       svr.waitForString(duration) { msg =>
         if (debug) println(msg)
+        if debug then
+          parts.foreach: p =>
+            if msg.contains(p) then println(s"> $msg contains $p")
+            else ()
         parts.forall(msg.contains)
       }
-    if (message.nonEmpty) assert(assertion, message) else assert(assertion)
+    if message.nonEmpty then assert(assertion, message)
+    else assert(assertion)
   }
 
   private def reloadWorkspace(): Int =

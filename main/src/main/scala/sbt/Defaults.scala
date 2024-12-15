@@ -9,7 +9,7 @@
 package sbt
 
 import java.io.{ File, PrintWriter }
-import java.nio.file.{ Files, Paths, Path => NioPath }
+import java.nio.file.{ Files, Path => NioPath }
 import java.util.Optional
 import java.util.concurrent.TimeUnit
 import lmcoursier.CoursierDependencyResolution
@@ -245,13 +245,12 @@ object Defaults extends BuildCommon {
     val base = app.baseDirectory.getCanonicalFile.toPath
     val boot = app.provider.scalaProvider.launcher.bootDirectory.toPath
     val ih = app.provider.scalaProvider.launcher.ivyHome.toPath
-    val javaHome = Paths.get(sys.props("java.home"))
     ListMap(
       "OUT" -> out,
       "BASE" -> base,
       "SBT_BOOT" -> boot,
       "IVY_HOME" -> ih,
-      "JAVA_HOME" -> javaHome
+      "JAVA_HOME" -> Util.javaHome,
     )
 
   private[sbt] lazy val globalIvyCore: Seq[Setting[?]] =

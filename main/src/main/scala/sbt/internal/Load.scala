@@ -33,7 +33,7 @@ import xsbti.{ FileConverter, HashedVirtualFileRef, VirtualFile }
 import xsbti.compile.{ ClasspathOptionsUtil, Compilers }
 import java.io.File
 import java.net.URI
-import java.nio.file.{ Path, Paths }
+import java.nio.file.Path
 import scala.annotation.tailrec
 import scala.collection.mutable
 import sbt.internal.util.Util
@@ -71,7 +71,7 @@ private[sbt] object Load {
     val scalaProvider = app.provider.scalaProvider
     val launcher = scalaProvider.launcher
     val stagingDirectory = getStagingDirectory(state, globalBase).getCanonicalFile
-    val javaHome = Paths.get(sys.props("java.home"))
+    val javaHome = Util.javaHome
     val out = baseDirectory.toPath.resolve("target").resolve("out")
     val rootPaths = Map(
       "OUT" -> out,
