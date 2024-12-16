@@ -54,7 +54,6 @@ trait Import {
   val Hash = sbt.io.Hash
   val HiddenFileFilter = sbt.io.HiddenFileFilter
   val IO = sbt.io.IO
-  type Mapper = sbt.io.Mapper
   val NameFilter = sbt.io.NameFilter
   type NameFilter = sbt.io.NameFilter
   val NothingFilter = sbt.io.NothingFilter
