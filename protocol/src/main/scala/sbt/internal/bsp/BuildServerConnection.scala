@@ -9,6 +9,7 @@
 package sbt.internal.bsp
 
 import sbt.internal.bsp.codec.JsonProtocol.BspConnectionDetailsFormat
+import sbt.internal.util.Util
 import sbt.io.IO
 import sjsonnew.support.scalajson.unsafe.{ CompactPrinter, Converter }
 
@@ -25,7 +26,7 @@ object BuildServerConnection {
 
   private[sbt] def writeConnectionFile(sbtVersion: String, baseDir: File): Unit = {
     val bspConnectionFile = new File(baseDir, ".bsp/sbt.json")
-    val javaHome = System.getProperty("java.home")
+    val javaHome = Util.javaHome
     val classPath = System.getProperty("java.class.path")
 
     val sbtScript = Option(System.getProperty("sbt.script"))

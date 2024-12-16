@@ -8,11 +8,12 @@
 
 package sbt.internal.util
 
+import java.nio.file.{ Path, Paths }
 import java.util.Locale
 
 import scala.collection.concurrent.TrieMap
 
-object Util {
+object Util:
   def makeList[T](size: Int, value: T): List[T] = List.fill(size)(value)
 
   def separate[T, A, B](ps: Seq[T])(f: T => Either[A, B]): (Seq[A], Seq[B]) = {
@@ -78,4 +79,11 @@ object Util {
     val cache = TrieMap.empty[A1, A2]
     x => cache.getOrElseUpdate(x, f(x))
   }
-}
+
+  lazy val javaHome: Path =
+    sys.env.get("JAVA_HOME") match
+      case Some(home) => Paths.get(home)
+      case None =>
+        if sys.props("java.home").endsWith("jre") then Paths.get(sys.props("java.home")).getParent()
+        else Paths.get(sys.props("java.home"))
+end Util
