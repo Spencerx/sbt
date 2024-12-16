@@ -714,6 +714,20 @@ object Defaults extends BuildCommon {
     },
     crossSbtVersions := Vector((pluginCrossBuild / sbtVersion).value),
     crossTarget := target.value,
+    clean := {
+      try {
+        val store = AnalysisUtil.staticCachedStore(
+          analysisFile = (Compile / compileAnalysisFile).value.toPath,
+          useTextAnalysis = false,
+          useConsistent = true,
+        )
+        // TODO: Uncomment after Zinc update
+        // store.clearCache()
+      } catch {
+        case NonFatal(_) => ()
+      }
+      clean.value
+    },
     scalaCompilerBridgeBinaryJar := {
       val sv = scalaVersion.value
       val managed = managedScalaInstance.value
@@ -1943,6 +1957,10 @@ object Defaults extends BuildCommon {
   def foregroundRunMainTask: Initialize[InputTask[EmulateForeground]] =
     Def.inputTask {
       val handle = bgRunMain.evaluated
+      handle match
+        case threadJobHandle: AbstractBackgroundJobService#ThreadJobHandle =>
+          threadJobHandle.isAutoCancel = true
+        case _ => ()
       EmulateForeground(handle)
     }
 
@@ -1950,6 +1968,11 @@ object Defaults extends BuildCommon {
   def foregroundRunTask: Initialize[InputTask[EmulateForeground]] =
     Def.inputTask {
       val handle = bgRun.evaluated
+      handle match {
+        case threadJobHandle: AbstractBackgroundJobService#ThreadJobHandle =>
+          threadJobHandle.isAutoCancel = true
+        case _ =>
+      }
       EmulateForeground(handle)
     }
 

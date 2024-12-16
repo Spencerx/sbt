@@ -80,10 +80,10 @@ object Dependencies {
   // and the JLine 2 fork version, which uses the same JAnsi
   val jline =
     "org.scala-sbt.jline" % "jline" % "2.14.7-sbt-9c3b6aca11c57e339441442bbf58e550cdfecb79"
-  val jline3Version = "3.27.0"
+  val jline3Version = "3.27.1"
   val jline3Terminal = "org.jline" % "jline-terminal" % jline3Version
-  val jline3Jansi = "org.jline" % "jline-terminal-jansi" % jline3Version
-  val jline3JNA = "org.jline" % "jline-terminal-jna" % jline3Version
+  val jline3JNI = "org.jline" % "jline-terminal-jni" % jline3Version
+  val jline3Native = "org.jline" % "jline-native" % jline3Version
   val jline3Reader = "org.jline" % "jline-reader" % jline3Version
   val jline3Builtins = "org.jline" % "jline-builtins" % jline3Version
   val scalatest = "org.scalatest" %% "scalatest" % "3.2.19"
@@ -121,7 +121,7 @@ object Dependencies {
 
   // lm-coursier dependencies
   val dataclassScalafixVersion = "0.1.0"
-  val coursierVersion = "2.1.13"
+  val coursierVersion = "2.1.19"
 
   val coursier = ("io.get-coursier" %% "coursier" % coursierVersion)
     .cross(CrossVersion.for3Use2_13)

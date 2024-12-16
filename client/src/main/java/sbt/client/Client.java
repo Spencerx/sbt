@@ -11,11 +11,15 @@ package sbt.client;
 import sbt.internal.client.NetworkClient;
 
 public class Client {
-  public static void main(String[] args) {
+  public static void main(final String[] args) {
+    boolean hadError = false;
     try {
       NetworkClient.main(args);
     } catch (final Throwable t) {
       t.printStackTrace();
+      hadError = true;
+    } finally {
+      if (hadError) System.exit(1);
     }
   }
 }
