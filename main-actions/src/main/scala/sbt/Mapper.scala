@@ -6,20 +6,20 @@ import xsbti.{ FileConverter, VirtualFile }
 
 import java.io.File
 
-object Mapper {
+object Mapper:
 
   /**
    * Selects all descendants of `base` directory and maps them to a path relative to `base`.
    * `base` itself is not included.
    */
-  def allSubpaths(base: File)(implicit conv: FileConverter): Seq[(VirtualFile, String)] =
+  def allSubpaths(base: File)(using conv: FileConverter): Seq[(VirtualFile, String)] =
     selectSubpaths(base, AllPassFilter)
 
   /**
    * Selects descendants of `base` directory matching `filter` and maps them to a path relative to `base`.
    * `base` itself is not included.
    */
-  def selectSubpaths(base: File, filter: FileFilter)(implicit
+  def selectSubpaths(base: File, filter: FileFilter)(using
       conv: FileConverter
   ): Seq[(VirtualFile, String)] =
     PathFinder(base).globRecursive(filter).get().collect {
@@ -47,7 +47,7 @@ object Mapper {
    * @param baseDirectory The directory that should be turned into a mappings sequence.
    * @return mappings The `baseDirectory` and all of its contents
    */
-  def directory(baseDirectory: File)(implicit conv: FileConverter): Seq[(VirtualFile, String)] =
+  def directory(baseDirectory: File)(using conv: FileConverter): Seq[(VirtualFile, String)] =
     Option(baseDirectory.getParentFile)
       .map(parent => PathFinder(baseDirectory).allPaths pair relativeTo(parent))
       .getOrElse(PathFinder(baseDirectory).allPaths pair basic)
@@ -79,8 +79,8 @@ object Mapper {
    * @param baseDirectory The directory that should be turned into a mappings sequence.
    * @return mappings - The `basicDirectory`'s contents exlcuding `basicDirectory` itself
    */
-  def contentOf(baseDirectory: File): Seq[(File, String)] = (
+  def contentOf(baseDirectory: File)(using conv: FileConverter): Seq[(VirtualFile, String)] =
     (PathFinder(baseDirectory).allPaths --- PathFinder(baseDirectory))
-      pair relativeTo(baseDirectory)
-  )
-}
+      .pair(relativeTo(baseDirectory))
+      .map { case (f, s) => conv.toVirtualFile(f.toPath) -> s }
+end Mapper
