@@ -34,8 +34,6 @@ private[sbt] object AnalysisUtil {
       mappers = ReadWriteMappers.getEmptyMappers(),
       sort = true,
       ec = scala.concurrent.ExecutionContext.global,
-      // reproducisble = true will wipe out the timestamp, which we need for sbt 1.x
-      // reproducible = false,
       parallelism = parallelism,
     )
 }
