@@ -48,12 +48,11 @@ ThisBuild / libraryDependencySchemes += "org.scala-lang.modules" %% "scala-xml" 
 Global / semanticdbEnabled := !(Global / insideCI).value
 // Change main/src/main/scala/sbt/plugins/SemanticdbPlugin.scala too, if you change this.
 Global / semanticdbVersion := "4.9.9"
-Global / excludeLintKeys += Utils.componentID
-Global / excludeLintKeys += scriptedBufferLog
-Global / excludeLintKeys += checkPluginCross
-Global / excludeLintKeys += nativeImageVersion
-Global / excludeLintKeys += nativeImageJvm
-ThisBuild / evictionErrorLevel := Level.Info
+val excludeLint = SettingKey[Set[Def.KeyedInitialize[_]]]("excludeLintKeys")
+Global / excludeLint := (Global / excludeLint).?.value.getOrElse(Set.empty)
+Global / excludeLint += Utils.componentID
+Global / excludeLint += scriptedBufferLog
+Global / excludeLint += checkPluginCross
 
 def commonSettings: Seq[Setting[_]] = Def.settings(
   headerLicense := Some(
@@ -67,6 +66,7 @@ def commonSettings: Seq[Setting[_]] = Def.settings(
     )
   ),
   scalaVersion := baseScalaVersion,
+  evictionErrorLevel := Level.Info,
   Utils.componentID := None,
   resolvers += Resolver.typesafeIvyRepo("releases").withName("typesafe-sbt-build-ivy-releases"),
   resolvers ++= Resolver.sonatypeOssRepos("snapshots"),
@@ -347,8 +347,8 @@ lazy val utilLogging = project
       Seq(
         jline,
         jline3Terminal,
-        jline3JNA,
-        jline3Jansi,
+        jline3JNI,
+        jline3Native,
         log4jApi,
         log4jCore,
         disruptor,
@@ -1047,6 +1047,10 @@ lazy val sbtClientProj = (project in file("client"))
     nativeImageOptions ++= Seq(
       "--no-fallback",
       s"--initialize-at-run-time=sbt.client",
+      // "The current machine does not support all of the following CPU features that are required by
+      // the image: [CX8, CMOV, FXSR, MMX, SSE, SSE2, SSE3, SSSE3, SSE4_1, SSE4_2, POPCNT, LZCNT, AVX,
+      // AVX2, BMI1, BMI2, FMA, F16C]."
+      "-march=compatibility",
       // "--verbose",
       "-H:IncludeResourceBundles=jline.console.completer.CandidateListCompletionHandler",
       "-H:+ReportExceptionStackTraces",

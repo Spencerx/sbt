@@ -148,8 +148,9 @@ object DependencyTreeSettings {
                 .asciiTree(GraphTransformations.reverseGraphStartingAt(graph, module), graphWidth)
             }
             .mkString("\n")
-
-        streams.value.log.info(output)
+        synchronized {
+          streams.value.log.info(output)
+        }
         output
       },
     ) ++
@@ -172,7 +173,9 @@ object DependencyTreeSettings {
       key := {
         val s = streams.value
         val str = (key / asString).value
-        s.log.info(str)
+        synchronized {
+          s.log.info(str)
+        }
       },
       (key / toFile) := {
         val (targetFile, force) = targetFileAndForceParser.parsed
@@ -199,7 +202,7 @@ object DependencyTreeSettings {
         rendering.DOT.HTMLLabelRendering.AngleBrackets,
         dependencyDotNodeColors.value
       )
-      val link = DagreHTML.createLink(dotGraph, target.value)
+      val link = DagreHTML.createLink(dotGraph, dependencyBrowseGraphTarget.value)
       streams.value.log.info(s"HTML graph written to $link")
       link
     }
@@ -208,7 +211,7 @@ object DependencyTreeSettings {
     Def.task {
       val graph = dependencyTreeModuleGraph0.value
       val renderedTree = TreeView.createJson(graph)
-      val link = TreeView.createLink(renderedTree, target.value)
+      val link = TreeView.createLink(renderedTree, dependencyBrowseTreeTarget.value)
       streams.value.log.info(s"HTML tree written to $link")
       link
     }
@@ -246,7 +249,10 @@ object DependencyTreeSettings {
     Def.task {
       val uri = uriKey.value
       streams.value.log.info(s"Opening ${uri} in browser...")
-      java.awt.Desktop.getDesktop.browse(uri)
+      val desktop = java.awt.Desktop.getDesktop
+      desktop.synchronized {
+        desktop.browse(uri)
+      }
       uri
     }
 

@@ -123,9 +123,10 @@ object Cross {
       .map { case uri ~ seg1 ~ cmd => (uri, seg1, cmd) }
     Parser.parse(command, parser) match {
       case Right((uri, seg1, cmd)) =>
-        structure.allProjectRefs.find(p =>
-          uri.contains(p.build.toString) && seg1 == p.project
-        ) match {
+        structure.allProjectRefs.find {
+          case p if uri.isDefined => seg1 == p.project && uri.contains(p.build.toString)
+          case p                  => seg1 == p.project
+        } match {
           case Some(proj) => (Seq(proj), cmd)
           case _          => (resolveAggregates(extracted), command)
         }
