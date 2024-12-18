@@ -32,8 +32,7 @@ private[sbt] object AnalysisUtil {
       useTextAnalysis = useTextAnalysis,
       useConsistent = useConsistent,
       mappers = ReadWriteMappers.getEmptyMappers(),
-      sort = true,
-      ec = scala.concurrent.ExecutionContext.global,
+      reproducible = true,
       parallelism = parallelism,
     )
 }
