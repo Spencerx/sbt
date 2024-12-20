@@ -1491,7 +1491,6 @@ lazy val lmCoursier = project
     Mima.lmCoursierFilters,
     lmCoursierDependencies,
     Compile / sourceGenerators += Utils.dataclassGen(lmCoursierDefinitions).taskValue,
-    Compile / scalacOptions --= Seq("-Xfatal-warnings"),
   )
   .dependsOn(
     // We depend on lmIvy rather than just lmCore to handle the ModuleDescriptor
@@ -1508,7 +1507,6 @@ lazy val lmCoursierShaded = project
     Mima.lmCoursierFilters,
     Mima.lmCoursierShadedFilters,
     Compile / sources := (lmCoursier / Compile / sources).value,
-    Compile / scalacOptions --= Seq("-Xfatal-warnings"),
     lmCoursierDependencies,
     autoScalaLibrary := false,
     libraryDependencies ++= Seq(
