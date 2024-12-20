@@ -101,8 +101,6 @@ package object syntax {
         followHttpToHttpsRedirections: Boolean
     ): CoursierConfiguration =
       value.withFollowHttpToHttpsRedirections(Some(followHttpToHttpsRedirections))
-    def withFollowHttpToHttpsRedirections(): CoursierConfiguration =
-      value.withFollowHttpToHttpsRedirections(Some(true))
     def withStrict(strict: Strict): CoursierConfiguration =
       value.withStrict(Some(strict))
     def withTtl(ttl: Duration): CoursierConfiguration =
