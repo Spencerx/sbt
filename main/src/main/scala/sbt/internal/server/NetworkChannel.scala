@@ -38,6 +38,7 @@ import sbt.internal.util.complete.{ Parser, Parsers }
 import sbt.util.Logger
 
 import scala.annotation.tailrec
+import scala.collection.concurrent
 import scala.collection.mutable
 import scala.concurrent.duration._
 import scala.util.Try
@@ -828,20 +829,27 @@ final class NetworkChannel(
     override lazy val isColorEnabled: Boolean = waitForPending(_.isColorEnabled)
     override lazy val isSupershellEnabled: Boolean = waitForPending(_.isSupershellEnabled)
     getProperties(false)
-    private def getCapability[T](
+
+    private val capabilityCache
+        : concurrent.Map[TerminalCapabilitiesQuery, TerminalCapabilitiesResponse] =
+      concurrent.TrieMap()
+    private def getCapability[A1](
         query: TerminalCapabilitiesQuery,
-        result: TerminalCapabilitiesResponse => T
-    ): Option[T] = {
-      if (closed.get) None
-      else {
-        val queue = VirtualTerminal.sendTerminalCapabilitiesQuery(
-          term.name,
-          jsonRpcRequest[TerminalCapabilitiesQuery],
-          query
+        result: TerminalCapabilitiesResponse => A1
+    ): Option[A1] =
+      if closed.get then None
+      else
+        val response = capabilityCache.getOrElseUpdate(
+          query, {
+            val queue = VirtualTerminal.sendTerminalCapabilitiesQuery(
+              term.name,
+              jsonRpcRequest[TerminalCapabilitiesQuery],
+              query
+            )
+            queue.take()
+          }
         )
-        Some(result(queue.take))
-      }
-    }
+        Some(result(response))
     override def getBooleanCapability(capability: String): Boolean =
       getCapability(
         TerminalCapabilitiesQuery(boolean = Some(capability), numeric = None, string = None),
