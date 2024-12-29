@@ -1200,7 +1200,7 @@ object BuiltinCommands {
       try {
         val version = sbtVersion(state)
         val skipFile = skipWelcomeFile(state, version)
-        Files.createDirectories(skipFile.getParent)
+        IO.createDirectory(skipFile.getParent.toFile())
         val suppress = !SysProp.banner || Files.exists(skipFile)
         if (!suppress) {
           Banner(version).foreach(banner => state.log.info(banner))
