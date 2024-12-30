@@ -274,7 +274,7 @@ class DiskActionCacheStore(base: Path, converter: FileConverter) extends Abstrac
     // On Windows, the program has be running under the Administrator privileges or the
     // user enable Developer Mode on Windows 10+ to create symbolic links.
     def writeFileAndNotify(outPath: Path): Path =
-      Files.createDirectories(outPath.getParent())
+      IO.createDirectory(outPath.getParent().toFile())
       val result = Retry:
         if Files.exists(outPath) then IO.delete(outPath.toFile())
         if symlinkSupported.get() then
@@ -314,7 +314,7 @@ class DiskActionCacheStore(base: Path, converter: FileConverter) extends Abstrac
    */
   private def unpackageDirZip(dirzip: Path, outputDirectory: Path): Path =
     val dirPath = Paths.get(dirzip.toString.dropRight(ActionCache.dirZipExt.size))
-    Files.createDirectories(dirPath)
+    IO.createDirectory(dirPath.toFile())
     val allPaths = mutable.Set(
       FileTreeView.default
         .list(dirPath.toGlob / ** / "*")

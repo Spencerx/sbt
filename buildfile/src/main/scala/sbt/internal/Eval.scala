@@ -18,7 +18,7 @@ import java.nio.file.{ Files, Path, Paths, StandardOpenOption }
 import java.security.MessageDigest
 import scala.jdk.CollectionConverters.*
 import scala.quoted.*
-import sbt.io.Hash
+import sbt.io.{ Hash, IO }
 
 /**
  * - nonCpOptions - non-classpath options
@@ -35,7 +35,7 @@ class Eval(
   import Eval.*
 
   backingDir.foreach { dir =>
-    Files.createDirectories(dir)
+    IO.createDirectory(dir.toFile())
   }
   private val outputDir =
     backingDir match

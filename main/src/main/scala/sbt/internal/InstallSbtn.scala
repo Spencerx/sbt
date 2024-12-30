@@ -61,7 +61,7 @@ private[sbt] object InstallSbtn {
 
   private[sbt] def extractSbtn(term: Terminal, version: String, sbtZip: Path, sbtn: Path): Unit = {
     downloadRelease(term, version, sbtZip)
-    Files.createDirectories(sbtn.getParent)
+    IO.createDirectory(sbtn.getParent().toFile())
     val bin =
       if (Properties.isWin) "pc-win32.exe"
       else if (Properties.isLinux) "pc-linux"
@@ -140,7 +140,7 @@ private[sbt] object InstallSbtn {
     }
   }
   private def downloadCompletion(completion: String, version: String, target: Path): Unit = {
-    Files.createDirectories(target.getParent)
+    IO.createDirectory(target.getParent().toFile())
     val comp = s"https://raw.githubusercontent.com/sbt/sbt/v$version/client/completions/$completion"
     transfer(new URI(comp).toURL.openStream, target)
   }
