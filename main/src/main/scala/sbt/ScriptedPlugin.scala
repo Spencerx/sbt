@@ -25,7 +25,6 @@ import sbt.io.syntax._
 import sbt.librarymanagement._
 import sbt.librarymanagement.syntax._
 import sbt.nio.file.{ Glob, RecursiveGlob }
-import scala.util.Try
 
 object ScriptedPlugin extends AutoPlugin {
 
@@ -77,7 +76,7 @@ object ScriptedPlugin extends AutoPlugin {
     scriptedBatchExecution := {
       val binVersion = CrossVersionUtil.binarySbtVersion(scriptedSbt.value)
       val versionParts =
-        binVersion.split("\\.").flatMap(p => Try(p.takeWhile(_.isDigit).toInt).toOption).take(2)
+        binVersion.split("\\.").flatMap(p => p.takeWhile(_.isDigit).toIntOption).take(2)
       versionParts match {
         case Array(major, minor) => major > 1 || (major == 1 && minor >= 4)
         case _                   => false

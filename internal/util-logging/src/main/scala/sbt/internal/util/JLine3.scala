@@ -22,7 +22,6 @@ import org.jline.terminal.impl.{ AbstractTerminal, DumbTerminal }
 import org.jline.terminal.spi.{ SystemStream, TerminalProvider }
 import sbt.internal.util.Terminal.hasConsole
 import scala.jdk.CollectionConverters.*
-import scala.util.Try
 import java.util.concurrent.LinkedBlockingQueue
 
 private[sbt] object JLine3 {
@@ -279,7 +278,7 @@ private[sbt] object JLine3 {
       chars.split(" ").foreach { keyValue =>
         keyValue.split(",") match {
           case Array(k, v) =>
-            Try(v.toInt).foreach(i => charMap.get(k).foreach(c => attributes.setControlChar(c, i)))
+            v.toIntOption.foreach(i => charMap.get(k).foreach(c => attributes.setControlChar(c, i)))
           case _ =>
         }
       }

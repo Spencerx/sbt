@@ -51,7 +51,7 @@ trait GCMonitorBase {
 
 class GCMonitor(logger: Logger) extends GCMonitorBase with AutoCloseable {
   override protected def window =
-    Try(System.getProperty("sbt.gc.monitor.window", "10").toInt).getOrElse(10).seconds
+    System.getProperty("sbt.gc.monitor.window", "10").toIntOption.getOrElse(10).seconds
 
   override protected def ratio =
     Try(System.getProperty("sbt.gc.monitor.ratio", "0.5").toDouble).getOrElse(0.5)
