@@ -140,7 +140,7 @@ private[sbt] object Continuous extends DeprecatedContinuous {
     )
 
   private val continuousParser: State => Parser[(Int, Seq[String])] = {
-    def toInt(s: String): Int = Try(s.toInt).getOrElse(0)
+    def toInt(s: String): Int = s.toIntOption.getOrElse(0)
 
     // This allows us to re-enter the watch with the previous count.
     val digitParser: Parser[Int] =

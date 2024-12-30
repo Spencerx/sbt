@@ -11,7 +11,6 @@ package sbt.internal.util
 import java.io.InputStream
 import java.nio.channels.ClosedChannelException
 import java.util.concurrent.atomic.AtomicBoolean
-import scala.util.Try
 
 private[sbt] object ReadJsonFromInputStream {
   def apply(
@@ -55,7 +54,7 @@ private[sbt] object ReadJsonFromInputStream {
           if (onCarriageReturn) consecutiveLineEndings += 1
           onCarriageReturn = false
           if (line.startsWith(contentLength)) {
-            Try(line.drop(contentLength.length).toInt) foreach { len =>
+            line.drop(contentLength.length).toIntOption foreach { len =>
               def doDrainHeaders(): Unit =
                 inputStream.read match
                   case `newline` if onCarriageReturn =>
