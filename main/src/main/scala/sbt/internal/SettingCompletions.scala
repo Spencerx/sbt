@@ -125,7 +125,7 @@ private[sbt] object SettingCompletions {
       val (used, trimU) = lines(strings(affected))
       val details = if (trimR || trimU) "\n\tRun `last` for details." else ""
       val valuesString = if (redefined.size == 1) "value" else "values"
-      "Defining %s\nThe new %s will be used by %s%s".format(redef, valuesString, used, details)
+      s"Defining ${redef}\nThe new ${valuesString} will be used by ${used}${details}"
     }
   }
 
@@ -170,7 +170,7 @@ private[sbt] object SettingCompletions {
   }
 
   /** Parser for the `in` method name that slightly augments the naive completion to give a hint of the purpose of `in`. */
-  val inParser = tokenDisplay(Space ~> InMethod, "%s <scope>".format(InMethod))
+  val inParser = tokenDisplay(Space ~> InMethod, s"${InMethod} <scope>")
 
   /**
    * Parser for the initialization expression for the assignment method `assign` on the key `sk`.

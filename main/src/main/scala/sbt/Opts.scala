@@ -75,7 +75,7 @@ object DefaultOptions {
   def javac: Seq[String] = compile.encoding("UTF-8")
   def scalac: Seq[String] = compile.encoding("UTF-8")
   def javadoc(name: String, version: String): Seq[String] =
-    Seq("-doctitle", "%s %s API".format(name, version))
+    Seq("-doctitle", s"${name} ${version} API")
   def scaladoc(name: String, version: String): Seq[String] =
     doc.title(name) ++ doc.version(version)
 
@@ -95,11 +95,6 @@ object DefaultOptions {
   def addCredentials: Setting[?] = Keys.credentials += { credentials(Keys.state.value) }
 
   def shellPrompt(version: String): State => String =
-    s =>
-      "%s:%s:%s> ".format(
-        s.configuration.provider.id.name,
-        Project.extract(s).currentProject.id,
-        version
-      )
+    s => s"${s.configuration.provider.id.name}:${Project.extract(s).currentProject.id}:${version}> "
   def setupShellPrompt: Setting[?] = Keys.shellPrompt := { shellPrompt(Keys.version.value) }
 }

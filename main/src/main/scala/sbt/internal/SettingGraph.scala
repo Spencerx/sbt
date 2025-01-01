@@ -67,7 +67,7 @@ case class SettingGraph(
   def dependsAscii(defaultWidth: Int): String = Graph.toAscii(
     this,
     (x: SettingGraph) => x.depends.toSeq.sortBy(_.name),
-    (x: SettingGraph) => "%s = %s" format (x.definedIn getOrElse { "" }, x.dataString),
+    (x: SettingGraph) => s"${x.definedIn getOrElse { "" }} = ${x.dataString}",
     defaultWidth
   )
 }

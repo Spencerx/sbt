@@ -105,7 +105,7 @@ object DependencyTreeSettings {
       // dot support
       dependencyDotFile := {
         val config = configuration.value
-        target.value / "dependencies-%s.dot".format(config.toString)
+        target.value / s"dependencies-${config.toString}.dot"
       },
       dependencyDot / asString := rendering.DOT.dotGraph(
         dependencyTreeModuleGraph0.value,
@@ -123,12 +123,12 @@ object DependencyTreeSettings {
          |    ]""".stripMargin,
       dependencyDotNodeColors := true,
       dependencyDotNodeLabel := { (organization: String, name: String, version: String) =>
-        """%s<BR/><B>%s</B><BR/>%s""".format(organization, name, version)
+        s"""${organization}<BR/><B>${name}</B><BR/>${version}"""
       },
       // GraphML support
       dependencyGraphMLFile := {
         val config = configuration.value
-        target.value / "dependencies-%s.graphml".format(config.toString)
+        target.value / s"dependencies-${config.toString}.graphml"
       },
       dependencyGraphML := dependencyGraphMLTask.value,
       whatDependsOn := {
@@ -188,7 +188,7 @@ object DependencyTreeSettings {
       val resultFile = dependencyGraphMLFile.value
       val graph = dependencyTreeModuleGraph0.value
       rendering.GraphML.saveAsGraphML(graph, resultFile.getAbsolutePath)
-      streams.value.log.info("Wrote dependency graph to '%s'" format resultFile)
+      streams.value.log.info(s"Wrote dependency graph to '${resultFile}'")
       resultFile
     }
 
@@ -221,7 +221,7 @@ object DependencyTreeSettings {
       val outFile = fileTask.value
       IO.write(outFile, dataTask.value, IO.utf8)
 
-      streams.value.log.info("Wrote dependency graph to '%s'" format outFile)
+      streams.value.log.info(s"Wrote dependency graph to '${outFile}'")
       outFile
     }
 

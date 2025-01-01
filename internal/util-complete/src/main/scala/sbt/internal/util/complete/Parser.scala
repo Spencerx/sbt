@@ -868,7 +868,7 @@ private final class And[T](a: Parser[T], b: Parser[?]) extends ValidParser[T] {
   def derive(c: Char) = a.derive(c) & b.derive(c)
   def completions(level: Int) = a.completions(level).filterS(s => apply(b)(s).resultEmpty.isValid)
   lazy val resultEmpty = a.resultEmpty && b.resultEmpty
-  override def toString = "(%s) && (%s)".format(a, b)
+  override def toString = s"(${a}) && (${b})"
 }
 
 private final class Not(delegate: Parser[?], failMessage: String) extends ValidParser[Unit] {
@@ -881,7 +881,7 @@ private final class Not(delegate: Parser[?], failMessage: String) extends ValidP
     case _: Value[_] => mkFailure(failMessage)
   }
 
-  override def toString = " -(%s)".format(delegate)
+  override def toString = s" -(${delegate})"
 }
 
 /**
