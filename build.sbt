@@ -1294,17 +1294,6 @@ lazy val javafmtOnCompile = taskKey[Unit]("Formats java sources before compile")
 lazy val scriptedProjects = ScopeFilter(inAnyProject)
 
 def customCommands: Seq[Setting[_]] = Seq(
-  commands += Command.command("setupBuildScala212") { state =>
-    s"""set scalaVersion in ThisBuild := "$scala212" """ ::
-      state
-  },
-  commands += Command.command("release-sbt-local") { state =>
-    "clean" ::
-      "so compile" ::
-      "so publishLocal" ::
-      "reload" ::
-      state
-  },
   commands += Command.command("publishLocalAllModule") { state =>
     val extracted = Project.extract(state)
     import extracted._
