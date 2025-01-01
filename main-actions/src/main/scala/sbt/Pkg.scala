@@ -76,7 +76,7 @@ object Pkg:
       .orElse(Some(default2010Timestamp))
 
   def timeFromConfiguration(config: Configuration): Option[Long] =
-    (config.options.collect { case t: PackageOption.FixedTimestamp => t }).headOption match
+    config.options.collectFirst { case t: PackageOption.FixedTimestamp => t } match
       case Some(PackageOption.FixedTimestamp(value)) => value
       case _                                         => defaultTimestamp
 
