@@ -64,7 +64,7 @@ object JLineCompletion {
         cursor: Int,
         candidates: java.util.List[CharSequence]
     ): Int = {
-      candidates.asInstanceOf[java.util.List[String]].add("dummy")
+      candidates.add("dummy")
       0
     }
   }
