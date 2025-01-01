@@ -437,7 +437,7 @@ class MakePom(val log: Logger) {
       configurations: Option[Iterable[Configuration]]
   ): Seq[DependencyDescriptor] = {
     val keepConfigurations = IvySbt.getConfigurations(module, configurations)
-    val keepSet: Set[String] = Set(keepConfigurations.toSeq*)
+    val keepSet: Set[String] = keepConfigurations.toSet
     def translate(dependency: DependencyDescriptor) = {
       val keep = dependency.getModuleConfigurations
         .filter((conf: String) => keepSet.contains(conf))

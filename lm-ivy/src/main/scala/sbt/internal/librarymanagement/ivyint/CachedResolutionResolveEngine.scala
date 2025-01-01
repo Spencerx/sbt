@@ -625,7 +625,7 @@ private[sbt] trait CachedResolutionResolveEngine extends ResolveEngine {
       loopLists.toList
     }
     val allModules2: mutable.Map[(String, String), Vector[OrganizationArtifactReport]] =
-      mutable.Map(allModules0.toSeq*)
+      allModules0.to(mutable.Map)
     @tailrec def breakLoops(loops: List[List[(String, String)]]): Unit =
       loops match {
         case Nil => ()
