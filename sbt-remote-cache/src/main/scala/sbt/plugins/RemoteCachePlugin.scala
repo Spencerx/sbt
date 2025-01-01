@@ -14,9 +14,9 @@ object RemoteCachePlugin extends AutoPlugin:
       val remoteOpt = remoteCache.value
       remoteOpt match
         case Some(remote) =>
-          val disk = orig.collect { case r: DiskActionCacheStore =>
+          val disk = orig.collectFirst { case r: DiskActionCacheStore =>
             r
-          }.headOption match
+          } match
             case Some(x) => x
             case None    => sys.error("disk store not found")
           val r = GrpcActionCacheStore(
