@@ -75,7 +75,7 @@ object DOT:
           if (graph.module(e._1).exists(_.isEvicted))
             s""" [label="Evicted By" style="$EvictedStyle"]"""
           else ""
-        """    "%s" -> "%s"%s""".format(e._1.idString, e._2.idString, extra)
+        s"""    "${e._1.idString}" -> "${e._2.idString}"${extra}"""
       }
     }.sorted.mkString("\n")
 
