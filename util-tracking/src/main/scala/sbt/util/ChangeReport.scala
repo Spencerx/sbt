@@ -63,7 +63,7 @@ trait ChangeReport[T] {
   override def toString = {
     val labels = List("Checked", "Modified", "Unmodified", "Added", "Removed")
     val sets = List(checked, modified, unmodified, added, removed)
-    val keyValues = labels.zip(sets).map { case (label, set) => label + ": " + set.mkString(", ") }
+    val keyValues = labels.lazyZip(sets).map { (label, set) => label + ": " + set.mkString(", ") }
     keyValues.mkString("Change report:\n\t", "\n\t", "")
   }
 
