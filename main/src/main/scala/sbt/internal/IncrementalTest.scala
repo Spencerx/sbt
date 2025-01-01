@@ -158,9 +158,9 @@ class ClassStamper(
    * @param className className to stamp
    * @param extraHashes additional information to include into the returning digest
    */
-  private[sbt] def transitiveStamp(className: String, extaHashes: Seq[Digest]): Option[Digest] =
+  private[sbt] def transitiveStamp(className: String, extraHashes: Seq[Digest]): Option[Digest] =
     val digests = SortedSet(analyses.flatMap(internalStamp(className, _, Set.empty))*)
-    if digests.nonEmpty then Some(Digest.sha256Hash(digests.toSeq ++ extaHashes*))
+    if digests.nonEmpty then Some(Digest.sha256Hash(digests.toSeq ++ extraHashes*))
     else None
 
   private def internalStamp(
