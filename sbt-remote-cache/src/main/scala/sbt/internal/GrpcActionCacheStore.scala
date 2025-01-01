@@ -96,7 +96,7 @@ object GrpcActionCacheStore:
       executor.execute: () =>
         try
           val headers = Metadata()
-          pairs.map { case (k, v) =>
+          pairs.foreach { case (k, v) =>
             headers.put(k, v)
           }
           applier.apply(headers)
@@ -206,7 +206,7 @@ class GrpcActionCacheStore(
   override def findBlobs(refs: Seq[HashedVirtualFileRef]): Seq[HashedVirtualFileRef] =
     val b = FindMissingBlobsRequest.newBuilder()
     b.setInstanceName(instanceName)
-    refs.map: r =>
+    refs.foreach: r =>
       b.addBlobDigests(toXDigest(Digest(r)))
     b.setDigestFunction(DigestFunction.Value.SHA256)
     val req = b.build()
@@ -219,7 +219,7 @@ class GrpcActionCacheStore(
   private def doGetBlobs(refs: Seq[HashedVirtualFileRef]): BatchReadBlobsResponse =
     val b = BatchReadBlobsRequest.newBuilder()
     b.setInstanceName(instanceName)
-    refs.map: ref =>
+    refs.foreach: ref =>
       b.addDigests(toXDigest(Digest(ref)))
     b.setDigestFunction(DigestFunction.Value.SHA256)
     b.addAcceptableCompressors(Compressor.Value.IDENTITY)

@@ -41,7 +41,7 @@ sealed abstract class LogExchange {
       loggerName: String,
       appenders: Seq[(Appender, Level.Value)]
   ): Unit = {
-    appenders.map(LoggerContext.globalContext.addAppender(loggerName, _))
+    appenders.foreach(LoggerContext.globalContext.addAppender(loggerName, _))
     ()
   }
 
