@@ -137,7 +137,6 @@ object Pkg:
 
   /**
    * @param conf the package configuration that should be build
-   * @param cacheStoreFactory used for jar caching. We try to avoid rebuilds as much as possible
    * @param log feedback for the user
    */
   def apply(conf: Configuration, converter: FileConverter, log: Logger): VirtualFile =
@@ -145,7 +144,6 @@ object Pkg:
 
   /**
    * @param conf the package configuration that should be build
-   * @param cacheStoreFactory used for jar caching. We try to avoid rebuilds as much as possible
    * @param log feedback for the user
    * @param time static timestamp to use for all entries, if any.
    */
