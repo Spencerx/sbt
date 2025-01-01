@@ -27,7 +27,6 @@ class DependencyResolution private[sbt] (lmEngine: DependencyResolutionInterface
    * @param moduleId The root module for which to create a `ModuleDescriptor`.
    * @param directDependencies The direct dependencies of the module.
    * @param scalaModuleInfo The information about the Scala version used, if any.
-   * @param configurations The configurations that this module has.
    * @return A `ModuleDescriptor` describing a subproject and its dependencies.
    */
   def moduleDescriptor(
