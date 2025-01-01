@@ -205,9 +205,8 @@ class ClassStamper(
           //       .get(prodClassName)
           //       .map: analyzed =>
           //         0L // analyzed.??? we need a hash here
-          val xs = SortedSet(
-            (internalDeps union internalJarDeps union externalDeps union classDigests).toSeq*
-          )
+          val xs =
+            (internalDeps union internalJarDeps union externalDeps union classDigests).to(SortedSet)
           if xs.nonEmpty then stamps(className) = xs
           else ()
           xs

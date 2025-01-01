@@ -64,12 +64,7 @@ object Configurations {
   private[sbt] def defaultConfiguration(mavenStyle: Boolean) =
     if (mavenStyle) Configurations.Compile else Configurations.Default
   private[sbt] def removeDuplicates(configs: Iterable[Configuration]) =
-    Set(
-      scala.collection.mutable
-        .Map(configs.map(config => (config.name, config)).toSeq*)
-        .values
-        .toList*
-    )
+    configs.map(config => (config.name, config)).toMap.values.toSet
 
   /** Returns true if the configuration should be under the influence of scalaVersion. */
   @nowarn
