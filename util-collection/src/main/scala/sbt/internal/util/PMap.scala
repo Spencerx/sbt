@@ -76,12 +76,12 @@ object IMap {
 
     def mapValues[V2[_]](f: [A] => V[A] => V2[A]) =
       new IMap0[K, V2](Map(backing.iterator.map { case (k, v) =>
-        k -> f(v.asInstanceOf[V[Any]])
+        k -> f(v)
       }.toArray*))
 
-    def toSeq = backing.toSeq.asInstanceOf[Seq[(K[Any], V[Any])]]
-    def keys = backing.keys.asInstanceOf[Iterable[K[Any]]]
-    def values = backing.values.asInstanceOf[Iterable[V[Any]]]
+    def toSeq: Seq[(K[Any], V[Any])] = backing.toSeq
+    def keys: Iterable[K[Any]] = backing.keys
+    def values: Iterable[V[Any]] = backing.values
     def isEmpty = backing.isEmpty
 
     override def toString = backing.toString
@@ -112,9 +112,9 @@ class DelegatingPMap[K[_], V[_]](backing: mutable.Map[K[Any], V[Any]])
     v
   }
 
-  def toSeq = backing.toSeq.asInstanceOf[Seq[(K[Any], V[Any])]]
-  def keys = backing.keys.asInstanceOf[Iterable[K[Any]]]
-  def values = backing.values.asInstanceOf[Iterable[V[Any]]]
+  def toSeq: Seq[(K[Any], V[Any])] = backing.toSeq
+  def keys: Iterable[K[Any]] = backing.keys
+  def values: Iterable[V[Any]] = backing.values
   def isEmpty = backing.isEmpty
 
   private def cast[A](v: V[Any]): V[A] = v.asInstanceOf[V[A]]
