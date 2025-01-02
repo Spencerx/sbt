@@ -12,11 +12,9 @@ import sbt.internal.util.complete.DefaultParsers._
 
 private[sbt] object SizeParser {
   def apply(s: String): Option[Long] = Parser.parse(s, value).toOption
-  private sealed trait SizeUnit
-  private case object Bytes extends SizeUnit
-  private case object KiloBytes extends SizeUnit
-  private case object MegaBytes extends SizeUnit
-  private case object GigaBytes extends SizeUnit
+  private enum SizeUnit {
+    case Bytes, KiloBytes, MegaBytes, GigaBytes
+  }
   private def parseDouble(s: String): Parser[Either[Double, Long]] =
     s.toDoubleOption match {
       case Some(x) => Parser.success(Left(x))
@@ -36,10 +34,10 @@ private[sbt] object SizeParser {
     }
   private val unitParser: Parser[SizeUnit] =
     token("b" | "B" | "g" | "G" | "k" | "K" | "m" | "M").map {
-      case "b" | "B" => Bytes
-      case "g" | "G" => GigaBytes
-      case "k" | "K" => KiloBytes
-      case "m" | "M" => MegaBytes
+      case "b" | "B" => SizeUnit.Bytes
+      case "g" | "G" => SizeUnit.GigaBytes
+      case "k" | "K" => SizeUnit.KiloBytes
+      case "m" | "M" => SizeUnit.MegaBytes
     }
   private def multiply(left: Either[Double, Long], right: Long): Long = left match {
     case Left(d)  => (d * right).toLong
@@ -51,10 +49,10 @@ private[sbt] object SizeParser {
       .*) ~ unitParser.?)
       .map { case (number, unit) =>
         unit match {
-          case None | Some(Bytes) => multiply(number, right = 1L)
-          case Some(KiloBytes)    => multiply(number, right = 1024L)
-          case Some(MegaBytes)    => multiply(number, right = 1024L * 1024)
-          case Some(GigaBytes)    => multiply(number, right = 1024L * 1024 * 1024)
+          case None | Some(SizeUnit.Bytes) => multiply(number, right = 1L)
+          case Some(SizeUnit.KiloBytes)    => multiply(number, right = 1024L)
+          case Some(SizeUnit.MegaBytes)    => multiply(number, right = 1024L * 1024)
+          case Some(SizeUnit.GigaBytes)    => multiply(number, right = 1024L * 1024 * 1024)
         }
       }
 }
