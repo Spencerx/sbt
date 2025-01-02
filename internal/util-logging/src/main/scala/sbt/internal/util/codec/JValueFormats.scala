@@ -51,7 +51,7 @@ trait JValueFormats { self: sjsonnew.BasicJsonProtocol =>
   given JValueJsonReader: JR[JValue] = new JR[JValue] {
     def read[J](j: Option[J], u: Unbuilder[J]) = j match {
       case Some(x: JValue) => x
-      case Some(x)         => sys.error(s"Uknown AST $x")
+      case Some(x)         => sys.error(s"Unknown AST $x")
       case _               => JNull
     }
   }

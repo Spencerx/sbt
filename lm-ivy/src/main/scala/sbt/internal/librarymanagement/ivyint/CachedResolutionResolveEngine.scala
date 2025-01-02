@@ -752,8 +752,8 @@ private[sbt] trait CachedResolutionResolveEngine extends ResolveEngine {
   }
 
   /**
-   * Merges ModuleReports, which represents orgnization, name, and version.
-   * Returns a touple of (surviving modules ++ non-conflicting modules, newly evicted modules).
+   * Merges ModuleReports, which represents organization, name, and version.
+   * Returns a tuple of (surviving modules ++ non-conflicting modules, newly evicted modules).
    */
   def mergeModuleReports(
       rootModuleConf: ConfigRef,
@@ -845,7 +845,7 @@ private[sbt] trait CachedResolutionResolveEngine extends ResolveEngine {
    * Conflict resolution could be expensive, so this is first cached to `cachedResolutionResolveCache` if the conflict is between 2 modules.
    * Otherwise, the default "latest" resolution takes the following precedence:
    *   1. overrides passed in to `os`.
-   *   2. diretly forced dependency within the artificial module.
+   *   2. directly forced dependency within the artificial module.
    *   3. latest revision.
    * Note transitively forced dependencies are not respected. This seems to be the case for stock Ivy's behavior as well,
    * which may be because Ivy makes all Maven dependencies as forced="true".
