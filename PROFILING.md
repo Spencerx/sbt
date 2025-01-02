@@ -105,7 +105,7 @@ $ make
 
 In addition, you have to git clone https://github.com/brendangregg/FlameGraph
 
-In a fresh termimal, run sbt with `-XX:+PreserveFramePointer` flag:
+In a fresh terminal, run sbt with `-XX:+PreserveFramePointer` flag:
 
 ```
 $ sbt -J-Dsbt.launcher.standby=20s -J-XX:+PreserveFramePointer exit

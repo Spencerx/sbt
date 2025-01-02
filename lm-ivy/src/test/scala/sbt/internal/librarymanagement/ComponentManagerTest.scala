@@ -4,7 +4,7 @@ import verify.BasicTestSuite
 
 // TODO - We need to re-enable this test.  Right now, we dont' have a "stub" launcher for this.
 //        This is testing something which uses a launcher interface, but was grabbing the underlying class directly
-//        when it really should, instead, be stubbing out the underyling class.
+//        when it really should, instead, be stubbing out the underlying class.
 
 object ComponentManagerTest extends BasicTestSuite {
   val TestID = "manager-test"

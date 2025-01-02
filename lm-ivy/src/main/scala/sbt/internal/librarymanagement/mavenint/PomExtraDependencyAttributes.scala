@@ -13,7 +13,7 @@ import org.apache.ivy.util.extendable.ExtendableItem
  * This class contains all the logic for dealing with the extra attributes in pom files relating to extra attributes
  * on dependency declarations.
  *
- * Specifically, if we have a dependency on an sbt plugin, there are two properties that need to propogate:
+ * Specifically, if we have a dependency on an sbt plugin, there are two properties that need to propagate:
  * - `sbtVersion`
  * - `scalaVersion`
  *
@@ -48,7 +48,7 @@ object PomExtraDependencyAttributes {
   }
 
   /**
-   * Mutates the to collection with the extra depdendency attributes from the incoming pom properties list.
+   * Mutates the to collection with the extra dependency attributes from the incoming pom properties list.
    *
    * @param from The properties directly off a maven POM file
    * @param to  The aaether properties where we can write whatever we want.

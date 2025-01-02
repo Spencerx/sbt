@@ -407,7 +407,7 @@ final class IvySbt(
           e.uri.map(Hash.contentsIfLocal).getOrElse(Array.empty)
         )
 
-      // Redefine to use a subset of properties, that are serialisable
+      // Redefine to use a subset of properties, that are serializable
       override given InlineIvyConfigurationFormat: JsonFormat[InlineIvyConfiguration] = {
         def hlToInlineIvy(i: InlineIvyHL): InlineIvyConfiguration = {
           val (
@@ -429,7 +429,7 @@ final class IvySbt(
         projectFormat[InlineIvyConfiguration, InlineIvyHL](inlineIvyToHL, hlToInlineIvy)
       }
 
-      // Redefine to use a subset of properties, that are serialisable
+      // Redefine to use a subset of properties, that are serializable
       override given ExternalIvyConfigurationFormat: JsonFormat[ExternalIvyConfiguration] = {
         def hlToExternalIvy(e: ExternalIvyHL): ExternalIvyConfiguration = {
           val (baseDirectory, _) = e
