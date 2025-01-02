@@ -19,19 +19,19 @@ import sbt.internal.util.complete.{
   HistoryCommands,
   Parser,
   TokenCompletions,
-  History => CHistory
+  History as CHistory
 }
 import sbt.internal.util.Types.{ const, idFun }
 import sbt.internal.util.Util.*
 import sbt.internal.inc.classpath.ClasspathUtil.toLoader
 import sbt.internal.inc.ModuleUtilities
 import sbt.internal.client.NetworkClient
-import DefaultParsers._
+import DefaultParsers.*
 
 import Command.applyEffect
-import BasicCommandStrings._
-import CommandUtil._
-import BasicKeys._
+import BasicCommandStrings.*
+import CommandUtil.*
+import BasicKeys.*
 import java.io.File
 
 import sbt.io.IO

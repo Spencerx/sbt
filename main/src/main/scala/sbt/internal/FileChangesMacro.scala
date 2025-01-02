@@ -9,10 +9,10 @@
 package sbt
 package internal
 
-import java.nio.file.{ Path => NioPath }
+import java.nio.file.{ Path as NioPath }
 
 import sbt.ScopeAxis.Select
-import sbt.nio.Keys._
+import sbt.nio.Keys.*
 import sbt.nio.{ FileChanges, FileStamp }
 
 import scala.annotation.compileTimeOnly

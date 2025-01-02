@@ -9,11 +9,11 @@
 package sbt
 
 import sbt.internal.util.Types.idFun
-import sbt.internal.TestBuild._
+import sbt.internal.TestBuild.*
 import sbt.ScopeAxis.{ Select, This, Zero }
-import hedgehog._
+import hedgehog.*
 import hedgehog.Result.{ all, assert, failure, success }
-import hedgehog.runner._
+import hedgehog.runner.*
 
 object Delegates extends Properties {
 

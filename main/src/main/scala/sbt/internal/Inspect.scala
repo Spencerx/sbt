@@ -12,7 +12,7 @@ package internal
 import sbt.internal.util.{ AttributeKey, complete, Types }
 
 import complete.{ DefaultParsers, Parser }
-import DefaultParsers._
+import DefaultParsers.*
 import Def.ScopedKey
 import Types.idFun
 import java.io.File

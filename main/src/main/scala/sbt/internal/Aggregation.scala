@@ -17,7 +17,7 @@ import sbt.ProjectExtra.*
 import sbt.ScopeAxis.{ Select, Zero }
 import sbt.internal.util.complete.Parser
 import sbt.internal.util.complete.Parser.{ failure, seq, success }
-import sbt.internal.util._
+import sbt.internal.util.*
 import sbt.internal.client.NetworkClient
 import sbt.std.Transform.DummyTaskMap
 import sbt.util.{ Logger, Show }
@@ -53,7 +53,7 @@ object Aggregation {
       display: Show[ScopedKey[?]]
   ): Unit =
     xs match {
-      case KeyValue(_, x: Seq[_]) :: Nil => print(x.mkString("* ", "\n* ", ""))
+      case KeyValue(_, x: Seq[?]) :: Nil => print(x.mkString("* ", "\n* ", ""))
       case KeyValue(_, x) :: Nil         => print(x.toString)
       case _ =>
         xs foreach (kv => print(display.show(kv.key) + "\n\t" + kv.value.toString))
@@ -105,8 +105,8 @@ object Aggregation {
       ts: Values[Task[A]],
       extra: DummyTaskMap,
   ): Complete[A] =
-    import EvaluateTask._
-    import std.TaskExtra._
+    import EvaluateTask.*
+    import std.TaskExtra.*
     val extracted = Project.extract(s)
     import extracted.structure
     val toRun = ts.map { case KeyValue(k, t) => t.map(v => KeyValue(k, v)) }.join
@@ -200,11 +200,11 @@ object Aggregation {
     if (kvs.isEmpty) failure("No such setting/task")
     else {
       val (inputTasks, other) = separate[InputTask[?]](kvs) {
-        case KeyValue(k, v: InputTask[_]) => Left(KeyValue(k, v))
+        case KeyValue(k, v: InputTask[?]) => Left(KeyValue(k, v))
         case kv                           => Right(kv)
       }
       val (tasks, settings) = separate[Task[?]](other) {
-        case KeyValue(k, v: Task[_]) => Left(KeyValue(k, v))
+        case KeyValue(k, v: Task[?]) => Left(KeyValue(k, v))
         case kv                      => Right(kv)
       }
       // currently, disallow input tasks to be mixed with normal tasks.

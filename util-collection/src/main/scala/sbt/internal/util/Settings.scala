@@ -159,7 +159,7 @@ trait Init:
     else d
 
   def deriveAllowed[T](s: Setting[T], allowDynamic: Boolean): Option[String] = s.init match {
-    case _: Bind[_, _] if !allowDynamic => Some("Cannot derive from dynamic dependencies.")
+    case _: Bind[?, ?] if !allowDynamic => Some("Cannot derive from dynamic dependencies.")
     case _                              => None
   }
 
@@ -190,7 +190,7 @@ trait Init:
     val result = new java.util.LinkedHashSet[Setting[?]]
     val others = new java.util.ArrayList[Setting[?]]
     ss.foreach {
-      case u: DefaultSetting[_] => result.add(u)
+      case u: DefaultSetting[?] => result.add(u)
       case r                    => others.add(r)
     }
     result.addAll(others)
@@ -529,7 +529,7 @@ trait Init:
     // separate `derived` settings from normal settings (`defs`)
     val (derived, rawDefs) =
       Util.separate[Setting[?], Derived, Setting[?]](init) {
-        case d: DerivedSetting[_] => Left(new Derived(d)); case s => Right(s)
+        case d: DerivedSetting[?] => Left(new Derived(d)); case s => Right(s)
       }
     val defs = addLocal(rawDefs)(using scopeLocal)
 
@@ -611,7 +611,7 @@ trait Init:
     // settings that were derived.
     val allDefs = addLocal(init)(using scopeLocal)
     allDefs.flatMap {
-      case d: DerivedSetting[_] => (derivedToStruct get d map (_.outputs)).toSeq.flatten
+      case d: DerivedSetting[?] => (derivedToStruct get d map (_.outputs)).toSeq.flatten
       case s                    => s :: nil
     }
   }
@@ -766,7 +766,7 @@ trait Init:
 
     override final def equals(o: Any): Boolean =
       o match
-        case d: DefaultSetting[_] => d.id == id
+        case d: DefaultSetting[?] => d.id == id
         case _                    => false
 
     override def toString: String = s"default($id) " + super.toString

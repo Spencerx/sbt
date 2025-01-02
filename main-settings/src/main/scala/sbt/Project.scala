@@ -73,7 +73,7 @@ sealed trait ProjectDefinition[PR <: ProjectReference] {
   override final def hashCode: Int = id.hashCode ^ base.hashCode ^ getClass.hashCode
 
   override final def equals(o: Any) = o match {
-    case p: ProjectDefinition[_] => p.getClass == this.getClass && p.id == id && p.base == base
+    case p: ProjectDefinition[?] => p.getClass == this.getClass && p.id == id && p.base == base
     case _                       => false
   }
 

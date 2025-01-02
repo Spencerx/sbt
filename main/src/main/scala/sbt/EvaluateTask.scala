@@ -12,15 +12,15 @@ import java.io.File
 import java.util.concurrent.atomic.AtomicReference
 
 import sbt.Def.{ ScopedKey, Setting, dummyState }
-import sbt.Keys.{ TaskProgress => _, name => _, _ }
+import sbt.Keys.{ TaskProgress as _, name as _, * }
 import sbt.BuildExtra.*
 import sbt.ProjectExtra.*
 import sbt.Scope.Global
 import sbt.internal.Aggregation.KeyValue
-import sbt.internal.TaskName._
-import sbt.internal._
+import sbt.internal.TaskName.*
+import sbt.internal.*
 import sbt.internal.langserver.ErrorCodes
-import sbt.internal.util.{ Terminal => ITerminal, _ }
+import sbt.internal.util.{ Terminal as ITerminal, * }
 import sbt.librarymanagement.{ Resolver, UpdateReport }
 import sbt.std.Transform.DummyTaskMap
 import sbt.util.{ Logger, Show }
@@ -398,11 +398,11 @@ object EvaluateTask {
   def logIncomplete(result: Incomplete, state: State, streams: Streams): Unit = {
     val all = Incomplete.linearize(result)
     val keyed =
-      all collect { case Incomplete(Some(key: ScopedKey[_]), _, msg, _, ex) =>
+      all collect { case Incomplete(Some(key: ScopedKey[?]), _, msg, _, ex) =>
         (key, msg, ex)
       }
 
-    import ExceptionCategory._
+    import ExceptionCategory.*
     for case (key, msg, Some(ex)) <- keyed
     do
       def log = getStreams(key, streams).log

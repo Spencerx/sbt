@@ -12,7 +12,7 @@ package nio
 import java.nio.file.{ Files, Path }
 import java.util.concurrent.ConcurrentHashMap
 
-import sbt.Keys._
+import sbt.Keys.*
 import sbt.ScopeAxis.{ Select, Zero }
 import sbt.internal.Clean.ToSeqPath
 import sbt.internal.Continuous.FileStampRepository
@@ -20,9 +20,9 @@ import sbt.internal.util.KeyTag
 import sbt.internal.{ Clean, Continuous, DynamicInput, WatchTransitiveDependencies }
 import sbt.nio.FileStamp.Formats.given
 import sbt.nio.FileStamper.{ Hash, LastModified }
-import sbt.nio.Keys._
+import sbt.nio.Keys.*
 import sbt.nio.file.{ AllPass, FileAttributes, Glob, RecursiveGlob }
-import sbt.std.TaskExtra._
+import sbt.std.TaskExtra.*
 import sjsonnew.JsonFormat
 
 import scala.annotation.nowarn

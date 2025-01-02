@@ -14,11 +14,11 @@ import java.nio.channels.ClosedChannelException
 import java.util.concurrent.atomic.{ AtomicBoolean, AtomicInteger }
 
 import org.apache.logging.log4j.core.appender.AbstractAppender
-import org.apache.logging.log4j.core.{ Appender => XAppender, LogEvent => XLogEvent }
+import org.apache.logging.log4j.core.{ Appender as XAppender, LogEvent as XLogEvent }
 import org.apache.logging.log4j.message.{ Message, ObjectMessage, ReusableObjectMessage }
-import org.apache.logging.log4j.{ Level => XLevel }
-import sbt.internal.util.ConsoleAppender._
-import sbt.util._
+import org.apache.logging.log4j.{ Level as XLevel }
+import sbt.internal.util.ConsoleAppender.*
+import sbt.util.*
 import org.apache.logging.log4j.core.AbstractLogEvent
 import org.apache.logging.log4j.message.SimpleMessageFactory
 import java.util.concurrent.atomic.AtomicReference
@@ -608,7 +608,7 @@ trait Appender extends AutoCloseable {
 
     o match {
       case x: StringEvent    => Vector(x.message) foreach { appendLog(level, _) }
-      case x: ObjectEvent[_] => appendEvent(x)
+      case x: ObjectEvent[?] => appendEvent(x)
       case _                 => Vector(o.toString) foreach { appendLog(level, _) }
     }
   }

@@ -18,7 +18,7 @@ import BuildPaths.outputDirectory
 import Scope.GlobalScope
 import sbt.ScopeAxis.{ Select, This, Zero }
 import BuildStreams.Streams
-import sbt.io.syntax._
+import sbt.io.syntax.*
 import sbt.internal.inc.MappedFileConverter
 import sbt.internal.util.{ AttributeEntry, AttributeKey, AttributeMap, Attributed }
 import sbt.internal.util.Attributed.data

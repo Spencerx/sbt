@@ -13,10 +13,10 @@ import Def.{ showRelativeKey2, ScopedKey }
 import Keys.sessionSettings
 import sbt.internal.util.complete.{ DefaultParsers, Parser }
 import Aggregation.{ KeyValue, Values }
-import DefaultParsers._
+import DefaultParsers.*
 import sbt.internal.util.Types.idFun
 import sbt.ScopeAxis.{ Select, Zero }
-import sbt.ProjectExtra.{ failure => _, * }
+import sbt.ProjectExtra.{ failure as _, * }
 import java.net.URI
 import sbt.internal.CommandStrings.{ MultiTaskCommand, ShowCommand, PrintCommand }
 import sbt.internal.util.{
@@ -219,7 +219,7 @@ object Act {
   def selectByConfig(ss: Seq[ParsedKey]): Seq[ParsedKey] =
     ss match {
       case Seq() => Nil
-      case Seq(x, tail @ _*) => // select the first configuration containing a valid key
+      case Seq(x, tail*) => // select the first configuration containing a valid key
         tail.takeWhile(_.key.scope.config == x.key.scope.config) match {
           case Seq() => x :: Nil
           case xs    => x +: xs
@@ -362,7 +362,7 @@ object Act {
   def resolveTask(task: ParsedAxis[AttributeKey[?]]): Option[AttributeKey[?]] =
     task match {
       case ParsedZero | ParsedGlobal | Omitted        => None
-      case t: ParsedValue[AttributeKey[_]] @unchecked => Some(t.value)
+      case t: ParsedValue[AttributeKey[?]] @unchecked => Some(t.value)
     }
 
   def filterStrings(base: Parser[String], valid: Set[String], label: String): Parser[String] =

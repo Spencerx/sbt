@@ -9,12 +9,12 @@
 package sbt
 package internal
 
-import Keys._
+import Keys.*
 import sbt.internal.util.{ FilePosition, NoPosition, SourcePosition }
 import java.io.File
 import ProjectExtra.{ extract, scopedKeyData }
 import Scope.Global
-import sbt.Def._
+import sbt.Def.*
 
 object LintUnused {
   lazy val lintSettings: Seq[Setting[?]] = Seq(

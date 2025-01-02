@@ -10,15 +10,15 @@ package sbt
 
 import java.io.File
 import sbt.Def.{ ScopedKey, Setting }
-import sbt.Keys._
+import sbt.Keys.*
 import sbt.ProjectExtra.extract
 import sbt.ScopeAxis.{ Select, Zero }
 import sbt.internal.Act
-import sbt.internal.CommandStrings._
+import sbt.internal.CommandStrings.*
 import sbt.internal.inc.ScalaInstance
 import sbt.internal.util.AttributeKey
 import sbt.internal.util.MessageOnlyException
-import sbt.internal.util.complete.DefaultParsers._
+import sbt.internal.util.complete.DefaultParsers.*
 import sbt.internal.util.complete.{ DefaultParsers, Parser }
 import sbt.io.IO
 import sbt.librarymanagement.{ SemanticSelector, VersionNumber }
@@ -40,10 +40,10 @@ object Cross {
       extends ScalaVersion
 
   private def switchParser(state: State): Parser[Switch] = {
-    import DefaultParsers._
+    import DefaultParsers.*
     def versionAndCommand(spacePresent: Boolean) = {
       val x = Project.extract(state)
-      import x._
+      import x.*
       val knownVersions = crossVersions(x, currentRef)
       val version = token(StringBasic.examples(knownVersions*)).map { arg =>
         val force = arg.endsWith("!")
@@ -104,7 +104,7 @@ object Cross {
   }
 
   private def crossVersions(extracted: Extracted, proj: ResolvedReference): Seq[String] = {
-    import extracted._
+    import extracted.*
     (proj / crossScalaVersions).get(structure.data).getOrElse {
       // reading scalaVersion is a one-time deal
       (proj / scalaVersion).get(structure.data).toSeq
@@ -117,8 +117,8 @@ object Cross {
   private[sbt] def parseSlashCommand(
       extracted: Extracted
   )(command: String): (Seq[ProjectRef], String) = {
-    import extracted._
-    import DefaultParsers._
+    import extracted.*
+    import DefaultParsers.*
     val parser = ((('{' ~> URIClass <~ '}').? ~ OpOrID <~ charClass(_ == '/', "/")) ~ any.*.string)
       .map { case uri ~ seg1 ~ cmd => (uri, seg1, cmd) }
     Parser.parse(command, parser) match {
@@ -272,7 +272,7 @@ object Cross {
 
   private def switchScalaVersion(switch: Switch, state: State): (State, Seq[ResolvedReference]) = {
     val extracted = Project.extract(state)
-    import extracted._
+    import extracted.*
 
     type ScalaVersion = String
 
@@ -393,7 +393,7 @@ object Cross {
       state: State,
       extracted: Extracted
   ): State = {
-    import extracted._
+    import extracted.*
 
     val newSettings = projects.flatMap { case (project, version, scalaVersions) =>
       val scope = Scope(Select(project), Zero, Zero, Zero)

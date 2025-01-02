@@ -18,7 +18,7 @@ import sbt.State
 import sbt.internal.CommandChannel
 import sbt.internal.util.ConsoleAppender.{ ClearPromptLine, ClearScreenAfterCursor, DeleteLine }
 import sbt.internal.util.Terminal.hasConsole
-import sbt.internal.util._
+import sbt.internal.util.*
 import sbt.internal.util.complete.{ Parser }
 
 import scala.annotation.tailrec

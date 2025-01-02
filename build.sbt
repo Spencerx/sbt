@@ -48,13 +48,13 @@ ThisBuild / libraryDependencySchemes += "org.scala-lang.modules" %% "scala-xml" 
 Global / semanticdbEnabled := !(Global / insideCI).value
 // Change main/src/main/scala/sbt/plugins/SemanticdbPlugin.scala too, if you change this.
 Global / semanticdbVersion := "4.9.9"
-val excludeLint = SettingKey[Set[Def.KeyedInitialize[_]]]("excludeLintKeys")
+val excludeLint = SettingKey[Set[Def.KeyedInitialize[?]]]("excludeLintKeys")
 Global / excludeLint := (Global / excludeLint).?.value.getOrElse(Set.empty)
 Global / excludeLint += Utils.componentID
 Global / excludeLint += scriptedBufferLog
 Global / excludeLint += checkPluginCross
 
-def commonSettings: Seq[Setting[_]] = Def.settings(
+def commonSettings: Seq[Setting[?]] = Def.settings(
   headerLicense := Some(
     HeaderLicense.Custom(
       """|sbt
@@ -104,17 +104,17 @@ def commonSettings: Seq[Setting[_]] = Def.settings(
   run / fork := true,
 )
 
-def utilCommonSettings: Seq[Setting[_]] = Def.settings(
+def utilCommonSettings: Seq[Setting[?]] = Def.settings(
   baseSettings,
 )
 
-def minimalSettings: Seq[Setting[_]] =
+def minimalSettings: Seq[Setting[?]] =
   commonSettings ++ customCommands ++ Utils.publishPomSettings
 
-def baseSettings: Seq[Setting[_]] =
+def baseSettings: Seq[Setting[?]] =
   minimalSettings ++ Seq(Utils.projectComponent) ++ Utils.baseScalacOptions ++ Licensed.settings
 
-def testedBaseSettings: Seq[Setting[_]] =
+def testedBaseSettings: Seq[Setting[?]] =
   baseSettings ++ testDependencies
 
 val sbt13Plus =
@@ -152,7 +152,7 @@ val noUtilVersion =
 
 val mimaSettings = mimaSettingsSince(sbt10Plus)
 val utilMimaSettings = mimaSettingsSince(sbt10Plus.filterNot(noUtilVersion))
-def mimaSettingsSince(versions: Seq[String]): Seq[Def.Setting[_]] = Def settings (
+def mimaSettingsSince(versions: Seq[String]): Seq[Def.Setting[?]] = Def settings (
   mimaPreviousArtifacts := {
     val crossVersion = if (crossPaths.value) CrossVersion.binary else CrossVersion.disabled
     versions.map(v => organization.value % moduleName.value % v cross crossVersion).toSet
@@ -1293,7 +1293,7 @@ lazy val docProjects: ScopeFilter = ScopeFilter(
 lazy val javafmtOnCompile = taskKey[Unit]("Formats java sources before compile")
 lazy val scriptedProjects = ScopeFilter(inAnyProject)
 
-def customCommands: Seq[Setting[_]] = Seq(
+def customCommands: Seq[Setting[?]] = Seq(
   commands += Command.command("publishLocalAllModule") { state =>
     val extracted = Project.extract(state)
     import extracted._
@@ -1344,7 +1344,7 @@ ThisBuild / publishTo := {
 }
 ThisBuild / publishMavenStyle := true
 
-def lmTestSettings: Seq[Setting[_]] = Def.settings(
+def lmTestSettings: Seq[Setting[?]] = Def.settings(
   Test / classLoaderLayeringStrategy := ClassLoaderLayeringStrategy.Flat,
   Test / parallelExecution := false
 )
@@ -1422,7 +1422,7 @@ lazy val lmIvy = (project in file("lm-ivy"))
     Test / classLoaderLayeringStrategy := ClassLoaderLayeringStrategy.Flat
   )
 
-lazy val lmCoursierSettings: Seq[Setting[_]] = Def.settings(
+lazy val lmCoursierSettings: Seq[Setting[?]] = Def.settings(
   baseSettings,
   headerLicense := Some(
     HeaderLicense.Custom(

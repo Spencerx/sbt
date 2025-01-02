@@ -2,7 +2,7 @@ package sbt
 
 import java.nio.file.{ FileAlreadyExistsException, Files }
 
-import sbt.Keys._
+import sbt.Keys.*
 import sbt.internal.librarymanagement.IvyXml
 
 /** This local plugin provides ways of publishing just the binary jar. */
@@ -13,7 +13,7 @@ object PublishBinPlugin extends AutoPlugin {
     val publishLocalBin = taskKey[Unit]("")
     val publishLocalBinConfig = taskKey[PublishConfiguration]("")
   }
-  import autoImport._
+  import autoImport.*
 
   private val dummyDoc = taskKey[File]("").withRank(Int.MaxValue)
   override val globalSettings = Seq(publishLocalBin := (()))

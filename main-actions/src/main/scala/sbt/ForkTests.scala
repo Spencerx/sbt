@@ -9,17 +9,17 @@
 package sbt
 
 import scala.collection.mutable
-import testing.{ Logger => _, Task => _, _ }
+import testing.{ Logger as _, Task as _, * }
 import scala.util.control.NonFatal
 import java.net.ServerSocket
-import java.io._
-import Tests.{ Output => TestOutput, _ }
+import java.io.*
+import Tests.{ Output as TestOutput, * }
 import sbt.io.IO
 import sbt.util.Logger
 import sbt.ConcurrentRestrictions.Tag
-import sbt.protocol.testing._
+import sbt.protocol.testing.*
 import sbt.internal.util.Util.*
-import sbt.internal.util.{ Terminal => UTerminal }
+import sbt.internal.util.{ Terminal as UTerminal }
 import xsbti.{ FileConverter, HashedVirtualFileRef }
 
 private[sbt] object ForkTests {
@@ -33,7 +33,7 @@ private[sbt] object ForkTests {
       log: Logger,
       tags: (Tag, Int)*
   ): Task[TestOutput] = {
-    import std.TaskExtra._
+    import std.TaskExtra.*
     val dummyLoader =
       this.getClass.getClassLoader // can't provide the loader for test classes, which is in another jvm
     def all(work: Seq[ClassLoader => Unit]) = work.fork(f => f(dummyLoader))
@@ -142,7 +142,7 @@ private[sbt] object ForkTests {
           } catch {
             case NonFatal(e) =>
               def throwableToString(t: Throwable) = {
-                import java.io._; val sw = new StringWriter; t.printStackTrace(new PrintWriter(sw));
+                import java.io.*; val sw = new StringWriter; t.printStackTrace(new PrintWriter(sw));
                 sw.toString
               }
               resultsAcc("Forked test harness failed: " + throwableToString(e)) = SuiteResult.Error
@@ -205,7 +205,7 @@ private final class React(
     listeners: Seq[TestReportListener],
     results: mutable.Map[String, SuiteResult]
 ) {
-  import ForkTags._
+  import ForkTags.*
   @annotation.tailrec
   def react(): Unit = is.readObject match {
     case `Done` =>

@@ -19,7 +19,7 @@ import sbt.librarymanagement.{
 }
 import sbt.internal.util.Attributed
 import Def.{ ScopedKey, Setting }
-import Keys._
+import Keys.*
 import Configurations.{ Compile, Runtime }
 import sbt.ProjectExtra.{ extract, runUnloadHooks, setProject }
 import sbt.SlashSyntax0.*
@@ -103,7 +103,7 @@ object GlobalPlugin {
       t: Task[T],
       roots: Seq[ScopedKey[?]]
   ): (State, T) = {
-    import EvaluateTask._
+    import EvaluateTask.*
     withStreams(structure, state) { str =>
       val nv = nodeView(state, str, roots)
       val config = EvaluateTask.extractedTaskConfig(Project.extract(state), structure, state)

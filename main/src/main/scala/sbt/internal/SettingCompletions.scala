@@ -17,8 +17,8 @@ import ProjectExtra.{ relation }
 import Def.{ ScopedKey, Setting }
 import Scope.Global
 import sbt.ScopeAxis.{ Select, This, Zero }
-import complete._
-import DefaultParsers._
+import complete.*
+import DefaultParsers.*
 
 /**
  * The resulting `session` and verbose and quiet summaries of the result of a set operation.
@@ -379,7 +379,7 @@ private[sbt] object SettingCompletions {
     val Define = Value(":=")
     val Update = Value("~=")
   }
-  import Assign._
+  import Assign.*
 
   /** Returns the description associated with the provided assignment method. */
   def assignDescription(a: Assign.Value): String = a match {

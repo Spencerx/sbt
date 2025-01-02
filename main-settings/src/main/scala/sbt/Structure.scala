@@ -18,7 +18,7 @@ import sbt.ConcurrentRestrictions.Tag
 import sbt.Def.{ Initialize, ScopedKey, Setting, setting }
 import sbt.ScopeAxis.Select
 import std.TaskMacro
-import std.TaskExtra.{ task => mktask, _ }
+import std.TaskExtra.{ task as mktask, * }
 import scala.reflect.ClassTag
 
 /** An abstraction on top of Settings for build configuration and task definition. */
@@ -676,7 +676,7 @@ end Scoped
  * See https://www.scala-sbt.org/1.x/docs/Migrating-from-sbt-013x.html#Migrating+from+sbt+0.12+style for how to migrate.
  */
 trait TupleSyntax:
-  import Scoped._
+  import Scoped.*
 
   // format: off
 

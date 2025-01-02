@@ -3,19 +3,19 @@ package internal
 
 import build.bazel.remote.execution.v2.{
   ActionCacheGrpc,
-  ActionResult => XActionResult,
+  ActionResult as XActionResult,
   BatchReadBlobsRequest,
   BatchReadBlobsResponse,
   BatchUpdateBlobsRequest,
   BatchUpdateBlobsResponse,
   Compressor,
   ContentAddressableStorageGrpc,
-  Digest => XDigest,
+  Digest as XDigest,
   DigestFunction,
   FindMissingBlobsRequest,
-  GetActionResultRequest => XGetActionResultRequest,
+  GetActionResultRequest as XGetActionResultRequest,
   OutputFile,
-  UpdateActionResultRequest => XUpdateActionResultRequest,
+  UpdateActionResultRequest as XUpdateActionResultRequest,
 }
 import com.eed3si9n.remoteapis.shaded.com.google.protobuf.ByteString
 import com.eed3si9n.remoteapis.shaded.io.grpc.{

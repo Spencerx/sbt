@@ -14,7 +14,7 @@ import java.util.concurrent.atomic.AtomicLong
 import scala.jdk.CollectionConverters.*
 import scala.collection.mutable
 import scala.collection.immutable.VectorBuilder
-import scala.concurrent.duration._
+import scala.concurrent.duration.*
 
 private[sbt] abstract class AbstractTaskExecuteProgress extends ExecuteProgress {
   import AbstractTaskExecuteProgress.Timer

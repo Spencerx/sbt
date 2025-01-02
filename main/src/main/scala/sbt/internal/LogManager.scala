@@ -10,12 +10,12 @@ package sbt
 package internal
 
 import sbt.Def.ScopedKey
-import sbt.Keys._
+import sbt.Keys.*
 import sbt.ProjectExtra.showContextKey
 import sbt.Scope.Global
 import sbt.ScopeAxis.{ Select, Zero }
-import sbt.internal.util.MainAppender._
-import sbt.internal.util.{ Terminal => ITerminal, _ }
+import sbt.internal.util.MainAppender.*
+import sbt.internal.util.{ Terminal as ITerminal, * }
 import sbt.util.{ Level, Logger, LoggerContext }
 
 import java.io.PrintWriter

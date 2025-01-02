@@ -11,7 +11,7 @@ package sbt
 import java.net.URI
 
 import sbt.internal.util.{ AttributeKey, AttributeMap, Dag }
-import sbt.internal.util.Util._
+import sbt.internal.util.Util.*
 import sbt.ScopeAxis.{ Select, This, Zero }
 
 import sbt.io.IO
@@ -100,7 +100,7 @@ object Scope:
 
   def fillTaskAxis(scope: Scope, key: AttributeKey[?]): Scope =
     scope.task match {
-      case _: Select[_] => scope
+      case _: Select[?] => scope
       case _            => scope.copy(task = Select(key))
     }
 

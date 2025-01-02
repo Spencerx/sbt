@@ -15,7 +15,7 @@ import sbt.KeyRanks.{ DTask, Invisible }
 import sbt.Scope.{ GlobalScope, ThisScope }
 import sbt.internal.util.Types.const
 import sbt.internal.util.complete.Parser
-import sbt.internal.util.{ Terminal => ITerminal, * }
+import sbt.internal.util.{ Terminal as ITerminal, * }
 import sbt.util.{
   ActionCacheStore,
   AggregateActionCacheStore,
@@ -23,7 +23,7 @@ import sbt.util.{
   cacheLevel,
   DiskActionCacheStore
 }
-import Util._
+import Util.*
 import sbt.util.Show
 import xsbti.{ HashedVirtualFileRef, VirtualFile, VirtualFileRef }
 import sjsonnew.JsonFormat
@@ -168,7 +168,7 @@ object Def extends BuildSyntax with Init with InitializeImplicits:
       project: Reference,
       trailingSlash: Boolean
   ): String = {
-    import Reference.{ display => displayRef }
+    import Reference.{ display as displayRef }
     @tailrec def loop(ref: Reference): String = ref match {
       case ProjectRef(b, p) => if (b == current.build) loop(LocalProject(p)) else displayRef(ref)
       case BuildRef(b)      => if (b == current.build) loop(ThisBuild) else displayRef(ref)

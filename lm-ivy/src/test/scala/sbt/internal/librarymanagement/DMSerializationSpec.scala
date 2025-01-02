@@ -3,9 +3,9 @@ package sbt.internal.librarymanagement
 import java.net.URI
 import java.io.File
 
-import sbt.librarymanagement._
-import sjsonnew.shaded.scalajson.ast.unsafe._
-import sjsonnew._, support.scalajson.unsafe._
+import sbt.librarymanagement.*
+import sjsonnew.shaded.scalajson.ast.unsafe.*
+import sjsonnew.*, support.scalajson.unsafe.*
 import LibraryManagementCodec.given
 import verify.BasicTestSuite
 

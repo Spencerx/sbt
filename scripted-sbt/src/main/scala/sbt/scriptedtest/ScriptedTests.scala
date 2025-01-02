@@ -16,8 +16,8 @@ import java.util.Properties
 import java.util.concurrent.ForkJoinPool
 
 import sbt.internal.io.Resources
-import sbt.internal.scripted._
-import RemoteSbtCreatorProp._
+import sbt.internal.scripted.*
+import RemoteSbtCreatorProp.*
 
 import scala.annotation.nowarn
 import scala.collection.parallel.ForkJoinTaskSupport

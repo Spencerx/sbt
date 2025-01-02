@@ -8,8 +8,8 @@
 
 package sbt.internal.util
 
-import java.io._
-import java.util.{ List => JList }
+import java.io.*
+import java.util.{ List as JList }
 
 import jline.console.ConsoleReader
 import jline.console.history.{ FileHistory, MemoryHistory }
@@ -17,14 +17,14 @@ import org.jline.reader.{
   Candidate,
   Completer,
   EndOfFileException,
-  LineReader => JLineReader,
+  LineReader as JLineReader,
   LineReaderBuilder,
   ParsedLine,
   UserInterruptException,
 }
 import org.jline.utils.ClosedException
 import sbt.internal.util.complete.Parser
-import sbt.io.syntax._
+import sbt.io.syntax.*
 
 import scala.util.control.NonFatal
 import java.nio.channels.ClosedByInterruptException
@@ -223,7 +223,7 @@ abstract class JLine extends LineReader {
   }
 
   private def handleProgress(prompt: String): String = {
-    import ConsoleAppender._
+    import ConsoleAppender.*
     if (showProgress) s"$DeleteLine" + prompt
     else prompt
   }

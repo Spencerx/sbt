@@ -10,8 +10,8 @@ package sbt
 
 import java.io.File
 import scala.util.control.NonFatal
-import testing.{ Task => TestTask, _ }
-import org.scalatools.testing.{ Framework => OldFramework }
+import testing.{ Task as TestTask, * }
+import org.scalatools.testing.{ Framework as OldFramework }
 import sbt.internal.inc.classpath.{ ClasspathUtilities, DualLoader }
 import sbt.internal.inc.ScalaInstance
 import scala.annotation.tailrec

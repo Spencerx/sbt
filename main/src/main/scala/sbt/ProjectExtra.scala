@@ -8,7 +8,7 @@
 package sbt
 
 import java.io.File
-import java.nio.file.{ Path => NioPath }
+import java.nio.file.{ Path as NioPath }
 import java.net.URI
 // import Project._
 import Keys.{

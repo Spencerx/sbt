@@ -9,10 +9,10 @@
 package sbt
 package coursierint
 
-import sbt.librarymanagement._
-import sbt.Keys._
+import sbt.librarymanagement.*
+import sbt.Keys.*
 import sbt.ProjectExtra.transitiveInterDependencies
-import sbt.ScopeFilter.Make._
+import sbt.ScopeFilter.Make.*
 
 object CoursierRepositoriesTasks {
   private object CResolvers {

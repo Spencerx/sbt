@@ -15,7 +15,7 @@ import java.io.File
 import java.net.URI
 
 import sbt.io.Path
-import Path._
+import Path.*
 
 /** Options for well-known tasks. */
 object Opts {
@@ -41,7 +41,7 @@ object Opts {
           .mkString("-doc-external-doc:", ",", "") :: Nil
   }
   object resolver {
-    import sbt.io.syntax._
+    import sbt.io.syntax.*
     @deprecated("Use sonatypeOssReleases instead", "1.7.0")
     val sonatypeReleases = Resolver.sonatypeRepo("releases")
     // todo: fix
@@ -66,8 +66,8 @@ object Opts {
 }
 
 object DefaultOptions {
-  import Opts._
-  import sbt.io.syntax._
+  import Opts.*
+  import sbt.io.syntax.*
   import BuildPaths.{ getGlobalBase, getGlobalSettingsDirectory }
   import sbt.ProjectExtra.extract
   import Def.Setting

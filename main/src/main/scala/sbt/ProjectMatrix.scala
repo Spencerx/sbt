@@ -191,7 +191,7 @@ trait ProjectFinder {
 }
 
 object ProjectMatrix {
-  import sbt.io.syntax._
+  import sbt.io.syntax.*
 
   val jvmIdSuffix: String = "JVM"
   val jvmDirectorySuffix: String = "-jvm"

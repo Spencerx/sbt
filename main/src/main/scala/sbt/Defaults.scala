@@ -9,18 +9,18 @@
 package sbt
 
 import java.io.{ File, PrintWriter }
-import java.nio.file.{ Files, Path => NioPath }
+import java.nio.file.{ Files, Path as NioPath }
 import java.util.Optional
 import java.util.concurrent.TimeUnit
 import lmcoursier.CoursierDependencyResolution
-import lmcoursier.definitions.{ Configuration => CConfiguration }
+import lmcoursier.definitions.{ Configuration as CConfiguration }
 import org.apache.ivy.core.module.descriptor.ModuleDescriptor
 import org.apache.ivy.core.module.id.ModuleRevisionId
-import org.apache.logging.log4j.core.{ Appender => XAppender }
+import org.apache.logging.log4j.core.{ Appender as XAppender }
 import org.scalasbt.ipcsocket.Win32SecurityLevel
 import sbt.Def.{ Initialize, ScopedKey, Setting, SettingsDefinition, parsed }
-import sbt.Keys._
-import sbt.OptionSyntax._
+import sbt.Keys.*
+import sbt.OptionSyntax.*
 import sbt.Project.{
   inScope,
   inTask,
@@ -33,11 +33,11 @@ import sbt.ProjectExtra.*
 import sbt.Scope.{ GlobalScope, ThisBuildScope, ThisScope, fillTaskAxis }
 import sbt.ScopeAxis.{ Select, This, Zero }
 import sbt.State.StateOpsImpl
-import sbt.coursierint._
+import sbt.coursierint.*
 import sbt.internal.CommandStrings.ExportStream
-import sbt.internal._
+import sbt.internal.*
 import sbt.internal.classpath.AlternativeZincUtil
-import sbt.internal.inc.JavaInterfaceUtil._
+import sbt.internal.inc.JavaInterfaceUtil.*
 import sbt.internal.inc.classpath.{ ClasspathFilter, ClasspathUtil }
 import sbt.internal.inc.{ CompileOutput, MappedFileConverter, Stamps, ZincLmUtil, ZincUtil }
 import sbt.internal.io.{ Source, WatchState }
@@ -45,7 +45,7 @@ import sbt.internal.librarymanagement.mavenint.{
   PomExtraDependencyAttributes,
   SbtPomExtraProperties
 }
-import sbt.internal.librarymanagement._
+import sbt.internal.librarymanagement.*
 import sbt.internal.nio.{ CheckBuildSources, Globs }
 import sbt.internal.server.{
   BspCompileProgress,
@@ -59,12 +59,12 @@ import sbt.internal.server.{
 }
 import sbt.internal.testing.TestLogger
 import sbt.internal.util.Attributed.data
-import sbt.internal.util.Types._
-import sbt.internal.util.{ Terminal => ITerminal, _ }
-import sbt.internal.util.complete._
-import sbt.io.Path._
-import sbt.io._
-import sbt.io.syntax._
+import sbt.internal.util.Types.*
+import sbt.internal.util.{ Terminal as ITerminal, * }
+import sbt.internal.util.complete.*
+import sbt.io.Path.*
+import sbt.io.*
+import sbt.io.syntax.*
 import sbt.librarymanagement.Artifact.{ DocClassifier, SourceClassifier }
 import sbt.librarymanagement.Configurations.{
   Compile,
@@ -75,24 +75,24 @@ import sbt.librarymanagement.Configurations.{
   Test
 }
 import sbt.librarymanagement.CrossVersion.{ binarySbtVersion, binaryScalaVersion, partialVersion }
-import sbt.librarymanagement._
-import sbt.librarymanagement.ivy._
-import sbt.librarymanagement.syntax._
+import sbt.librarymanagement.*
+import sbt.librarymanagement.ivy.*
+import sbt.librarymanagement.syntax.*
 import sbt.nio.FileStamp
-import sbt.nio.Keys._
-import sbt.nio.file.syntax._
+import sbt.nio.Keys.*
+import sbt.nio.file.syntax.*
 import sbt.nio.file.{ FileTreeView, Glob, RecursiveGlob }
 import sbt.nio.Watch
 import sbt.std.TaskExtra.*
 import sbt.testing.{ AnnotatedFingerprint, Framework, Runner, SubclassFingerprint }
 import sbt.util.CacheImplicits.given
-import sbt.util.InterfaceUtil.{ t2, toJavaFunction => f1 }
-import sbt.util._
-import sjsonnew._
+import sbt.util.InterfaceUtil.{ t2, toJavaFunction as f1 }
+import sbt.util.*
+import sjsonnew.*
 
 import scala.annotation.nowarn
 import scala.collection.immutable.ListMap
-import scala.concurrent.duration._
+import scala.concurrent.duration.*
 import scala.util.control.NonFatal
 import scala.xml.NodeSeq
 
@@ -1023,7 +1023,7 @@ object Defaults extends BuildCommon {
           case "run" | "runMain" => true
           case r =>
             r.split("/") match {
-              case Array(parts @ _*) =>
+              case Array(parts*) =>
                 parts.lastOption match {
                   case Some("run" | "runMain") => true
                   case _                       => false
@@ -2596,21 +2596,21 @@ object Defaults extends BuildCommon {
     }
 
   def runMainParser: (State, Seq[String]) => Parser[(String, Seq[String])] = {
-    import DefaultParsers._
+    import DefaultParsers.*
     (state, mainClasses) =>
       Space ~> token(NotSpace.examples(mainClasses.toSet)) ~ spaceDelimited("<arg>")
   }
 
   def testOnlyParser: (State, Seq[String]) => Parser[(Seq[String], Seq[String])] = {
     (state, tests) =>
-      import DefaultParsers._
+      import DefaultParsers.*
       val selectTests = distinctParser(tests.toSet, true)
       val options = (token(Space) ~> token("--") ~> spaceDelimited("<option>")) ?? Nil
       selectTests ~ options
   }
 
   private def distinctParser(exs: Set[String], raw: Boolean): Parser[Seq[String]] = {
-    import DefaultParsers._
+    import DefaultParsers.*
     import Parser.and
     val base = token(Space) ~> token(and(NotSpace, not("--", "Unexpected: ---")).examples(exs))
     val recurse = base flatMap { ex =>
@@ -2694,7 +2694,7 @@ object Defaults extends BuildCommon {
       runLocal: (Seq[String], Logger) => Unit
   ): Initialize[InputTask[Unit]] =
     Def.inputTask {
-      import Def._
+      import Def.*
       val s = streams.value
       val args = spaceDelimited().parsed
       runLocal(args, s.log)
@@ -2705,8 +2705,8 @@ object Defaults extends BuildCommon {
 }
 
 object Classpaths {
-  import Defaults._
-  import Keys._
+  import Defaults.*
+  import Keys.*
 
   def analyzed[A](data: A, analysisFile: VirtualFile): Attributed[A] =
     Attributed.blank(data).put(Keys.analysis, analysisFile.id)
@@ -3411,7 +3411,7 @@ object Classpaths {
     update / evictionWarningOptions := evictionWarningOptions.value,
     evicted / evictionWarningOptions := EvictionWarningOptions.full,
     evicted := {
-      import ShowLines._
+      import ShowLines.*
       val report = updateTask.value
       val log = streams.value.log
       val ew =
@@ -3711,8 +3711,8 @@ object Classpaths {
 
   val moduleIdJsonKeyFormat: sjsonnew.JsonKeyFormat[ModuleID] =
     new sjsonnew.JsonKeyFormat[ModuleID] {
-      import LibraryManagementCodec._
-      import sjsonnew.support.scalajson.unsafe._
+      import LibraryManagementCodec.*
+      import sjsonnew.support.scalajson.unsafe.*
       val moduleIdFormat: JsonFormat[ModuleID] = implicitly[JsonFormat[ModuleID]]
       def write(key: ModuleID): String =
         CompactPrinter(Converter.toJsonUnsafe(key)(moduleIdFormat))
@@ -3998,7 +3998,7 @@ object Classpaths {
       val st = state.value
       val s = streams.value
       val cacheStoreFactory = s.cacheStoreFactory.sub(updateCacheName.value)
-      import sbt.librarymanagement.LibraryManagementCodec._
+      import sbt.librarymanagement.LibraryManagementCodec.*
       def modulePositions: Map[ModuleID, SourcePosition] =
         try {
           val extracted = Project.extract(st)
@@ -4349,7 +4349,7 @@ object Classpaths {
       else Def.task { Seq.empty[HashedVirtualFileRef] }
     }
 
-  import DependencyFilter._
+  import DependencyFilter.*
   def managedJars(
       config: Configuration,
       jarTypes: Set[String],
@@ -4558,7 +4558,7 @@ object Classpaths {
 private[sbt] object BuildExtra extends BuildExtra
 
 trait BuildExtra extends BuildCommon with DefExtra {
-  import Defaults._
+  import Defaults.*
 
   /**
    * Creates a new Project.  This is a macro that expects to be assigned directly to a val.
@@ -4677,7 +4677,7 @@ trait BuildExtra extends BuildCommon with DefExtra {
   ): Initialize[InputTask[Unit]] =
     Def.inputTask {
       given FileConverter = fileConverter.value
-      import Def._
+      import Def.*
       val r = (config / run / runner).value
       val cp = (config / fullClasspath).value
       val args = spaceDelimited().parsed

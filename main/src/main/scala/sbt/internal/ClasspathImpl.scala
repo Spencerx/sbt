@@ -11,16 +11,16 @@ package internal
 
 import java.io.File
 import java.util.LinkedHashSet
-import sbt.Keys._
-import sbt.nio.Keys._
+import sbt.Keys.*
+import sbt.nio.Keys.*
 import sbt.nio.file.{ Glob, RecursiveGlob }
 import sbt.Def.Initialize
 import sbt.internal.util.{ Attributed, Dag }
 import sbt.librarymanagement.{ Configuration, TrackLevel }
 import sbt.librarymanagement.Configurations.names
 import sbt.SlashSyntax0.*
-import sbt.std.TaskExtra._
-import sbt.util._
+import sbt.std.TaskExtra.*
+import sbt.util.*
 import scala.jdk.CollectionConverters.*
 import xsbti.{ HashedVirtualFileRef, VirtualFile, VirtualFileRef }
 import xsbti.compile.CompileAnalysis

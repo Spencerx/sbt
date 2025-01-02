@@ -8,10 +8,10 @@ import coursier.core.{ Authentication, Repository }
 import coursier.ivy.IvyRepository
 import coursier.maven.SbtMavenRepository
 import org.apache.ivy.plugins.resolver.IBiblioResolver
-import sbt.librarymanagement.{ Configuration => _, MavenRepository => _, _ }
+import sbt.librarymanagement.{ Configuration as _, MavenRepository as _, * }
 import sbt.util.Logger
 
-import scala.jdk.CollectionConverters._
+import scala.jdk.CollectionConverters.*
 
 object Resolvers {
 

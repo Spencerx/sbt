@@ -13,7 +13,7 @@ import sbt.util.Show
 import java.io.File
 
 import Def.{ ScopedKey, compiled, flattenLocals }
-import Predef.{ any2stringadd => _, _ }
+import Predef.{ any2stringadd as _, * }
 import sbt.ProjectExtra.scopedKeyData
 import sbt.io.IO
 

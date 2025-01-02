@@ -6,7 +6,7 @@ import java.net.URI
 import org.apache.ivy.core.cache.ArtifactOrigin
 import org.apache.ivy.core.cache.{ DefaultRepositoryCacheManager, RepositoryCacheManager }
 import org.apache.ivy.core.module.descriptor.{
-  Artifact => IvyArtifact,
+  Artifact as IvyArtifact,
   DefaultArtifact,
   DefaultDependencyArtifactDescriptor,
   DefaultModuleDescriptor,
@@ -24,7 +24,7 @@ import org.apache.ivy.plugins.namespace.Namespace
 import org.apache.ivy.plugins.resolver.{ DependencyResolver, ResolverSettings }
 import org.apache.ivy.plugins.resolver.util.ResolvedResource
 
-import FakeResolver._
+import FakeResolver.*
 
 /**
  * A fake `DependencyResolver` that statically serves predefined artifacts.

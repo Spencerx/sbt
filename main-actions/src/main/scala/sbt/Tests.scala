@@ -8,10 +8,10 @@
 
 package sbt
 
-import std._
+import std.*
 import xsbt.api.{ Discovered, Discovery }
 import sbt.internal.inc.Analysis
-import TaskExtra._
+import TaskExtra.*
 import sbt.internal.Action
 import sbt.internal.util.FeedbackProvidedException
 import xsbti.api.Definition
@@ -27,7 +27,7 @@ import testing.{
   SubclassFingerprint,
   SuiteSelector,
   TaskDef,
-  Task => TestTask
+  Task as TestTask
 }
 
 import scala.annotation.tailrec
