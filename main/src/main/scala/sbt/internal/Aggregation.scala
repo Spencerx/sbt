@@ -73,7 +73,7 @@ object Aggregation {
     Command.applyEffect(seqParser(ps))(ts => runTasks(s, ts, DummyTaskMap(Nil), show))
 
   private def showRun[A](complete: Complete[A], show: ShowConfig)(using
-      display: Show[ScopedKey[?]]
+      Show[ScopedKey[?]]
   ): Unit =
     import complete.*
     val log = state.log

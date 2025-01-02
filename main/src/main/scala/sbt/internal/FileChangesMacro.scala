@@ -78,7 +78,7 @@ object FileChangesMacro:
       currentKey: Expr[TaskKey[Seq[NioPath]]],
       changeKey: Expr[TaskKey[Seq[(NioPath, FileStamp)] => FileChanges]],
       mapKey: Expr[TaskKey[Seq[(NioPath, FileStamp)]]],
-  )(using qctx: Quotes): Expr[FileChanges] =
+  )(using Quotes): Expr[FileChanges] =
     val taskScope = getTaskScope[A](in)
     '{
       val ts: Scope = $taskScope
@@ -98,7 +98,7 @@ object FileChangesMacro:
     val ts = getTaskScope[A](in)
     '{ rescope[Seq[NioPath]]($ts, allOutputFiles).value }
 
-  private def getTaskScope[A: Type](in: Expr[TaskKey[A]])(using qctx: Quotes): Expr[sbt.Scope] =
+  private def getTaskScope[A: Type](in: Expr[TaskKey[A]])(using Quotes): Expr[sbt.Scope] =
     '{
       if $in.scope.task.toOption.isDefined then $in.scope
       else $in.scope.copy(task = Select($in.key))

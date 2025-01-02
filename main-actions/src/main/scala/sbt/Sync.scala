@@ -229,14 +229,14 @@ object Sync {
 
   private def readUncaught[F <: FileInfo](
       store: CacheStore
-  )(using infoFormat: JsonFormat[F]): RelationInfo[F] =
+  )(using JsonFormat[F]): RelationInfo[F] =
     given IsoString[File] = fileIsoString
     import PathOnlyFormats.given
     store.read(default = (Relation.empty[File, File], Map.empty[File, F]))
 
   private def readUncaughtVirtual[F <: FileInfo](
       store: CacheStore
-  )(using infoFormat: JsonFormat[F]): RelationInfoVirtual[F] = {
+  )(using JsonFormat[F]): RelationInfoVirtual[F] = {
     import sjsonnew.IsoString
     given IsoString[VirtualFileRef] =
       IsoString.iso[VirtualFileRef](_.toString, VirtualFileRef.of(_))

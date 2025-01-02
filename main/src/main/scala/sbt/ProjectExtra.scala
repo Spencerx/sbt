@@ -485,9 +485,9 @@ trait ProjectExtra extends Scoped.Syntax:
       )
 
     private[sbt] def relation(settings: Seq[Def.Setting[?]], actual: Boolean)(using
-        delegates: Scope => Seq[Scope],
-        scopeLocal: Def.ScopeLocal,
-        display: Show[ScopedKey[?]]
+        Scope => Seq[Scope],
+        Def.ScopeLocal,
+        Show[ScopedKey[?]]
     ): Relation[ScopedKey[?], ScopedKey[?]] =
       val cMap = Def.flattenLocals(Def.compiled(settings, actual))
       val emptyRelation = Relation.empty[ScopedKey[?], ScopedKey[?]]
@@ -496,11 +496,11 @@ trait ProjectExtra extends Scoped.Syntax:
       }
 
     private[sbt] def showDefinitions(key: AttributeKey[?], defs: Seq[Scope])(using
-        display: Show[ScopedKey[?]]
+        Show[ScopedKey[?]]
     ): String =
       showKeys(defs.map(scope => ScopedKey(scope, key)))
 
-    private[sbt] def showUses(defs: Seq[ScopedKey[?]])(using display: Show[ScopedKey[?]]): String =
+    private[sbt] def showUses(defs: Seq[ScopedKey[?]])(using Show[ScopedKey[?]]): String =
       showKeys(defs)
 
     private def showKeys(s: Seq[ScopedKey[?]])(using display: Show[ScopedKey[?]]): String =

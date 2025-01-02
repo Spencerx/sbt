@@ -90,7 +90,7 @@ private[sbt] object SettingCompletions {
       session: SessionSettings,
       r: Relation[ScopedKey[?], ScopedKey[?]],
       redefined: Seq[Setting[?]],
-  )(using show: Show[ScopedKey[?]]): SetResult = {
+  )(using Show[ScopedKey[?]]): SetResult = {
     val redefinedKeys = redefined.map(_.key).toSet
     val affectedKeys = redefinedKeys.flatMap(r.reverse)
     def summary(verbose: Boolean): String = setSummary(redefinedKeys, affectedKeys, verbose)
