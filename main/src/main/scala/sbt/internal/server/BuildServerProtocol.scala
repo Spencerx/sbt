@@ -728,22 +728,6 @@ object BuildServerProtocol {
     )
   }
 
-  private def scalacOptionsBuildItem(
-      sbtJars: Seq[File],
-      targetId: BuildTargetIdentifier,
-      build: LoadedBuildUnit
-  ): ScalacOptionsItem = {
-    val plugins: LoadedPlugins = build.unit.plugins
-    val scalacOptions = plugins.pluginData.scalacOptions.toVector
-    val converter = plugins.pluginData.converter
-    val classpath =
-      plugins.classpath.map(f => converter.toPath(f).toFile.toURI).toVector ++
-        sbtJars.map(_.toURI).toVector
-    val classDirectory = new File(build.localBase, "project/target").toURI
-    val item = ScalacOptionsItem(targetId, scalacOptions, classpath, classDirectory)
-    item
-  }
-
   private def javacOptionsBuildItem(
       sbtJars: Array[File],
       targetId: BuildTargetIdentifier,

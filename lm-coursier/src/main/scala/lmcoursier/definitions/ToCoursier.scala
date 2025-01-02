@@ -10,12 +10,6 @@ object ToCoursier {
   def configuration(configuration: Configuration): coursier.core.Configuration =
     coursier.core.Configuration(configuration.value)
 
-  private def attributes(attributes: Attributes): coursier.core.Attributes =
-    coursier.core.Attributes(
-      coursier.core.Type(attributes.`type`.value),
-      coursier.core.Classifier(attributes.classifier.value)
-    )
-
   def publication(publication: Publication): coursier.core.Publication =
     coursier.core.Publication(
       publication.name,

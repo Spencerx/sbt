@@ -2842,21 +2842,9 @@ object Classpaths {
       s: Setting[Task[Classpath]]
   ): Setting[Task[Classpath]] =
     s.mapInitialize(init => Def.task { exportVirtualClasspath(streams.value, init.value) })
-  private def exportClasspath(
-      s: Setting[Task[Seq[Attributed[File]]]]
-  ): Setting[Task[Seq[Attributed[File]]]] =
-    s.mapInitialize(init => Def.task { exportClasspath(streams.value, init.value) })
   private def exportVirtualClasspath(s: TaskStreams, cp: Classpath): Classpath =
     val w = s.text(ExportStream)
     try w.println(data(cp).toString)
-    finally w.close() // workaround for #937
-    cp
-  private def exportClasspath(
-      s: TaskStreams,
-      cp: Seq[Attributed[File]]
-  ): Seq[Attributed[File]] =
-    val w = s.text(ExportStream)
-    try w.println(Path.makeString(data(cp)))
     finally w.close() // workaround for #937
     cp
 
