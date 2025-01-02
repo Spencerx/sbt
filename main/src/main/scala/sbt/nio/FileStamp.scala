@@ -25,22 +25,17 @@ import xsbti.VirtualFileRef
  * A trait that indicates what file stamping implementation should be used to track the state of
  * a given file. The two choices are [[FileStamper.Hash]] and [[FileStamper.LastModified]].
  */
-sealed trait FileStamper
-
-/**
- * Provides implementations of [[FileStamper]].
- */
-object FileStamper {
+enum FileStamper {
 
   /**
    * Track files using a hash.
    */
-  case object Hash extends FileStamper
+  case Hash
 
   /**
    * Track files using the last modified time.
    */
-  case object LastModified extends FileStamper
+  case LastModified
 }
 
 /**
