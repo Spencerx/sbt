@@ -24,7 +24,7 @@ object InputTaskMacro:
   //   inputTaskDynMacro0[A1](c)(t)
 
   private def inputTaskMacro0[A1: Type](tree: Expr[A1])(using
-      qctx: Quotes
+      Quotes
   ): Expr[Def.Initialize[InputTask[A1]]] =
     // println(s"tree = ${tree.show}")
     iInitializeMacro(tree) { et =>

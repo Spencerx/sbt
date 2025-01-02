@@ -79,7 +79,7 @@ class EvaluateSettings[I <: Init](
     getResults(using delegates)
   }
 
-  private def getResults(using delegates: ScopeType => Seq[ScopeType]) =
+  private def getResults(using ScopeType => Seq[ScopeType]) =
     static.toTypedSeq.foldLeft(empty) { case (ss, static.TPair(key, node)) =>
       if key.key.isLocal then ss
       else ss.set(key, node.get)
