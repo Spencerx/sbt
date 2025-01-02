@@ -23,7 +23,7 @@ import sbt.librarymanagement.{
 import java.io.File
 import Configurations.Compile
 import Def.Setting
-import Keys._
+import Keys.*
 import Scope.Global
 import sbt.ProjectExtra.{ extract, setProject }
 import sbt.SlashSyntax0.*

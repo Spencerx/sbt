@@ -11,7 +11,7 @@ package internal
 
 import org.scalatest.diagrams.Diagrams
 import org.scalatest.funsuite.AnyFunSuite
-import sbt.internal.CrossJava.JavaDiscoverConfig._
+import sbt.internal.CrossJava.JavaDiscoverConfig.*
 import scala.collection.immutable.ListMap
 
 class CrossJavaTest extends AnyFunSuite with Diagrams {

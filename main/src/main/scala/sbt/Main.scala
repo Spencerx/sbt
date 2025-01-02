@@ -20,7 +20,7 @@ import sbt.Project.LoadAction
 import sbt.ProjectExtra.*
 import sbt.ScopeAxis.Select
 import sbt.internal.Aggregation.AnyKeys
-import sbt.internal._
+import sbt.internal.*
 import sbt.internal.client.BspClient
 import sbt.internal.inc.ScalaInstance
 import sbt.internal.io.Retry
@@ -29,9 +29,9 @@ import sbt.internal.server.{ BuildServerProtocol, NetworkChannel }
 import sbt.internal.util.Terminal.hasConsole
 import sbt.internal.util.Types.{ const, idFun }
 import sbt.internal.util.complete.{ Parser, SizeParser }
-import sbt.internal.util.{ Terminal => ITerminal, _ }
-import sbt.io._
-import sbt.io.syntax._
+import sbt.internal.util.{ Terminal as ITerminal, * }
+import sbt.io.*
+import sbt.io.syntax.*
 import sbt.util.{ Level, Logger, Show }
 import xsbti.AppProvider
 import xsbti.compile.CompilerCache
@@ -292,12 +292,12 @@ object StandardMain {
   }
 }
 
-import sbt.BasicCommandStrings._
-import sbt.BasicCommands._
-import sbt.CommandUtil._
+import sbt.BasicCommandStrings.*
+import sbt.BasicCommands.*
+import sbt.CommandUtil.*
 import sbt.TemplateCommandUtil.{ templateCommandAlias, templateCommand }
-import sbt.internal.CommandStrings._
-import sbt.internal.util.complete.DefaultParsers._
+import sbt.internal.CommandStrings.*
+import sbt.internal.util.complete.DefaultParsers.*
 
 object BuiltinCommands {
   def initialAttributes = AttributeMap.empty
@@ -499,7 +499,7 @@ object BuiltinCommands {
 
   def allTaskAndSettingKeys(s: State): Seq[AttributeKey[?]] = {
     val extracted = Project.extract(s)
-    import extracted._
+    import extracted.*
     val index = structure.index
     index.keyIndex
       .keys(Some(currentRef))
@@ -564,7 +564,7 @@ object BuiltinCommands {
 
   private def loadedEval(s: State, arg: String): Unit = {
     val extracted = Project.extract(s)
-    import extracted._
+    import extracted.*
     val result =
       session.currentEval().evalInfer(expression = arg, imports = autoImports(extracted))
     s.log.info(s"ans: ${result.tpe} = ${result.getValue(currentLoader)}")
@@ -594,7 +594,7 @@ object BuiltinCommands {
 
   def set: Command = Command(SetCommand, setBrief, setDetailed)(setParser) { case (s, (all, arg)) =>
     val extracted = Project.extract(s)
-    import extracted._
+    import extracted.*
     val dslVals = extracted.currentUnit.unit.definitions.dslDefinitions
     // TODO - This is possibly inefficient (or stupid).  We should try to only attach the
     // classloader + imports NEEDED to compile the set command, rather than
@@ -668,7 +668,7 @@ object BuiltinCommands {
 
   def setParser = (s: State) => {
     val extracted = Project.extract(s)
-    import extracted._
+    import extracted.*
     token(Space ~> flag("every" ~ Space)) ~
       SettingCompletions.settingParser(structure.data, structure.index.keyMap, currentProject)
   }
@@ -825,7 +825,7 @@ object BuiltinCommands {
 
   def showProjects(s: State): Unit = {
     val extracted = Project.extract(s)
-    import extracted._
+    import extracted.*
     listBuild(currentRef.build, structure.units(currentRef.build), true, currentRef.project, s.log)
     for ((uri, build) <- structure.units if currentRef.build != uri)
       listBuild(uri, build, false, currentRef.project, s.log)
@@ -915,7 +915,7 @@ object BuiltinCommands {
     Command(LoadProjectImpl)(_ => Project.loadActionParser)(doLoadProject)
 
   def checkSBTVersionChanged(state: State): Unit = {
-    import sbt.io.syntax._
+    import sbt.io.syntax.*
     val sbtVersionProperty = "sbt.version"
 
     // Don't warn if current version has been set in system properties
@@ -985,7 +985,7 @@ object BuiltinCommands {
   }
   private val addSuperShellParams: State => State = (s: State) => {
     val extracted = Project.extract(s)
-    import scala.concurrent.duration._
+    import scala.concurrent.duration.*
     val sleep = extracted.getOpt(Keys.superShellSleep).getOrElse(SysProp.supershellSleep.millis)
     val threshold =
       extracted.getOpt(Keys.superShellThreshold).getOrElse(SysProp.supershellThreshold)

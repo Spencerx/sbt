@@ -25,7 +25,7 @@ class EvaluateSettings[I <: Init](
     executor: Executor,
     compiledSettings: Seq[init.Compiled[?]],
 ):
-  import init._
+  import init.*
   import EvaluationState.*
 
   private val complete = new LinkedBlockingQueue[Option[Throwable]]

@@ -9,7 +9,7 @@
 package sbt.util
 
 import sbt.io.IO
-import sbt.io.syntax._
+import sbt.io.syntax.*
 
 import CacheImplicits.given
 

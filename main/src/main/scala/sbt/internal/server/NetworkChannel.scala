@@ -40,15 +40,15 @@ import sbt.util.Logger
 import scala.annotation.tailrec
 import scala.collection.concurrent
 import scala.collection.mutable
-import scala.concurrent.duration._
+import scala.concurrent.duration.*
 import scala.util.Try
 import scala.util.control.NonFatal
-import sbt.protocol._
+import sbt.protocol.*
 import sbt.protocol.Serialization.{ attach, cancelReadSystemIn, readSystemIn, promptChannel }
 
-import sbt.protocol.codec.JsonProtocol._
+import sbt.protocol.codec.JsonProtocol.*
 
-import sjsonnew._
+import sjsonnew.*
 import sjsonnew.support.scalajson.unsafe.{ CompactPrinter, Converter }
 
 import sbt.internal.util.ProgressState
@@ -645,7 +645,7 @@ final class NetworkChannel(
   }
 
   def logMessage(level: String, message: String): Unit = {
-    import sbt.internal.langserver.codec.JsonProtocol._
+    import sbt.internal.langserver.codec.JsonProtocol.*
     jsonRpcNotify(
       "build/logMessage",
       LogMessageParams(MessageType.fromLevelString(level), message)
@@ -654,7 +654,7 @@ final class NetworkChannel(
 
   private lazy val inputStream: InputStream = new Terminal.SimpleInputStream {
     override def read(): Int = {
-      import sjsonnew.BasicJsonProtocol._
+      import sjsonnew.BasicJsonProtocol.*
       try {
         jsonRpcNotify(readSystemIn, "")
         inputBuffer.take
@@ -669,7 +669,7 @@ final class NetworkChannel(
   }
   private lazy val writeableInputStream: Terminal.WriteableInputStream =
     new Terminal.WriteableInputStream(inputStream, name)
-  import sjsonnew.BasicJsonProtocol._
+  import sjsonnew.BasicJsonProtocol.*
 
   import scala.jdk.CollectionConverters.*
   private val outputBuffer = new LinkedBlockingQueue[Byte]

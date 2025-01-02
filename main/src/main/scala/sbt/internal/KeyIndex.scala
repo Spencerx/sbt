@@ -84,7 +84,7 @@ object KeyIndex {
   private[sbt] val emptyBuildIndex = new BuildIndex(Map.empty)
 
 }
-import KeyIndex._
+import KeyIndex.*
 
 trait KeyIndex {
   // TODO, optimize

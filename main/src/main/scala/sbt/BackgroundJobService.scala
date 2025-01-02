@@ -12,7 +12,7 @@ import java.io.Closeable
 
 import sbt.util.Logger
 import Def.{ Classpath, ScopedKey }
-import sbt.internal.util.complete._
+import sbt.internal.util.complete.*
 import java.io.File
 
 import scala.util.control.NonFatal
@@ -92,7 +92,7 @@ abstract class BackgroundJobService extends Closeable {
 
 object BackgroundJobService {
   private[sbt] def jobIdParser: (State, Seq[JobHandle]) => Parser[Seq[JobHandle]] = {
-    import DefaultParsers._
+    import DefaultParsers.*
     (state, handles) => {
       val stringIdParser: Parser[Seq[String]] = Space ~> token(
         NotSpace.examples(handles.map(_.id.toString).toSet),

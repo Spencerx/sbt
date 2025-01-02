@@ -8,14 +8,14 @@
 package sbt
 
 import sbt.Def.{ ScopedKey, displayFull, displayMasked }
-import sbt.internal.TestBuild._
+import sbt.internal.TestBuild.*
 import sbt.internal.util.complete.Parser
 import sbt.internal.{ Resolve, TestBuild }
 import sbt.ProjectExtra.equalKeys
 import sbt.ScopeAxis.{ Select, Zero }
-import hedgehog._
+import hedgehog.*
 import hedgehog.core.{ ShrinkLimit, SuccessCount }
-import hedgehog.runner._
+import hedgehog.runner.*
 
 /**
  * Tests that the scoped key parser in Act can correctly parse a ScopedKey converted by Def.show*Key.
@@ -135,7 +135,7 @@ object ParseKeySpec extends Properties {
       .filter(configExistsInIndex)
 
   private def configExistsInIndex(skm: StructureKeyMask): Boolean = {
-    import skm._
+    import skm.*
     val resolvedKey = resolve(structure, key, mask)
     val proj = resolvedKey.scope.project.toOption
     val maybeResolvedProj = proj.collect { case ref: ResolvedReference =>

@@ -16,7 +16,7 @@ import java.util.concurrent.{ Executors, LinkedBlockingQueue, TimeUnit }
 
 import jline.console.ConsoleReader
 import scala.annotation.tailrec
-import scala.concurrent.duration._
+import scala.concurrent.duration.*
 import scala.util.Try
 import scala.util.control.NonFatal
 

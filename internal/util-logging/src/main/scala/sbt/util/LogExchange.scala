@@ -10,8 +10,8 @@ package sbt.util
 
 import org.apache.logging.log4j.core.config.LoggerConfig
 import org.apache.logging.log4j.core.layout.PatternLayout
-import org.apache.logging.log4j.core.{ LoggerContext => XLoggerContext }
-import org.apache.logging.log4j.{ LogManager => XLogManager }
+import org.apache.logging.log4j.core.{ LoggerContext as XLoggerContext }
+import org.apache.logging.log4j.{ LogManager as XLogManager }
 import sbt.internal.util.{ Appender, ManagedLogger, TraceEvent, SuccessEvent, Util }
 import sbt.internal.util.appmacro.StringTypeTag
 

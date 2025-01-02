@@ -42,7 +42,7 @@ case class SettingsExample() extends Init {
 
 /** Usage Example * */
 case class SettingsUsage(val settingsExample: SettingsExample) {
-  import settingsExample._
+  import settingsExample.*
 
   // Define some keys
   val a = AttributeKey[Int]("a")

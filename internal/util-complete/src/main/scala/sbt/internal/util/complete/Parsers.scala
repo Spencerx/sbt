@@ -9,7 +9,7 @@
 package sbt.internal.util
 package complete
 
-import Parser._
+import Parser.*
 import java.io.File
 import java.net.URI
 import java.lang.Character.{

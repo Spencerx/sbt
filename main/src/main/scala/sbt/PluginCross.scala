@@ -9,13 +9,13 @@
 package sbt
 
 import sbt.internal.util.complete.{ Parser, DefaultParsers }
-import DefaultParsers._
-import sbt.Keys._
+import DefaultParsers.*
+import sbt.Keys.*
 import Scope.GlobalScope
 import Def.ScopedKey
 import sbt.ScopeAxis.Select
 import sbt.internal.Load
-import sbt.internal.CommandStrings._
+import sbt.internal.CommandStrings.*
 import Cross.{ spacedFirst, requireSession }
 import sbt.librarymanagement.VersionNumber
 import Project.inScope
@@ -70,7 +70,7 @@ private[sbt] object PluginCross {
       }
     def crossVersions(state: State): List[String] = {
       val x = Project.extract(state)
-      import x._
+      import x.*
       (currentRef / crossSbtVersions)
         .get(structure.data)
         .getOrElse(Nil)
@@ -78,7 +78,7 @@ private[sbt] object PluginCross {
     }
     Command.arb(requireSession(crossParser), pluginCrossHelp) { case (state, command) =>
       val x = Project.extract(state)
-      import x._
+      import x.*
       val versions = crossVersions(state)
       val current = (pluginCrossBuild / sbtVersion)
         .get(structure.data)

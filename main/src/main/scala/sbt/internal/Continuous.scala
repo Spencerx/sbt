@@ -9,7 +9,7 @@
 package sbt
 package internal
 
-import java.io.{ ByteArrayInputStream, IOException, InputStream, File => _ }
+import java.io.{ ByteArrayInputStream, IOException, InputStream, File as _ }
 import java.nio.file.Path
 import java.util.concurrent.{
   ConcurrentHashMap,
@@ -20,30 +20,30 @@ import java.util.concurrent.{
 }
 import java.util.concurrent.atomic.{ AtomicBoolean, AtomicInteger }
 
-import sbt.BasicCommandStrings._
-import sbt.Def._
-import sbt.Keys._
+import sbt.BasicCommandStrings.*
+import sbt.Def.*
+import sbt.Keys.*
 import sbt.ProjectExtra.extract
 import sbt.internal.Continuous.{ ContinuousState, FileStampRepository }
-import sbt.internal.LabeledFunctions._
+import sbt.internal.LabeledFunctions.*
 import sbt.internal.io.WatchState
-import sbt.internal.nio._
+import sbt.internal.nio.*
 import sbt.internal.ui.UITask
-import sbt.internal.util.JoinThread._
+import sbt.internal.util.JoinThread.*
 import sbt.internal.util.complete.DefaultParsers.Space
-import sbt.internal.util.complete.Parser._
+import sbt.internal.util.complete.Parser.*
 import sbt.internal.util.complete.{ Parser, Parsers }
-import sbt.internal.util._
-import sbt.nio.Keys.{ fileInputs, _ }
+import sbt.internal.util.*
+import sbt.nio.Keys.{ fileInputs, * }
 import sbt.nio.Watch.{ Creation, Deletion, ShowOptions, Update }
 import sbt.nio.file.{ FileAttributes, Glob }
 import sbt.nio.{ FileStamp, FileStamper, Watch }
-import sbt.util.{ Level, _ }
+import sbt.util.{ Level, * }
 
 import scala.annotation.tailrec
 import scala.collection.mutable
 import scala.concurrent.duration.FiniteDuration.FiniteDurationIsOrdered
-import scala.concurrent.duration._
+import scala.concurrent.duration.*
 import scala.util.{ Failure, Success, Try }
 import scala.util.control.NonFatal
 import scala.annotation.nowarn
@@ -179,7 +179,7 @@ private[sbt] object Continuous extends DeprecatedContinuous {
     // Extract all of the globs that we will monitor during the continuous build.
     val inputs = {
       val configs = scopedKey.get(internalDependencyConfigurations).getOrElse(Nil)
-      import WatchTransitiveDependencies.{ Arguments => DArguments }
+      import WatchTransitiveDependencies.{ Arguments as DArguments }
       val args = new DArguments(scopedKey, extracted, compiledMap, logger, configs, state)
       WatchTransitiveDependencies.transitiveDynamicInputs(args)
     }
@@ -224,7 +224,7 @@ private[sbt] object Continuous extends DeprecatedContinuous {
     val scopedKeyParser: Parser[Seq[ScopedKey[?]]] = Act.aggregatedKeyParser(state) <~ Parsers.any.*
     @tailrec def impl(current: String): Seq[ScopedKey[?]] = {
       Parser.parse(current, scopedKeyParser) match {
-        case Right(scopedKeys: Seq[ScopedKey[_]]) => scopedKeys
+        case Right(scopedKeys: Seq[ScopedKey[?]]) => scopedKeys
         case Left(e) =>
           val aliases = BasicCommands.allAliases(state)
           aliases.collectFirst { case (`command`, aliased) => aliased } match {
@@ -355,7 +355,7 @@ private[sbt] object Continuous extends DeprecatedContinuous {
       isCommand: Boolean
   ): (Watch.Action, String, Int, State) => State = {
     configs.flatMap(_.watchSettings.onTermination).distinct match {
-      case Seq(head, tail @ _*) =>
+      case Seq(head, tail*) =>
         tail.foldLeft(head) { case (onTermination, configOnTermination) =>
           (action, cmd, count, state) =>
             configOnTermination(action, cmd, count, onTermination(action, cmd, count, state))

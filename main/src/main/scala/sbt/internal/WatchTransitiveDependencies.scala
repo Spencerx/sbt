@@ -9,8 +9,8 @@
 package sbt
 package internal
 
-import sbt.Def._
-import sbt.Keys._
+import sbt.Def.*
+import sbt.Keys.*
 // import sbt.Project.richInitializeTask
 import sbt.ProjectExtra.*
 import sbt.ScopeAxis.Zero
@@ -18,7 +18,7 @@ import sbt.internal.io.Source
 import sbt.internal.nio.Globs
 import sbt.internal.util.complete.Parser
 import sbt.nio.FileStamper
-import sbt.nio.Keys._
+import sbt.nio.Keys.*
 import sbt.nio.file.Glob
 
 import scala.annotation.{ nowarn, tailrec }
@@ -100,7 +100,7 @@ private[sbt] object WatchTransitiveDependencies {
       }
 
   private[sbt] def transitiveDynamicInputs(args: Arguments): Seq[DynamicInput] = {
-    import args._
+    import args.*
     val taskScope = Project.fillTaskAxis(scopedKey).scope
     def delegates(sk: ScopedKey[?]): Seq[ScopedKey[?]] =
       Project.delegates(structure, sk.scope, sk.key)
@@ -139,7 +139,7 @@ private[sbt] object WatchTransitiveDependencies {
   }
 
   private def legacy(keys: Seq[ScopedKey[?]], args: Arguments): Seq[DynamicInput] = {
-    import args._
+    import args.*
     val projectScopes =
       keys.view
         .map(_.scope.copy(task = Zero, extra = Zero))
@@ -175,7 +175,7 @@ private[sbt] object WatchTransitiveDependencies {
   ): Seq[ScopedKey[Seq[Glob]]] = dependencies match {
     // Iterates until the dependency list is empty. The visited parameter prevents the graph
     // traversal from getting stuck in a cycle.
-    case Seq(dependency, rest @ _*) =>
+    case Seq(dependency, rest*) =>
       (if (!visited(dependency)) arguments.compiledMap.get(dependency) else None) match {
         case Some(compiled) =>
           val newVisited = visited + compiled.key
@@ -216,7 +216,7 @@ private[sbt] object WatchTransitiveDependencies {
               }
           // Append the Keys.triggers key in case there are no other references to Keys.triggers.
           val transitiveTrigger = compiled.key.scope.task.toOption match {
-            case _: Some[_] => ScopedKey(compiled.key.scope, watchTriggers.key)
+            case _: Some[?] => ScopedKey(compiled.key.scope, watchTriggers.key)
             case None => ScopedKey(Project.fillTaskAxis(compiled.key).scope, watchTriggers.key)
           }
           val newRest = rest ++ newDependencies ++ (if (newVisited(transitiveTrigger)) Nil

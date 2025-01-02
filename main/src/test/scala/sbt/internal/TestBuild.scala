@@ -18,7 +18,7 @@ import sbt.librarymanagement.Configuration
 
 import java.net.URI
 
-import hedgehog._
+import hedgehog.*
 import hedgehog.predef.sequence
 
 object TestBuild extends TestBuild
@@ -217,7 +217,7 @@ abstract class TestBuild {
   def oneOrGlobal[T](gen: Seq[T]): Gen[ScopeAxis[T]] = orGlobal(oneOf(gen))
 
   def makeParser(structure: Structure): Parser[ScopedKey[?]] = {
-    import structure._
+    import structure.*
     def confs(uri: URI) =
       env.buildMap.get(uri).toList.flatMap { _.root.configurations.map(_.name) }
     val defaultConfs: Option[ResolvedReference] => Seq[String] = {
@@ -373,7 +373,7 @@ abstract class TestBuild {
   ): Gen[Vector[(T, Vector[T])]] =
     names match {
       case Vector() => sequence(acc.toList).map(_.toVector)
-      case Vector(x, xs @ _*) =>
+      case Vector(x, xs*) =>
         val next =
           for (depCount <- Gen.int(maxDeps); d <- pick(depCount, xs))
             yield (x, d.toVector)

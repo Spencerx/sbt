@@ -7,7 +7,7 @@
 
 package testpkg
 
-import scala.concurrent.duration._
+import scala.concurrent.duration.*
 
 // starts svr using server-test/response and perform custom server tests
 class ResponseTest extends AbstractServerTest {

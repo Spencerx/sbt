@@ -7,7 +7,7 @@
 
 package testpkg
 
-import scala.concurrent.duration._
+import scala.concurrent.duration.*
 import java.util.concurrent.atomic.AtomicInteger
 
 // starts svr using server-test/events and perform event related tests

@@ -11,13 +11,13 @@ package plugins
 
 import java.io.File
 
-import Keys._
+import Keys.*
 import sbt.internal.SysProp
-import sbt.librarymanagement.syntax._
+import sbt.librarymanagement.syntax.*
 import sbt.librarymanagement.{ Configuration, CrossVersion }
 import ProjectExtra.inConfig
 import sbt.internal.inc.ScalaInstance
-import sbt.ScopeFilter.Make._
+import sbt.ScopeFilter.Make.*
 
 object SemanticdbPlugin extends AutoPlugin {
   override def requires = JvmPlugin

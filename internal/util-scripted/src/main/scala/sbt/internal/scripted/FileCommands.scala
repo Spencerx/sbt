@@ -14,7 +14,7 @@ import java.io.File
 import sbt.nio.file.{ FileTreeView, Glob, PathFilter, RecursiveGlob }
 import sbt.io.{ IO, Path }
 import sbt.io.syntax.*
-import Path._
+import Path.*
 
 class FileCommands(baseDirectory: File) extends BasicStatementHandler {
   final val OR = "||"

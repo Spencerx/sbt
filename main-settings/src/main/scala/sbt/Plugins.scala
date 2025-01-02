@@ -18,10 +18,10 @@ import sbt.librarymanagement.Configuration
 import sbt.internal.util.logic.{ Atom, Clause, Clauses, Formula, Literal, Logic, Negated }
 import Logic.{ CyclicNegation, InitialContradictions, InitialOverlap, LogicException }
 import Def.Setting
-import Plugins._
+import Plugins.*
 import annotation.tailrec
 import sbt.util.Logger
-import PluginTrigger._
+import PluginTrigger.*
 
 /**
  * An AutoPlugin defines a group of settings and the conditions where the settings are automatically added to a build (called "activation").

@@ -1,5 +1,5 @@
-import sbt._
-import Keys._
+import sbt.*
+import Keys.*
 
 object Dependencies {
   // WARNING: Please Scala update versions in PluginCross.scala too

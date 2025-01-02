@@ -14,14 +14,14 @@ import java.util.concurrent.{ LinkedBlockingQueue, TimeUnit }
 import java.util.concurrent.atomic.AtomicBoolean
 import sbt.{ ForkOptions, OutputStrategy, RunFromSourceMain }
 import sbt.io.IO
-import sbt.io.syntax._
+import sbt.io.syntax.*
 import sbt.protocol.ClientSocket
 import sjsonnew.JsonReader
 import sjsonnew.support.scalajson.unsafe.{ Converter, Parser }
 
 import scala.annotation.tailrec
-import scala.concurrent._
-import scala.concurrent.duration._
+import scala.concurrent.*
+import scala.concurrent.duration.*
 import scala.util.{ Failure, Success, Try }
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.BeforeAndAfterAll

@@ -15,18 +15,18 @@ import java.util.Locale
 import java.util.concurrent.TimeUnit
 
 import sbt.BasicCommandStrings.{ ContinuousExecutePrefix, TerminateAction }
-import sbt._
-import sbt.internal.LabeledFunctions._
+import sbt.*
+import sbt.internal.LabeledFunctions.*
 import sbt.internal.nio.FileEvent
 import sbt.internal.util.complete.Parser
-import sbt.internal.util.complete.Parser._
-import sbt.nio.Keys._
+import sbt.internal.util.complete.Parser.*
+import sbt.nio.Keys.*
 import sbt.nio.file.FileAttributes
 import sbt.util.{ Level, Logger }
 
 import scala.annotation.tailrec
 import scala.collection.mutable
-import scala.concurrent.duration._
+import scala.concurrent.duration.*
 import scala.util.control.NonFatal
 
 object Watch {
@@ -330,8 +330,8 @@ object Watch {
     ): InputOption =
       new impl(chars.mkString("|"), display, description, action) {
         override private[sbt] def parser: Parser[Watch.Action] = chars match {
-          case Seq(c)            => c ^^^ action
-          case Seq(h, rest @ _*) => rest.foldLeft(h: Parser[Char])(_ | _) ^^^ action
+          case Seq(c)        => c ^^^ action
+          case Seq(h, rest*) => rest.foldLeft(h: Parser[Char])(_ | _) ^^^ action
         }
       }
     def apply(input: String, description: String, action: Action): InputOption =
@@ -485,8 +485,8 @@ object Watch {
    */
   final def defaultInputParser(options: Seq[Watch.InputOption]): Parser[Action] =
     distinctOptions(options) match {
-      case Seq()             => (('\n': Parser[Char]) | '\r' | 4.toChar) ^^^ Run("")
-      case Seq(h, rest @ _*) => rest.foldLeft(h.parser)(_ | _.parser)
+      case Seq()         => (('\n': Parser[Char]) | '\r' | 4.toChar) ^^^ Run("")
+      case Seq(h, rest*) => rest.foldLeft(h.parser)(_ | _.parser)
     }
   final val defaultInputOptions: Seq[Watch.InputOption] = Seq(
     Watch.InputOption("<enter>", "interrupt (exits sbt in batch mode)", CancelWatch, '\n', '\r'),

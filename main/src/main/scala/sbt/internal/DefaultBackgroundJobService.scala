@@ -21,12 +21,12 @@ import sbt.ProjectExtra.extract
 import sbt.Scope.GlobalScope
 import sbt.internal.inc.classpath.ClasspathFilter
 import sbt.internal.util.{ Attributed, ManagedLogger }
-import sbt.io.syntax._
+import sbt.io.syntax.*
 import sbt.io.{ Hash, IO }
 import sbt.util.{ Level, Logger }
 
 import scala.concurrent.ExecutionContext
-import scala.concurrent.duration._
+import scala.concurrent.duration.*
 import scala.util.Try
 import sbt.util.LoggerContext
 import java.util.concurrent.TimeoutException
@@ -366,7 +366,7 @@ private[sbt] class BackgroundThreadPool extends java.io.Closeable {
   private class BackgroundRunnable(val taskName: String, body: () => Unit)
       extends BackgroundJob
       with Runnable {
-    import BackgroundThreadPool._
+    import BackgroundThreadPool.*
     private val finishedLatch = new java.util.concurrent.CountDownLatch(1)
     // synchronize to read/write this, no sync to just read
     @volatile

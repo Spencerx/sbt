@@ -12,10 +12,10 @@ package internal
 import java.util.concurrent.atomic.{ AtomicBoolean, AtomicInteger, AtomicReference }
 import java.util.concurrent.{ RejectedExecutionException, TimeUnit }
 
-import sbt.internal.util._
+import sbt.internal.util.*
 
 import scala.jdk.CollectionConverters.*
-import scala.concurrent.duration._
+import scala.concurrent.duration.*
 import java.util.concurrent.{ ConcurrentHashMap, Executors, TimeoutException }
 import sbt.util.Logger
 

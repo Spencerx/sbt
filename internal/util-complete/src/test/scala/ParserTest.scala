@@ -10,7 +10,7 @@ package sbt.internal.util
 package complete
 
 object JLineTest {
-  import DefaultParsers._
+  import DefaultParsers.*
 
   val one = "blue" | "green" | "black"
   val two = token("color" ~> Space) ~> token(one)
@@ -44,11 +44,11 @@ object JLineTest {
   }
 }
 
-import Parser._
-import org.scalacheck._
+import Parser.*
+import org.scalacheck.*
 
 object ParserTest extends Properties("Completing Parser") {
-  import Parsers._
+  import Parsers.*
   import DefaultParsers.matches
 
   val nested = (token("a1") ~ token("b2")) ~ "c3"

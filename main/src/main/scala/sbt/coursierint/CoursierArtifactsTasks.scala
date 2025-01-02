@@ -10,14 +10,14 @@ package sbt
 package coursierint
 
 import lmcoursier.definitions.{
-  Classifier => CClassifier,
-  Configuration => CConfiguration,
-  Extension => CExtension,
-  Publication => CPublication,
-  Type => CType
+  Classifier as CClassifier,
+  Configuration as CConfiguration,
+  Extension as CExtension,
+  Publication as CPublication,
+  Type as CType
 }
-import sbt.librarymanagement._
-import sbt.Keys._
+import sbt.librarymanagement.*
+import sbt.Keys.*
 import sbt.ProjectExtra.extract
 import sbt.SlashSyntax0.*
 
@@ -33,7 +33,7 @@ object CoursierArtifactsTasks {
       val sbv = sbt.Keys.scalaBinaryVersion.value
       val ivyConfs = sbt.Keys.ivyConfigurations.value
       val extracted = Project.extract(s)
-      import extracted._
+      import extracted.*
 
       val sourcesConfigOpt =
         if (ivyConfigurations.value.exists(_.name == "sources"))

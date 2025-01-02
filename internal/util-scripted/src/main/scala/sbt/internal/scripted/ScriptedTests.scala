@@ -15,7 +15,7 @@ import sbt.util.{ Logger, LoggerContext, Level }
 import sbt.internal.util.{ Appender, ManagedLogger, ConsoleAppender, BufferedAppender }
 import sbt.io.IO.wrapNull
 import sbt.io.{ DirectoryFilter, HiddenFileFilter }
-import sbt.io.syntax._
+import sbt.io.syntax.*
 import sbt.internal.io.Resources
 import java.util.concurrent.atomic.AtomicInteger
 
@@ -201,7 +201,7 @@ object ListTests {
   def list(directory: File, filter: java.io.FileFilter): Seq[File] =
     wrapNull(directory.listFiles(filter)).toSeq
 }
-import ListTests._
+import ListTests.*
 final class ListTests(baseDirectory: File, accept: ScriptedTest => Boolean, log: Logger) {
   def filter = DirectoryFilter -- HiddenFileFilter
   def listTests: Seq[ScriptedTest] = {

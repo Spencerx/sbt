@@ -13,9 +13,9 @@ import java.net.{ URL, URLClassLoader }
 import java.util.concurrent.Callable
 
 import sbt.internal.classpath.ClassLoaderCache
-import sbt.internal.inc.classpath.{ ClassLoaderCache => IncClassLoaderCache }
+import sbt.internal.inc.classpath.{ ClassLoaderCache as IncClassLoaderCache }
 import sbt.internal.util.complete.{ HistoryCommands, Parser }
-import sbt.internal.util._
+import sbt.internal.util.*
 import sbt.util.Logger
 import BasicCommandStrings.{
   CompleteExec,
@@ -447,7 +447,7 @@ object State {
       new ClassLoaderCache(s.configuration.provider.scalaProvider)
   }
 
-  import ExceptionCategory._
+  import ExceptionCategory.*
 
   private def handleException(t: Throwable, s: State, log: Logger): State = {
     ExceptionCategory(t) match {

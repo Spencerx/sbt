@@ -12,15 +12,15 @@ import java.lang.reflect.InvocationTargetException
 import java.nio.file.Path
 import java.io.File
 
-import sbt.io._, syntax._
-import sbt.util._
-import sbt.internal.util.{ ConsoleAppender, Terminal => ITerminal }
-import sbt.internal.util.complete.{ DefaultParsers, Parser }, DefaultParsers._
+import sbt.io.*, syntax.*
+import sbt.util.*
+import sbt.internal.util.{ ConsoleAppender, Terminal as ITerminal }
+import sbt.internal.util.complete.{ DefaultParsers, Parser }, DefaultParsers.*
 import xsbti.AppConfiguration
-import sbt.librarymanagement._
+import sbt.librarymanagement.*
 import sbt.librarymanagement.ivy.{ IvyConfiguration, IvyDependencyResolution }
 import sbt.internal.inc.classpath.ClasspathUtil
-import BasicCommandStrings._, BasicKeys._
+import BasicCommandStrings.*, BasicKeys.*
 import sbt.internal.util.Terminal.hasConsole
 import sbt.ProjectExtra.*
 
@@ -36,7 +36,7 @@ private[sbt] object TemplateCommandUtil {
     (token(Space) ~> repsep(StringBasic, token(Space))) | (token(EOF).map(_ => Nil))
 
   private def runTemplate(s0: State, inputArg: Seq[String]): State = {
-    import BuildPaths._
+    import BuildPaths.*
     val globalBase = getGlobalBase(s0)
     val infos = s0.get(templateResolverInfos).getOrElse(Nil).toList
     val log = s0.globalLogging.full

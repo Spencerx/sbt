@@ -9,7 +9,7 @@
 package sbt.internal.util
 package complete
 
-import Parser._
+import Parser.*
 import sbt.internal.util.Types.{ left, right, some }
 import sbt.internal.util.Util.{ makeList, separate }
 
@@ -878,7 +878,7 @@ private final class Not(delegate: Parser[?], failMessage: String) extends ValidP
 
   lazy val resultEmpty = delegate.resultEmpty match {
     case _: Failure  => Value(())
-    case _: Value[_] => mkFailure(failMessage)
+    case _: Value[?] => mkFailure(failMessage)
   }
 
   override def toString = s" -(${delegate})"

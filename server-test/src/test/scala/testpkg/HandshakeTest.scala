@@ -7,7 +7,7 @@
 
 package testpkg
 
-import scala.concurrent.duration._
+import scala.concurrent.duration.*
 
 // starts svr using server-test/handshake and perform basic tests
 class HandshakeTest extends AbstractServerTest {

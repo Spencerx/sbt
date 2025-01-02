@@ -9,14 +9,14 @@ package sbt.internal.librarymanagement
 
 import java.io.File
 import sbt.util.Logger
-import sbt.librarymanagement._
-import Resolver._
+import sbt.librarymanagement.*
+import Resolver.*
 import mavenint.PomExtraDependencyAttributes
 
 import scala.collection.immutable.ArraySeq
 // Node needs to be renamed to XNode because the task subproject contains a Node type that will shadow
 // scala.xml.Node when generating aggregated API documentation
-import scala.xml.{ Elem, Node => XNode, NodeSeq, PrettyPrinter, PrefixedAttribute }
+import scala.xml.{ Elem, Node as XNode, NodeSeq, PrettyPrinter, PrefixedAttribute }
 import Configurations.Optional
 
 import org.apache.ivy.Ivy
@@ -42,7 +42,7 @@ object MakePom {
     VersionRange.fromIvyToMavenVersion(revision)
 }
 class MakePom(val log: Logger) {
-  import MakePom._
+  import MakePom.*
   def write(
       ivy: Ivy,
       module: ModuleDescriptor,
@@ -409,7 +409,7 @@ class MakePom(val log: Logger) {
 
   // cast the contents of a pre-generics collection
   private def castResolvers(s: java.util.Collection[?]): Seq[DependencyResolver] = {
-    import scala.jdk.CollectionConverters._
+    import scala.jdk.CollectionConverters.*
     s.asScala.toSeq.map(_.asInstanceOf[DependencyResolver])
   }
 

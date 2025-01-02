@@ -26,7 +26,7 @@ import sjsonnew.{
 }
 
 import sbt.util.Logger
-import sbt.util.CacheImplicits._
+import sbt.util.CacheImplicits.*
 import scala.sys.process.Process
 import xsbti.{ FileConverter, HashedVirtualFileRef, VirtualFile, VirtualFileRef }
 
@@ -169,8 +169,8 @@ object Pkg:
         case PackageOption.JarManifest(mergeManifest) => mergeManifests(manifest, mergeManifest)
         case PackageOption.MainClass(mainClassName) =>
           main.put(Attributes.Name.MAIN_CLASS, mainClassName)
-        case PackageOption.ManifestAttributes(attributes @ _*) => main.asScala ++= attributes
-        case PackageOption.FixedTimestamp(value)               => ()
+        case PackageOption.ManifestAttributes(attributes*) => main.asScala ++= attributes
+        case PackageOption.FixedTimestamp(value)           => ()
     setVersion(main)
     manifest
 
@@ -187,7 +187,7 @@ object Pkg:
     }
   }
   def addSpecManifestAttributes(name: String, version: String, orgName: String): PackageOption = {
-    import Attributes.Name._
+    import Attributes.Name.*
     val attribKeys = Seq(SPECIFICATION_TITLE, SPECIFICATION_VERSION, SPECIFICATION_VENDOR)
     val attribVals = Seq(name, version, orgName)
     PackageOption.ManifestAttributes(attribKeys.zip(attribVals)*)
@@ -199,7 +199,7 @@ object Pkg:
       org: String,
       orgName: String
   ): PackageOption = {
-    import Attributes.Name._
+    import Attributes.Name.*
 
     // The ones in Attributes.Name are deprecated saying:
     //   "Extension mechanism will be removed in a future release. Use class path instead."

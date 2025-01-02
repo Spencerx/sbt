@@ -12,11 +12,11 @@ import java.io.File
 import java.io.PrintWriter
 import java.lang.ProcessBuilder.Redirect
 import scala.sys.process.Process
-import OutputStrategy._
+import OutputStrategy.*
 import sbt.internal.util.{ RunningProcesses, Util }
 import Util.*
 
-import java.lang.{ ProcessBuilder => JProcessBuilder }
+import java.lang.{ ProcessBuilder as JProcessBuilder }
 import java.util.Locale
 
 /**

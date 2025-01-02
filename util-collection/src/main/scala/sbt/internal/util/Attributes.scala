@@ -7,7 +7,7 @@
 
 package sbt.internal.util
 
-import Types._
+import Types.*
 import scala.reflect.ClassTag
 import sbt.util.OptJsonWriter
 import sjsonnew.*

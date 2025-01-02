@@ -18,17 +18,17 @@ import sbt.Scope.Global
 import sbt.internal.CommandStrings.LoadProject
 import sbt.internal.SysProp
 import sbt.internal.util.{ AttributeKey, Terminal }
-import sbt.io.syntax._
+import sbt.io.syntax.*
 import sbt.nio.FileChanges
 import sbt.nio.FileStamp
-import sbt.nio.Keys._
+import sbt.nio.Keys.*
 import sbt.nio.file.{ FileAttributes, FileTreeView, Glob, ** }
-import sbt.nio.file.syntax._
+import sbt.nio.file.syntax.*
 import sbt.nio.Settings
 import sbt.util.Logger
 
 import scala.annotation.tailrec
-import scala.concurrent.duration.{ Deadline => SDeadline, _ }
+import scala.concurrent.duration.{ Deadline as SDeadline, * }
 import scala.io.AnsiColor
 
 /**

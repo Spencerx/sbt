@@ -106,7 +106,7 @@ object ScopeFilter {
      * static inspections will not show them.
      */
     def all(sfilter: => ScopeFilter): Initialize[Task[Seq[A]]] = Def.flatMap(getData) { data =>
-      import std.TaskExtra._
+      import std.TaskExtra.*
       sfilter(data).toSeq.map(s => Project.inScope(s, i)).join(_.join)
     }
 

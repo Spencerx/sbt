@@ -7,9 +7,9 @@
  */
 package sbt
 
-import java.io._
+import java.io.*
 
-import sbt.internal._
+import sbt.internal.*
 import sbt.internal.inc.MappedFileConverter
 import sbt.internal.util.{
   AttributeEntry,
@@ -28,8 +28,8 @@ package subpackage {
 }
 
 object PluginCommandTest extends verify.BasicTestSuite {
-  import subpackage._
-  import FakeState._
+  import subpackage.*
+  import FakeState.*
 
   test("`plugin` command should work for plugins within nested in one package") {
     val output = processCommand(
