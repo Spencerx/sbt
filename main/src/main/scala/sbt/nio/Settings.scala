@@ -174,7 +174,6 @@ private[sbt] object Settings {
     }) :: fileStamps(scopedKey) :: allFilesImpl(scope) :: changedInputFilesImpl(scope)
   }
 
-  private val seqClass = classOf[Seq[?]]
   private val pathClass = classOf[Path]
   private val fileClass = classOf[File]
   private val virtualFileRefClass = classOf[VirtualFileRef]

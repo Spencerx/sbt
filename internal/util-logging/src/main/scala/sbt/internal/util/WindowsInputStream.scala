@@ -46,9 +46,6 @@ private object WindowsSupport {
  */
 private[util] class WindowsInputStream(term: org.jline.terminal.Terminal, in: InputStream)
     extends SimpleInputStream {
-  private val SHIFT_FLAG = 0x01;
-  private val ALT_FLAG = 0x02;
-  private val CTRL_FLAG = 0x04;
 
   private val RIGHT_ALT_PRESSED = 0x0001;
   private val LEFT_ALT_PRESSED = 0x0002;
