@@ -318,7 +318,7 @@ class DiskActionCacheStore(base: Path, converter: FileConverter) extends Abstrac
     val allPaths = mutable.Set(
       FileTreeView.default
         .list(dirPath.toGlob / ** / "*")
-        .filter(!_._2.isDirectory)
+        .withFilter(!_._2.isDirectory)
         .map(_._1)*
     )
     def doSync(ref: HashedVirtualFileRef, in: Path): Unit =

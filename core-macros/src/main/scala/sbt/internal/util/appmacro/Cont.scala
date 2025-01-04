@@ -278,7 +278,7 @@ trait Cont:
                           .asExprOf[BuildWideCacheConfiguration]
                       if inputs.exists(_.isCacheInput) then
                         val tags = inputs
-                          .filter(_.isCacheInput)
+                          .withFilter(_.isCacheInput)
                           .map(_.tags.toSet)
                           .reduce(_ & _)
                           .toList

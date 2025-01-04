@@ -75,7 +75,7 @@ private[sbt] abstract class AbstractTaskExecuteProgress extends ExecuteProgress 
   ): Unit = {
     // we need this to infer anonymous task names
     pendingDeps
-      .filter {
+      .withFilter {
         case t: Task[?] => TaskName.transformNode(t).isEmpty
         case _          => true
       }

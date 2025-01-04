@@ -72,7 +72,7 @@ class FileExamples(base: File, prefix: String = "") extends ExampleSource {
       .map(IO.relativize(base, _).get)
       .filter(_.startsWith(prefix))
     val dirsToRecurseInto = childPaths
-      .filter(_.isDirectory)
+      .withFilter(_.isDirectory)
       .map(IO.relativize(base, _).get)
       .filter(dirStartsWithPrefix)
     prefixedDirectChildPaths ++ dirsToRecurseInto.flatMap(dir => files(new File(base, dir)))
