@@ -157,7 +157,7 @@ object ActionCache:
     val dirPath = conv.toPath(dir)
     val allPaths = FileTreeView.default
       .list(dirPath.toGlob / ** / "*")
-      .filter(!_._2.isDirectory)
+      .withFilter(!_._2.isDirectory)
       .map(_._1)
       .sortBy(_.toString())
     // create a manifest of files and their hashes here

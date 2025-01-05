@@ -100,7 +100,7 @@ object PomExtraDependencyAttributes {
 
   /** parses the sequence of dependencies with extra attribute information, with one dependency per line */
   def readDependencyExtra(s: String): Seq[ModuleRevisionId] = ArraySeq.unsafeWrapArray(
-    LinesP.split(s).map(_.trim).filter(!_.isEmpty).map(ModuleRevisionId.decode)
+    LinesP.split(s).map(_.trim).withFilter(!_.isEmpty).map(ModuleRevisionId.decode)
   )
 
   private val LinesP = Pattern.compile("(?m)^")

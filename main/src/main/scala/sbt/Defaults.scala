@@ -1598,7 +1598,7 @@ object Defaults extends BuildCommon {
       val xs = products.value
       xs
         .flatMap(Path.allSubpaths)
-        .filter(_._1.isFile())
+        .withFilter(_._1.isFile())
         .map { case (p, path) =>
           val vf = converter.toVirtualFile(p.toPath())
           (vf: HashedVirtualFileRef) -> path
@@ -1612,7 +1612,7 @@ object Defaults extends BuildCommon {
       Path
         .allSubpaths(d)
         .toSeq
-        .filter(_._1.isFile())
+        .withFilter(_._1.isFile())
         .map { case (p, path) =>
           val vf = converter.toVirtualFile(p.toPath())
           (vf: HashedVirtualFileRef) -> path

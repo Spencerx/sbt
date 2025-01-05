@@ -393,7 +393,7 @@ class MakePom(val log: Logger) {
           MavenRepository(m.getName, m.getRoot) :: Nil
         case _ => Nil
       }
-    val repositoryElements = mavenRepositories.filter(filterRepositories).map(mavenRepository)
+    val repositoryElements = mavenRepositories.withFilter(filterRepositories).map(mavenRepository)
     if (repositoryElements.isEmpty) repositoryElements
     else
       <repositories>{
