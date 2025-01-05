@@ -206,7 +206,7 @@ private[internal] object SbtUpdateReport {
         dep -> m.getOrElse(dep, Nil).map { case (_, pub, a, f) => (pub, a, f) }
       }
       val fromInterProj = interProjectDependencies
-        .filter(p => p.module != thisModule._1)
+        .withFilter(p => p.module != thisModule._1)
         .map(p => Dependency(p.module, p.version) -> Nil)
       fromLib ++ fromInterProj
     }

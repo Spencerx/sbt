@@ -544,7 +544,7 @@ private[sbt] object DefaultBackgroundJobService {
     backgroundJobServices
       .values()
       .forEach(jobService => {
-        jobService.jobs.filter(_.isAutoCancel).foreach(jobService.stop)
+        jobService.jobs.withFilter(_.isAutoCancel).foreach(jobService.stop)
       })
   }
 

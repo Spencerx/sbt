@@ -148,7 +148,7 @@ private[sbt] object WatchTransitiveDependencies {
     val projects = projectScopes.flatMap(_.project.toOption).distinct.toSet
     val scopes: Seq[Either[Scope, Seq[Glob]]] =
       data.scopes.toSeq
-        .filter(s => s == Scope.Global || s.project.toOption.exists(projects.contains))
+        .withFilter(s => s == Scope.Global || s.project.toOption.exists(projects.contains))
         .flatMap { s =>
           data.getDirect(ScopedKey(s, Keys.watchSources.key)).map { task =>
             task.work match

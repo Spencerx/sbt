@@ -137,7 +137,7 @@ object PluginDiscovery:
       .getResources(resourceName)
       .asScala
       .toSeq
-      .filter(onClasspath(classpath, converter))
+      .withFilter(onClasspath(classpath, converter))
       .flatMap { u =>
         IO.readLinesURL(u).map(_.trim).filter(!_.isEmpty)
       }

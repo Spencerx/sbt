@@ -72,7 +72,7 @@ trait ContextUtil[C <: Quotes & scala.Singleton](val valStart: Int):
       override def tupleExpr: Expr[Tuple] =
         exprOfTupleFromSeq(inputs.map(_.term.asExpr))
       override def cacheInputTupleTypeRepr: TypeRepr =
-        tupleTypeRepr(inputs.filter(_.isCacheInput).map(_.tpe))
+        tupleTypeRepr(inputs.withFilter(_.isCacheInput).map(_.tpe))
       override def cacheInputExpr(tupleTerm: Term): Expr[Tuple] =
         exprOfTupleFromSeq(inputs.zipWithIndex.flatMap { case (input, idx) =>
           if input.tags.nonEmpty then
