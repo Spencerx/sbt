@@ -237,17 +237,16 @@ object MainLoop {
 
         exchange.setState(cmdProgressState)
         exchange.setExec(Some(exec))
-        val (restoreTerminal, termState) = channelName.flatMap(exchange.channelForName) match {
+        val (flushTerminal, termState) = channelName.flatMap(exchange.channelForName) match
           case Some(c) =>
             val prevTerminal = ITerminal.set(c.terminal)
             // temporarily set the prompt to running during task evaluation
             c.terminal.setPrompt(Prompt.Running)
-            (() => {
-              ITerminal.set(prevTerminal)
-              c.terminal.flush()
-            }) -> cmdProgressState.put(Keys.terminalKey, Terminal(c.terminal))
+            (() => c.terminal.flush()) -> cmdProgressState.put(
+              Keys.terminalKey,
+              Terminal(c.terminal)
+            )
           case _ => (() => ()) -> cmdProgressState.put(Keys.terminalKey, Terminal(ITerminal.get))
-        }
 
         val currentCmdProgress =
           cmdProgressState.get(sbt.Keys.currentCommandProgress)
@@ -283,12 +282,10 @@ object MainLoop {
               currentCmdProgress
                 .foreach(_.afterCommand(exec.commandLine, Left(e)))
               throw e
-          } finally {
+          } finally
             // Flush the terminal output after command evaluation to ensure that all output
-            // is displayed in the thin client before we report the command status. Also
-            // set the prompt to whatever it was before we started evaluating the task.
-            restoreTerminal()
-          }
+            // is displayed in the thin client before we report the command status.
+            flushTerminal()
         if (
           exec.execId.fold(true)(!_.startsWith(networkExecPrefix)) &&
           !exec.commandLine.startsWith(networkExecPrefix)
