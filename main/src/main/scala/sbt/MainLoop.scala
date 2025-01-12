@@ -34,43 +34,40 @@ import scala.util.control.NonFatal
 
 import java.text.ParseException
 
-object MainLoop {
+private[sbt] object MainLoop:
 
   /** Entry point to run the remaining commands in State with managed global logging. */
-  def runLogged(state: State): xsbti.MainResult = {
-
+  def runLogged(state: State): xsbti.MainResult =
     // We've disabled jline shutdown hooks to prevent classloader leaks, and have been careful to always restore
     // the jline terminal in finally blocks, but hitting ctrl+c prevents finally blocks from being executed, in that
     // case the only way to restore the terminal is in a shutdown hook.
     val shutdownHook = ShutdownHooks.add(ITerminal.restore)
-
-    try {
-      runLoggedLoop(state, state.globalLogging.backing)
-    } finally {
+    try runLoggedLoop(state, state.globalLogging.backing)
+    finally
       shutdownHook.close()
       ()
-    }
-  }
 
   /** Run loop that evaluates remaining commands and manages changes to global logging configuration. */
   @tailrec def runLoggedLoop(state: State, logBacking: GlobalLogBacking): xsbti.MainResult =
-    runAndClearLast(state, logBacking) match {
-      case ret: Return => // delete current and last log files when exiting normally
+    runAndClearLast(state, logBacking) match
+      // delete current and last log files when exiting normally
+      case RunNext.Return(result) =>
         logBacking.file.delete()
         deleteLastLog(logBacking)
-        ret.result
-      case clear: ClearGlobalLog => // delete previous log file, move current to previous, and start writing to a new file
+        result
+      // delete previous log file, move current to previous, and start writing to a new file
+      case RunNext.ClearGlobalLog(state) =>
         deleteLastLog(logBacking)
-        runLoggedLoop(clear.state, logBacking.shiftNew())
-      case keep: KeepGlobalLog => // make previous log file the current log file
+        runLoggedLoop(state, logBacking.shiftNew())
+      // make previous log file the current log file
+      case RunNext.KeepGlobalLog(state) =>
         logBacking.file.delete
-        runLoggedLoop(keep.state, logBacking.unshift)
-    }
+        runLoggedLoop(state, logBacking.unshift)
 
   /** Runs the next sequence of commands, cleaning up global logging after any exceptions. */
-  def runAndClearLast(state: State, logBacking: GlobalLogBacking): RunNext = {
+  def runAndClearLast(state: State, logBacking: GlobalLogBacking): RunNext =
     try runWithNewLog(state, logBacking)
-    catch {
+    catch
       case e: xsbti.FullReload =>
         deleteLastLog(logBacking)
         throw e // pass along a reboot request
@@ -84,8 +81,6 @@ object MainLoop {
         )
         deleteLastLog(logBacking)
         throw e
-    }
-  }
 
   /** Deletes the previous global log file. */
   def deleteLastLog(logBacking: GlobalLogBacking): Unit =
@@ -114,7 +109,7 @@ object MainLoop {
   }
 
   /** Runs the next sequence of commands with global logging in place. */
-  def runWithNewLog(state: State, logBacking: GlobalLogBacking): RunNext = {
+  def runWithNewLog(state: State, logBacking: GlobalLogBacking): RunNext =
     Using.fileWriter(append = true)(logBacking.file) { writer =>
       val out = new PrintWriter(writer)
       val full = state.globalLogging.full
@@ -123,11 +118,9 @@ object MainLoop {
       // transferLevels(state, newLogging)
       val loggedState = state.copy(globalLogging = newLogging)
       try run(loggedState)
-      finally {
+      finally
         out.close()
-      }
     }
-  }
 
   // /** Transfers logging and trace levels from the old global loggers to the new ones. */
   // private def transferLevels(state: State, logging: GlobalLogging): Unit = {
@@ -139,21 +132,24 @@ object MainLoop {
   //   }
   // }
 
-  sealed trait RunNext
-  final class ClearGlobalLog(val state: State) extends RunNext
-  final class KeepGlobalLog(val state: State) extends RunNext
-  final class Return(val result: xsbti.MainResult) extends RunNext
+  enum RunNext:
+    case ClearGlobalLog(val state: State)
+    case KeepGlobalLog(val state: State)
+    case Return(val result: xsbti.MainResult)
+
+  def run(state: State): RunNext =
+    val exchange = StandardMain.exchange
+    runLoop(state)
 
   /** Runs the next sequence of commands that doesn't require global logging changes. */
-  @tailrec def run(state: State): RunNext =
-    state.next match {
-      case State.Continue       => run(next(state))
-      case State.ClearGlobalLog => new ClearGlobalLog(state.continue)
-      case State.KeepLastLog    => new KeepGlobalLog(state.continue)
-      case ret: State.Return    => new Return(ret.result)
-    }
+  @tailrec def runLoop(state: State): RunNext =
+    state.next match
+      case State.Continue       => runLoop(next(state))
+      case State.ClearGlobalLog => RunNext.ClearGlobalLog(state.continue)
+      case State.KeepLastLog    => RunNext.KeepGlobalLog(state.continue)
+      case ret: State.Return    => RunNext.Return(ret.result)
 
-  def next(state: State): State = {
+  def next(state: State): State =
     val context = LoggerContext()
     val superShellSleep =
       state.get(Keys.superShellSleep.key).getOrElse(SysProp.supershellSleep.millis)
@@ -205,11 +201,11 @@ object MainLoop {
       context.close()
       taskProgress.close()
     }
-  }
+  end next
 
   /** This is the main function State transfer function of the sbt command processing. */
-  def processCommand(exec: Exec, state: State): State = {
-    val channelName = exec.source map (_.channelName)
+  def processCommand(exec: Exec, state: State): State =
+    val channelName = exec.source.map(_.channelName)
     val exchange = StandardMain.exchange
     exchange.setState(state)
     exchange.notifyStatus(
@@ -327,33 +323,31 @@ object MainLoop {
         StandardMain.exchange.respondStatus(errorEvent)
         throw err
     }
-  }
+  end processCommand
 
   def logFullException(e: Throwable, log: Logger): Unit = State.logFullException(e, log)
 
-  private type ExitCode = Option[Long]
-  private object ExitCode {
+  opaque type ExitCode = Option[Long]
+  object ExitCode:
     def apply(n: Long): ExitCode = Option(n)
     val Success: ExitCode = ExitCode(0)
     val Unknown: ExitCode = None
-  }
+  end ExitCode
 
-  private def exitCode(state: State, prevState: State): ExitCode = {
-    exitCodeFromStateNext(state) match {
+  private def exitCode(state: State, prevState: State): ExitCode =
+    exitCodeFromStateNext(state) match
       case ExitCode.Success => exitCodeFromStateOnFailure(state, prevState)
       case x                => x
-    }
-  }
 
   // State's "next" field indicates the next action for the command processor to take
   // we'll use that to determine if the command failed
-  private def exitCodeFromStateNext(state: State): ExitCode = {
-    state.next match {
+  private def exitCodeFromStateNext(state: State): ExitCode =
+    state.next match
       case State.Continue       => ExitCode.Success
       case State.ClearGlobalLog => ExitCode.Success
       case State.KeepLastLog    => ExitCode.Success
       case ret: State.Return =>
-        ret.result match {
+        ret.result match
           case exit: xsbti.Exit  => ExitCode(exit.code().toLong)
           case _: xsbti.Continue => ExitCode.Success
           case _: xsbti.Reboot   => ExitCode.Success
@@ -361,21 +355,17 @@ object MainLoop {
             val clazz = if (x eq null) "" else " (class: " + x.getClass + ")"
             state.log.debug(s"Unknown main result: $x$clazz")
             ExitCode.Unknown
-        }
-    }
-  }
 
   // the shell command specifies an onFailure so that if an exception is thrown
   // it's handled by executing the shell again, instead of the state failing
   // so we also use that to indicate that the execution failed
   private def exitCodeFromStateOnFailure(state: State, prevState: State): ExitCode =
-    if (
-      prevState.onFailure.isDefined && state.onFailure.isEmpty &&
+    if prevState.onFailure.isDefined && state.onFailure.isEmpty &&
       state.currentCommand.fold(true)(_.commandLine != StashOnFailure)
-    ) {
-      ExitCode(ErrorCodes.UnknownError)
-    } else ExitCode.Success
-}
+    then ExitCode(ErrorCodes.UnknownError)
+    else ExitCode.Success
+
+end MainLoop
 
 // No stack trace since this is just to notify the user which command they cancelled
 class Cancelled(cmdLine: String) extends Throwable(cmdLine, null, true, false) {
