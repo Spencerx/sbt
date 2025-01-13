@@ -28,6 +28,7 @@ import sbt.util.{ Level, Logger }
 import scala.concurrent.ExecutionContext
 import scala.concurrent.duration.*
 import scala.util.Try
+import scala.util.control.NonFatal
 import sbt.util.LoggerContext
 import java.util.concurrent.TimeoutException
 import xsbti.FileConverter
@@ -308,19 +309,21 @@ private[sbt] abstract class AbstractBackgroundJobService extends BackgroundJobSe
     copyClasspath(products, full, workingDirectory, hashFileContents = true, converter)
 
   private[sbt] def pauseChannelDuringJob(state: State, handle: JobHandle): Unit =
-    currentChannel(state) match
-      case Some(channel) =>
-        handle match
-          case t: ThreadJobHandle =>
-            val level = channel.logLevel
-            channel.setLevel(Level.Error)
-            channel.pause()
-            t.job.onStop: () =>
-              channel.setLevel(level)
-              channel.resume()
-              channel.prompt(ConsolePromptEvent(state))
-          case _ => ()
-      case _ => ()
+    if !jobs.contains(handle) then ()
+    else
+      currentChannel(state) match
+        case Some(channel) =>
+          handle match
+            case t: ThreadJobHandle =>
+              val level = channel.logLevel
+              channel.setLevel(Level.Error)
+              channel.pause()
+              t.job.onStop: () =>
+                channel.setLevel(level)
+                channel.resume()
+                channel.prompt(ConsolePromptEvent(state))
+            case _ => ()
+        case _ => ()
 
   private[sbt] def currentChannel(state: State): Option[CommandChannel] =
     state.currentCommand match
@@ -424,7 +427,8 @@ private[sbt] class BackgroundThreadPool extends java.io.Closeable {
           list
         }
         listeners.foreach { l =>
-          l.executionContext.execute(() => l.callback())
+          try l.executionContext.execute(() => l.callback())
+          catch case NonFatal(_) => ()
         }
       }
     }
