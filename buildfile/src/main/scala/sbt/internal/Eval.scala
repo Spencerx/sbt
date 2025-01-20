@@ -97,8 +97,8 @@ class Eval(
           |  }
           |}
           |""".stripMargin
-        val startLine = header.linesIterator.toList.size
-        EvalSourceFile(srcName, startLine, contents)
+        val headerLine = header.linesIterator.toList.size
+        EvalSourceFile(srcName, headerLine, line - 1, contents)
 
       override def extract(run: Run, unit: CompilationUnit)(using ctx: Context): String =
         atPhase(Phases.typerPhase.next) {
@@ -159,8 +159,8 @@ class Eval(
           |${definitions.map(_._1).mkString("\n")}
           |}
           |""".stripMargin
-        val startLine = header.linesIterator.toList.size
-        EvalSourceFile(srcName, startLine, contents)
+        val headerLine = header.linesIterator.toList.size
+        EvalSourceFile(srcName, headerLine, 0, contents)
 
       override def extract(run: Run, unit: CompilationUnit)(using ctx: Context): Seq[String] =
         atPhase(Phases.typerPhase.next) {
@@ -319,13 +319,15 @@ object Eval:
   private[sbt] final val WrapValName = "$sbtdef"
 
   // used to map the position offset
-  class EvalSourceFile(name: String, startLine: Int, contents: String)
+  class EvalSourceFile(name: String, headerLine: Int, extraLine: Int, contents: String)
       extends SourceFile(
         new VirtualFile(name, contents.getBytes(StandardCharsets.UTF_8)),
         contents.toArray
       ):
-    override def lineToOffset(line: Int): Int = super.lineToOffset((line + startLine) max 0)
-    override def offsetToLine(offset: Int): Int = super.offsetToLine(offset) - startLine
+    override def lineToOffset(line: Int): Int =
+      super.lineToOffset((line + headerLine - extraLine) max 0)
+    override def offsetToLine(offset: Int): Int =
+      super.offsetToLine(offset) - headerLine + extraLine
   end EvalSourceFile
 
   trait EvalType[A]:
