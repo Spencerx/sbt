@@ -180,6 +180,7 @@ object Defaults extends BuildCommon {
       apiMappings := Map.empty,
       autoScalaLibrary :== true,
       managedScalaInstance :== true,
+      allowUnsafeScalaLibUpgrade :== false,
       classpathEntryDefinesClass := { (file: File) =>
         sys.error("use classpathEntryDefinesClassVF instead")
       },
@@ -1178,6 +1179,7 @@ object Defaults extends BuildCommon {
   def scalaInstanceFromUpdate: Initialize[Task[ScalaInstance]] = Def.task {
     val sv = scalaVersion.value
     val fullReport = update.value
+    val s = streams.value
 
     // For Scala 3, update scala-library.jar in `scala-tool` and `scala-doc-tool` in case a newer version
     // is present in the `compile` configuration. This is needed once forwards binary compatibility is dropped
@@ -1204,24 +1206,38 @@ object Defaults extends BuildCommon {
     )
 
     if (Classpaths.isScala213(sv)) {
-      for {
-        compileReport <- fullReport.configuration(Configurations.Compile)
-        libName <- ScalaArtifacts.Artifacts
-      } {
-        for (lib <- compileReport.modules.find(_.module.name == libName)) {
-          val libVer = lib.module.revision
-          val n = name.value
-          if (VersionNumber(sv).matchesSemVer(SemanticSelector(s"<$libVer")))
-            sys.error(
-              s"""expected `$n/scalaVersion` to be "$libVer" or later,
-                 |but found "$sv"; upgrade scalaVersion to fix the build.
-                 |
-                 |to support backwards-only binary compatibility (SIP-51),
-                 |the Scala 2.13 compiler cannot be older than $libName on the
-                 |dependency classpath.
-                 |see `$n/evicted` to know why $libName $libVer is getting pulled in.
-                 |""".stripMargin
-            )
+      val scalaDeps = for {
+        compileReport <- fullReport.configuration(Configurations.Compile).iterator
+        libName <- ScalaArtifacts.Artifacts.iterator
+        lib <- compileReport.modules.find(_.module.name == libName)
+      } yield lib
+      for (lib <- scalaDeps.take(1)) {
+        val libVer = lib.module.revision
+        val libName = lib.module.name
+        val n = name.value
+        if (VersionNumber(sv).matchesSemVer(SemanticSelector(s"<$libVer"))) {
+          val err = !allowUnsafeScalaLibUpgrade.value
+          val fix =
+            if (err)
+              """Upgrade the `scalaVersion` to fix the build. If upgrading the Scala compiler version is
+                |not possible (for example due to a regression in the compiler or a missing dependency),
+                |this error can be demoted by setting `allowUnsafeScalaLibUpgrade := true`.""".stripMargin
+            else
+              s"""Note that the dependency classpath and the runtime classpath of your project
+                 |contain the newer $libName $libVer, even if the scalaVersion is $sv.
+                 |Compilation (macro expansion) or using the Scala REPL in sbt may fail with a LinkageError.""".stripMargin
+
+          val msg =
+            s"""Expected `$n/scalaVersion` to be $libVer or later, but found $sv.
+               |To support backwards-only binary compatibility (SIP-51), the Scala 2.13 compiler
+               |should not be older than $libName on the dependency classpath.
+               |
+               |$fix
+               |
+               |See `$n/evicted` to know why $libName $libVer is getting pulled in.
+               |""".stripMargin
+          if (err) sys.error(msg)
+          else s.log.warn(msg)
         }
       }
     }

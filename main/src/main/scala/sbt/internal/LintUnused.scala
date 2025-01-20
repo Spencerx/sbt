@@ -34,6 +34,7 @@ object LintUnused {
       commands,
       crossScalaVersions,
       crossSbtVersions,
+      allowUnsafeScalaLibUpgrade,
       initialize,
       lintUnusedKeysOnLoad,
       onLoad,
