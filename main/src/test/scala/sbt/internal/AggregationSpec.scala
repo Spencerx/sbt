@@ -17,10 +17,10 @@ object AggregationSpec extends verify.BasicTestSuite {
     assert(timing(3000).startsWith("elapsed time: 3 s"))
     assert(timing(30399).startsWith("elapsed time: 30 s"))
     assert(timing(60399).startsWith("elapsed time: 60 s"))
-    assert(timing(60699).startsWith("elapsed time: 61 s (01:01)"))
-    assert(timing(303099).startsWith("elapsed time: 303 s (05:03)"))
-    assert(timing(6003099).startsWith("elapsed time: 6003 s (01:40:03)"))
-    assert(timing(96003099).startsWith("elapsed time: 96003 s (26:40:03)"))
+    assert(timing(60699).startsWith("elapsed time: 61 s (0:01:01.0)"))
+    assert(timing(303099).startsWith("elapsed time: 303 s (0:05:03.0)"))
+    assert(timing(6003099).startsWith("elapsed time: 6003 s (01:40:03.0)"))
+    assert(timing(96003099).startsWith("elapsed time: 96003 s (26:40:03.0)"))
   }
 
   test("timing should not emit special space characters") {

@@ -1126,12 +1126,12 @@ object NetworkClient {
     val totalString = s"$total s" +
       (if (total <= 60) ""
        else {
-         val maybeHours = total / 3600 match
-           case 0 => ""
-           case h => f"$h%02d:"
+         val hours = total / 3600 match
+           case 0 => "0"
+           case h => f"$h%02d"
          val mins = f"${total % 3600 / 60}%02d"
          val secs = f"${total % 60}%02d"
-         s" ($maybeHours$mins:$secs)"
+         s" ($hours:$mins:$secs.0)"
        })
     s"elapsed time: $totalString"
 
