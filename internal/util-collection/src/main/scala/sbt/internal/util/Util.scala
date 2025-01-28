@@ -12,6 +12,8 @@ import java.util.Locale
 
 import scala.reflect.macros.blackbox
 import scala.language.experimental.macros
+import scala.language.reflectiveCalls
+import scala.util.control.NonFatal
 
 object Util {
   def makeList[T](size: Int, value: T): List[T] = List.fill(size)(value)
@@ -77,4 +79,39 @@ object Util {
   class Macro(val c: blackbox.Context) {
     def ignore(f: c.Tree): c.Expr[Unit] = c.universe.reify({ c.Expr[Any](f).splice; () })
   }
+
+  lazy val majorJavaVersion: Int =
+    try {
+      val javaVersion = sys.props.get("java.version").getOrElse("1.0")
+      if (javaVersion.startsWith("1.")) {
+        javaVersion.split("\\.")(1).toInt
+      } else {
+        javaVersion.split("\\.")(0).toInt
+      }
+    } catch {
+      case NonFatal(_) => 0
+    }
+
+  private type GetId = {
+    def getId: Long
+  }
+  private type ThreadId = {
+    def threadId: Long
+  }
+
+  /**
+   * Returns current thread id.
+   * Thread.threadId was added in JDK 19, and deprecated Thread#getId
+   * https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Thread.html#threadId()
+   */
+  def threadId: Long =
+    if (majorJavaVersion < 19) {
+      (Thread.currentThread(): AnyRef) match {
+        case g: GetId @unchecked => g.getId
+      }
+    } else {
+      (Thread.currentThread(): AnyRef) match {
+        case g: ThreadId @unchecked => g.threadId
+      }
+    }
 }

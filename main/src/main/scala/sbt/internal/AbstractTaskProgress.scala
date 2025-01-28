@@ -9,6 +9,7 @@
 package sbt
 package internal
 
+import sbt.internal.util.Util
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicLong
 import scala.collection.JavaConverters._
@@ -123,6 +124,7 @@ object AbstractTaskExecuteProgress {
   private[sbt] class Timer() {
     val startNanos: Long = System.nanoTime()
     val threadName: String = Thread.currentThread().getName
+    val threadId: Long = Util.threadId
     var endNanos: Long = 0L
     def stop(): Unit = {
       endNanos = System.nanoTime()
