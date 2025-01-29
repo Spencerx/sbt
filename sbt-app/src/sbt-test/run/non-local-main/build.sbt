@@ -1,4 +1,4 @@
-ThisBuild / scalaVersion := "2.12.17"
+ThisBuild / scalaVersion := "2.12.20"
 
 lazy val main = project.settings(
   organization := "org.scala-sbt.testsuite.example",
