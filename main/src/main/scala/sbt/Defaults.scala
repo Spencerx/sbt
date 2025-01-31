@@ -3714,17 +3714,21 @@ object Classpaths {
       val ref = thisProjectRef.value
       val unit = loadedBuild.value.units(ref.build).unit
       val converter = unit.converter
-      val pluginClasspath = unit.plugins.fullClasspath.toVector
+      val pluginClasspath = unit.plugins.pluginData.dependencyClasspath.toVector
+      // Exclude directories: an approximation to whether they've been published
+      // Note: it might be a redundant legacy from sbt 0.13/1.x times where the classpath contained directories
+      // but it's left jsut in case
       val pluginJars = pluginClasspath.filter: x =>
         !Files.isDirectory(converter.toPath(x.data))
-      // exclude directories: an approximation to whether they've been published
       val pluginIDs: Vector[ModuleID] = pluginJars.flatMap(_.get(moduleIDStr).map: str =>
         moduleIdJsonKeyFormat.read(str))
+
+      val dependencies = sbtDependency.value +: pluginIDs
       GetClassifiersModule(
         projectID.value,
         // TODO: Should it be sbt's scalaModuleInfo?
         scalaModuleInfo.value,
-        sbtDependency.value +: pluginIDs,
+        dependencies,
         // sbt is now on Maven Central, so this has changed from sbt 0.13.
         Vector(Configurations.Default) ++ Configurations.default,
         classifiers.toVector
