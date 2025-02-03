@@ -1038,7 +1038,13 @@ object Defaults extends BuildCommon {
         val r = run.evaluated
         val service = bgJobService.value
         service.waitForTry(r.handle).get
-        r
+        ()
+      },
+      runMainBlock := {
+        val r = runMain.evaluated
+        val service = bgJobService.value
+        service.waitForTry(r.handle).get
+        ()
       },
       fgRun := runTask(fullClasspath, (run / mainClass), (run / runner)).evaluated,
       fgRunMain := runMainTask(fullClasspath, (run / runner)).evaluated,

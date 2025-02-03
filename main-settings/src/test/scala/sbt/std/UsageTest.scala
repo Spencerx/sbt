@@ -129,11 +129,15 @@ object Assign {
     dummys.parsed
   }
 
-  // val it6 = Def.inputTaskDyn {
-  //   val d3 = dummy3.parsed
-  //   val i = d3._2
-  //   Def.task { tk.value + i }
-  // }
+  val it6a = Def.inputTaskDyn {
+    val d3 = dummy3.parsed
+    val i = d3._2
+    Def.task { tk.value + i }
+  }
+
+  val it6b = Def.inputTaskDyn {
+    Def.task { 1 }
+  }
 
   val it7 = Def.inputTask {
     it5.parsed
