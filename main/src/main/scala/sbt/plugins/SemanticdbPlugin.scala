@@ -55,8 +55,9 @@ object SemanticdbPlugin extends AutoPlugin {
 
   lazy val configurationSettings: Seq[Def.Setting[?]] = List(
     semanticdbTargetRoot := {
+      val converter = fileConverter.value
       val in = semanticdbIncludeInJar.value
-      if (in) classDirectory.value
+      if in then converter.toPath(backendOutput.value).toFile()
       else semanticdbTargetRoot.value
     },
     semanticdbOptions --= Def.settingDyn {
@@ -69,28 +70,23 @@ object SemanticdbPlugin extends AutoPlugin {
     }.value,
     semanticdbOptions ++=
       targetRootOptions(scalaVersion.value, semanticdbTargetRoot.value),
-    // todo:
-    // scalacOptions --= {
-    //   Def
-    //     .task { (configuration.value, semanticdbEnabled.value) }
-    //     .flatMapTask { case (config, enabled) =>
-    //       if enabled then
-    //         Def.task {
-    //           (semanticdbOptions.?.all(ancestorConfigs(config)).value.flatten.flatten: Seq[String])
-    //         }
-    //       else Def.task { (Nil: Seq[String]) }
-    //     }
-    //     .value
-    // },
-    scalacOptions ++= {
-      if (semanticdbEnabled.value)
-        semanticdbOptions.value
-      else Seq.empty
-    }
+    scalacOptions := (Def.taskDyn {
+      val orig = scalacOptions.value
+      val config = configuration.value
+      if semanticdbEnabled.value then
+        Def.task {
+          val xs =
+            (orig diff semanticdbOptions.?.all(ancestorConfigs(config)).value.flatten.flatten) ++
+              semanticdbOptions.value
+          println(xs.toString)
+          xs
+        }
+      else
+        Def.task {
+          orig
+        }
+    }).value,
   )
-
-  @deprecated("use configurationSettings only", "1.5.0")
-  lazy val testSettings: Seq[Def.Setting[?]] = List()
 
   def targetRootOptions(scalaVersion: String, targetRoot: File): Seq[String] = {
     if (ScalaInstance.isDotty(scalaVersion)) {
