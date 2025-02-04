@@ -2239,7 +2239,7 @@ object Defaults extends BuildCommon {
     val store = analysisStore(compileAnalysisFile)
     val contents = store.unsafeGet()
     if (exportP) {
-      // this stores the eary analysis (again) in case the subproject contains a macro
+      // this stores the early analysis (again) in case the subproject contains a macro
       setup.earlyAnalysisStore.toOption map { earlyStore =>
         earlyStore.set(contents)
       }
@@ -2822,7 +2822,7 @@ object Classpaths {
           val vf = converter.toVirtualFile(p)
           FileStamp(stamper.library(vf)).map(p -> _)
       },
-      // Note: invoking this task from shell would block indefinately because it will
+      // Note: invoking this task from shell would block indefinitely because it will
       // wait for the upstream compilation to start.
       dependencyPicklePath := {
         // This is a conditional task. Do not refactor.
@@ -3498,17 +3498,17 @@ object Classpaths {
     }
   )
 
-  def warnResolversConflict(ress: Seq[Resolver], log: Logger): Unit = {
-    val resset = ress.toSet
-    for ((name, r) <- resset groupBy (_.name) if r.size > 1) {
+  def warnResolversConflict(resolverList: Seq[Resolver], log: Logger): Unit = {
+    val resolverSet = resolverList.toSet
+    for ((name, r) <- resolverSet groupBy (_.name) if r.size > 1) {
       log.warn(
         "Multiple resolvers having different access mechanism configured with same name '" + name + "'. To avoid conflict, Remove duplicate project resolvers (`resolvers`) or rename publishing resolver (`publishTo`)."
       )
     }
   }
 
-  private[sbt] def errorInsecureProtocol(ress: Seq[Resolver], log: Logger): Unit = {
-    val bad = !ress.forall(!_.validateProtocol(log))
+  private[sbt] def errorInsecureProtocol(resolverList: Seq[Resolver], log: Logger): Unit = {
+    val bad = !resolverList.forall(!_.validateProtocol(log))
     if (bad) {
       sys.error("insecure protocol is unsupported")
     }
@@ -3717,7 +3717,7 @@ object Classpaths {
       val pluginClasspath = unit.plugins.pluginData.dependencyClasspath.toVector
       // Exclude directories: an approximation to whether they've been published
       // Note: it might be a redundant legacy from sbt 0.13/1.x times where the classpath contained directories
-      // but it's left jsut in case
+      // but it's left just in case
       val pluginJars = pluginClasspath.filter: x =>
         !Files.isDirectory(converter.toPath(x.data))
       val pluginIDs: Vector[ModuleID] = pluginJars.flatMap(_.get(moduleIDStr).map: str =>

@@ -33,7 +33,7 @@ object EscHelpers {
    * The CSI (control sequence instruction) codes start with ESC + '['. This is for testing the
    * second character.
    *
-   * There is an additional CSI (one character) that we could test for, but is not frequnetly used,
+   * There is an additional CSI (one character) that we could test for, but is not frequently used,
    * and we don't check for it.
    *
    * cf. http://en.wikipedia.org/wiki/ANSI_escape_code#CSI_codes
@@ -193,7 +193,7 @@ object EscHelpers {
    * Removes the ansi escape sequences from a string and makes a best attempt at calculating any
    * ansi moves by hand. For example, if the string contains a backspace character followed by a
    * character, the output string would replace the character preceding the backspaces with the
-   * character proceding it. This is in contrast to `strip` which just removes all ansi codes
+   * character preceding it. This is in contrast to `strip` which just removes all ansi codes
    * entirely.
    *
    * @param s

@@ -9,13 +9,13 @@ case object MyPlugin extends AutoPlugin {
   }
   import autoImport._
   override def projectSettings: Seq[Def.Setting[_]] = Seq(
-    // should not produce a "@nowarn annotation does not suppres any warnings" warning
+    // should not produce a "@nowarn annotation does not suppress any warnings" warning
     helloWorld := {
       streams.value.log("Hello world")
       "Hello world"
     },
     Compile / compile := {
-      helloWorld.value // shoult not produce "a pure expression does nothing" warning
+      helloWorld.value // should not produce "a pure expression does nothing" warning
       (Compile / compile).value
     }
   )

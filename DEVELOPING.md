@@ -8,7 +8,7 @@ Create a [fork](https://docs.github.com/en/github/getting-started-with-github/fo
 ### Branch to work against
 
 sbt uses two or three branches for development:
-Use the **default** branch set on Github for bug fixes.
+Use the **default** branch set on GitHub for bug fixes.
 
 - Next minor branch: `1.$MINOR.x`, where `$MINOR` is next minor version (e.g. `1.10.x` during 1.9.x series)
 - Development branch: `develop`
@@ -162,8 +162,7 @@ suite with `sbt testOnly`
 
 Scripted integration tests reside in `sbt-app/src/sbt-test` and are
 written using the same testing infrastructure sbt plugin authors can
-use to test their own plugins with sbt. You can read more about this
-style of tests [here](https://www.scala-sbt.org/1.x/docs/Testing-sbt-plugins).
+use to test their own plugins with sbt. You can read more about [Testing sbt plugins](https://www.scala-sbt.org/1.x/docs/Testing-sbt-plugins).
 
 You can run the integration tests with the `sbt scripted` sbt
 command. To run a single test, such as the test in
