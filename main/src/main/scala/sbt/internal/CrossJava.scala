@@ -412,13 +412,19 @@ private[sbt] object CrossJava {
 
     class MacOsDiscoverConfig extends JavaDiscoverConf {
       val base: File = file("/Library") / "Java" / "JavaVirtualMachines"
+      // User-specific JDKs are installed, for example, by IntelliJ IDEA
+      private val baseInUserHome: File = Path.userHome / "Library" / "Java" / "JavaVirtualMachines"
 
       def javaHomes: Vector[(String, File)] =
-        wrapNull(base.list())
-          .collect {
-            case dir @ JavaHomeDir(version) =>
-              version -> (base / dir / "Contents" / "Home")
-          }
+        findAllHomes(base) ++
+          findAllHomes(baseInUserHome)
+
+      private def findAllHomes(root: File): Vector[(String, File)] = {
+        wrapNull(root.list()).collect {
+          case dir @ JavaHomeDir(version) =>
+            version -> (root / dir / "Contents" / "Home")
+        }
+      }
     }
 
     class JabbaDiscoverConfig extends JavaDiscoverConf {
