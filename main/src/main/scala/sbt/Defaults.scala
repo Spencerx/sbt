@@ -4705,22 +4705,20 @@ trait BuildExtra extends BuildCommon with DefExtra {
       baseArguments: String*
   ): Vector[Setting[?]] = {
     Vector(
-      scoped := Def
-        .input(_ => Def.spaceDelimited())
-        .flatMapTask { result =>
-          initScoped(
-            scoped.scopedKey,
-            ClassLoaders.runner.mapReferenced(Project.mapScope(_.rescope(config))),
-          ).zipWith(Def.task {
-            ((config / fullClasspath).value, streams.value, fileConverter.value, result)
-          }) { (rTask, t) =>
-            (t, rTask) mapN { case ((cp, s, converter, args), r) =>
-              given FileConverter = converter
-              r.run(mainClass, cp.files, baseArguments ++ args, s.log).get
-            }
+      scoped := Def.inputTaskDyn {
+        val result = Def.spaceDelimited().parsed
+        initScoped(
+          scoped.scopedKey,
+          ClassLoaders.runner.mapReferenced(Project.mapScope(_.rescope(config))),
+        ).zipWith(Def.task {
+          ((config / fullClasspath).value, streams.value, fileConverter.value, result)
+        }) { (rTask, t) =>
+          (t, rTask) mapN { case ((cp, s, converter, args), r) =>
+            given FileConverter = converter
+            r.run(mainClass, cp.files, baseArguments ++ args, s.log).get
           }
         }
-        .evaluated
+      }.evaluated
     ) ++ inTask(scoped)((config / forkOptions) := forkOptionsTask.value)
   }
 
