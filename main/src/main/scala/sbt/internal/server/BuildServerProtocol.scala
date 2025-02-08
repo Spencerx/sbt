@@ -747,13 +747,12 @@ object BuildServerProtocol {
   private inline def bspInputTask[T](
       inline taskImpl: (BspFullWorkspace, ScopeFilter) => T
   ): Def.Initialize[InputTask[T]] =
-    Def
-      .input(_ => targetIdentifierParser)
-      .flatMapTask { targets =>
-        val workspace: BspFullWorkspace = bspFullWorkspace.value.filter(targets)
-        val filter = ScopeFilter.in(workspace.scopes.values.toList)
-        Def.task(taskImpl(workspace, filter))
-      }
+    Def.inputTaskDyn {
+      val targets = targetIdentifierParser.parsed
+      val workspace: BspFullWorkspace = bspFullWorkspace.value.filter(targets)
+      val filter = ScopeFilter.in(workspace.scopes.values.toList)
+      Def.task(taskImpl(workspace, filter))
+    }
 
   private def jvmEnvironmentItem(): Initialize[Task[JvmEnvironmentItem]] = Def.task {
     val target = Keys.bspTargetIdentifier.value
@@ -866,7 +865,8 @@ object BuildServerProtocol {
     .map(JsonParser.parseFromString)
 
   private def bspRunTask: Def.Initialize[InputTask[Unit]] =
-    Def.input(_ => jsonParser).flatMapTask { json =>
+    Def.inputTaskDyn {
+      val json = jsonParser.parsed
       val runParams = json.flatMap(Converter.fromJson[RunParams]).get
       val defaultClass = Keys.mainClass.value
       val defaultJvmOptions = Keys.javaOptions.value
@@ -909,7 +909,8 @@ object BuildServerProtocol {
     }
 
   private def bspTestTask: Def.Initialize[InputTask[Unit]] =
-    Def.input(_ => jsonParser).flatMapTask { json =>
+    Def.inputTaskDyn {
+      val json = jsonParser.parsed
       val testParams = json.flatMap(Converter.fromJson[TestParams]).get
       val workspace = bspFullWorkspace.value
 

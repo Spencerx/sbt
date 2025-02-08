@@ -11,6 +11,7 @@ package std
 import sbt.internal.util.Types.Id
 import sbt.internal.util.complete.Parser
 import scala.quoted.*
+import scala.collection.mutable.ListBuffer
 
 object InputTaskMacro:
   import TaskMacro.ContSyntax.*
@@ -20,8 +21,10 @@ object InputTaskMacro:
   ): Expr[Def.Initialize[InputTask[A1]]] =
     inputTaskMacro0[A1](tree)
 
-  // def inputTaskDynMacroImpl[A1: Type](t: c.Expr[Initialize[Task[A1]]])(using qctx: Quotes): c.Expr[Initialize[InputTask[A1]]] =
-  //   inputTaskDynMacro0[A1](c)(t)
+  def inputTaskDynMacroImpl[A1: Type](tree: Expr[Def.Initialize[Task[A1]]])(using
+      qctx: Quotes
+  ): Expr[Def.Initialize[InputTask[A1]]] =
+    inputTaskDynMacro0[A1](tree)
 
   private def inputTaskMacro0[A1: Type](tree: Expr[A1])(using
       Quotes
@@ -110,92 +113,78 @@ object InputTaskMacro:
   private def iTaskMacro[A1: Type](tree: Expr[A1])(using qctx: Quotes): Expr[Task[A1]] =
     val convert1 = new TaskConvert(qctx, 2000)
     convert1.contMapN[A1, Task, Id](tree, convert1.appExpr, None)
-  /*
+
   private def inputTaskDynMacro0[A1: Type](
       expr: Expr[Def.Initialize[Task[A1]]]
-  )(using qctx: Quotes): Expr[Def.Initialize[InputTask[A1]]] = {
-    import qctx.reflect.{ Apply => ApplyTree, * }
-    // import internal.decorators._
-    val tag: Type[A1] = summon[Type[A1]]
-    // val util = ContextUtil[c.type](c)
-    val convert1 = new InitParserConvert(qctx)
-    import convert1.Converted
-
-    // val it = Ident(convert1.singleton(InputTask))
-    val isParserWrapper = new InitParserConvert(qctx).asPredicate
-    val isTaskWrapper = new FullConvert(qctx).asPredicate
-    val isAnyWrapper =
-      (n: String, tpe: TypeRepr, tr: Term) =>
-        isParserWrapper(n, tpe, tr) || isTaskWrapper(n, tpe, tr)
-    val ttree = expr.asTerm
-    val defs = convert1.collectDefs(ttree, isAnyWrapper)
-    val checkQual =
-      util.checkReferences(defs, isAnyWrapper, weakTypeOf[Def.Initialize[InputTask[Any]]])
-
-    // the Symbol for the anonymous function passed to the appropriate Instance.map/flatMap/pure method
-    // this Symbol needs to be known up front so that it can be used as the owner of synthetic vals
-
-    // val functionSym = util.functionSymbol(ttree.pos)
-    var result: Option[(Term, TypeRepr, ValDef)] = None
-
-    // original is the Tree being replaced.  It is needed for preserving attributes.
-    def subWrapper(tpe: TypeRepr, qual: Term, original: Term): Tree =
-      if result.isDefined then
-        report.errorAndAbort(
-          "implementation restriction: a dynamic InputTask can only have a single input parser.",
-          qual.pos,
+  )(using qctx: Quotes): Expr[Def.Initialize[InputTask[A1]]] =
+    // convert1 detects x.parsed where x is Parser[a], State => Parser[a], Initialize[Parser[a]], or Initialize[State => Parser[a]]
+    //   val it6a = Def.inputTaskDyn {
+    //     val d3 = dummy3.parsed
+    //     val i = d3._2
+    //     Def.task { tk.value + i }
+    //   }
+    val convert1 = InitParserConvert(qctx, 0)
+    import convert1.qctx.reflect.*
+    def expandTask[A2: Type](dyn: Boolean, tree: Tree): Expr[Def.Initialize[Task[A2]]] =
+      if dyn then
+        TaskMacro.taskDynMacroImpl[A2](
+          tree.asExprOf[Def.Initialize[Task[A2]]]
         )
-        Literal(UnitConstant())
-      else {
-        // qual.foreach(checkQual)
-        val vd = util.freshValDef(tpe, qual.symbol.pos, functionSym) // val $x: <tpe>
-        result = Some((qual, tpe, vd))
-        val tree = util.refVal(original, vd) // $x
-        tree.setPos(
-          qual.pos
-        ) // position needs to be set so that wrapKey passes the position onto the wrapper
-        assert(tree.tpe != null, "Null type: " + tree)
-        tree.setType(tpe)
-        tree
+      else TaskMacro.taskMacroImpl[A2](tree.asExprOf[A2], false)
+    val inputBuf = ListBuffer[(String, TypeRepr, Term, Term)]()
+    val record = [a] =>
+      (name: String, tpe: Type[a], qual: Term, oldTree: Term) =>
+        given t: Type[a] = tpe
+        convert1
+          .convert[a](name, qual)
+          .transform { (replacement: Term) =>
+            inputBuf.append((name, TypeRepr.of[a](using tpe), qual, replacement))
+            oldTree
+        }
+    def genCreateFree(body: Term) =
+      val init = expandTask[A1](true, body)
+      '{
+        InputTask.createFree($init)
       }
-    // Tree for InputTask.<name>[<tpeA>, <tpeB>](arg1)(arg2)
-    def inputTaskCreate(name: String, tpeA: Type, tpeB: Type, arg1: Tree, arg2: Tree) = {
-      val typedApp = TypeApply(util.select(it, name), TypeTree(tpeA) :: TypeTree(tpeB) :: Nil)
-      val app = ApplyTree(ApplyTree(typedApp, arg1 :: Nil), arg2 :: Nil)
-      Expr[Def.Initialize[InputTask[A1]]](app)
-    }
-    // Tree for InputTask.createFree[<tpe>](arg1)
-    def inputTaskCreateFree(tpe: Type, arg: Tree) = {
-      val typedApp = TypeApply(util.select(it, InputTaskCreateFreeName), TypeTree(tpe) :: Nil)
-      val app = ApplyTree(typedApp, arg :: Nil)
-      Expr[Def.Initialize[InputTask[A1]]](app)
-    }
-    def expandTask[I: Type](dyn: Boolean, tx: Tree): c.Expr[Initialize[Task[I]]] =
-      if dyn then taskDynMacroImpl[I](c)(c.Expr[Initialize[Task[I]]](tx))
-      else taskMacroImpl[I](c)(c.Expr[I](tx))
-    def wrapTag[I: Type]: Type[Initialize[Task[I]]] = weakTypeTag
-
-    def sub(name: String, tpe: TypeRepr, qual: Term, oldTree: Term): Converted =
-      convert1.convert[A1](name, qual) transform { (tree: Term) =>
-        subWrapper(tpe, tree, oldTree)
+    // This is roughly based on getMap in Cont.scala
+    def genCreateDyn[Arg: Type](parser: Term, body: Term) =
+      val param = parser.asExprOf[Def.Initialize[State => Parser[Arg]]]
+      val tpe =
+        MethodType(List("$p"))(
+          _ => List(TypeRepr.of[Arg]),
+          _ => TypeRepr.of[Def.Initialize[Task[A1]]]
+        )
+      val lambda = Lambda(
+        owner = Symbol.spliceOwner,
+        tpe = tpe,
+        rhsFn = (sym, params) => {
+          val param = params.head.asInstanceOf[Term]
+          val substitute = [a] =>
+            (name: String, tpe: Type[a], qual: Term, replace: Term) =>
+              given t: Type[a] = tpe
+              convert1
+                .convert[a](name, qual)
+                .transform { _ => Ref(param.symbol) }
+          val modifiedBody =
+            convert1
+              .transformWrappers(body.changeOwner(sym), substitute, sym)
+          modifiedBody
+        }
+      )
+      val action = expandTask[Arg => Def.Initialize[Task[A1]]](false, lambda)
+      '{
+        InputTask.createDyn[Arg, A1](p = $param)(action = $action)
       }
-
-    val tx =
-      convert1.transformWrappers(expr.asTerm, sub, Symbol.spliceOwner)
-    result match {
-      case Some((p, tpe, param)) =>
-        val fCore = util.createFunction(param :: Nil, tx, functionSym)
-        val bodyTpe = wrapTag(tag).tpe
-        val fTpe = util.functionType(tpe :: Nil, bodyTpe)
-        val fTag = Type[Any](fTpe) // don't know the actual type yet, so use Any
-        val fInit = expandTask(false, fCore)(fTag).tree
-        inputTaskCreate(InputTaskCreateDynName, tpe, tag.tpe, p, fInit)
-      case None =>
-        val init = expandTask[A1](true, tx).tree
-        inputTaskCreateFree(tag.tpe, init)
-    }
-  }
-   */
+    val body = convert1.transformWrappers(expr.asTerm, record, Symbol.spliceOwner)
+    inputBuf.toList match
+      case Nil => genCreateFree(body)
+      case (_, tpe, _, paramTree) :: Nil =>
+        tpe.asType match
+          case '[a] => genCreateDyn[a](paramTree, body)
+      case xs =>
+        report.errorAndAbort("a dynamic InputTask can only have a single input parser.")
+        ???
+  end inputTaskDynMacro0
 
   def parserGenInputTaskMacroImpl[A1: Type, A2: Type](
       parserGen: Expr[ParserGen[A1]],

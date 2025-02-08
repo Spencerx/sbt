@@ -319,6 +319,9 @@ object Def extends BuildSyntax with Init with InitializeImplicits:
   inline def inputTask[A1](inline a: A1): Def.Initialize[InputTask[A1]] =
     ${ InputTaskMacro.inputTaskMacroImpl[A1]('a) }
 
+  inline def inputTaskDyn[A1](inline a: Def.Initialize[Task[A1]]): Def.Initialize[InputTask[A1]] =
+    ${ InputTaskMacro.inputTaskDynMacroImpl[A1]('a) }
+
   inline def taskIf[A1](inline a: A1): Def.Initialize[Task[A1]] =
     ${ TaskMacro.taskIfImpl[A1]('a, cached = true) }
 
