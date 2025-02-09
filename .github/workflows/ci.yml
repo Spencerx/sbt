@@ -32,10 +32,10 @@ jobs:
             java: 21
             distribution: temurin
             jobtype: 5
-          - os: ubuntu-latest
-            java: 8
-            distribution: adopt
-            jobtype: 6
+          # - os: ubuntu-latest
+          #   java: 8
+          #   distribution: adopt
+          #   jobtype: 6
           - os: ubuntu-latest
             java: 8
             distribution: adopt
