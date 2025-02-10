@@ -499,6 +499,7 @@ object Keys {
   val csrPublications = taskKey[Seq[(lmcoursier.definitions.Configuration, lmcoursier.definitions.Publication)]]("")
   val csrReconciliations = settingKey[Seq[(ModuleMatchers, Reconciliation)]]("Strategy to reconcile version conflicts.")
   val csrSameVersions = settingKey[Seq[Set[InclExclRule]]]("Modules to keep at the same version.")
+  val csrMavenDependencyOverride = settingKey[Boolean]("Enables Maven dependency override (bill of materials) support")
 
   val internalConfigurationMap = settingKey[Configuration => Configuration]("Maps configurations to the actual configuration used to define the classpath.").withRank(CSetting)
   val classpathConfiguration = taskKey[Configuration]("The configuration used to define the classpath.").withRank(CTask)
@@ -615,6 +616,7 @@ object Keys {
   val conflictManager = settingKey[ConflictManager]("Selects the conflict manager to use for dependency management.").withRank(CSetting)
   val autoScalaLibrary = settingKey[Boolean]("Adds a dependency on scala-library if true.").withRank(ASetting)
   val managedScalaInstance = settingKey[Boolean]("Automatically obtains Scala tools as managed dependencies if true.").withRank(BSetting)
+  val allowUnsafeScalaLibUpgrade = settingKey[Boolean]("Allow the Scala library on the compilation classpath to be newer than the scalaVersion (see Scala SIP-51).").withRank(CSetting)
   val sbtResolver = settingKey[Resolver]("Provides a resolver for obtaining sbt as a dependency.").withRank(BMinusSetting)
   val sbtResolvers = settingKey[Seq[Resolver]]("The external resolvers for sbt and plugin dependencies.").withRank(BMinusSetting)
   val sbtDependency = settingKey[ModuleID]("Provides a definition for declaring the current version of sbt.").withRank(BMinusSetting)

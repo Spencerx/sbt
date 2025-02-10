@@ -22,7 +22,7 @@ abstract class SourcePositionImpl {
 }
 
 final class SourcePositionMacro(val c: blackbox.Context) {
-  import c.universe.{ NoPosition => _, _ }
+  import c.universe.{ NoPosition as _, * }
 
   def fromEnclosingImpl(): Expr[SourcePosition] = {
     val pos = c.enclosingPosition

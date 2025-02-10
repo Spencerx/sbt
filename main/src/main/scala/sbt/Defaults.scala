@@ -191,6 +191,7 @@ object Defaults extends BuildCommon {
       apiMappings := Map.empty,
       autoScalaLibrary :== true,
       managedScalaInstance :== true,
+      allowUnsafeScalaLibUpgrade :== false,
       classpathEntryDefinesClass := { (file: File) =>
         sys.error("use classpathEntryDefinesClassVF instead")
       },
@@ -296,6 +297,7 @@ object Defaults extends BuildCommon {
       csrLogger := LMCoursier.coursierLoggerTask.value,
       csrMavenProfiles :== Set.empty,
       csrReconciliations :== LMCoursier.relaxedForAllModules,
+      csrMavenDependencyOverride :== false,
       csrSameVersions := Seq(
         ScalaArtifacts.Artifacts.map(a => InclExclRule(scalaOrganization.value, a)).toSet
       ),

@@ -12,6 +12,8 @@ import java.nio.file.{ Path, Paths }
 import java.util.Locale
 
 import scala.collection.concurrent.TrieMap
+import scala.reflect.Selectable.reflectiveSelectable
+import scala.util.control.NonFatal
 
 object Util:
   def makeList[T](size: Int, value: T): List[T] = List.fill(size)(value)
@@ -86,4 +88,46 @@ object Util:
       case None =>
         if sys.props("java.home").endsWith("jre") then Paths.get(sys.props("java.home")).getParent()
         else Paths.get(sys.props("java.home"))
+
+  /**
+   * Given a list of event handlers expressed partial functions, combine them
+   * together using orElse from the left.
+   */
+  def reduceIntents[A1, A2](intents: PartialFunction[A1, A2]*): PartialFunction[A1, A2] =
+    intents.toList.reduceLeft(_ orElse _)
+
+  lazy val majorJavaVersion: Int =
+    try {
+      val javaVersion = sys.props.get("java.version").getOrElse("1.0")
+      if (javaVersion.startsWith("1.")) {
+        javaVersion.split("\\.")(1).toInt
+      } else {
+        javaVersion.split("\\.")(0).toInt
+      }
+    } catch {
+      case NonFatal(_) => 0
+    }
+
+  private type GetId = {
+    def getId: Long
+  }
+  private type ThreadId = {
+    def threadId: Long
+  }
+
+  /**
+   * Returns current thread id.
+   * Thread.threadId was added in JDK 19, and deprecated Thread#getId
+   * https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Thread.html#threadId()
+   */
+  def threadId: Long =
+    if (majorJavaVersion < 19) {
+      (Thread.currentThread(): AnyRef) match {
+        case g: GetId @unchecked => g.getId
+      }
+    } else {
+      (Thread.currentThread(): AnyRef) match {
+        case g: ThreadId @unchecked => g.threadId
+      }
+    }
 end Util

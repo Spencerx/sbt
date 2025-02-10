@@ -95,6 +95,7 @@ object LMCoursier {
       depsOverrides: Seq[ModuleID],
       updateConfig: Option[UpdateConfiguration],
       sameVersions: Seq[Set[InclExclRule]],
+      enableDependencyOverrides: Option[Boolean],
       log: Logger
   ): CoursierConfiguration = {
     val coursierExcludeDeps = Inputs
@@ -146,6 +147,7 @@ object LMCoursier {
       .withForceVersions(userForceVersions.toVector)
       .withMissingOk(missingOk)
       .withSameVersions(sameVersions)
+    // .withEnableDependencyOverrides(enableDependencyOverrides)
   }
 
   def coursierConfigurationTask: Def.Initialize[Task[CoursierConfiguration]] = Def.task {
@@ -172,6 +174,7 @@ object LMCoursier {
       dependencyOverrides.value,
       Some(updateConfiguration.value),
       csrSameVersions.value,
+      Some(csrMavenDependencyOverride.value),
       streams.value.log
     )
   }
@@ -207,6 +210,7 @@ object LMCoursier {
       dependencyOverrides.value,
       Some(updateConfiguration.value),
       csrSameVersions.value,
+      Some(csrMavenDependencyOverride.value),
       streams.value.log
     )
   }
@@ -235,6 +239,7 @@ object LMCoursier {
       dependencyOverrides.value,
       Some(updateConfiguration.value),
       csrSameVersions.value,
+      Some(csrMavenDependencyOverride.value),
       streams.value.log
     )
   }

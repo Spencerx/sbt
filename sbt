@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 set +e
-declare builtin_sbt_version="1.10.6"
+declare builtin_sbt_version="1.10.7"
 declare -a residual_args
 declare -a java_args
 declare -a scalac_args
@@ -25,6 +25,7 @@ declare use_sbtn=
 declare no_server=
 declare sbtn_command="$SBTN_CMD"
 declare sbtn_version="1.10.5"
+declare use_colors=1
 
 ###  ------------------------------- ###
 ###  Helper methods for BASH scripts ###
@@ -103,6 +104,15 @@ declare -r sbt_home="$(dirname "$sbt_bin_dir")"
 
 echoerr () {
   echo 1>&2 "$@"
+}
+RED='\033[0;31m'
+NC='\033[0m' # No Color
+echoerr_error () {
+  if [[ $use_colors == "1" ]]; then
+    echoerr -e "[${RED}error${NC}] $@"
+  else
+    echoerr "[error] $@"
+  fi
 }
 vlog () {
   [[ $sbt_verbose || $sbt_debug ]] && echoerr "$@"
@@ -486,6 +496,21 @@ copyRt() {
   fi
 }
 
+# Confirm a user's intent if the current directory does not look like an sbt
+# top-level directory and neither the --allow-empty option nor the "new" command was given.
+checkWorkingDirectory() {
+  if [[ ! -n "$allow_empty" ]]; then
+    [[ -f ./build.sbt || -d ./project || -n "$sbt_new" ]] || {
+      echoerr_error "Neither build.sbt nor a 'project' directory in the current directory: $(pwd)"
+      echoerr_error "run 'sbt new', touch build.sbt, or run 'sbt --allow-empty'."
+      echoerr_error ""
+      echoerr_error "To opt out of this check, create ${config_home}/sbtopts with:"
+      echoerr_error "--allow-empty"
+      exit 1
+    }
+  fi
+}
+
 run() {
   # Copy preloaded repo to user's preloaded directory
   syncPreloaded
@@ -522,6 +547,7 @@ run() {
     done
     echo "shutdown ${#sbt_processes[@]} sbt processes"
   else
+    checkWorkingDirectory
     # run sbt
     execRunner "$java_cmd" \
       "${java_args[@]}" \
@@ -546,7 +572,10 @@ declare -r sbt_opts_file=".sbtopts"
 declare -r build_props_file="$(pwd)/project/build.properties"
 declare -r etc_sbt_opts_file="/etc/sbt/sbtopts"
 # this allows /etc/sbt/sbtopts location to be changed
-declare -r etc_file="${SBT_ETC_FILE:-$etc_sbt_opts_file}"
+declare machine_sbt_opts_file="${etc_sbt_opts_file}"
+declare config_home="${XDG_CONFIG_HOME:-$HOME/.config}/sbt"
+[[ -f "${config_home}/sbtopts" ]] && machine_sbt_opts_file="${config_home}/sbtopts"
+[[ -f "$SBT_ETC_FILE" ]] && machine_sbt_opts_file="$SBT_ETC_FILE"
 declare -r dist_sbt_opts_file="${sbt_home}/conf/sbtopts"
 declare -r win_sbt_opts_file="${sbt_home}/conf/sbtconfig.txt"
 declare sbt_jar="$(jar_file)"
@@ -571,7 +600,7 @@ Usage: `basename "$0"` [options]
                       enable or disable supershell            (sbt 1.3 and above)
   --traces            generate Trace Event report on shutdown (sbt 1.3 and above)
   --timings           display task timings report on shutdown
-  --sbt-create        start sbt even if current directory contains no sbt project
+  --allow-empty       start sbt even if current directory contains no sbt project
   --sbt-dir   <path>  path to global settings/plugins directory (default: ~/.sbt)
   --sbt-boot  <path>  path to shared boot directory (default: ~/.sbt/boot in 0.11 series)
   --sbt-cache <path>  path to global cache directory (default: operating system specific)
@@ -610,7 +639,7 @@ process_my_args () {
     case "$1" in
              -batch|--batch) exec </dev/null && shift ;; #>
 
-   -sbt-create|--sbt-create) sbt_create=true && shift ;;
+   -allow-empty|--allow-empty|-sbt-create|--sbt-create) allow_empty=true && shift ;;
 
                         new) sbt_new=true && addResidual "$1" && shift ;;
 
@@ -620,23 +649,6 @@ process_my_args () {
 
   # Now, ensure sbt version is used.
   [[ "${sbt_version}XXX" != "XXX" ]] && addJava "-Dsbt.version=$sbt_version"
-
-  # Confirm a user's intent if the current directory does not look like an sbt
-  # top-level directory and neither the -sbt-create option nor the "new"
-  # command was given.
-  [[ -f ./build.sbt || -d ./project || -n "$sbt_create" || -n "$sbt_new" ]] || {
-    echo "[warn] Neither build.sbt nor a 'project' directory in the current directory: $(pwd)"
-    while true; do
-      echo 'c) continue'
-      echo 'q) quit'
-
-      read -p '? ' || exit 1
-      case "$REPLY" in
-        c|C) break ;;
-        q|Q) exit 1 ;;
-      esac
-    done
-  }
 }
 
 ## map over argument array. this is used to process both command line arguments and SBT_OPTS
@@ -697,6 +709,7 @@ process_args () {
                              export PATH="$2/bin:$PATH" &&
                              shift 2 ;;
 
+ -Dsbt.color=never|-Dsbt.log.noformat=true) addJava "$1" && use_colors=0 && shift ;;
                   "-D*"|-D*) addJava "$1" && shift ;;
                         -J*) addJava "${1:2}" && shift ;;
                           *) addResidual "$1" && shift ;;
@@ -788,11 +801,13 @@ runNativeClient() {
 
 original_args=("$@")
 
-# Here we pull in the default settings configuration.
-[[ -f "$dist_sbt_opts_file" ]] && set -- $(loadConfigFile "$dist_sbt_opts_file") "$@"
-
-# Here we pull in the global settings configuration.
-[[ -f "$etc_file" ]] && set -- $(loadConfigFile "$etc_file") "$@"
+# Pull in the machine-wide settings configuration.
+if [[ -f "$machine_sbt_opts_file" ]]; then
+  set -- $(loadConfigFile "$machine_sbt_opts_file") "$@"
+else
+  # Otherwise pull in the default settings configuration.
+  [[ -f "$dist_sbt_opts_file" ]] && set -- $(loadConfigFile "$dist_sbt_opts_file") "$@"
+fi
 
 # Pull in the project-level config file, if it exists.
 [[ -f "$sbt_opts_file" ]] && set -- $(loadConfigFile "$sbt_opts_file") "$@"
