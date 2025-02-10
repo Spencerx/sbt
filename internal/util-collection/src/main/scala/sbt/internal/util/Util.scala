@@ -80,6 +80,13 @@ object Util {
     def ignore(f: c.Tree): c.Expr[Unit] = c.universe.reify({ c.Expr[Any](f).splice; () })
   }
 
+  /**
+   * Given a list of event handlers expressed partial functions, combine them
+   * together using orElse from the left.
+   */
+  def reduceIntents[A1, A2](intents: PartialFunction[A1, A2]*): PartialFunction[A1, A2] =
+    intents.toList.reduceLeft(_ orElse _)
+
   lazy val majorJavaVersion: Int =
     try {
       val javaVersion = sys.props.get("java.version").getOrElse("1.0")
