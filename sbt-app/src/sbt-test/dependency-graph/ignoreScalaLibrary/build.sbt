@@ -4,6 +4,7 @@ libraryDependencies ++= Seq(
   "org.slf4j" % "slf4j-api" % "1.7.2",
   "ch.qos.logback" % "logback-classic" % "1.0.7"
 )
+csrMavenDependencyOverride := false
 
 TaskKey[Unit]("check") := {
   val report = updateFull.value

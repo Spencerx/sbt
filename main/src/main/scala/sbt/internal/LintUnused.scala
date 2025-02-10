@@ -34,6 +34,7 @@ object LintUnused {
       configuration,
       crossScalaVersions,
       crossSbtVersions,
+      allowUnsafeScalaLibUpgrade,
       evictionWarningOptions,
       initialize,
       lintUnusedKeysOnLoad,

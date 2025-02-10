@@ -17,7 +17,7 @@ import sjsonnew.support.scalajson.unsafe.{ CompactPrinter, Converter }
 
 import java.io.File
 import java.net.URI
-import java.nio.file.Files
+import java.nio.file.{ Files, Paths }
 import java.util.concurrent.atomic.AtomicInteger
 import scala.concurrent.duration.*
 
@@ -57,6 +57,16 @@ class BuildServerTest extends AbstractServerTest {
         case None    => sys.error(s"buildserver-root-build not in ${result.targets}")
     assert(buildServerBuildTarget.id.uri.toString.endsWith("#buildserver-root-build"))
     assert(!result.targets.exists(_.displayName.contains("badBuildTarget")))
+    // Check for JVM based Scala Project, built target should contain Java version information
+    val scalaBuildTarget =
+      Converter.fromJsonOptionUnsafe[ScalaBuildTarget](utilTarget.data)
+    val javaTarget = scalaBuildTarget.jvmBuildTarget
+    (javaTarget.flatMap(_.javaVersion), javaTarget.flatMap(_.javaHome)) match {
+      case (Some(javaVersion), Some(javaHome)) =>
+        assert(javaVersion.equals(sys.props("java.version")))
+        assert(javaHome.equals(Paths.get(sys.props("java.home")).toUri))
+      case _ => fail("JVM build target should contain javaVersion and javaHome")
+    }
   }
 
   test("buildTarget/sources") {

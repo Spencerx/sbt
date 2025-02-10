@@ -3,7 +3,7 @@ import Keys.*
 
 object Dependencies {
   // WARNING: Please Scala update versions in PluginCross.scala too
-  val scala213 = "2.13.15"
+  val scala213 = "2.13.16"
   val scala3 = "3.6.3"
   val checkPluginCross = settingKey[Unit]("Make sure scalaVersion match up")
   val baseScalaVersion = scala3
@@ -77,7 +77,7 @@ object Dependencies {
   // JLine 3 version must be coordinated together with JAnsi version
   // and the JLine 2 fork version, which uses the same JAnsi
   val jline =
-    "org.scala-sbt.jline" % "jline" % "2.14.7-sbt-9c3b6aca11c57e339441442bbf58e550cdfecb79"
+    "org.scala-sbt.jline" % "jline" % "2.14.7-sbt-9a88bc413e2b34a4580c001c654d1a7f4f65bf18"
   val jline3Version = "3.27.1"
   val jline3Terminal = "org.jline" % "jline-terminal" % jline3Version
   val jline3JNI = "org.jline" % "jline-terminal-jni" % jline3Version
@@ -119,7 +119,7 @@ object Dependencies {
 
   // lm-coursier dependencies
   val dataclassScalafixVersion = "0.1.0"
-  val coursierVersion = "2.1.19"
+  val coursierVersion = "2.1.23"
 
   val coursier = ("io.get-coursier" %% "coursier" % coursierVersion)
     .cross(CrossVersion.for3Use2_13)

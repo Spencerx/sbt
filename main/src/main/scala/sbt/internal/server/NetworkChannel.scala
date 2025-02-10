@@ -165,7 +165,7 @@ final class NetworkChannel(
       }
   }
 
-  val thread = new Thread(s"sbt-networkchannel-${connection.getPort}") {
+  private val thread = new Thread(s"sbt-networkchannel-${connection.getPort}") {
     private val ct = "Content-Type: "
     private val x1 = "application/sbt-x1"
     override def run(): Unit = {
@@ -243,7 +243,6 @@ final class NetworkChannel(
       }
     }
   }
-  thread.start()
 
   private[sbt] def isLanguageServerProtocol: Boolean = true
 
@@ -370,7 +369,6 @@ final class NetworkChannel(
     s"sbt-$name-write-thread"
   )
   writeThread.setDaemon(true)
-  writeThread.start()
 
   def publishBytes(event: Array[Byte], delimit: Boolean): Unit =
     try pendingWrites.put(event -> delimit)
@@ -959,6 +957,9 @@ final class NetworkChannel(
     }
   }
   private[sbt] def isAttached: Boolean = attached.get
+
+  thread.start()
+  writeThread.start()
 }
 
 object NetworkChannel {

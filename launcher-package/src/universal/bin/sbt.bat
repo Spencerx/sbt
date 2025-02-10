@@ -45,7 +45,7 @@ set sbt_args_timings=
 set sbt_args_traces=
 set sbt_args_sbt_boot=
 set sbt_args_sbt_cache=
-set sbt_args_sbt_create=
+set sbt_args_allow_empty=
 set sbt_args_sbt_dir=
 set sbt_args_sbt_version=
 set sbt_args_mem=
@@ -72,11 +72,13 @@ rem TODO: remove/deprecate sbtconfig.txt and parse the sbtopts files
 rem FIRST we load the config file of extra options.
 set SBT_CONFIG=!SBT_HOME!\conf\sbtconfig.txt
 set SBT_CFG_OPTS=
-for /F "tokens=* eol=# usebackq delims=" %%i in ("!SBT_CONFIG!") do (
-  set DO_NOT_REUSE_ME=%%i
-  rem ZOMG (Part #2) WE use !! here to delay the expansion of
-  rem SBT_CFG_OPTS, otherwise it remains "" for this loop.
-  set SBT_CFG_OPTS=!SBT_CFG_OPTS! !DO_NOT_REUSE_ME!
+if exist "!SBT_CONFIG!" (
+  for /F "tokens=* eol=# usebackq delims=" %%i in ("!SBT_CONFIG!") do (
+    set DO_NOT_REUSE_ME=%%i
+    rem ZOMG (Part #2) WE use !! here to delay the expansion of
+    rem SBT_CFG_OPTS, otherwise it remains "" for this loop.
+    set SBT_CFG_OPTS=!SBT_CFG_OPTS! !DO_NOT_REUSE_ME!
+  )
 )
 
 rem poor man's jenv (which is not available on Windows)
@@ -235,12 +237,14 @@ if defined _traces_arg (
   goto args_loop
 )
 
-if "%~0" == "-sbt-create" set _sbt_create_arg=true
-if "%~0" == "--sbt-create" set _sbt_create_arg=true
+if "%~0" == "-sbt-create" set _allow_empty_arg=true
+if "%~0" == "--sbt-create" set _allow_empty_arg=true
+if "%~0" == "-allow-empty" set _allow_empty_arg=true
+if "%~0" == "--allow-empty" set _allow_empty_arg=true
 
-if defined _sbt_create_arg (
-  set _sbt_create_arg=
-  set sbt_args_sbt_create=1
+if defined _allow_empty_arg (
+  set _allow_empty_arg=
+  set sbt_args_allow_empty=1
   goto args_loop
 )
 
@@ -526,25 +530,12 @@ goto args_loop
 rem Confirm a user's intent if the current directory does not look like an sbt
 rem top-level directory and the "new" command was not given.
 
-if not defined sbt_args_sbt_create if not defined sbt_args_print_version if not defined sbt_args_print_sbt_version if not defined sbt_args_print_sbt_script_version if not defined shutdownall if not exist build.sbt (
+if not defined sbt_args_allow_empty if not defined sbt_args_print_version if not defined sbt_args_print_sbt_version if not defined sbt_args_print_sbt_script_version if not defined shutdownall if not exist build.sbt (
   if not exist project\ (
     if not defined sbt_new (
-      echo [warn] Neither build.sbt nor a 'project' directory in the current directory: "%CD%"
-      setlocal
-:confirm
-      echo c^) continue
-      echo q^) quit
-
-      set /P reply=^?
-      if /I "!reply!" == "c" (
-        goto confirm_end
-      ) else if /I "!reply!" == "q" (
-        exit /B 1
-      )
-
-      goto confirm
-:confirm_end
-      endlocal
+      echo [error] Neither build.sbt nor a 'project' directory in the current directory: "%CD%"
+      echo [error] run 'sbt new', touch build.sbt, or run 'sbt --allow-empty'.
+      goto error
     )
   )
 )
