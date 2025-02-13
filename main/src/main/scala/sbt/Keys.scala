@@ -29,6 +29,7 @@ import sbt.internal.remotecache.RemoteCacheArtifact
 import sbt.internal.server.BuildServerProtocol.BspFullWorkspace
 import sbt.internal.server.{ BuildServerReporter, ServerHandler }
 import sbt.internal.util.{ AttributeKey, ProgressState, SourcePosition }
+import sbt.internal.worker.ClientJobParams
 import sbt.io._
 import sbt.librarymanagement.Configurations.CompilerPlugin
 import sbt.librarymanagement.LibraryManagementCodec._
@@ -437,6 +438,8 @@ object Keys {
   val bspScalaMainClasses = inputKey[Unit]("Implementation of buildTarget/scalaMainClasses").withRank(DTask)
   val bspScalaMainClassesItem = taskKey[ScalaMainClassesItem]("").withRank(DTask)
   val bspReporter = taskKey[BuildServerReporter]("").withRank(DTask)
+  val clientJob = inputKey[ClientJobParams]("Translates a task into a job specification").withRank(Invisible)
+  val clientJobRunInfo = inputKey[ClientJobParams]("Translates the run task into a job specification").withRank(Invisible)
 
   val useCoursier = settingKey[Boolean]("Use Coursier for dependency resolution.").withRank(BSetting)
   val csrCacheDirectory = settingKey[File]("Coursier cache directory. Uses -Dsbt.coursier.home or Coursier's default.").withRank(CSetting)

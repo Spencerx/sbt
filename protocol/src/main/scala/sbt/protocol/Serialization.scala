@@ -27,6 +27,7 @@ object Serialization {
   private[sbt] val VsCode = "application/vscode-jsonrpc; charset=utf-8"
   val readSystemIn = "sbt/readSystemIn"
   val cancelReadSystemIn = "sbt/cancelReadSystemIn"
+  val clientJob = "sbt/clientJob"
   val systemIn = "sbt/systemIn"
   val systemOut = "sbt/systemOut"
   val systemErr = "sbt/systemErr"
@@ -67,15 +68,10 @@ object Serialization {
     command match {
       case x: InitCommand =>
         val execId = x.execId.getOrElse(UUID.randomUUID.toString)
-        val analysis = s""""skipAnalysis" : ${x.skipAnalysis.getOrElse(false)}"""
-        val opt = x.token match {
-          case Some(t) =>
-            val json: JValue = Converter.toJson[String](t).get
-            val v = CompactPrinter(json)
-            s"""{ "token": $v, $analysis }"""
-          case None => s"{ $analysis }"
-        }
-        s"""{ "jsonrpc": "2.0", "id": "$execId", "method": "initialize", "params": { "initializationOptions": $opt } }"""
+        val opts = x.initializationOptions.getOrElse(sys.error("expected initializationOptions"))
+        import sbt.protocol.codec.JsonProtocol._
+        val optsJson = CompactPrinter(Converter.toJson(opts).get)
+        s"""{ "jsonrpc": "2.0", "id": "$execId", "method": "initialize", "params": { "initializationOptions": $optsJson } }"""
       case x: ExecCommand =>
         val execId = x.execId.getOrElse(UUID.randomUUID.toString)
         val json: JValue = Converter.toJson[String](x.commandLine).get

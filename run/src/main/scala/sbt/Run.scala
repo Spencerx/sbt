@@ -26,25 +26,16 @@ sealed trait ScalaRun {
 }
 class ForkRun(config: ForkOptions) extends ScalaRun {
   def run(mainClass: String, classpath: Seq[File], options: Seq[String], log: Logger): Try[Unit] = {
-    def processExitCode(exitCode: Int, label: String): Try[Unit] =
-      if (exitCode == 0) Success(())
-      else
-        Failure(
-          new MessageOnlyException(
-            s"""Nonzero exit code returned from $label: $exitCode""".stripMargin
-          )
-        )
-
     log.info(s"running (fork) $mainClass ${Run.runOptionsStr(options)}")
     val c = configLogged(log)
     val scalaOpts = scalaOptions(mainClass, classpath, options)
     val exitCode = try Fork.java(c, scalaOpts)
     catch {
       case _: InterruptedException =>
-        log.warn("Run canceled.")
+        log.warn("run canceled")
         1
     }
-    processExitCode(exitCode, "runner")
+    Run.processExitCode(exitCode, "runner")
   }
 
   def fork(mainClass: String, classpath: Seq[File], options: Seq[String], log: Logger): Process = {
@@ -195,4 +186,13 @@ object Run {
       case str if str.contains(" ") => "\"" + str + "\""
       case str                      => str
     }).mkString(" ")
+
+  private[sbt] def processExitCode(exitCode: Int, label: String): Try[Unit] =
+    if (exitCode == 0) Success(())
+    else
+      Failure(
+        new MessageOnlyException(
+          s"""nonzero exit code returned from $label: $exitCode""".stripMargin
+        )
+      )
 }

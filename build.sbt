@@ -758,7 +758,7 @@ lazy val protocolProj = (project in file("protocol"))
 // General command support and core commands not specific to a build system
 lazy val commandProj = (project in file("main-command"))
   .enablePlugins(ContrabandPlugin, JsonCodecPlugin)
-  .dependsOn(protocolProj, completeProj, utilLogging)
+  .dependsOn(protocolProj, completeProj, utilLogging, runProj)
   .settings(
     testedBaseSettings,
     name := "Command",
@@ -1072,6 +1072,7 @@ lazy val mainProj = (project in file("main"))
       exclude[IncompatibleTemplateDefProblem]("sbt.internal.server.BuildServerReporter"),
       exclude[MissingClassProblem]("sbt.internal.CustomHttp*"),
       exclude[ReversedMissingMethodProblem]("sbt.JobHandle.isAutoCancel"),
+      exclude[ReversedMissingMethodProblem]("sbt.BackgroundJobService.createWorkingDirectory"),
     )
   )
   .configure(

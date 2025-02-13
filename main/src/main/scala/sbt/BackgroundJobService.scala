@@ -70,6 +70,8 @@ abstract class BackgroundJobService extends Closeable {
 
   def waitFor(job: JobHandle): Unit
 
+  private[sbt] def createWorkingDirectory: File
+
   /** Copies classpath to temporary directories. */
   def copyClasspath(products: Classpath, full: Classpath, workingDirectory: File): Classpath
 

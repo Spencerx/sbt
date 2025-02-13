@@ -220,7 +220,7 @@ case class TestServer(
 
   // initiate handshake
   sendJsonRpc(
-    s"""{ "jsonrpc": "2.0", "id": 1, "method": "initialize", "params": { "initializationOptions": { "skipAnalysis": true } } }"""
+    s"""{ "jsonrpc": "2.0", "id": 1, "method": "initialize", "params": { "initializationOptions": { "skipAnalysis": true, "canWork": true } } }"""
   )
 
   def test(f: TestServer => Future[Assertion]): Future[Assertion] = {
