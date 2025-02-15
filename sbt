@@ -200,6 +200,7 @@ acquire_sbtn () {
       exit 2
     fi
   elif [[ "$OSTYPE" == "darwin"* ]]; then
+    arch="universal"
     archive_target="$p/sbtn-universal-apple-darwin-${sbtn_v}.tar.gz"
     url="https://github.com/sbt/sbtn-dist/releases/download/v${sbtn_v}/sbtn-universal-apple-darwin-${sbtn_v}.tar.gz"
   elif [[ "$OSTYPE" == "cygwin" ]] || [[ "$OSTYPE" == "msys" ]] || [[ "$OSTYPE" == "win32" ]]; then
