@@ -158,7 +158,7 @@ private[sbt] object EvaluateConfigurations {
         (imp, DefinedSbtValues(definitions))
       }
     val allImports = importDefs.map(s => (s, -1)) ++ parsed.imports
-    val dslEntries = parsed.settings map { case (dslExpression, range) =>
+    val dslEntries = parsed.settings map { (dslExpression, range) =>
       evaluateDslEntry(eval, name, allImports, dslExpression, range)
     }
 
@@ -195,10 +195,10 @@ private[sbt] object EvaluateConfigurations {
     p.copy(base = IO.resolve(f, p.base))
 
   def addOffset(offset: Int, lines: Seq[(String, Int)]): Seq[(String, Int)] =
-    lines.map { case (s, i) => (s, i + offset) }
+    lines.map { (s, i) => (s, i + offset) }
 
   def addOffsetToRange(offset: Int, ranges: Seq[(String, LineRange)]): Seq[(String, LineRange)] =
-    ranges.map { case (s, r) => (s, r.shift(offset)) }
+    ranges.map { (s, r) => (s, r.shift(offset)) }
 
   /**
    * The name of the class we cast DSL "setting" (vs. definition) lines to.
@@ -317,7 +317,7 @@ private[sbt] object EvaluateConfigurations {
       definitions: Seq[(String, LineRange)],
       file: Option[VirtualFileRef],
   ): EvalDefinitions = {
-    val convertedRanges = definitions.map { case (s, r) => (s, r.start to r.end) }
+    val convertedRanges = definitions.map { (s, r) => (s, r.start to r.end) }
     eval.evalDefinitions(
       convertedRanges,
       new EvalImports(imports.map(_._1)), // name
@@ -367,7 +367,7 @@ object Index {
     if duplicates.isEmpty then multiMap.collect { case (k, v) if validID(k) => (k, v.head) }.toMap
     else
       val duplicateStr = duplicates
-        .map { case (k, tps) => s"'$k' (${tps.mkString(", ")})" }
+        .map { (k, tps) => s"'$k' (${tps.mkString(", ")})" }
         .mkString(",")
       sys.error(s"Some keys were defined with the same name but different types: $duplicateStr")
   }

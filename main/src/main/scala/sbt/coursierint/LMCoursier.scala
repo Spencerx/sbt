@@ -106,7 +106,7 @@ object LMCoursier {
         log
       )
       .toVector
-      .map { case (o, n) =>
+      .map { (o, n) =>
         (o.value, n.value)
       }
       .sorted

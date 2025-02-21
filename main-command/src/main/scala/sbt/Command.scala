@@ -228,7 +228,7 @@ object Command {
   def spacedAny(name: String): Parser[String] = spacedC(name, any)
 
   def spacedC(name: String, c: Parser[Char]): Parser[String] =
-    ((c & opOrIDSpaced(name)) ~ c.+) map { case (f, rem) => (f +: rem).mkString }
+    ((c & opOrIDSpaced(name)) ~ c.+) map {  (f, rem) => (f +: rem).mkString }
 }
 
 // format: on

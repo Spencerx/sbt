@@ -70,7 +70,7 @@ private[sbt] object WatchTransitiveDependencies {
       }).toTaskable,
       (scopedKey.scope / internalDependencyConfigurations).toTaskable,
       state,
-    ).mapN { case (log, configs, st) =>
+    ).mapN { (log, configs, st) =>
       new Arguments(
         scopedKey,
         extracted,
@@ -90,7 +90,7 @@ private[sbt] object WatchTransitiveDependencies {
         val rs = Keys.resolvedScoped.value
         (extracted, compiledMap, st, rs)
       }
-      .flatMapTask { case (extracted, compiledMap, st, rs) =>
+      .flatMapTask { (extracted, compiledMap, st, rs) =>
         st.currentCommand.get.commandLine match
           case ShowTransitive(key) =>
             Parser.parse(key.trim, Act.scopedKeyParser(st)) match
@@ -202,7 +202,7 @@ private[sbt] object WatchTransitiveDependencies {
                     .map { task =>
                       val zeroedTaskScope = key.scope.copy(task = Zero)
                       val transitiveKeys = arguments.dependencyConfigurations.flatMap {
-                        case (p, configs) =>
+                        (p, configs) =>
                           configs.map(c =>
                             ScopedKey(zeroedTaskScope.rescope(p).rescope(ConfigKey(c)), task)
                           )

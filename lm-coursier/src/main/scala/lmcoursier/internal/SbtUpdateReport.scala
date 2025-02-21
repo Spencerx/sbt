@@ -34,7 +34,7 @@ private[internal] object SbtUpdateReport {
     project.properties.filter(_._1.startsWith("info."))
 
   private val moduleId = caching[(Dependency, String, Map[String, String]), ModuleID] {
-    case (dependency, version, extraProperties) =>
+    (dependency, version, extraProperties) =>
       val mod = sbt.librarymanagement.ModuleID(
         dependency.module.organization.value,
         dependency.module.name.value,
@@ -48,7 +48,7 @@ private[internal] object SbtUpdateReport {
         .withExtraAttributes(dependency.module.attributes ++ extraProperties)
         .withExclusions(
           dependency.minimizedExclusions.toVector
-            .map { case (org, name) =>
+            .map { (org, name) =>
               sbt.librarymanagement
                 .InclExclRule()
                 .withOrganization(org.value)
@@ -61,7 +61,7 @@ private[internal] object SbtUpdateReport {
   private val artifact = caching[
     (Module, Map[String, String], Publication, Artifact, Seq[ClassLoader]),
     sbt.librarymanagement.Artifact
-  ] { case (module, extraProperties, pub, artifact, classLoaders) =>
+  ] { (module, extraProperties, pub, artifact, classLoaders) =>
     sbt.librarymanagement
       .Artifact(pub.name)
       .withType(pub.`type`.value)
@@ -85,7 +85,7 @@ private[internal] object SbtUpdateReport {
         Seq[ClassLoader]
     ),
     ModuleReport
-  ] { case (dependency, dependees, project, artifacts, classLoaders) =>
+  ] { (dependency, dependees, project, artifacts, classLoaders) =>
     val sbtArtifacts = artifacts.collect { case (pub, artifact0, Some(file)) =>
       (
         artifact((dependency.module, infoProperties(project).toMap, pub, artifact0, classLoaders)),
@@ -100,7 +100,7 @@ private[internal] object SbtUpdateReport {
       new GregorianCalendar(dt.year, dt.month, dt.day, dt.hour, dt.minute, dt.second)
     }
 
-    val callers = dependees.distinct.map { case (dependee, dependeeProj) =>
+    val callers = dependees.distinct.map { (dependee, dependeeProj) =>
       Caller(
         moduleId((dependee, dependeeProj.version, Map.empty)),
         // FIXME Shouldn't we only keep the configurations pulling dependency?
@@ -162,14 +162,14 @@ private[internal] object SbtUpdateReport {
 
     val depArtifacts1 = fullArtifactsOpt match {
       case Some(map) =>
-        deps.map { case (d, p, a) =>
+        deps.map { (d, p, a) =>
           val d0 = d.withAttributes(d.attributes.withClassifier(p.classifier))
           val a0 = if (missingOk) a.withOptional(true) else a
           val f = map.get((d0, p, a0)).flatten
           (d, p, a0, f) // not d0
         }
       case None =>
-        deps.map { case (d, p, a) =>
+        deps.map { (d, p, a) =>
           (d, p, a, None)
         }
     }
@@ -184,7 +184,7 @@ private[internal] object SbtUpdateReport {
         val notFound = depArtifacts0.filter(!_._3.extra.contains("sig"))
 
         if (notFound.isEmpty)
-          depArtifacts0.flatMap { case (dep, pub, a, f) =>
+          depArtifacts0.flatMap { (dep, pub, a, f) =>
             val sigPub = pub
               // not too sure about those
               .withExt(Extension(pub.ext.value))
@@ -259,14 +259,14 @@ private[internal] object SbtUpdateReport {
 
     val reverseDependencies = {
       val transitiveReverseDependencies = res.reverseDependencies.toVector
-        .map { case (k, v) => clean(k) -> v.map(clean) }
+        .map { (k, v) => clean(k) -> v.map(clean) }
         .groupMapReduce(_._1)((_, deps) => deps)(_ ++ _)
 
       (transitiveReverseDependencies.toVector ++ directReverseDependencies.toVector)
         .groupMapReduce(_._1)((_, deps) => deps)(_ ++ _)
     }
 
-    groupedDepArtifacts.toVector.map { case (dep, artifacts) =>
+    groupedDepArtifacts.toVector.map { (dep, artifacts) =>
       val proj = lookupProject(dep.moduleVersion).get
       val assembledProject = assemble(proj)
 
@@ -292,7 +292,7 @@ private[internal] object SbtUpdateReport {
               Vector.empty
           }
         }
-      val filesOpt = artifacts.map { case (pub, a, fileOpt) =>
+      val filesOpt = artifacts.map { (pub, a, fileOpt) =>
         val fileOpt0 = fileOpt.orElse {
           if (fullArtifactsOpt.isEmpty)
             artifactFileOpt(proj.module, proj.version, pub.attributes, a)
@@ -328,7 +328,7 @@ private[internal] object SbtUpdateReport {
       classLoaders: Seq[ClassLoader],
   ): UpdateReport = {
 
-    val configReports = resolutions.map { case (config, subRes) =>
+    val configReports = resolutions.map { (config, subRes) =>
       val reports = moduleReports(
         thisModule,
         subRes,

@@ -282,7 +282,7 @@ trait Parsers {
       (open ~ (notDelim ~ close).?).flatMap {
         case (l, Some((content, r))) => Parser.success(s"$l$content$r")
         case (l, None) =>
-          ((notDelim ~ impl()).map { case (leftPrefix, nestedBraces) =>
+          ((notDelim ~ impl()).map { (leftPrefix, nestedBraces) =>
             leftPrefix + nestedBraces
           }.+ ~ notDelim ~ close).map { case ((nested, suffix), r) =>
             s"$l${nested.mkString}$suffix$r"
@@ -314,10 +314,10 @@ trait Parsers {
    * Parses an unquoted, non-empty String value that cannot start with a double quote and cannot
    * contain whitespace.
    */
-  lazy val NotQuoted = (NotDQuoteSpaceClass ~ OptNotSpace) map { case (c, s) => c.toString + s }
+  lazy val NotQuoted = (NotDQuoteSpaceClass ~ OptNotSpace) map { (c, s) => c.toString + s }
 
   /** Parses a non-empty String value that cannot start with a double quote, but includes double quotes. */
-  lazy val NotQuotedThenQuoted = (NotQuoted ~ StringEscapable) map { case (s1, s2) =>
+  lazy val NotQuotedThenQuoted = (NotQuoted ~ StringEscapable) map { (s1, s2) =>
     s"""$s1\"$s2\""""
   }
 

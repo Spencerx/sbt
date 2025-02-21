@@ -63,7 +63,7 @@ private[sbt] class PluginsDebug(
       val possibleString =
         if (explained.lengthCompare(1) > 0)
           explained.zipWithIndex
-            .map { case (s, i) => s"$i. $s" }
+            .map { (s, i) => s"$i. $s" }
             .mkString(s"Multiple plugins are available that can provide $notFoundKey:\n", "\n", "")
         else
           s"$notFoundKey is provided by an available (but not activated) plugin:\n${explained.mkString}"

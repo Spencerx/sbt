@@ -75,7 +75,7 @@ object IMap {
       put(k, f(this.get(k).getOrElse(init)))
 
     def mapValues[V2[_]](f: [A] => V[A] => V2[A]) =
-      new IMap0[K, V2](Map(backing.iterator.map { case (k, v) =>
+      new IMap0[K, V2](Map(backing.iterator.map { (k, v) =>
         k -> f(v)
       }.toArray*))
 

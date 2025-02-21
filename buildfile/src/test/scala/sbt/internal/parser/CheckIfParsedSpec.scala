@@ -14,7 +14,7 @@ abstract class CheckIfParsedSpec(
 ) extends AbstractSpec {
 
   test(s"${this.getClass.getName} should parse sbt file") {
-    files foreach { case (content, description, nonEmptyImports, nonEmptyStatements) =>
+    files foreach { (content, description, nonEmptyImports, nonEmptyStatements) =>
       println(s"""${getClass.getSimpleName}: "$description" """)
       val (imports, statements) = splitter(content)
       assert(

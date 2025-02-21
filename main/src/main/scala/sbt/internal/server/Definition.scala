@@ -70,7 +70,7 @@ private[sbt] object Definition {
       val whiteSpaceReg = "(\\s|\\.)+".r
 
       val (zero, end) = fold(Seq.empty)(whiteSpaceReg.findAllIn(line))
-        .collect { case (white, ind) =>
+        .collect { (white, ind) =>
           (ind, ind + white.length)
         }
         .fold((0, line.length)) { case ((left, right), (from, to)) =>
@@ -85,7 +85,7 @@ private[sbt] object Definition {
       } yield (from -> to)
 
       ranges
-        .sortBy { case (from, to) => -(to - from) }
+        .sortBy { (from, to) => -(to - from) }
         .foldLeft(List.empty[String]) { case (z, (from, to)) =>
           val fragment = line.slice(from, to).trim
           if (isIdentifier(fragment))
@@ -134,7 +134,7 @@ private[sbt] object Definition {
         .flatMap { reg =>
           fold(Seq.empty)(reg.findAllIn(line))
         }
-        .collect { case (name, pos) =>
+        .collect { (name, pos) =>
           (if (name.endsWith("[")) name.init.trim else name.trim) -> pos
         }
     }
@@ -146,9 +146,9 @@ private[sbt] object Definition {
         .iterator
         .asScala
         .zipWithIndex
-        .flatMap { case (line, lineNumber) =>
+        .flatMap { (line, lineNumber) =>
           findInLine(line)
-            .collect { case (sym, from) =>
+            .collect { (sym, from) =>
               (file.toUri, lineNumber.toLong, from.toLong, from.toLong + sym.length)
             }
         }
@@ -294,7 +294,7 @@ private[sbt] object Definition {
                 }
                 .flatMap { (classFile: VirtualFileRef) =>
                   val x = converter.toPath(classFile)
-                  textProcessor.markPosition(x, sym).collect { case (uri, line, from, to) =>
+                  textProcessor.markPosition(x, sym).collect { (uri, line, from, to) =>
                     Location(
                       uri.toString,
                       Range(Position(line, from), Position(line, to)),

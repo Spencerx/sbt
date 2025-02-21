@@ -570,7 +570,7 @@ class NetworkClient(
           completions(msg.result match {
             case Some(o: JObject) =>
               o.value
-                .foldLeft(CompletionResponse(Vector.empty[String])) { case (resp, i) =>
+                .foldLeft(CompletionResponse(Vector.empty[String])) { (resp, i) =>
                   if (i.field == "items")
                     resp.withItems(
                       Converter
@@ -651,7 +651,7 @@ class NetworkClient(
             )
           )
       }
-    splitToMessage foreach { case (level, msg) =>
+    splitToMessage foreach { (level, msg) =>
       console.appendLog(level, msg)
     }
   }

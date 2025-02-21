@@ -648,7 +648,7 @@ object Defaults extends BuildCommon {
     resourceDigests := {
       val uifs = (unmanagedResources / inputFileStamps).value
       val mifs = (managedResources / inputFileStamps).value
-      (uifs ++ mifs).sortBy(_._1.toString()).map { case (p, fileStamp) =>
+      (uifs ++ mifs).sortBy(_._1.toString()).map { (p, fileStamp) =>
         FileStamp.toDigest(p, fileStamp)
       }
     },
@@ -1175,7 +1175,7 @@ object Defaults extends BuildCommon {
         (classLoaderLayeringStrategy),
         thisProject,
         fileConverter,
-      ).flatMapN { case (s, lt, tl, gp, ex, cp, fp, jo, clls, thisProj, c) =>
+      ).flatMapN { (s, lt, tl, gp, ex, cp, fp, jo, clls, thisProj, c) =>
         allTestGroupsTask(
           s,
           lt,
@@ -1330,7 +1330,7 @@ object Defaults extends BuildCommon {
 
   private lazy val inputTests0: Initialize[InputTask[Unit]] = {
     val parser = loadForParser(definedTestNames)((s, i) => testOnlyParser(s, i getOrElse Nil))
-    ParserGen(parser).flatMapTask { case ((selected, frameworkOptions)) =>
+    ParserGen(parser).flatMapTask { (selected, frameworkOptions) =>
       val s = streams.value
       val filter = testFilter.value
       val config = testExecution.value
@@ -1367,7 +1367,7 @@ object Defaults extends BuildCommon {
   ): Map[TestFramework, Runner] = {
     import Tests.Argument
     val opts = config.options.toList
-    frameworks.map { case (tf, f) =>
+    frameworks.map { (tf, f) =>
       val args = opts.flatMap {
         case Argument(None | Some(`tf`), args) => args
         case _                                 => Nil
@@ -1489,7 +1489,7 @@ object Defaults extends BuildCommon {
     }
     val output = Tests.foldTasks(groupTasks, config.parallel)
     val result = output map { out =>
-      out.events.foreach { case (suite, e) =>
+      out.events.foreach { (suite, e) =>
         if (
           strategy != ClassLoaderLayeringStrategy.Flat ||
           strategy != ClassLoaderLayeringStrategy.ScalaLibrary
@@ -1531,7 +1531,7 @@ object Defaults extends BuildCommon {
         }
       }
       val summaries =
-        runners map { case (tf, r) =>
+        runners map { (tf, r) =>
           Tests.Summary(frameworks(tf).name, r.done())
         }
       out.copy(summaries = summaries)
@@ -1607,7 +1607,7 @@ object Defaults extends BuildCommon {
       xs
         .flatMap(Path.allSubpaths)
         .withFilter(_._1.isFile())
-        .map { case (p, path) =>
+        .map { (p, path) =>
           val vf = converter.toVirtualFile(p.toPath())
           (vf: HashedVirtualFileRef) -> path
         }
@@ -1621,7 +1621,7 @@ object Defaults extends BuildCommon {
         .allSubpaths(d)
         .toSeq
         .withFilter(_._1.isFile())
-        .map { case (p, path) =>
+        .map { (p, path) =>
           val vf = converter.toVirtualFile(p.toPath())
           (vf: HashedVirtualFileRef) -> path
         }
@@ -1659,7 +1659,7 @@ object Defaults extends BuildCommon {
           case s if !exclude(s) => relative(s).map(s -> _)
           case _                => None
         }
-        .map { case (p, path) =>
+        .map { (p, path) =>
           val vf = converter.toVirtualFile(p.toPath())
           (vf: HashedVirtualFileRef) -> path
         }
@@ -1681,7 +1681,7 @@ object Defaults extends BuildCommon {
           case r if !rdirs(r) => relative(r).map(r -> _)
           case _              => None
         }
-        .map { case (p, path) =>
+        .map { (p, path) =>
           val vf = converter.toVirtualFile(p.toPath())
           (vf: HashedVirtualFileRef) -> path
         }
@@ -2126,7 +2126,7 @@ object Defaults extends BuildCommon {
           val allDeps = allDependencies.value
           (hasScala, hasJava) match {
             case (true, _) =>
-              val xapisFiles = xapis.map { case (k, v) =>
+              val xapisFiles = xapis.map { (k, v) =>
                 converter.toPath(k).toFile() -> v
               }
               val options = sOpts ++ Opts.doc.externalAPI(xapisFiles)
@@ -2979,7 +2979,7 @@ object Classpaths {
       IO.copyFile(file, targetFile)
       artifact.withName(nameWithSuffix) -> converter.toVirtualFile(targetFile.toPath)
     }
-    legacyPackages.map { case (artifact, file) =>
+    legacyPackages.map { (artifact, file) =>
       copyArtifact(artifact, file);
     }
 
@@ -3887,36 +3887,36 @@ object Classpaths {
       publishMavenStyle.toTaskable,
       compatibilityWarningOptions.toTaskable,
     ).mapN {
-      case (
-            lm,
-            s,
-            conf,
-            maybeUpdateLevel,
-            ucn,
-            state0,
-            sv,
-            ac,
-            usiOnly,
-            dcd,
-            ct,
-            er,
-            rs,
-            fup,
-            isPlugin,
-            thisRef,
-            im,
-            so,
-            sk,
-            tu,
-            uwConfig,
-            eel,
-            lds,
-            aeel,
-            avs,
-            avsj,
-            mavenStyle,
-            cwo,
-          ) =>
+      (
+          lm,
+          s,
+          conf,
+          maybeUpdateLevel,
+          ucn,
+          state0,
+          sv,
+          ac,
+          usiOnly,
+          dcd,
+          ct,
+          er,
+          rs,
+          fup,
+          isPlugin,
+          thisRef,
+          im,
+          so,
+          sk,
+          tu,
+          uwConfig,
+          eel,
+          lds,
+          aeel,
+          avs,
+          avsj,
+          mavenStyle,
+          cwo,
+      ) =>
         val cacheDirectory = ct / cacheLabel / ucn
         val cacheStoreFactory: CacheStoreFactory = {
           val factory =
@@ -4159,7 +4159,7 @@ object Classpaths {
   private[sbt] def depMap: Initialize[Task[Map[ModuleRevisionId, ModuleDescriptor]]] =
     import sbt.TupleSyntax.*
     (buildDependencies.toTaskable, thisProjectRef.toTaskable, settingsData, streams).flatMapN {
-      case (bd, thisProj, data, s) =>
+      (bd, thisProj, data, s) =>
         depMap(bd.classpathTransitiveRefs(thisProj), data, s.log)
     }
 
@@ -4252,7 +4252,7 @@ object Classpaths {
       data: Def.Settings,
       deps: BuildDependencies
   ): Seq[(ProjectRef, ConfigRef)] =
-    interSort(projectRef, conf, data, deps).map { case (projectRef, configName) =>
+    interSort(projectRef, conf, data, deps).map { (projectRef, configName) =>
       (projectRef, ConfigRef(configName))
     }
 
@@ -4396,7 +4396,7 @@ object Classpaths {
   private lazy val internalCompilerPluginClasspath: Initialize[Task[Classpath]] =
     (Def
       .task { (thisProjectRef.value, settingsData.value, buildDependencies.value, streams.value) })
-      .flatMapTask { case (ref, data, deps, s) =>
+      .flatMapTask { (ref, data, deps, s) =>
         ClasspathImpl.internalDependenciesImplTask(
           ref,
           CompilerPlugin,
@@ -4737,7 +4737,7 @@ trait BuildExtra extends BuildCommon with DefExtra {
         scoped.scopedKey,
         ClassLoaders.runner.mapReferenced(Project.mapScope(_.rescope(config))),
       ).zipWith(Def.task { ((config / fullClasspath).value, streams.value, fileConverter.value) }) {
-        case (rTask, t) =>
+        (rTask, t) =>
           (t, rTask).mapN { case ((cp, s, converter), r) =>
             given FileConverter = converter
             r.run(mainClass, cp.files, arguments, s.log).get

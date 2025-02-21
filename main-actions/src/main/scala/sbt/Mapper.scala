@@ -51,7 +51,7 @@ object Mapper:
     Option(baseDirectory.getParentFile)
       .map(parent => PathFinder(baseDirectory).allPaths pair relativeTo(parent))
       .getOrElse(PathFinder(baseDirectory).allPaths pair basic)
-      .map { case (f, s) => conv.toVirtualFile(f.toPath) -> s }
+      .map { (f, s) => conv.toVirtualFile(f.toPath) -> s }
 
   /**
    * return a Seq of mappings  excluding the directory itself.
@@ -82,5 +82,5 @@ object Mapper:
   def contentOf(baseDirectory: File)(using conv: FileConverter): Seq[(VirtualFile, String)] =
     (PathFinder(baseDirectory).allPaths --- PathFinder(baseDirectory))
       .pair(relativeTo(baseDirectory))
-      .map { case (f, s) => conv.toVirtualFile(f.toPath) -> s }
+      .map { (f, s) => conv.toVirtualFile(f.toPath) -> s }
 end Mapper

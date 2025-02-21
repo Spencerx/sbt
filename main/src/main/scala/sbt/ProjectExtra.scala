@@ -516,7 +516,7 @@ trait ProjectExtra extends Scoped.Syntax:
     private[sbt] def usedBy(structure: BuildStructure, actual: Boolean, key: AttributeKey[?])(using
         display: Show[ScopedKey[?]]
     ): Seq[ScopedKey[?]] =
-      relation(structure, actual)(using display).all.toSeq flatMap { case (a, b) =>
+      relation(structure, actual)(using display).all.toSeq flatMap { (a, b) =>
         if (b.key == key) List[ScopedKey[?]](a) else Nil
       }
 

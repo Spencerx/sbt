@@ -106,7 +106,7 @@ object Pkg:
     import sbt.util.CacheImplicits.hashedVirtualFileRefToStr
     private def sourcesStr: String =
       sources
-        .map { case (k, v) =>
+        .map { (k, v) =>
           s"${hashedVirtualFileRefToStr(k)}=$v"
         }
         .mkString(",\n    ")
@@ -153,7 +153,7 @@ object Pkg:
   ): VirtualFile =
     val manifest = toManifest(conf, log)
     val out = converter.toPath(conf.jar).toFile()
-    val sources = conf.sources.map { case (vf, path) =>
+    val sources = conf.sources.map { (vf, path) =>
       converter.toPath(vf).toFile() -> path
     }
     makeJar(sources, out, manifest, log, time)
@@ -235,7 +235,7 @@ object Pkg:
     log.debug("Done packaging.")
   }
   def sourcesDebugString(sources: Seq[(File, String)]): String =
-    "Input file mappings:\n\t" + (sources map { case (f, s) => s + "\n\t  " + f } mkString ("\n\t"))
+    "Input file mappings:\n\t" + (sources map { (f, s) => s + "\n\t  " + f } mkString ("\n\t"))
 
   given manifestFormat: JsonFormat[Manifest] = projectFormat[Manifest, Array[Byte]](
     m => {
@@ -303,7 +303,7 @@ object PackageOption:
             unbuilder.beginObject(js)
             val attributes = unbuilder.readField[Vector[(String, String)]]("attributes")
             unbuilder.endObject()
-            PackageOption.ManifestAttributes(attributes.map { case (k, v) =>
+            PackageOption.ManifestAttributes(attributes.map { (k, v) =>
               Attributes.Name(k) -> v
             }*)
           case None => deserializationError("Expected JsObject but found None")
@@ -311,7 +311,7 @@ object PackageOption:
         builder.beginObject()
         builder.addField(
           "attributes",
-          obj.attributes.toVector.map { case (k, v) => k.toString -> v }
+          obj.attributes.toVector.map { (k, v) => k.toString -> v }
         )
         builder.endObject()
 

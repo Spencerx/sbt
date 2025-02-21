@@ -19,8 +19,8 @@ object Test extends std.TaskExtra:
   val b2 = task(true)
   val c = task("asdf")
 
-  val h1 = t3(a, b, c).mapN { case (aa, bb, cc) => s"$aa $bb $cc" }
-  val h2 = t3(a, b2, c).mapN { case (aa, bb, cc) => s"$aa $bb $cc" }
+  val h1 = t3(a, b, c).mapN { (aa, bb, cc) => s"$aa $bb $cc" }
+  val h2 = t3(a, b2, c).mapN { (aa, bb, cc) => s"$aa $bb $cc" }
 
   type Values = (Result[Int], Result[Boolean], Result[String])
 

@@ -126,14 +126,14 @@ private[sbt] object TestStatus:
     val props = Properties()
     IO.load(props, f)
     val result = ConcurrentHashMap[String, Digest]()
-    props.asScala.iterator.foreach { case (k, v) => result.put(k, Digest(v)) }
+    props.asScala.iterator.foreach { (k, v) => result.put(k, Digest(v)) }
     result.asScala
 
   def write(map: collection.Map[String, Digest], label: String, f: File): Unit =
     IO.writeLines(
       f,
       s"# $label" ::
-        map.toList.sortBy(_._1).map { case (k, v) =>
+        map.toList.sortBy(_._1).map { (k, v) =>
           s"$k=$v"
         }
     )

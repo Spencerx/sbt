@@ -171,7 +171,7 @@ private[sbt] class TaskProgress(
         if (tasks.nonEmpty) nextReport.set(Deadline.now + sleepDuration)
         val toWrite = tasks.sortBy(_._2)
         val distinct = new java.util.LinkedHashMap[String, ProgressItem]
-        toWrite.foreach { case (task, elapsed) =>
+        toWrite.foreach { (task, elapsed) =>
           val name = taskName(task)
           distinct.put(name, ProgressItem(name, elapsed))
         }

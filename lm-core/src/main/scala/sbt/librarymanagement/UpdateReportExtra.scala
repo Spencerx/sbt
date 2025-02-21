@@ -116,7 +116,7 @@ private[librarymanagement] abstract class ModuleReportExtra {
   }
 
   def retrieve(f: (ModuleID, Artifact, File) => File): ModuleReport =
-    withArtifacts(artifacts.map { case (art, file) => (art, f(module, art, file)) })
+    withArtifacts(artifacts.map { (art, file) => (art, f(module, art, file)) })
 }
 
 private[librarymanagement] abstract class UpdateReportExtra {

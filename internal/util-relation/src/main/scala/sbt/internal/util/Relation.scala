@@ -32,7 +32,7 @@ object Relation {
     val reverse = reversePairs.foldLeft(Map.empty[B, Set[A]]) { case (m, (b, a)) =>
       add(m, b, a :: Nil)
     }
-    make(forward filter { case (a, bs) => bs.nonEmpty }, reverse)
+    make(forward filter { (a, bs) => bs.nonEmpty }, reverse)
   }
 
   def merge[A, B](rels: Iterable[Relation[A, B]]): Relation[A, B] =
@@ -58,10 +58,10 @@ object Relation {
 
   /** when both parameters taken by relation are the same type, switch calls a function on them. */
   private[sbt] def switch[X, Y](relation: Relation[X, X], f: X => Y): Relation[Y, Y] = {
-    val forward = relation.forwardMap.map { case (first, second) =>
+    val forward = relation.forwardMap.map { (first, second) =>
       f(first) -> second.map(f)
     }
-    val reverse = relation.reverseMap.map { case (first, second) =>
+    val reverse = relation.reverseMap.map { (first, second) =>
       f(first) -> second.map(f)
     }
     make(forward, reverse)
@@ -170,7 +170,7 @@ private final class MRelation[A, B](fwd: Map[A, Set[B]], rev: Map[B, Set[A]])
   def size = (fwd.valuesIterator map (_.size)).sum
 
   def all: Iterable[(A, B)] =
-    fwd.iterator.flatMap { case (a, bs) => bs.iterator.map(b => (a, b)) }.to(Iterable)
+    fwd.iterator.flatMap { (a, bs) => bs.iterator.map(b => (a, b)) }.to(Iterable)
 
   def +(pair: (A, B)) = this + (pair._1, Set(pair._2))
   def +(from: A, to: B) = this + (from, to :: Nil)
@@ -221,5 +221,5 @@ private final class MRelation[A, B](fwd: Map[A, Set[B]], rev: Map[B, Set[A]])
   override def hashCode = fwd.filterNot(_._2.isEmpty).hashCode()
 
   override def toString =
-    all.map { case (a, b) => s"$a -> $b" }.mkString("Relation [", ", ", "]")
+    all.map { (a, b) => s"$a -> $b" }.mkString("Relation [", ", ", "]")
 }

@@ -71,7 +71,7 @@ class FileCommands(baseDirectory: File) extends BasicStatementHandler {
         case Nil      => sys.error("unexpected Nil")
         case g :: Nil => g
         case g :: gs =>
-          gs.foldLeft(g) { case (acc, g) =>
+          gs.foldLeft(g) { (acc, g) =>
             acc || g
           }
       List(combined)

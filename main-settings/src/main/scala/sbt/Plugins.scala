@@ -278,7 +278,7 @@ object Plugins extends PluginsFunctions {
     lits map { case Atom(l) => l; case Negated(Atom(l)) => l } mkString (", ")
 
   private def duplicateProvidesError(byAtom: Seq[(Atom, AutoPlugin)]): Unit = {
-    val dupsByAtom = Map(byAtom.groupBy(_._1).toSeq.map { case (k, v) =>
+    val dupsByAtom = Map(byAtom.groupBy(_._1).toSeq.map { (k, v) =>
       k -> v.map(_._2)
     }*)
     val dupStrings =

@@ -80,7 +80,7 @@ object Cross {
   private def crossParser(state: State): Parser[CrossArgs] =
     token(CrossCommand <~ OptSpace) flatMap { _ =>
       (token(Parser.opt("-v" <~ Space)) ~ token(matched(state.combinedParser))).map {
-        case (verbose, command) => CrossArgs(command, verbose.isDefined)
+        (verbose, command) => CrossArgs(command, verbose.isDefined)
       }
     }
 
@@ -161,7 +161,7 @@ object Cross {
               "that are configured."
           )
           state.log.debug("Scala versions configuration is:")
-          projCrossVersions.foreach { case (project, versions) =>
+          projCrossVersions.foreach { (project, versions) =>
             state.log.debug(s"$project: $versions")
           }
         }
@@ -185,7 +185,7 @@ object Cross {
           .view
           .mapValues(_.map(_._2).toSet)
         val commandsByVersion = keysByVersion.toSeq
-          .flatMap { case (v, keys) =>
+          .flatMap { (v, keys) =>
             val projects = keys.flatMap(project)
             keys.toSeq.flatMap { k =>
               project(k).withFilter(projects.contains).flatMap { p =>
@@ -205,7 +205,7 @@ object Cross {
           .mapValues(_.map(_._2))
           .toSeq
           .sortBy(_._1)
-        commandsByVersion.flatMap { case (v, commands) =>
+        commandsByVersion.flatMap { (v, commands) =>
           commands match {
             case Seq(c) => Seq(s"$SwitchCommand $verbose $v $c")
             case Seq()  => Nil // should be unreachable
@@ -294,7 +294,7 @@ object Cross {
         excluded: Seq[(ResolvedReference, Seq[ScalaVersion])]
     ) = {
 
-      instance.foreach { case (home, instance) =>
+      instance.foreach { (home, instance) =>
         state.log.info(s"Using Scala home $home with actual version ${instance.actualVersion}")
       }
       if (switch.version.force) {
@@ -302,7 +302,7 @@ object Cross {
       } else {
         included
           .groupBy(_._2)
-          .foreach { case (selectedVersion, projects) =>
+          .foreach { (selectedVersion, projects) =>
             state.log.info(
               s"Setting Scala version to $selectedVersion on ${projects.size} projects."
             )
@@ -333,13 +333,13 @@ object Cross {
       val projectScalaVersions =
         structure.allProjectRefs.map(proj => proj -> crossVersions(extracted, proj))
       if (switch.version.force) {
-        projectScalaVersions.map { case (ref, options) =>
+        projectScalaVersions.map { (ref, options) =>
           (ref, Some(version), options)
         } ++ structure.units.keys
           .map(BuildRef.apply)
           .map(proj => (proj, Some(version), crossVersions(extracted, proj)))
       } else {
-        projectScalaVersions.map { case (project, scalaVersions) =>
+        projectScalaVersions.map { (project, scalaVersions) =>
           val selector = SemanticSelector(version)
           scalaVersions.filter(v => selector.matches(VersionNumber(v))) match {
             case Nil          => (project, None, scalaVersions)
@@ -395,7 +395,7 @@ object Cross {
   ): State = {
     import extracted.*
 
-    val newSettings = projects.flatMap { case (project, version, scalaVersions) =>
+    val newSettings = projects.flatMap { (project, version, scalaVersions) =>
       val scope = Scope(Select(project), Zero, Zero, Zero)
 
       instance match {

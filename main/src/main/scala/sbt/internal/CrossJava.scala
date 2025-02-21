@@ -105,7 +105,7 @@ private[sbt] object CrossJava {
   }
 
   def lookupJavaHome(jv: String, mappings: Map[String, File]): File = {
-    val ms = mappings map { case (k, v) => (JavaVersion(k), v) }
+    val ms = mappings map { (k, v) => (JavaVersion(k), v) }
     lookupJavaHome(JavaVersion(jv), ms)
   }
 
@@ -115,7 +115,7 @@ private[sbt] object CrossJava {
 
       // when looking for "10" it should match "openjdk@10"
       case None if jv.vendor.isEmpty =>
-        val noVendors: Map[JavaVersion, File] = mappings map { case (k, v) =>
+        val noVendors: Map[JavaVersion, File] = mappings map { (k, v) =>
           k.withVendor(None) -> v
         }
         noVendors.get(jv).getOrElse(javaHomeNotFound(jv, mappings))
@@ -178,7 +178,7 @@ private[sbt] object CrossJava {
       extracted: Extracted,
       proj: ResolvedReference
   ): Map[JavaVersion, File] = {
-    getJavaHomes(extracted, proj) map { case (k, v) => (JavaVersion(k), v) }
+    getJavaHomes(extracted, proj) map { (k, v) => (JavaVersion(k), v) }
   }
 
   private def getCrossJavaVersions(
@@ -217,7 +217,7 @@ private[sbt] object CrossJava {
         switch.target.version match {
           case None => projectJavaVersions
           case Some(v) =>
-            projectJavaVersions flatMap { case (proj, versions) =>
+            projectJavaVersions flatMap { (proj, versions) =>
               if (versions.isEmpty || versions.contains[String](v.toString))
                 Vector(proj -> versions)
               else Vector()
@@ -226,7 +226,7 @@ private[sbt] object CrossJava {
     }
 
     def setJavaHomeForProjects: State = {
-      val newSettings = projects.flatMap { case (proj, javaVersions) =>
+      val newSettings = projects.flatMap { (proj, javaVersions) =>
         val fjh = getJavaHomesTyped(extracted, proj)
         val home = switch.target match {
           case SwitchTarget(Some(v), _, _) => lookupJavaHome(v, fjh)
@@ -273,7 +273,7 @@ private[sbt] object CrossJava {
   private def crossParser(state: State): Parser[CrossArgs] =
     token(JavaCrossCommand <~ OptSpace) flatMap { _ =>
       (token(Parser.opt("-v" <~ Space)) ~ token(matched(state.combinedParser))).map {
-        case (verbose, command) => CrossArgs(command, verbose.isDefined)
+        (verbose, command) => CrossArgs(command, verbose.isDefined)
       } & spacedFirst(JavaCrossCommand)
     }
 
@@ -286,7 +286,7 @@ private[sbt] object CrossJava {
     }
     // if we support javaHome, projVersions should be cached somewhere since
     // running ++2.11.1 is at the root level is going to mess with the scalaVersion for the aggregated subproj
-    val projVersions = (projCrossVersions flatMap { case (proj, versions) =>
+    val projVersions = (projCrossVersions flatMap { (proj, versions) =>
       versions map { proj.project -> _ }
     }).toList
 
@@ -313,7 +313,7 @@ private[sbt] object CrossJava {
                 "that are configured."
             )
             state.log.debug("Java versions configuration is:")
-            projCrossVersions.foreach { case (project, versions) =>
+            projCrossVersions.foreach { (project, versions) =>
               state.log.debug(s"$project: $versions")
             }
           }
@@ -515,15 +515,15 @@ private[sbt] object CrossJava {
     else s
 
   def expandJavaHomes(hs: Map[String, File]): Map[String, File] = {
-    val parsed = hs map { case (k, v) =>
+    val parsed = hs map { (k, v) =>
       JavaVersion(k) -> v
     }
     // first ignore vnd
-    val withAndWithoutVnd = parsed flatMap { case (k, v) =>
+    val withAndWithoutVnd = parsed flatMap { (k, v) =>
       if (k.vendor.isDefined) Vector(k -> v, k.withVendor(None) -> v)
       else Vector(k -> v)
     }
-    val normalizeNumbers = withAndWithoutVnd flatMap { case (k, v) =>
+    val normalizeNumbers = withAndWithoutVnd flatMap { (k, v) =>
       k.numbers match {
         case Vector(1L, minor, _*) =>
           Vector(k -> v, k.withNumbers(Vector(minor)) -> v)
@@ -535,7 +535,7 @@ private[sbt] object CrossJava {
           Vector(k -> v)
       }
     }
-    val result: Map[String, File] = normalizeNumbers map { case (k, v) =>
+    val result: Map[String, File] = normalizeNumbers map { (k, v) =>
       (k.toString -> v)
     }
     result

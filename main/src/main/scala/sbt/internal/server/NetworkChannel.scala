@@ -200,16 +200,16 @@ final class NetworkChannel(
     }
 
     lazy val onRequestMessage: PartialFunction[JsonRpcRequestMessage, Unit] =
-      intents.foldLeft(PartialFunction.empty[JsonRpcRequestMessage, Unit]) { case (f, i) =>
+      intents.foldLeft(PartialFunction.empty[JsonRpcRequestMessage, Unit]) { (f, i) =>
         f orElse i.onRequest
       }
     lazy val onResponseMessage: PartialFunction[JsonRpcResponseMessage, Unit] =
-      intents.foldLeft(PartialFunction.empty[JsonRpcResponseMessage, Unit]) { case (f, i) =>
+      intents.foldLeft(PartialFunction.empty[JsonRpcResponseMessage, Unit]) { (f, i) =>
         f orElse i.onResponse
       }
 
     lazy val onNotification: PartialFunction[JsonRpcNotificationMessage, Unit] =
-      intents.foldLeft(PartialFunction.empty[JsonRpcNotificationMessage, Unit]) { case (f, i) =>
+      intents.foldLeft(PartialFunction.empty[JsonRpcNotificationMessage, Unit]) { (f, i) =>
         f orElse i.onNotification
       }
 

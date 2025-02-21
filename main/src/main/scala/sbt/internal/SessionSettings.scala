@@ -158,7 +158,7 @@ object SessionSettings:
 
   def removeRanges[T](in: Seq[T], ranges: Seq[(Int, Int)]): Seq[T] = {
     val asSet = ranges.foldLeft(Set.empty[Int]) { case (s, (hi, lo)) => s ++ (hi to lo) }
-    in.zipWithIndex.flatMap { case (t, index) => if (asSet(index + 1)) Nil else t :: Nil }
+    in.zipWithIndex.flatMap { (t, index) => if (asSet(index + 1)) Nil else t :: Nil }
   }
 
   /**

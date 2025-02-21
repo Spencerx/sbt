@@ -156,7 +156,7 @@ object Previous {
   def runtime[T](skey: TaskKey[T])(using format: JsonFormat[T]): Initialize[Task[Option[T]]] = {
     type Inputs = (Task[Previous], ScopedKey[Task[T]], References)
     val inputs = (Global / cache, Def.validated(skey, selfRefOk = true), Global / references)
-    Def.app[Inputs, Task[Option[T]]](inputs) { case (prevTask, resolved, refs) =>
+    Def.app[Inputs, Task[Option[T]]](inputs) { (prevTask, resolved, refs) =>
       val key = Key(resolved, resolved)
       refs.recordReference(key, format) // always evaluated on project load
       prevTask.map(_.get(key)) // evaluated if this task is evaluated
@@ -174,7 +174,7 @@ object Previous {
       Global / references,
       Def.resolvedScoped
     )
-    Def.app[Inputs, Task[Option[T]]](inputs) { case (prevTask, resolved, refs, inTask) =>
+    Def.app[Inputs, Task[Option[T]]](inputs) { (prevTask, resolved, refs, inTask) =>
       val key = Key(resolved, inTask.asInstanceOf[ScopedKey[Task[Any]]])
       refs.recordReference(key, format) // always evaluated on project load
       prevTask.map(_.get(key))

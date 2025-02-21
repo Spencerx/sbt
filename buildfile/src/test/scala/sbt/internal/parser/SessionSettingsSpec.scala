@@ -48,7 +48,7 @@ abstract class AbstractSessionSettingsSpec(folder: String) extends AbstractSpec 
     allFiles.foreach { file =>
       val originalLines = readLines(file)
       val virtualFile = converter.toVirtualFile(file)
-      expectedResultAndMap(file).foreach { case (expectedResultList, commands) =>
+      expectedResultAndMap(file).foreach { (expectedResultList, commands) =>
         val resultList = SbtRefactorings.applySessionSettings(originalLines, commands)
         val expected = SbtParser(virtualFile, expectedResultList)
         val result = SbtParser(virtualFile, resultList)

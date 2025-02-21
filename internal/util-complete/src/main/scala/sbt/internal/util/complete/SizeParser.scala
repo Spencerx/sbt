@@ -47,7 +47,7 @@ private[sbt] object SizeParser {
     ((numberParser <~ SpaceClass
       .examples(" ", "b", "B", "g", "G", "k", "K", "m", "M")
       .*) ~ unitParser.?)
-      .map { case (number, unit) =>
+      .map { (number, unit) =>
         unit match {
           case None | Some(SizeUnit.Bytes) => multiply(number, right = 1L)
           case Some(SizeUnit.KiloBytes)    => multiply(number, right = 1024L)

@@ -44,7 +44,7 @@ object HistoryCommands {
 
   def helpString =
     "History commands:\n   " + (descriptions
-      .map { case (c, d) => c + "    " + d })
+      .map { (c, d) => c + "    " + d })
       .mkString("\n   ")
 
   def printHelp(): Unit = println(helpString)
@@ -62,11 +62,11 @@ object HistoryCommands {
     { printHistory(h, MaxLines, show); nil[String].some }
   }
 
-  lazy val execStr = flag('?') ~ token(any.+.string, "<string>") map { case (contains, str) =>
+  lazy val execStr = flag('?') ~ token(any.+.string, "<string>") map { (contains, str) =>
     execute(h => if (contains) h !? str else h ! str)
   }
 
-  lazy val execInt = flag('-') ~ num map { case (neg, value) =>
+  lazy val execInt = flag('-') ~ num map { (neg, value) =>
     execute(h => if (neg) h !- value else h ! value)
   }
 

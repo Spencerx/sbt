@@ -420,7 +420,7 @@ private[sbt] trait CachedResolutionResolveEngine extends ResolveEngine {
       val (internal, external) = mds.partition { case (_, _, dd) =>
         cache.internalDependency(dd, projectResolver).isDefined
       }
-      val internalResults = internal map { case (md, changing, dd) =>
+      val internalResults = internal map { (md, changing, dd) =>
         cache.getOrElseUpdateMiniGraph(
           md,
           changing,
@@ -432,7 +432,7 @@ private[sbt] trait CachedResolutionResolveEngine extends ResolveEngine {
           doWork(md, dd)
         }
       }
-      val externalResults = external map { case (md0, changing, dd) =>
+      val externalResults = external map { (md0, changing, dd) =>
         val configurationsInInternal = internalResults flatMap {
           case Right(ur) =>
             ur.allModules.flatMap { case md =>
@@ -498,7 +498,7 @@ private[sbt] trait CachedResolutionResolveEngine extends ResolveEngine {
     val messages = errors flatMap { _.messages }
     val failed = errors flatMap { _.failed }
     val failedPaths = errors flatMap {
-      _.failedPaths.toList map { case (failed, paths) =>
+      _.failedPaths.toList map { (failed, paths) =>
         if (paths.isEmpty) (failed, paths)
         else
           (
@@ -584,7 +584,7 @@ private[sbt] trait CachedResolutionResolveEngine extends ResolveEngine {
     // this might take up some memory, but it's limited to a single
     val reports1 = reports0 flatMap { filterReports }
     val allModules0: Map[(String, String), Vector[OrganizationArtifactReport]] =
-      Map(orgNamePairs map { case (organization, name) =>
+      Map(orgNamePairs map { (organization, name) =>
         val xs = reports1 filter { oar =>
           oar.organization == organization && oar.name == name
         }
@@ -613,7 +613,7 @@ private[sbt] trait CachedResolutionResolveEngine extends ResolveEngine {
             if (!loopSets(loop.toSet)) {
               loopSets += loop.toSet
               loopLists += loop
-              val loopStr = (loop map { case (o, n) => s"$o:$n" }).mkString("->")
+              val loopStr = (loop map { (o, n) => s"$o:$n" }).mkString("->")
               log.warn(s"""avoid circular dependency while using cached resolution: $loopStr""")
             }
           } else testLoop(m, c, c :: history)
@@ -745,7 +745,7 @@ private[sbt] trait CachedResolutionResolveEngine extends ResolveEngine {
       }
     val guard0 = (orgNamePairs.size * orgNamePairs.size) + 1
     val sorted: Vector[(String, String)] = sortModules(orgNamePairs, Vector(), Vector(), 0, guard0)
-    val sortedStr = (sorted map { case (o, n) => s"$o:$n" }).mkString(", ")
+    val sortedStr = (sorted map { (o, n) => s"$o:$n" }).mkString(", ")
     log.debug(s":: sort result: $sortedStr")
     val result = resolveConflicts(sorted.toList, allModules0)
     result.toVector

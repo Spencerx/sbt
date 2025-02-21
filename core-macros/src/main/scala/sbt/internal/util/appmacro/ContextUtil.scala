@@ -74,7 +74,7 @@ trait ContextUtil[C <: Quotes & scala.Singleton](val valStart: Int):
       override def cacheInputTupleTypeRepr: TypeRepr =
         tupleTypeRepr(inputs.withFilter(_.isCacheInput).map(_.tpe))
       override def cacheInputExpr(tupleTerm: Term): Expr[Tuple] =
-        exprOfTupleFromSeq(inputs.zipWithIndex.flatMap { case (input, idx) =>
+        exprOfTupleFromSeq(inputs.zipWithIndex.flatMap { (input, idx) =>
           if input.tags.nonEmpty then
             input.tpe.asType match
               case '[a] =>

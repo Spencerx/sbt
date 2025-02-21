@@ -63,7 +63,7 @@ object ToCoursier {
   def reconciliation(
       rs: Vector[(ModuleMatchers, Reconciliation)]
   ): Vector[(coursier.util.ModuleMatchers, coursier.core.Reconciliation)] =
-    rs map { case (m, r) => (moduleMatchers(m), reconciliation(r)) }
+    rs map { (m, r) => (moduleMatchers(m), reconciliation(r)) }
 
   def sameVersions(
       sv: Seq[Set[InclExclRule]]
@@ -79,7 +79,7 @@ object ToCoursier {
       module(dependency.module),
       dependency.version,
       configuration(dependency.configuration),
-      dependency.exclusions.map { case (org, name) =>
+      dependency.exclusions.map { (org, name) =>
         (coursier.core.Organization(org.value), coursier.core.ModuleName(name.value))
       },
       publication(dependency.publication),
@@ -91,10 +91,10 @@ object ToCoursier {
     coursier.core.Project(
       module(project.module),
       project.version,
-      project.dependencies.map { case (conf, dep) =>
+      project.dependencies.map { (conf, dep) =>
         configuration(conf) -> dependency(dep)
       },
-      project.configurations.map { case (k, l) =>
+      project.configurations.map { (k, l) =>
         configuration(k) -> l.map(configuration)
       },
       None,
@@ -106,7 +106,7 @@ object ToCoursier {
       project.packagingOpt.map(t => coursier.core.Type(t.value)),
       relocated = false,
       None,
-      project.publications.map { case (conf, pub) =>
+      project.publications.map { (conf, pub) =>
         configuration(conf) -> publication(pub)
       },
       coursier.core.Info(
@@ -192,12 +192,12 @@ object ToCoursier {
   def strict(strict: Strict): coursier.params.rule.Strict =
     coursier.params.rule
       .Strict()
-      .withInclude(strict.include.map { case (o, n) =>
+      .withInclude(strict.include.map { (o, n) =>
         coursier.util.ModuleMatcher(
           coursier.Module(coursier.Organization(o), coursier.ModuleName(n))
         )
       })
-      .withExclude(strict.exclude.map { case (o, n) =>
+      .withExclude(strict.exclude.map { (o, n) =>
         coursier.util.ModuleMatcher(
           coursier.Module(coursier.Organization(o), coursier.ModuleName(n))
         )

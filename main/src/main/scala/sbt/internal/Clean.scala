@@ -99,7 +99,7 @@ private[sbt] object Clean {
         val manager = streamsManager.value
         (state, extracted, view, manager)
       })
-      .flatMapTask { case (state, extracted, view, manager) =>
+      .flatMapTask { (state, extracted, view, manager) =>
         Def.task {
           val excludeFilter = cleanFilter(scope).value
           val delete = cleanDelete(scope).value

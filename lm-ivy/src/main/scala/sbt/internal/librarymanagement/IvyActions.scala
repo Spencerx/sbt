@@ -170,7 +170,7 @@ object IvyActions {
     val rawa = artifacts.keys.toVector
     val seqa = CrossVersion.substituteCross(rawa, cross)
     val zipped = rawa zip IvySbt.mapArtifacts(module, seqa)
-    zipped map { case (a, ivyA) => (ivyA, artifacts(a)) }
+    zipped map { (a, ivyA) => (ivyA, artifacts(a)) }
   }
 
   /**
@@ -255,7 +255,7 @@ object IvyActions {
       art.classifier.map { c =>
         (restrictedCopy(mod, false), c)
       }
-    } groupBy (_._1) map { case (mod, pairs) => (mod, pairs.map(_._2).toSet) }
+    } groupBy (_._1) map { (mod, pairs) => (mod, pairs.map(_._2).toSet) }
 
   /**
    * Represents the inputs to pass in to [[resolveAndRetrieve]] and [[cachedResolveAndRetrieve]].
@@ -497,7 +497,7 @@ object IvyActions {
       checkFilesPresent(artifacts)
       try {
         resolver.beginPublishTransaction(module.getModuleRevisionId(), overwrite);
-        artifacts.foreach { case (artifact, file) =>
+        artifacts.foreach { (artifact, file) =>
           IvyUtil.retryWithBackoff(
             resolver.publish(artifact, file, overwrite),
             TransientNetworkException.apply,

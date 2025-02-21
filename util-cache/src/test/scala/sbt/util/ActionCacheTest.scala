@@ -36,7 +36,7 @@ object ActionCacheTest extends BasicTestSuite:
   def testActionCacheBasic(cache: ActionCacheStore): Unit =
     import sjsonnew.BasicJsonProtocol.*
     var called = 0
-    val action: ((Int, Int)) => InternalActionResult[Int] = { case (a, b) =>
+    val action: ((Int, Int)) => InternalActionResult[Int] = { (a, b) =>
       called += 1
       InternalActionResult(a + b, Nil)
     }
@@ -58,7 +58,7 @@ object ActionCacheTest extends BasicTestSuite:
     import sjsonnew.BasicJsonProtocol.*
     IO.withTemporaryDirectory: (tempDir) =>
       var called = 0
-      val action: ((Int, Int)) => InternalActionResult[Int] = { case (a, b) =>
+      val action: ((Int, Int)) => InternalActionResult[Int] = { (a, b) =>
         called += 1
         val out = StringVirtualFile1(s"$tempDir/a.txt", (a + b).toString)
         InternalActionResult(a + b, Seq(out))

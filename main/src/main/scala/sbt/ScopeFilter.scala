@@ -223,8 +223,8 @@ object ScopeFilter {
     val grouped: ScopeMap =
       scopes
         .groupBy(_.project)
-        .map { case (k, v) =>
-          k -> v.groupBy(_.config).map { case (k, v) => k -> v.groupBy(_.task) }
+        .map { (k, v) =>
+          k -> v.groupBy(_.config).map { (k, v) => k -> v.groupBy(_.task) }
         }
     new AllScopes(scopes, grouped)
   }

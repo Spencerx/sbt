@@ -416,7 +416,7 @@ object Tests {
       testFun: TestFunction,
       nestedTasks: Seq[TestTask]
   ): Seq[(String, TestFunction)] =
-    (nestedTasks.view.zipWithIndex map { case (nt, idx) =>
+    (nestedTasks.view.zipWithIndex map { (nt, idx) =>
       val testFunDef = testFun.taskDef
       (
         testFunDef.fullyQualifiedName,
@@ -447,8 +447,8 @@ object Tests {
       runnables: Seq[TestRunnable],
       tags: Seq[(Tag, Int)]
   ): Task[Map[String, SuiteResult]] = {
-    val tasks = runnables.map { case (name, test) => toTask(loader, name, test, tags) }
-    tasks.join.map(_.foldLeft(Map.empty[String, SuiteResult]) { case (sum, e) =>
+    val tasks = runnables.map { (name, test) => toTask(loader, name, test, tags) }
+    tasks.join.map(_.foldLeft(Map.empty[String, SuiteResult]) { (sum, e) =>
       val merged = sum.toSeq ++ e.toSeq
       val grouped = merged.groupBy(_._1)
       grouped.view

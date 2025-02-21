@@ -191,7 +191,7 @@ private[sbt] object TemplateCommandUtil {
     else
       ITerminal.withStreams(true, false) {
         assert(templates.size <= 20, "template list cannot have more than 20 items")
-        val mappingList = templates.zipWithIndex.map { case (v, idx) =>
+        val mappingList = templates.zipWithIndex.map { (v, idx) =>
           toLetter(idx) -> v
         }
         val out = term.printStream

@@ -18,7 +18,7 @@ import org.scalatest.flatspec.AnyFlatSpec
 class CacheSpec extends AnyFlatSpec {
 
   "A cache" should "NOT throw an exception if read without being written previously" in {
-    testCache[String, Int] { case (cache, store) =>
+    testCache[String, Int] { (cache, store) =>
       cache(store)("missing") match {
         case Hit(_)  => fail()
         case Miss(_) => ()
@@ -27,7 +27,7 @@ class CacheSpec extends AnyFlatSpec {
   }
 
   it should "write a very simple value" in {
-    testCache[String, Int] { case (cache, store) =>
+    testCache[String, Int] { (cache, store) =>
       cache(store)("missing") match {
         case Hit(_)       => fail()
         case Miss(update) => update(5)
@@ -36,7 +36,7 @@ class CacheSpec extends AnyFlatSpec {
   }
 
   it should "be updatable" in {
-    testCache[String, Int] { case (cache, store) =>
+    testCache[String, Int] { (cache, store) =>
       val value = 5
       cache(store)("someKey") match {
         case Hit(_)       => fail()
@@ -51,7 +51,7 @@ class CacheSpec extends AnyFlatSpec {
   }
 
   it should "return the value that has been previously written" in {
-    testCache[String, Int] { case (cache, store) =>
+    testCache[String, Int] { (cache, store) =>
       val key = "someKey"
       val value = 5
       cache(store)(key) match {

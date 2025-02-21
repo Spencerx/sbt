@@ -384,7 +384,7 @@ private[sbt] final class Execute(
   // cyclic reference checking
 
   def snapshotCycleCheck(): Unit =
-    callers.toSeq foreach { case (called, callers) =>
+    callers.toSeq foreach { (called, callers) =>
       for (caller <- callers) cycleCheck(caller, called)
     }
 

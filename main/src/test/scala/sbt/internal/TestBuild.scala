@@ -158,7 +158,7 @@ abstract class TestBuild {
       )
     lazy val allFullScopes: Seq[Scope] =
       for {
-        (ref, p) <- (Zero, root.root) +: allProjects.map { case (ref, p) => (Select(ref), p) }
+        (ref, p) <- (Zero, root.root) +: allProjects.map { (ref, p) => (Select(ref), p) }
         t <- Zero +: tasks.map(t => Select(t.key))
         c <- Zero +: p.configurations.map(c => Select(ConfigKey(c.name)))
       } yield Scope(project = ref, config = c, task = t, extra = Zero)
@@ -353,7 +353,7 @@ abstract class TestBuild {
       make: T => Gen[Vector[A] => A]
   ): Gen[Vector[A]] =
     genAcyclic(maxDeps, keys, Vector()) flatMap { pairs =>
-      sequence(pairs.map { case (key, deps) => mapMake(key, deps, make) }.toList) map { inputs =>
+      sequence(pairs.map { (key, deps) => mapMake(key, deps, make) }.toList) map { inputs =>
         val made = new collection.mutable.HashMap[T, A]
         for ((key, deps, mk) <- inputs)
           made(key) = mk(deps map made)

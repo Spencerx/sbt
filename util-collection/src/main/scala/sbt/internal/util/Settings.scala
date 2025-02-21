@@ -246,7 +246,7 @@ trait Init:
       case m: IMap.IMap0[ScopedKey, SettingSeq] @unchecked =>
         import scala.collection.parallel.CollectionConverters.*
         m.backing.par
-          .map { case (k, ss) =>
+          .map { (k, ss) =>
             val deps = ss.iterator.flatMap(_.dependencies).toSet
             k -> Compiled(k.asInstanceOf[ScopedKey[Any]], deps, ss.asInstanceOf[SettingSeq[Any]])
           }
@@ -292,7 +292,7 @@ trait Init:
     val undefined = new java.util.ArrayList[Undefined]
     val result = new java.util.concurrent.ConcurrentHashMap[ScopedKey[?], Any]
     val backing = sMap.toSeq
-    Par(backing).foreach { case (key, settings) =>
+    Par(backing).foreach { (key, settings) =>
       val valid = new java.util.ArrayList[Setting[?]]
       val undefs = new java.util.ArrayList[Undefined]
       def validate(s: Setting[?], first: Boolean): Unit = {

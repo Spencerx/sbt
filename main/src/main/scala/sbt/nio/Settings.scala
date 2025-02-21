@@ -232,8 +232,10 @@ private[sbt] object Settings {
     val unmodifiedBuilder = new VectorBuilder[Path]
     val seen = ConcurrentHashMap.newKeySet[Path]
     val prevMap = new ConcurrentHashMap[Path, FileStamp]()
-    previous.foreach { case (k, v) => prevMap.put(k, v); () }
-    current.foreach { case (path, currentStamp) =>
+    previous.foreach { (k, v) =>
+      prevMap.put(k, v); ()
+    }
+    current.foreach { (path, currentStamp) =>
       if (seen.add(path)) {
         prevMap.remove(path) match {
           case null => createdBuilder += path

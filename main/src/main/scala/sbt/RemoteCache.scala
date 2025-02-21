@@ -268,17 +268,17 @@ object RemoteCache {
       remoteCacheId := {
         val inputs = (unmanagedSources / inputFileStamps).value
         val cp = (externalDependencyClasspath / outputFileStamps).?.value.getOrElse(Nil)
-        val extraInc = (extraIncOptions.value) flatMap { case (k, v) =>
+        val extraInc = (extraIncOptions.value) flatMap { (k, v) =>
           Vector(k, v)
         }
         combineHash(extractHash(inputs) ++ extractHash(cp) ++ extraInc)
       },
       pushRemoteCacheConfiguration := {
         val converter = fileConverter.value
-        val artifacts = (pushRemoteCacheConfiguration / packagedArtifacts).value.toVector.map {
-          case (a, vf) =>
+        val artifacts =
+          (pushRemoteCacheConfiguration / packagedArtifacts).value.toVector.map { (a, vf) =>
             a -> converter.toPath(vf).toFile
-        }
+          }
         Classpaths.publishConfig(
           (pushRemoteCacheConfiguration / publishMavenStyle).value,
           Classpaths.deliverPattern(crossTarget.value),

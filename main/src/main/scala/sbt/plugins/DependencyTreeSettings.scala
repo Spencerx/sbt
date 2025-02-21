@@ -154,7 +154,7 @@ object DependencyTreeSettings {
         output
       },
     ) ++
-      renderingAlternatives.flatMap { case (key, renderer) => renderingTaskSettings(key, renderer) }
+      renderingAlternatives.flatMap { (key, renderer) => renderingTaskSettings(key, renderer) }
 
   def renderingAlternatives: Seq[(TaskKey[Unit], ModuleGraph => String)] =
     Seq(

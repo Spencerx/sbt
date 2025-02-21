@@ -76,7 +76,7 @@ private[sbt] object PluginCross {
         .getOrElse(Nil)
         .toList
     }
-    Command.arb(requireSession(crossParser), pluginCrossHelp) { case (state, command) =>
+    Command.arb(requireSession(crossParser), pluginCrossHelp) { (state, command) =>
       val x = Project.extract(state)
       import x.*
       val versions = crossVersions(state)

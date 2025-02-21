@@ -29,7 +29,7 @@ private[sbt] object FastTrackCommands {
         case l               => None
       }
   private val commands = Map[String, (State, String) => Option[State]](
-    FailureWall -> { case (s, c) => if (c == FailureWall) Some(s) else None },
+    FailureWall -> { (s, c) => if (c == FailureWall) Some(s) else None },
     StashOnFailure -> fromCommand(StashOnFailure, stashOnFailure, arguments = false),
     PopOnFailure -> fromCommand(PopOnFailure, popOnFailure, arguments = false),
     Shell -> fromCommand(Shell, shell),

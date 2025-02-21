@@ -179,7 +179,7 @@ object CustomPomParser {
       .toMap
   }
   private[sbt] def toUnqualify(propertyAttributes: Map[String, String]): Map[String, String] =
-    (propertyAttributes - ExtraAttributesKey) map { case (k, v) => ("e:" + k, v) }
+    (propertyAttributes - ExtraAttributesKey) map { (k, v) => ("e:" + k, v) }
 
   private def shouldBeUnqualified(m: Map[String, String]): Map[String, String] =
     m.view.filterKeys(unqualifiedKeys).toMap
