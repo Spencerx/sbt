@@ -133,7 +133,7 @@ object CoursierRepositoriesTasks {
         val dependencyRefs = Project.transitiveInterDependencies(s, projectRef)
         (ScopeFilter(inProjects(projectRef)), ScopeFilter(inProjects(dependencyRefs*)))
       })
-      .flatMapTask { case (filter1, filter2) =>
+      .flatMapTask { (filter1, filter2) =>
         Def.task {
           val resolvers = csrResolvers.all(filter1).value ++ csrResolvers.all(filter2).value
           resolvers.flatten

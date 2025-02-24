@@ -808,7 +808,7 @@ private[sbt] object IvySbt {
   }
   private[sbt] def javaMap(m: Map[String, String], unqualify: Boolean = false) = {
     import scala.jdk.CollectionConverters.*
-    val map = if (unqualify) m map { case (k, v) => (k.stripPrefix("e:"), v) }
+    val map = if (unqualify) m map { (k, v) => (k.stripPrefix("e:"), v) }
     else m
     if (map.isEmpty) null else map.asJava
   }

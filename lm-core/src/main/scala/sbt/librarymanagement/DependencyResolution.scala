@@ -168,7 +168,7 @@ class DependencyResolution private[sbt] (lmEngine: DependencyResolutionInterface
       restrictedCopy(m, true)
     }
     // Adding list of explicit artifacts here.
-    val exls = Map(config.excludes map { case (k, v) => (k, v.toSet) }*)
+    val exls = Map(config.excludes map { (k, v) => (k, v.toSet) }*)
     val deps = baseModules.distinct flatMap classifiedArtifacts(classifiers, exls, artifacts)
     val base = restrictedCopy(id, true).withName(id.name + classifiers.mkString("$", "_", ""))
     val moduleSetting = ModuleDescriptorConfiguration(base, ModuleInfo(base.name))
@@ -187,7 +187,7 @@ class DependencyResolution private[sbt] (lmEngine: DependencyResolutionInterface
           ((config.sourceArtifactTypes.toSeq map (_ -> Artifact.SourceClassifier))
             :: (config.docArtifactTypes.toSeq map (_ -> Artifact.DocClassifier)) :: Nil).flatten.toMap
         Right(r.substitute { (conf, mid, artFileSeq) =>
-          artFileSeq map { case (art, f) =>
+          artFileSeq map { (art, f) =>
             // Deduce the classifier from the type if no classifier is present already
             art.withClassifier(art.classifier orElse typeClassifierMap.get(art.`type`)) -> f
           }

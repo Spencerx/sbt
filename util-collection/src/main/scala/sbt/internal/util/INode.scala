@@ -120,7 +120,7 @@ class EvaluateSettings[I <: Init](
 
     private def keyString =
       static.toSeq
-        .flatMap { case (key, value) =>
+        .flatMap { (key, value) =>
           if (value eq this) init.showFullKey.show(key) :: Nil else Nil
         }
         .headOption

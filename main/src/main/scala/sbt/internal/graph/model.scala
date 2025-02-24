@@ -93,7 +93,7 @@ private[sbt] case class ModuleGraph(nodes: Seq[Module], edges: Seq[Edge]) {
     createMap(identity)
 
   lazy val reverseDependencyMap: Map[GraphModuleId, Seq[Module]] =
-    createMap { case (a, b) => (b, a) }
+    createMap { (a, b) => (b, a) }
 
   def createMap(
       bindingFor: ((GraphModuleId, GraphModuleId)) => (GraphModuleId, GraphModuleId)

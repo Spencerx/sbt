@@ -65,7 +65,7 @@ object ArtifactsRun {
       }
       .addTransformArtifacts { artifacts =>
         if (params.missingOk)
-          artifacts.map { case (dependency, publication, artifact) =>
+          artifacts.map { (dependency, publication, artifact) =>
             (dependency, publication, artifact.withOptional(true))
           }
         else

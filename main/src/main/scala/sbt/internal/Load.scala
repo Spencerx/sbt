@@ -315,7 +315,7 @@ private[sbt] object Load {
     val dups = overlappingTargets(allTargets(data))
     if (dups.isEmpty) None
     else {
-      val dupStr = dups.map { case (dir, scopes) =>
+      val dupStr = dups.map { (dir, scopes) =>
         s"${dir.getAbsolutePath}:\n\t${scopes.mkString("\n\t")}"
       }.mkString
       Some(s"Overlapping output directories:$dupStr")
@@ -380,7 +380,7 @@ private[sbt] object Load {
     val scopedKeys = keys ++ data.keys
     val projectsMap = projects.view.mapValues(_.defined.keySet).toMap
     val configsMap: Map[String, Seq[Configuration]] =
-      projects.values.flatMap(bu => bu.defined map { case (k, v) => (k, v.configurations) }).toMap
+      projects.values.flatMap(bu => bu.defined map { (k, v) => (k, v.configurations) }).toMap
     val keyIndex = KeyIndex(scopedKeys, projectsMap, configsMap)
     val aggIndex = KeyIndex.aggregate(scopedKeys, extra(keyIndex), projectsMap, configsMap)
     new StructureIndex(
@@ -432,9 +432,9 @@ private[sbt] object Load {
     (((GlobalScope / loadedBuild) :== loaded) +:
       transformProjectOnly(loaded.root, rootProject, injectSettings.global)) ++
       inScope(GlobalScope)(loaded.autos.globalSettings) ++
-      loaded.units.toSeq.flatMap { case (uri, build) =>
+      loaded.units.toSeq.flatMap { (uri, build) =>
         val pluginBuildSettings = loaded.autos.buildSettings(uri)
-        val projectSettings = build.defined flatMap { case (id, project) =>
+        val projectSettings = build.defined flatMap { (id, project) =>
           val ref = ProjectRef(uri, id)
           val defineConfig: Seq[Setting[?]] =
             for (c <- project.configurations)
@@ -667,7 +667,7 @@ private[sbt] object Load {
 
   def resolveAll(builds: Map[URI, PartBuildUnit]): Map[URI, LoadedBuildUnit] = {
     val rootProject = getRootProject(builds)
-    builds map { case (uri, unit) =>
+    builds map { (uri, unit) =>
       (uri, unit.resolveRefs(ref => Scope.resolveProjectRef(uri, rootProject, ref)))
     }
   }
@@ -706,7 +706,7 @@ private[sbt] object Load {
 
   def resolveProjects(loaded: PartBuild): LoadedBuild = {
     val rootProject = getRootProject(loaded.units)
-    val units = loaded.units map { case (uri, unit) =>
+    val units = loaded.units map { (uri, unit) =>
       IO.assertAbsolute(uri)
       (uri, resolveProjects(uri, unit, rootProject))
     }

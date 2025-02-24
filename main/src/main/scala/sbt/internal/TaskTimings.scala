@@ -68,14 +68,14 @@ private[sbt] final class TaskTimings(reportOnShutdown: Boolean, logger: Logger)
     val times = timingsByName.toSeq
       .sortBy(_._2.get)
       .reverse
-      .map { case (name, time) =>
+      .map { (name, time) =>
         (if (omitPaths) reFilePath.replaceFirstIn(name, "") else name, divide(time.get))
       }
       .filter { _._2 > threshold }
     if (times.size > 0) {
       val maxTaskNameLength = times.map { _._1.length }.max
       val maxTime = times.map { _._2 }.max.toString.length
-      times.foreach { case (taskName, time) =>
+      times.foreach { (taskName, time) =>
         logger.info(s"  ${taskName.padTo(maxTaskNameLength, ' ')}: ${""
             .padTo(maxTime - time.toString.length, ' ')}$time $unit")
       }

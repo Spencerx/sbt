@@ -50,7 +50,7 @@ private[sbt] class ClassLoaderCache(
         }
       }
     )
-  private val scalaProviderKey = miniProvider.map { case (f, cl) =>
+  private val scalaProviderKey = miniProvider.map { (f, cl) =>
     new Key((f -> IO.getModifiedTimeOrZero(f)) :: Nil, commonParent) {
       override def toClassLoader: ClassLoader = cl
     }
@@ -93,7 +93,7 @@ private[sbt] class ClassLoaderCache(
     delegate.asScala.groupBy { case (k, _) => k.parent -> k.files.toSet }.foreach {
       case (_, pairs) if pairs.size > 1 =>
         val max = pairs.map(_._1.maxStamp).max
-        pairs.foreach { case (k, v) => if (k.maxStamp != max) clear(k, v) }
+        pairs.foreach { (k, v) => if (k.maxStamp != max) clear(k, v) }
       case _ =>
     }
     delegate.forEach((k, v) => if (isInvalidated(k.parent)) clear(k, v))

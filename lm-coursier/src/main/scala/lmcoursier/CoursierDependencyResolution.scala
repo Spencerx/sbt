@@ -220,13 +220,13 @@ class CoursierDependencyResolution(
         // (e.g. sbt-dotty 0.13.0-RC1)
         FromSbt.dependencies(d, sv, sbv, optionalCrossVer = true)
       }
-      .map { case (config, dep) =>
+      .map { (config, dep) =>
         (ToCoursier.configuration(config), ToCoursier.dependency(dep))
       }
 
     val orderedConfigs = Inputs
       .orderedConfigurations(Inputs.configExtendsSeq(module0.configurations))
-      .map { case (config, extends0) =>
+      .map { (config, extends0) =>
         (ToCoursier.configuration(config), extends0.map(ToCoursier.configuration))
       }
 
@@ -241,7 +241,7 @@ class CoursierDependencyResolution(
       .withCredentials(conf.credentials.map(ToCoursier.credentials))
       .withFollowHttpToHttpsRedirections(conf.followHttpToHttpsRedirections.getOrElse(true))
 
-    val excludeDependencies = conf.excludeDependencies.map { case (strOrg, strName) =>
+    val excludeDependencies = conf.excludeDependencies.map { (strOrg, strName) =>
       (coursier.Organization(strOrg), coursier.ModuleName(strName))
     }.toSet
 
@@ -263,7 +263,7 @@ class CoursierDependencyResolution(
         .ResolutionParams()
         .withMaxIterations(conf.maxIterations)
         .withProfiles(conf.mavenProfiles.toSet)
-        .withForceVersion(conf.forceVersions.map { case (k, v) => (ToCoursier.module(k), v) }.toMap)
+        .withForceVersion(conf.forceVersions.map { (k, v) => (ToCoursier.module(k), v) }.toMap)
         .withTypelevel(typelevel)
         .withReconciliation(ToCoursier.reconciliation(conf.reconciliation))
         .withExclusions(excludeDependencies)
@@ -293,7 +293,7 @@ class CoursierDependencyResolution(
       conf.sbtScalaJars
     )
 
-    val configs = Inputs.coursierConfigurationsMap(module0.configurations).map { case (k, l) =>
+    val configs = Inputs.coursierConfigurationsMap(module0.configurations).map { (k, l) =>
       ToCoursier.configuration(k) -> l.map(ToCoursier.configuration)
     }
 
@@ -304,11 +304,11 @@ class CoursierDependencyResolution(
       UpdateParams(
         thisModule = (ToCoursier.module(mod), ver),
         artifacts = artifacts.collect { case (d, p, a, Some(f)) => a -> f }.toMap,
-        fullArtifacts = Some(artifacts.map { case (d, p, a, f) => (d, p, a) -> f }.toMap),
+        fullArtifacts = Some(artifacts.map { (d, p, a, f) => (d, p, a) -> f }.toMap),
         classifiers = classifiers,
         configs = configs,
         dependencies = dependencies,
-        forceVersions = conf.forceVersions.map { case (m, v) => (ToCoursier.module(m), v) }.toMap,
+        forceVersions = conf.forceVersions.map { (m, v) => (ToCoursier.module(m), v) }.toMap,
         interProjectDependencies = interProjectDependencies,
         res = resolutions,
         includeSignatures = false,

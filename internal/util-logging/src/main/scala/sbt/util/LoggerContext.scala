@@ -39,14 +39,14 @@ object LoggerContext {
       private val consoleAppenders: AtomicReference[Vector[(Appender, Level.Value)]] =
         new AtomicReference(Vector.empty)
       def log(level: Level.Value, message: => String): Unit = {
-        val toAppend = consoleAppenders.get.filter { case (a, l) => level.compare(l) >= 0 }
+        val toAppend = consoleAppenders.get.filter { (a, l) => level.compare(l) >= 0 }
         if (toAppend.nonEmpty) {
           val m = message
-          toAppend.foreach { case (a, l) => a.appendLog(level, m) }
+          toAppend.foreach { (a, l) => a.appendLog(level, m) }
         }
       }
       def log[T](level: Level.Value, message: ObjectEvent[T]): Unit = {
-        consoleAppenders.get.foreach { case (a, l) =>
+        consoleAppenders.get.foreach { (a, l) =>
           if (level.compare(l) >= 0) a.appendObjectEvent(level, message)
         }
       }

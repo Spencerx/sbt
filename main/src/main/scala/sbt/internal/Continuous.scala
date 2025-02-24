@@ -356,9 +356,8 @@ private[sbt] object Continuous extends DeprecatedContinuous {
   ): (Watch.Action, String, Int, State) => State = {
     configs.flatMap(_.watchSettings.onTermination).distinct match {
       case Seq(head, tail*) =>
-        tail.foldLeft(head) { case (onTermination, configOnTermination) =>
-          (action, cmd, count, state) =>
-            configOnTermination(action, cmd, count, onTermination(action, cmd, count, state))
+        tail.foldLeft(head) { (onTermination, configOnTermination) => (action, cmd, count, state) =>
+          configOnTermination(action, cmd, count, onTermination(action, cmd, count, state))
         }
       case _ =>
         if (isCommand) Watch.defaultCommandOnTermination else Watch.defaultTaskOnTermination
@@ -636,7 +635,7 @@ private[sbt] object Continuous extends DeprecatedContinuous {
           val actions = events.flatMap(onEvent(count, _))
           if (actions.exists(_._2 != Watch.Ignore)) {
             val builder = new StringBuilder
-            val min = actions.minBy { case (e, a) =>
+            val min = actions.minBy { (e, a) =>
               if (builder.nonEmpty) builder.append(", ")
               val path = e.path
               builder.append(path)
@@ -777,7 +776,7 @@ private[sbt] object Continuous extends DeprecatedContinuous {
       val default: String => Watch.Action =
         string => parse(inputStream(string), systemInBuilder, fullParser)
       val alt = alternative
-        .map { case (key, handler) =>
+        .map { (key, handler) =>
           val is = extracted.runTask(key, state)._2
           () => handler(is)
         }

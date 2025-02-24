@@ -191,7 +191,7 @@ private[sbt] case class SbtChainResolver(
         data: ResolveData
     ): Option[ResolvedModuleRevision] = {
 
-      val sortedRevisions = foundRevisions.sortBy { case (rmr, resolver) =>
+      val sortedRevisions = foundRevisions.sortBy { (rmr, resolver) =>
         val publicationDate = rmr.getPublicationDate
         val descriptorDate = rmr.getDescriptor.getPublicationDate
         Message.warn(s"Sorting results from $rmr, using $publicationDate and $descriptorDate.")
@@ -278,7 +278,7 @@ private[sbt] case class SbtChainResolver(
     }
 
     /** Cleans unnecessary module id information not provided by [[IvyRetrieve.toModuleID()]]. */
-    private final val moduleResolvers = updateOptions.moduleResolvers.map { case (key, value) =>
+    private final val moduleResolvers = updateOptions.moduleResolvers.map { (key, value) =>
       val cleanKey = ModuleID(key.organization, key.name, key.revision)
         .withExtraAttributes(key.extraAttributes)
         .withBranchName(key.branchName)

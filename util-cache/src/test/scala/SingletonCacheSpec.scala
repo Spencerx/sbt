@@ -48,7 +48,7 @@ class SingletonCacheSpec extends AnyFlatSpec {
   }
 
   "A singleton cache" should "throw an exception if read without being written previously" in {
-    testCache[Int] { case (cache, store) =>
+    testCache[Int] { (cache, store) =>
       intercept[Exception] {
         cache.read(store)
       }
@@ -57,13 +57,13 @@ class SingletonCacheSpec extends AnyFlatSpec {
   }
 
   it should "write a very simple value" in {
-    testCache[Int] { case (cache, store) =>
+    testCache[Int] { (cache, store) =>
       cache.write(store, 5)
     }
   }
 
   it should "return the simple value that has been previously written" in {
-    testCache[Int] { case (cache, store) =>
+    testCache[Int] { (cache, store) =>
       val value = 5
       cache.write(store, value)
       val read = cache.read(store)
@@ -73,7 +73,7 @@ class SingletonCacheSpec extends AnyFlatSpec {
   }
 
   it should "write a complex value" in {
-    testCache[ComplexType] { case (cache, store) =>
+    testCache[ComplexType] { (cache, store) =>
       val value = ComplexType(1, "hello, world!", (1 to 10 by 3).toList)
       cache.write(store, value)
       val read = cache.read(store)

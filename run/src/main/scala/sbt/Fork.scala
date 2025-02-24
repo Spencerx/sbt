@@ -67,7 +67,7 @@ final class Fork(val commandName: String, val runnerClass: Option[String]) {
       else
         new JProcessBuilder(command*)
     workingDirectory.foreach(jpb.directory(_))
-    environment.foreach { case (k, v) => jpb.environment.put(k, v) }
+    environment.foreach { (k, v) => jpb.environment.put(k, v) }
     if (connectInput) {
       jpb.redirectInput(Redirect.INHERIT)
       ()

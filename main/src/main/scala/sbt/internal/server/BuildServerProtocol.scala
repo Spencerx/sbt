@@ -106,13 +106,13 @@ object BuildServerProtocol {
         val workspace = Keys.bspFullWorkspace.value
         val state = Keys.state.value
         val allTargets = ScopeFilter.in(workspace.scopes.values.toSeq)
-        val sbtTargets = workspace.builds.map { case (buildTargetIdentifier, loadedBuildUnit) =>
+        val sbtTargets = workspace.builds.map { (buildTargetIdentifier, loadedBuildUnit) =>
           val buildFor = workspace.buildToScope.getOrElse(buildTargetIdentifier, Nil)
           sbtBuildTarget(loadedBuildUnit, buildTargetIdentifier, buildFor).result
         }.toList
         (workspace, state, allTargets, sbtTargets)
       }
-      .flatMapTask { case (workspace, state, allTargets, sbtTargets) =>
+      .flatMapTask { (workspace, state, allTargets, sbtTargets) =>
         Def.task {
           val buildTargets = Keys.bspBuildTarget.result.all(allTargets).value
           val successfulBuildTargets = anyOrThrow(buildTargets ++ sbtTargets.join.value)
@@ -124,7 +124,7 @@ object BuildServerProtocol {
     // https://github.com/build-server-protocol/build-server-protocol/blob/master/docs/specification.md#build-target-sources-request
     bspBuildTargetSources := bspInputTask { (workspace, filter) =>
       val items = bspBuildTargetSourcesItem.result.all(filter).value
-      val buildItems = workspace.builds.map { case (id, loadedBuildUnit) =>
+      val buildItems = workspace.builds.map { (id, loadedBuildUnit) =>
         val base = loadedBuildUnit.localBase
         val sbtFiles = configurationSources(base)
         val pluginData = loadedBuildUnit.unit.plugins.pluginData
@@ -223,7 +223,7 @@ object BuildServerProtocol {
       val items = bspBuildTargetJavacOptionsItem.result.all(filter).value
       val appProvider = appConfiguration.value.provider()
       val sbtJars = appProvider.mainClasspath()
-      val buildItems = workspace.builds.map { case (targetId, build) =>
+      val buildItems = workspace.builds.map { (targetId, build) =>
         Result.Value(javacOptionsBuildItem(sbtJars, targetId, build))
       }
       val successfulItems = anyOrThrow(items ++ buildItems)
@@ -669,15 +669,15 @@ object BuildServerProtocol {
         )
       }
       .flatMapTask {
-        case (
-              buildTargetIdentifier,
-              displayName,
-              baseDirectory,
-              tags,
-              capabilities,
-              projectDependencies,
-              compileData
-            ) =>
+        (
+            buildTargetIdentifier,
+            displayName,
+            baseDirectory,
+            tags,
+            capabilities,
+            projectDependencies,
+            compileData
+        ) =>
           Def.task {
             BuildTarget(
               buildTargetIdentifier,
@@ -806,13 +806,13 @@ object BuildServerProtocol {
         )
       }
       .flatMapTask {
-        case (
-              target,
-              scalacOptions,
-              classDirectory,
-              externalDependencyClasspath,
-              internalDependencyClasspath
-            ) =>
+        (
+            target,
+            scalacOptions,
+            classDirectory,
+            externalDependencyClasspath,
+            internalDependencyClasspath
+        ) =>
           Def.task {
             val converter = fileConverter.value
             val cp0 = internalDependencyClasspath.join.value.distinct ++
@@ -893,7 +893,7 @@ object BuildServerProtocol {
               )
             case Success(value) =>
               value.withEnvironmentVariables(
-                envVars.value.map { case (k, v) => s"$k=$v" }.toVector ++ value.environmentVariables
+                envVars.value.map { (k, v) => s"$k=$v" }.toVector ++ value.environmentVariables
               )
           }
 
@@ -913,7 +913,7 @@ object BuildServerProtocol {
             ),
             runParams.arguments,
             defaultJvmOptions.toVector,
-            envVars.value.map { case (k, v) => s"$k=$v" }.toVector
+            envVars.value.map { (k, v) => s"$k=$v" }.toVector
           )
       }
       runMainClassTask(mainClass, runParams.originId)
@@ -1000,7 +1000,7 @@ object BuildServerProtocol {
   private def internalDependencyConfigurationsSetting = Def.settingDyn {
     val allScopes = bspFullWorkspace.value.scopes.map { case (_, scope) => scope }.toSet
     val directDependencies = Keys.internalDependencyConfigurations.value
-      .map { case (project, rawConfigs) =>
+      .map { (project, rawConfigs) =>
         val configs = rawConfigs
           .flatMap(_.split(","))
           .map(name => ConfigKey(name.trim))
@@ -1042,7 +1042,7 @@ object BuildServerProtocol {
 
         val grouped = TestFramework.testMap(frameworks, definitions)
 
-        grouped.map { case (framework, definitions) =>
+        grouped.map { (framework, definitions) =>
           ScalaTestClassesItem(
             bspTargetIdentifier.value,
             definitions.map(_.name).toVector,
@@ -1059,7 +1059,7 @@ object BuildServerProtocol {
         _,
         Vector(),
         jvmOptions,
-        envVars.value.map { case (k, v) => s"$k=$v" }.toVector
+        envVars.value.map { (k, v) => s"$k=$v" }.toVector
       )
     )
     ScalaMainClassesItem(

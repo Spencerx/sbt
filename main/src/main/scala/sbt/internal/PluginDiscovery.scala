@@ -56,9 +56,8 @@ object PluginDiscovery:
       "sbt.plugins.MiniDependencyTreePlugin" -> sbt.plugins.MiniDependencyTreePlugin,
     )
     val detectedAutoPlugins = discover[AutoPlugin](AutoPlugins)
-    val allAutoPlugins = (defaultAutoPlugins ++ detectedAutoPlugins.modules) map {
-      case (name, value) =>
-        DetectedAutoPlugin(name, value, sbt.Plugins.hasAutoImportGetter(value, loader))
+    val allAutoPlugins = (defaultAutoPlugins ++ detectedAutoPlugins.modules) map { (name, value) =>
+      DetectedAutoPlugin(name, value, sbt.Plugins.hasAutoImportGetter(value, loader))
     }
     new DetectedPlugins(allAutoPlugins, discover[BuildDef](Builds))
   }
@@ -186,7 +185,7 @@ object PluginDiscovery:
     val evictedModules = evicted.map { id =>
       (id.organization, id.name)
     }.distinct
-    val evictedStrings = evictedModules map { case (o, n) => o + ":" + n }
+    val evictedStrings = evictedModules map { (o, n) => o + ":" + n }
     val msgBase = "Binary incompatibility in plugins detected."
     val msgExtra =
       if (evictedStrings.isEmpty) ""

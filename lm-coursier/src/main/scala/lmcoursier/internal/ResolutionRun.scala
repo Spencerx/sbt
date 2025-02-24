@@ -46,7 +46,7 @@ object ResolutionRun {
 
     def depsRepr(deps: Seq[(Configuration, Dependency)]) =
       deps
-        .map { case (config, dep) =>
+        .map { (config, dep) =>
           s"${dep.module}:${dep.version}:${config.value}->${dep.configuration.value}"
         }
         .sorted

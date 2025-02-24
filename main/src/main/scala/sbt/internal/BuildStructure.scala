@@ -60,7 +60,7 @@ final class BuildStructure(
 
   /** Foreach project in each build apply the specified function. */
   private def eachBuild[A](f: (URI, ResolvedProject) => A): Seq[A] =
-    units.iterator.flatMap { case (build, unit) => unit.projects.map(f(build, _)) }.toIndexedSeq
+    units.iterator.flatMap { (build, unit) => unit.projects.map(f(build, _)) }.toIndexedSeq
 
   /** Foreach project in the specified build apply the specified function. */
   private def eachProject[A](build: URI, f: ResolvedProject => A): Seq[A] =
@@ -266,7 +266,7 @@ final class LoadedBuild(val root: URI, val units: Map[URI, LoadedBuildUnit]) {
   BuildUtil.checkCycles(units)
 
   def allProjectRefs: Seq[(ProjectRef, ResolvedProject)] =
-    units.iterator.flatMap { case (build, unit) =>
+    units.iterator.flatMap { (build, unit) =>
       unit.projects.map(p => ProjectRef(build, p.id) -> p)
     }.toIndexedSeq
 

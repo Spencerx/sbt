@@ -59,7 +59,7 @@ object Inspect {
   }
 
   def commandHandler(s: State, mode: Mode): Parser[() => String] = {
-    Space ~> commandParser(s).flatMap { case (name, cmd) =>
+    Space ~> commandParser(s).flatMap { (name, cmd) =>
       cmd.tags.get(BasicCommands.CommandAliasKey) match {
         case Some((_, aliasFor)) =>
           def header = s"Alias for: $aliasFor"

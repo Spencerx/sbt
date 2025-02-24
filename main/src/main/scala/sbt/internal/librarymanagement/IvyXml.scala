@@ -91,7 +91,7 @@ object IvyXml {
           new PrefixedAttribute("e", k, v, acc)
       }
 
-    val licenseElems = project.info.licenses.map { case (name, urlOpt) =>
+    val licenseElems = project.info.licenses.map { (name, urlOpt) =>
       val n = <license name={name} />
 
       urlOpt.fold(n) { url =>
@@ -133,7 +133,7 @@ object IvyXml {
       .view
       .mapValues { _.map { case (cfg, _) => cfg } }
 
-    val publicationElems = publications.map { case (pub, configs) =>
+    val publicationElems = publications.map { (pub, configs) =>
       val n =
         <artifact name={pub.name} type={pub.`type`.value} ext={pub.ext.value} conf={
           configs.map(_.value).mkString(",")
@@ -145,7 +145,7 @@ object IvyXml {
         n
     }
 
-    val dependencyElems = project.dependencies.toVector.map { case (conf, dep) =>
+    val dependencyElems = project.dependencies.toVector.map { (conf, dep) =>
       val classifier = {
         val pub = dep.publication
         if (pub.classifier.value.nonEmpty)
@@ -160,7 +160,7 @@ object IvyXml {
           Seq.empty
       }
 
-      val excludes = dep.exclusions.toSeq.map { case (org, name) =>
+      val excludes = dep.exclusions.toSeq.map { (org, name) =>
         <exclude org={org.value} module={
           name.value
         } name="*" type="*" ext="*" conf="" matcher="exact"/>

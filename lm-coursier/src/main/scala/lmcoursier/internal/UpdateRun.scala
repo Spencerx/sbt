@@ -17,11 +17,11 @@ object UpdateRun {
       configs: Map[Configuration, Set[Configuration]]
   ): Map[Configuration, Set[Dependency]] = {
 
-    val allDepsByConfig = depsByConfig.map { case (config, deps) =>
+    val allDepsByConfig = depsByConfig.map { (config, deps) =>
       config -> res(config).subset(deps).minDependencies
     }
 
-    val filteredAllDepsByConfig = allDepsByConfig.map { case (config, allDeps) =>
+    val filteredAllDepsByConfig = allDepsByConfig.map { (config, allDeps) =>
       val allExtendedConfigs = configs.getOrElse(config, Set.empty) - config
       val inherited = allExtendedConfigs
         .flatMap(allDepsByConfig.getOrElse(_, Set.empty))
@@ -39,11 +39,11 @@ object UpdateRun {
       configs: Map[Configuration, Set[Configuration]]
   ): Set[Dependency] =
     allDependenciesByConfig(res, depsByConfig, configs)
-      .flatMap { case (config, deps) =>
+      .flatMap { (config, deps) =>
         deps.map(dep => dep.withConfiguration(config --> dep.configuration))
       }
       .groupBy(_.withConfiguration(Configuration.empty))
-      .map { case (dep, l) =>
+      .map { (dep, l) =>
         dep.withConfiguration(Configuration.join(l.map(_.configuration).toSeq*))
       }
       .toSet

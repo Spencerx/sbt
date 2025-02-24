@@ -159,7 +159,7 @@ object BasicCommands {
   def completionsParser(state: State): Parser[String] = completionsParser
 
   private def completionsParser: Parser[String] = {
-    val notQuoted = (NotQuoted ~ any.*) map { case (nq, s) => nq + s }
+    val notQuoted = (NotQuoted ~ any.*) map { (nq, s) => nq + s }
     val quotedOrUnquotedSingleArgument = Space ~> (StringVerbatim | StringEscapable | notQuoted)
     token((quotedOrUnquotedSingleArgument ?? "").examples("", " "))
   }
@@ -190,7 +190,7 @@ object BasicCommands {
       state.map(s => (matched(s.nonMultiParser) & cmdPart) | cmdPart)
     val cmdParser = {
       val parser = completionParser.getOrElse(cmdPart).map(_.trim)
-      exclude.foldLeft(parser) { case (p, e) => p & not(OptSpace ~ s"$e ", s"!$e").examples() }
+      exclude.foldLeft(parser) { (p, e) => p & not(OptSpace ~ s"$e ", s"!$e").examples() }
     }
     val multiCmdParser: Parser[String] = token(';') ~> OptSpace ~> cmdParser
 

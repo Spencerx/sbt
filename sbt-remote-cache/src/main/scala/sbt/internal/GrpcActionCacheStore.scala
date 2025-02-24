@@ -96,7 +96,7 @@ object GrpcActionCacheStore:
       executor.execute: () =>
         try
           val headers = Metadata()
-          pairs.foreach { case (k, v) =>
+          pairs.foreach { (k, v) =>
             headers.put(k, v)
           }
           applier.apply(headers)

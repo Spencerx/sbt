@@ -189,7 +189,7 @@ object InputTask:
     override def pure[A1](a: () => A1): InputTask[A1] = InputTask.createFreeFromAction(a)
     override def ap[A1, A2](ff: InputTask[A1 => A2])(in: InputTask[A1]): InputTask[A2] =
       InputTask[A2]((s: State) =>
-        (in.parser(s) ~ ff.parser(s)).map { case (ta1, tf) =>
+        (in.parser(s) ~ ff.parser(s)).map { (ta1, tf) =>
           Task.taskMonad.ap(tf)(ta1)
         }
       )

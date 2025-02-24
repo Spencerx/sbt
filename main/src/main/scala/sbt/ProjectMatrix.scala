@@ -655,7 +655,7 @@ object ProjectMatrix {
       new AxisBaseProjectFinder(axisValues.toSeq)
 
     override def allProjects(): Seq[(Project, Seq[VirtualAxis])] =
-      resolvedMappings.map { case (row, project) =>
+      resolvedMappings.map { (row, project) =>
         project -> row.axisValues
       }.toSeq
 

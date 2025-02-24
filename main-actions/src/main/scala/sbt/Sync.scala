@@ -105,7 +105,7 @@ object Sync {
   def noDuplicateTargets(relation: Relation[File, File]): Unit = {
     val dups = relation.reverseMap
       .withFilter { case (_, srcs) => srcs.size >= 2 && srcs.exists(!_.isDirectory) }
-      .map { case (target, srcs) => "\n\t" + target + "\nfrom\n\t" + srcs.mkString("\n\t\t") }
+      .map { (target, srcs) => "\n\t" + target + "\nfrom\n\t" + srcs.mkString("\n\t\t") }
     if (dups.nonEmpty)
       sys.error("Duplicate mappings:" + dups.mkString)
   }
@@ -159,7 +159,7 @@ object Sync {
   )(using infoFormat: JsonFormat[F]): Unit = {
     val virtualRelation: Relation[VirtualFileRef, VirtualFileRef] =
       Relation.switch(relation, (f: File) => fileConverter.toVirtualFile(f.toPath))
-    val virtualInfo: Map[VirtualFileRef, F] = info.map { case (file, fileInfo) =>
+    val virtualInfo: Map[VirtualFileRef, F] = info.map { (file, fileInfo) =>
       fileConverter.toVirtualFile(file.toPath) -> fileInfo
     }
 
@@ -188,7 +188,7 @@ object Sync {
       fileConverter: FileConverter
   ): RelationInfo[F] = {
     val firstPart = Relation.switch(info._1, (r: VirtualFileRef) => fileConverter.toPath(r).toFile)
-    val secondPart = info._2.map { case (file, fileInfo) =>
+    val secondPart = info._2.map { (file, fileInfo) =>
       fileConverter.toPath(file).toFile -> fileInfo
     }
     firstPart -> secondPart

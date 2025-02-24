@@ -26,7 +26,7 @@ object SelectMainClass {
           @tailrec def loop(): Option[String] = {
             val header = "\nMultiple main classes detected. Select one to run:\n"
             val classes = multiple.zipWithIndex
-              .map { case (className, index) => s" [${index + 1}] $className" }
+              .map { (className, index) => s" [${index + 1}] $className" }
               .mkString("\n")
             println(ClearScreenAfterCursor + header + classes + "\n")
             val line = trim(prompt("Enter number: "))

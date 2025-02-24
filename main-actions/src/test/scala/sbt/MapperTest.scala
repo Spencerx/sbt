@@ -31,7 +31,7 @@ object MapperTest extends verify.BasicTestSuite:
 
       val mappings = Mapper
         .directory(tempDirectory)
-        .map { case (h, p) =>
+        .map { (h, p) =>
           (h.toString, p)
         }
 
@@ -51,7 +51,7 @@ object MapperTest extends verify.BasicTestSuite:
       given FileConverter = MappedFileConverter(Map("BASE" -> tempDirectory.toPath()), true)
       val mappings = Mapper
         .directory(tempDirectory)
-        .map { case (h, p) =>
+        .map { (h, p) =>
           (h.toString, p)
         }
       Predef.assert(
@@ -77,7 +77,7 @@ object MapperTest extends verify.BasicTestSuite:
       given FileConverter = conv0
       val file = tempDirectory / "file"
       IO.touch(file)
-      val mappings = Mapper.directory(file).map { case (h, p) =>
+      val mappings = Mapper.directory(file).map { (h, p) =>
         (h.toString, p)
       }
       Predef.assert(
@@ -99,7 +99,7 @@ object MapperTest extends verify.BasicTestSuite:
       IO.createDirectory(nestedDir)
       IO.touch(nestedDirFile)
 
-      val mappings = Mapper.contentOf(tempDirectory).map { case (h, p) =>
+      val mappings = Mapper.contentOf(tempDirectory).map { (h, p) =>
         (h.toString, p)
       }
       Predef.assert(

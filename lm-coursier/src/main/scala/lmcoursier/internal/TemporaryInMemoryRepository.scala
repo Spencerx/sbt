@@ -191,7 +191,7 @@ final class TemporaryInMemoryRepository private (
     fallbacks
       .get(dependency.moduleVersion)
       .toSeq
-      .map { case (url, changing) =>
+      .map { (url, changing) =>
         val url0 = url.toString
         val ext = url0.substring(url0.lastIndexOf('.') + 1)
         val pub = Publication(

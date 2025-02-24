@@ -46,7 +46,7 @@ object ProjectQuery:
       token("@scalaBinaryVersion=" ~> StringBasic.map((scalaBinaryVersion.key, _)))
         .examples("@scalaBinaryVersion=3")
         .?)
-      .map { case (proj, params) =>
+      .map { (proj, params) =>
         ProjectQuery(proj, params.toMap)
       }
       .filter(

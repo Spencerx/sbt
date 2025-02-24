@@ -70,7 +70,7 @@ object UnresolvedWarning {
         if (path.nonEmpty) {
           val head = path.head
           buffer += "\t\t" + head._1.toString + sourcePosStr(head._2)
-          path.tail foreach { case (m, pos) =>
+          path.tail foreach { (m, pos) =>
             buffer += "\t\t  +- " + m.toString + sourcePosStr(pos)
           }
         }

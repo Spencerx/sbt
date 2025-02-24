@@ -158,7 +158,7 @@ final class EvictionError private[sbt] (
     val out: mutable.ListBuffer[String] = mutable.ListBuffer()
     out += "found version conflict(s) in library dependencies; some are suspected to be binary incompatible:"
     out += ""
-    evictions.foreach({ case (a, scheme) =>
+    evictions.foreach({ (a, scheme) =>
       val seen: mutable.Set[ModuleID] = mutable.Set()
       val callers: List[String] = (a.evicteds.toList ::: a.winner.toList) flatMap { r =>
         val rev = r.module.revision

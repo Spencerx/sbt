@@ -63,7 +63,7 @@ object FromSbt {
 
   private def attributes(attr: Map[String, String]): Map[String, String] =
     attr
-      .map { case (k, v) =>
+      .map { (k, v) =>
         k.stripPrefix("e:") -> v
       }
       .filter { case (k, _) =>
@@ -131,7 +131,7 @@ object FromSbt {
     )
 
     val mapping = module.configurations.getOrElse("compile")
-    val allMappings = ivyXmlMappings(mapping).map { case (from, to) =>
+    val allMappings = ivyXmlMappings(mapping).map { (from, to) =>
       (Configuration(from.value), Configuration(to.value))
     }
 
@@ -191,7 +191,7 @@ object FromSbt {
     val properties = projectID.extraAttributes.view
       .filterKeys(_.startsWith(prefix))
       .toSeq
-      .map { case (k, v) => (k.stripPrefix("e:"), v) }
+      .map { (k, v) => (k.stripPrefix("e:"), v) }
       .sortBy(_._1)
 
     Project(

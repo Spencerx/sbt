@@ -147,7 +147,7 @@ private[sbt] object ConvertResolver {
     (updateOptions.resolverConverter orElse defaultConvert)((r, settings, log))
 
   /** The default implementation of converter. */
-  lazy val defaultConvert: ResolverConverter = { case (r, settings, log) =>
+  lazy val defaultConvert: ResolverConverter = { (r, settings, log) =>
     val managedChecksums = Option(settings.getVariable(ManagedChecksums)) match {
       case Some(x) => x.toBoolean
       case _       => false

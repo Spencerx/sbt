@@ -385,9 +385,8 @@ object Scope:
       configInherit: (ResolvedReference, ConfigKey) => Seq[ConfigKey]
   ): DelegateIndex = {
     val pDelegates = refs
-      .map:
-        case (ref, project) =>
-          (ref, delegateIndex(ref, configurations(project))(projectInherit, configInherit))
+      .map: (ref, project) =>
+        (ref, delegateIndex(ref, configurations(project))(projectInherit, configInherit))
       .toMap
     new DelegateIndex0(pDelegates)
   }

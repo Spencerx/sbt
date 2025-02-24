@@ -122,7 +122,7 @@ final class ScriptedTests(
 
     type TestInfo = ((String, String), File)
 
-    val labelsAndDirs = groupAndNameDirs.filterNot(_._2.isFile).map { case (groupDir, nameDir) =>
+    val labelsAndDirs = groupAndNameDirs.filterNot(_._2.isFile).map { (groupDir, nameDir) =>
       val groupName = groupDir.getName
       val testName = nameDir.getName
       val testDirectory = testResources.readOnlyResourceDirectory(groupName, testName)

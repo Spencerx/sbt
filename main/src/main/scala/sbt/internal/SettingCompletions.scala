@@ -143,7 +143,7 @@ private[sbt] object SettingCompletions {
       context: ResolvedProject,
   ): Parser[String] = {
     val keyMap: Map[String, AttributeKey[?]] =
-      rawKeyMap.map { case (k, v) => (keyScalaID(k), v) }.toMap
+      rawKeyMap.map { (k, v) => (keyScalaID(k), v) }.toMap
     val full = for {
       defineKey <- scopedKeyParser(keyMap, settings, context)
       a <- assign(defineKey)
@@ -239,7 +239,7 @@ private[sbt] object SettingCompletions {
     )
     val taskParser =
       axisParser[AttributeKey[?]](_.task, k => keyScalaID(k.label), _.description, "task")
-    val nonGlobal = (configParser ~ taskParser) map { case (c, t) => Scope(This, c, t, Zero) }
+    val nonGlobal = (configParser ~ taskParser) map { (c, t) => Scope(This, c, t, Zero) }
     val global = inParser ~> token((Space ~ GlobalID) ^^^ Global)
     global | nonGlobal
   }
@@ -272,7 +272,7 @@ private[sbt] object SettingCompletions {
 
   /** Produce a new parser that allows the input accepted by `p` to be quoted in backticks. */
   def optionallyQuoted[T](p: Parser[T]): Parser[T] =
-    (Backtick.? ~ p) flatMap { case (quote, id) =>
+    (Backtick.? ~ p) flatMap { (quote, id) =>
       if (quote.isDefined) Backtick.? ^^^ id else success(id)
     }
 
@@ -316,7 +316,7 @@ private[sbt] object SettingCompletions {
       description: T => Option[String]
   )(prominent: (String, T) => Boolean): Seq[Completion] = {
     val applicable = all.toSeq.filter { case (k, _) => k.startsWith(seen) }
-    val prominentOnly = applicable filter { case (k, v) => prominent(k, v) }
+    val prominentOnly = applicable filter { (k, v) => prominent(k, v) }
 
     val showAll = (level >= 3) || (level == 2 && prominentOnly.lengthCompare(
       detailLimit
@@ -331,7 +331,7 @@ private[sbt] object SettingCompletions {
     def appendString(id: String): String = id.stripPrefix(seen) + " "
     if (in.isEmpty) Nil
     else if (showDescriptions) {
-      val withDescriptions = in map { case (id, key) => (id, description(key)) }
+      val withDescriptions = in map { (id, key) => (id, description(key)) }
       val padded = CommandUtil.aligned("", "   ", withDescriptions)
       padded.lazyZip(in).map { case (line, (id, _)) =>
         Completion.tokenDisplay(append = appendString(id), display = line + "\n")

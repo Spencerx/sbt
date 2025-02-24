@@ -85,7 +85,7 @@ private[sbt] object SbtRefactorings:
   private def toTreeStringMap(command: Seq[String]) = {
     val split = SbtParser(FAKE_FILE, command)
     val trees = split.settingsTrees
-    val seq = trees.map { case (statement, tree) =>
+    val seq = trees.map { (statement, tree) =>
       (extractSettingName(tree), statement)
     }
     seq.toMap

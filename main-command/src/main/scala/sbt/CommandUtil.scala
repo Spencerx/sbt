@@ -53,7 +53,7 @@ object CommandUtil {
     }
 
   def singleArgument(exampleStrings: Set[String]): Parser[String] = {
-    val arg = (NotSpaceClass ~ any.*) map { case (ns, s) => (ns +: s).mkString }
+    val arg = (NotSpaceClass ~ any.*) map { (ns, s) => (ns +: s).mkString }
     token(Space) ~> token(arg.examples(exampleStrings))
   }
 
@@ -75,7 +75,7 @@ object CommandUtil {
 
   def searchHelp(selected: String, detailMap: Map[String, String]): Map[String, String] = {
     val pattern = Pattern.compile(selected, HelpPatternFlags)
-    detailMap flatMap { case (k, v) =>
+    detailMap flatMap { (k, v) =>
       val contentMatches = Highlight.showMatches(pattern)(v)
       val keyMatches = Highlight.showMatches(pattern)(k)
       val keyString = Highlight.bold(keyMatches getOrElse k)
@@ -88,7 +88,7 @@ object CommandUtil {
   }
 
   def layoutDetails(details: Map[String, String]): String =
-    details.map { case (k, v) => k + "\n\n  " + v }.mkString("\n", "\n\n", "\n")
+    details.map { (k, v) => k + "\n\n  " + v }.mkString("\n", "\n\n", "\n")
 
   final val HelpPatternFlags = Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE
 

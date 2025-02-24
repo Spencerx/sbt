@@ -43,7 +43,7 @@ object IvyXml {
       new PrefixedAttribute("e", k, v, acc)
     }
 
-    val licenseElems = project.info.licenses.map { case (name, urlOpt) =>
+    val licenseElems = project.info.licenses.map { (name, urlOpt) =>
       val n = <license name={name} />
 
       urlOpt.fold(n) { url =>
@@ -62,7 +62,7 @@ object IvyXml {
       </info>
     } % infoAttrs
 
-    val confElems = project.configurations.toVector.collect { case (name, extends0) =>
+    val confElems = project.configurations.toVector.collect { (name, extends0) =>
       val n = <conf name={name.value} visibility="public" description="" />
       if (extends0.nonEmpty)
         n % <x extends={extends0.map(_.value).mkString(",")} />.attributes
@@ -73,7 +73,7 @@ object IvyXml {
     val publications = project.publications
       .groupMap((_, p) => p)((cfg, _) => cfg)
 
-    val publicationElems = publications.map { case (pub, configs) =>
+    val publicationElems = publications.map { (pub, configs) =>
       val n = <artifact name={pub.name} type={pub.`type`.value} ext={pub.ext.value} conf={
         configs.map(_.value).mkString(",")
       } />
@@ -84,8 +84,8 @@ object IvyXml {
         n
     }
 
-    val dependencyElems = project.dependencies.toVector.map { case (conf, dep) =>
-      val excludes = dep.exclusions.toSeq.map { case (org, name) =>
+    val dependencyElems = project.dependencies.toVector.map { (conf, dep) =>
+      val excludes = dep.exclusions.toSeq.map { (org, name) =>
         <exclude org={org.value} module={
           name.value
         } name="*" type="*" ext="*" conf="" matcher="exact"/>
@@ -105,11 +105,11 @@ object IvyXml {
       n % moduleAttrs
     }
 
-    val excludeElems = exclusions.toVector.map { case (org, name) =>
+    val excludeElems = exclusions.toVector.map { (org, name) =>
       <exclude org={org} module={name} artifact="*" type="*" ext="*" matcher="exact"/>
     }
 
-    val overrideElems = overrides.toVector.map { case (org, name, ver) =>
+    val overrideElems = overrides.toVector.map { (org, name, ver) =>
       <override org={org} module={name} rev={ver} matcher="exact"/>
     }
 

@@ -40,7 +40,7 @@ object ParserInstance:
     type F[x] = State => Parser[x]
     override def pure[A1](a: () => A1): State => Parser[A1] = const(DefaultParsers.success(a()))
     override def ap[A1, A2](ff: F[A1 => A2])(fa: F[A1]): F[A2] =
-      (s: State) => (ff(s) ~ fa(s)).map { case (f, a) => f(a) }
+      (s: State) => (ff(s) ~ fa(s)).map { (f, a) => f(a) }
     override def map[A1, A2](fa: F[A1])(f: A1 => A2) =
       (s: State) => fa(s).map(f)
 end ParserInstance
@@ -87,7 +87,7 @@ object FullInstance:
     type Tup = (Task[Initialize[Task[A1]]], Task[SS], [a] => Initialize[a] => Initialize[a])
     Def.app[Tup, Task[A1]]((in, settingsData, Def.capturedTransformations)) {
       case (a: Task[Initialize[Task[A1]]], data: Task[SS], f) =>
-        TaskExtra.multT2Task((a, data)).flatMapN { case (a, d) => f(a).evaluate(d) }
+        TaskExtra.multT2Task((a, data)).flatMapN { (a, d) => f(a).evaluate(d) }
     }
 
   def flattenFun[A1, A2](
@@ -96,7 +96,7 @@ object FullInstance:
     type Tup = (Task[A1 => Initialize[Task[A2]]], Task[SS], [a] => Initialize[a] => Initialize[a])
     Def.app[Tup, A1 => Task[A2]]((in, settingsData, Def.capturedTransformations)) {
       case (a: Task[A1 => Initialize[Task[A2]]] @unchecked, data: Task[SS] @unchecked, f) =>
-        (s: A1) => TaskExtra.multT2Task((a, data)).flatMapN { case (af, d) => f(af(s)).evaluate(d) }
+        (s: A1) => TaskExtra.multT2Task((a, data)).flatMapN { (af, d) => f(af(s)).evaluate(d) }
     }
 
 end FullInstance

@@ -229,7 +229,7 @@ object TestFramework {
     else
       createTestTasks(
         testLoader,
-        runners.map { case (tf, r) =>
+        runners.map { (tf, r) =>
           (frameworks(tf), new TestRunner(r, listeners, log))
         },
         mappedTests,
@@ -283,7 +283,7 @@ object TestFramework {
 
     val startTask = foreachListenerSafe(_.doInit())
     val testTasks =
-      Map(tests.toSeq.flatMap { case (framework, testDefinitions) =>
+      Map(tests.toSeq.flatMap { (framework, testDefinitions) =>
         val runner = runners(framework)
         val testTasks = withContextLoader(loader) { runner.tasks(testDefinitions) }
         for (testTask <- testTasks) yield {

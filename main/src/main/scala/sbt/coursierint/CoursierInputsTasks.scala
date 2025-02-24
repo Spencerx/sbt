@@ -109,7 +109,7 @@ object CoursierInputsTasks {
     CModule(
       COrganization(id.getOrganisation),
       CModuleName(id.getName),
-      id.getExtraAttributes.asScala.map { case (k0, v0) =>
+      id.getExtraAttributes.asScala.map { (k0, v0) =>
         k0.asInstanceOf[String] -> v0.asInstanceOf[String]
       }.toMap
     )
@@ -155,7 +155,7 @@ object CoursierInputsTasks {
       c => m.getOrElse(c, CPublication("", CType(""), CExtension(""), CClassifier("")))
     }
 
-    configurations.map { case (from, to) =>
+    configurations.map { (from, to) =>
       from -> dependency(to, publications(to))
     }
   }
@@ -181,14 +181,14 @@ object CoursierInputsTasks {
 
       // this includes org.scala-sbt:global-plugins referenced from meta-builds in particular
       sbt.Keys.projectDescriptors.value
-        .map { case (k, v) =>
+        .map { (k, v) =>
           moduleFromIvy(k) -> v
         }
         .filter { case (module, _) =>
           !projectModules(module)
         }
         .toVector
-        .map { case (module, v) =>
+        .map { (module, v) =>
           val configurations = v.getConfigurations.map { c =>
             CConfiguration(c.getName) -> c.getExtends.map(CConfiguration(_)).toSeq
           }.toMap

@@ -10,7 +10,7 @@ import scala.collection.mutable
 object Inputs {
 
   def ivyXmlMappings(mapping: String): Seq[(Configuration, Configuration)] =
-    initialIvyXmlMappings(mapping).map { case (from, to) =>
+    initialIvyXmlMappings(mapping).map { (from, to) =>
       Configuration(from.value) -> Configuration(to.value)
     }
 
@@ -96,7 +96,7 @@ object Inputs {
     }
 
     val sets =
-      new mutable.HashMap[Configuration, Wrapper] ++= configurations.map { case (k, l) =>
+      new mutable.HashMap[Configuration, Wrapper] ++= configurations.map { (k, l) =>
         val s = new mutable.HashSet[Configuration]
         s ++= l
         s += k

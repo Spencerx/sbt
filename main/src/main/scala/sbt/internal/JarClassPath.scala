@@ -51,6 +51,6 @@ private[internal] final class JarClassPath(val jars: Seq[File]) {
    * This is a stricter equality requirement than equals that we can use for cache invalidation.
    */
   private[internal] def strictEquals(that: JarClassPath): Boolean = {
-    this.equals(that) && !this.snapshots.view.zip(that.snapshots).exists { case (l, r) => l != r }
+    this.equals(that) && !this.snapshots.view.zip(that.snapshots).exists { (l, r) => l != r }
   }
 }
