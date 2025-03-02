@@ -58,7 +58,7 @@ class ForkRun(config: ForkOptions) extends ScalaRun {
   }
 
   private def configLogged(log: Logger): ForkOptions = {
-    if (config.outputStrategy.isDefined) config
+    if (config.outputStrategy.isDefined || config.connectInput) config
     else config.withOutputStrategy(OutputStrategy.LoggedOutput(log))
   }
 
