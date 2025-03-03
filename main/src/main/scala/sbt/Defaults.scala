@@ -9,8 +9,7 @@
 package sbt
 
 import java.io.{ File, PrintWriter }
-import java.net.{ URI, URL }
-import java.nio.file.{ Paths, Path => NioPath }
+import java.nio.file.{ Path => NioPath }
 import java.util.Optional
 import java.util.concurrent.TimeUnit
 import lmcoursier.CoursierDependencyResolution
@@ -408,13 +407,12 @@ object Defaults extends BuildCommon {
       val boot = app.provider.scalaProvider.launcher.bootDirectory
       val ih = app.provider.scalaProvider.launcher.ivyHome
       val coursierCache = csrCacheDirectory.value
-      val javaHome = Paths.get(sys.props("java.home"))
       Map(
         "BASE" -> base.toPath,
         "SBT_BOOT" -> boot.toPath,
         "CSR_CACHE" -> coursierCache.toPath,
         "IVY_HOME" -> ih.toPath,
-        "JAVA_HOME" -> javaHome,
+        "JAVA_HOME" -> Util.javaHome,
       )
     },
     fileConverter := MappedFileConverter(rootPaths.value, allowMachinePath.value),
