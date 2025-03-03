@@ -24,7 +24,7 @@ declare build_props_sbt_version=
 declare use_sbtn=
 declare no_server=
 declare sbtn_command="$SBTN_CMD"
-declare sbtn_version="1.10.5"
+declare sbtn_version="1.10.8"
 declare use_colors=1
 
 ###  ------------------------------- ###
