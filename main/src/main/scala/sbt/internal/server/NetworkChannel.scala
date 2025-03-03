@@ -148,21 +148,6 @@ final class NetworkChannel(
       self.onCancellationRequest(execId, crp)
   }
 
-  // Take over commandline for network channel
-  private val networkCommand: PartialFunction[String, String] = {
-    case cmd if cmd.split(" ").head.split("/").last == "run" =>
-      s"clientJob $cmd"
-  }
-  override protected def appendExec(commandLine: String, execId: Option[String]): Boolean =
-    if (clientCanWork && networkCommand.isDefinedAt(commandLine))
-      super.appendExec(networkCommand(commandLine), execId)
-    else super.appendExec(commandLine, execId)
-
-  override private[sbt] def onCommandLine(cmd: String): Boolean =
-    if (clientCanWork && networkCommand.isDefinedAt(cmd))
-      appendExec(networkCommand(cmd), None)
-    else super.onCommandLine(cmd)
-
   protected def setInitializeOption(opts: InitializeOption): Unit = initializeOption.set(opts)
 
   // Returns true if sbtn has declared with canWork: true
