@@ -68,7 +68,7 @@ object ClientTest extends AbstractServerTest {
         false
       )
     )
-  private def clientWithStdoutLines(args: String*): (Int, Seq[String]) = {
+  def clientWithStdoutLines(args: String*): (Int, Seq[String]) = {
     val out = new CachingPrintStream
     val exitCode = background(
       NetworkClient.client(
@@ -119,11 +119,6 @@ object ClientTest extends AbstractServerTest {
   }
   test("three commands with middle failure") { _ =>
     assert(client("compile;willFail;willSucceed") == 1)
-  }
-  test("run") { _ =>
-    val (exitCode, lines) = clientWithStdoutLines("run")
-    assert(exitCode == 0)
-    assert(lines.toList.exists(_.endsWith("Hello, World!")))
   }
   test("compi completions") { _ =>
     val expected = Vector(
