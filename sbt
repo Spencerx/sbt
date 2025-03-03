@@ -639,7 +639,7 @@ process_my_args () {
 
    -allow-empty|--allow-empty|-sbt-create|--sbt-create) allow_empty=true && shift ;;
 
-                        new) sbt_new=true && addResidual "$1" && shift ;;
+                   new|init) sbt_new=true && addResidual "$1" && shift ;;
 
                           *) addResidual "$1" && shift ;;
     esac
