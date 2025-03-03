@@ -24,6 +24,7 @@ import java.util.concurrent.atomic.{ AtomicBoolean, AtomicReference }
 import sbt.BasicCommandStrings.{ Shutdown, TerminateAction }
 import sbt.internal.langserver.{ CancelRequestParams, ErrorCodes, LogMessageParams, MessageType }
 import sbt.internal.protocol.{
+  InitializeOption,
   JsonRpcNotificationMessage,
   JsonRpcRequestMessage,
   JsonRpcResponseError,
@@ -83,6 +84,10 @@ final class NetworkChannel(
   private val delimiter: Byte = '\n'.toByte
   private val out = connection.getOutputStream
   private var initialized = false
+
+  /** Reference to the client-side custom options
+   */
+  private val initializeOption = new AtomicReference[InitializeOption](null)
   private val pendingRequests: mutable.Map[String, JsonRpcRequestMessage] = mutable.Map()
 
   private[this] val inputBuffer = new LinkedBlockingQueue[Int]()
@@ -124,7 +129,7 @@ final class NetworkChannel(
       self.jsonRpcNotify(method, params)
 
     def appendExec(commandLine: String, execId: Option[String]): Boolean =
-      self.append(Exec(commandLine, execId, Some(CommandSource(name))))
+      self.appendExec(commandLine, execId)
 
     def appendExec(exec: Exec): Boolean = self.append(exec)
 
@@ -133,6 +138,8 @@ final class NetworkChannel(
     private[sbt] def authOptions: Set[ServerAuthentication] = self.authOptions
     private[sbt] def authenticate(token: String): Boolean = self.authenticate(token)
     private[sbt] def setInitialized(value: Boolean): Unit = self.setInitialized(value)
+    private[sbt] def setInitializeOption(opts: InitializeOption): Unit =
+      self.setInitializeOption(opts)
     private[sbt] def onSettingQuery(execId: Option[String], req: SettingQuery): Unit =
       self.onSettingQuery(execId, req)
     private[sbt] def onCompletionRequest(execId: Option[String], cp: CompletionParams): Unit =
@@ -140,6 +147,30 @@ final class NetworkChannel(
     private[sbt] def onCancellationRequest(execId: Option[String], crp: CancelRequestParams): Unit =
       self.onCancellationRequest(execId, crp)
   }
+
+  // Take over commandline for network channel
+  private val networkCommand: PartialFunction[String, String] = {
+    case cmd if cmd.split(" ").head.split("/").last == "run" =>
+      s"clientJob $cmd"
+  }
+  override protected def appendExec(commandLine: String, execId: Option[String]): Boolean =
+    if (clientCanWork && networkCommand.isDefinedAt(commandLine))
+      super.appendExec(networkCommand(commandLine), execId)
+    else super.appendExec(commandLine, execId)
+
+  override private[sbt] def onCommandLine(cmd: String): Boolean =
+    if (clientCanWork && networkCommand.isDefinedAt(cmd))
+      appendExec(networkCommand(cmd), None)
+    else super.onCommandLine(cmd)
+
+  protected def setInitializeOption(opts: InitializeOption): Unit = initializeOption.set(opts)
+
+  // Returns true if sbtn has declared with canWork: true
+  protected def clientCanWork: Boolean =
+    Option(initializeOption.get) match {
+      case Some(opts) => opts.canWork.getOrElse(false)
+      case _          => false
+    }
 
   protected def authenticate(token: String): Boolean = instance.authenticate(token)
 
@@ -368,40 +399,6 @@ final class NetworkChannel(
   def publishBytes(event: Array[Byte], delimit: Boolean): Unit =
     try pendingWrites.put(event -> delimit)
     catch { case _: InterruptedException => }
-
-  def onCommand(command: CommandMessage): Unit = command match {
-    case x: InitCommand  => onInitCommand(x)
-    case x: ExecCommand  => onExecCommand(x)
-    case x: SettingQuery => onSettingQuery(None, x)
-  }
-
-  private def onInitCommand(cmd: InitCommand): Unit = {
-    if (auth(ServerAuthentication.Token)) {
-      cmd.token match {
-        case Some(x) =>
-          authenticate(x) match {
-            case true =>
-              initialized = true
-              notifyEvent(ChannelAcceptedEvent(name))
-            case _ => sys.error("invalid token")
-          }
-        case None => sys.error("init command but without token.")
-      }
-    } else {
-      initialized = true
-    }
-  }
-
-  private def onExecCommand(cmd: ExecCommand) = {
-    if (initialized) {
-      append(
-        Exec(cmd.commandLine, cmd.execId orElse Some(Exec.newExecId), Some(CommandSource(name)))
-      )
-      ()
-    } else {
-      log.warn(s"ignoring command $cmd before initialization")
-    }
-  }
 
   protected def onSettingQuery(execId: Option[String], req: SettingQuery) = {
     if (initialized) {

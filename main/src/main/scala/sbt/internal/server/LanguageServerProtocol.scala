@@ -62,6 +62,7 @@ private[sbt] object LanguageServerProtocol {
             else throw LangServerError(ErrorCodes.InvalidRequest, "invalid token")
           } else ()
           setInitialized(true)
+          setInitializeOption(opt)
           if (!opt.skipAnalysis.getOrElse(false)) appendExec("collectAnalyses", None)
           jsonRpcRespond(InitializeResult(serverCapabilities), Some(r.id))
 

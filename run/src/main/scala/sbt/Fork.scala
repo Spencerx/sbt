@@ -33,15 +33,8 @@ final class Fork(val commandName: String, val runnerClass: Option[String]) {
    * It is configured according to `config`.
    * If `runnerClass` is defined for this Fork instance, it is prepended to `arguments` to define the arguments passed to the forked command.
    */
-  def apply(config: ForkOptions, arguments: Seq[String]): Int = {
-    val p = fork(config, arguments)
-    RunningProcesses.add(p)
-    try p.exitValue()
-    finally {
-      if (p.isAlive()) p.destroy()
-      RunningProcesses.remove(p)
-    }
-  }
+  def apply(config: ForkOptions, arguments: Seq[String]): Int =
+    Fork.blockForExitCode(fork(config, arguments))
 
   /**
    * Forks the configured process and returns a `Process` that can be used to wait for completion or to terminate the forked process.
@@ -50,37 +43,22 @@ final class Fork(val commandName: String, val runnerClass: Option[String]) {
    * If `runnerClass` is defined for this Fork instance, it is prepended to `arguments` to define the arguments passed to the forked command.
    */
   def fork(config: ForkOptions, arguments: Seq[String]): Process = {
-    import config.{ envVars => env, _ }
+    import config._
     val executable = Fork.javaCommand(javaHome, commandName).getAbsolutePath
     val preOptions = makeOptions(runJVMOptions, bootJars, arguments)
     val (classpathEnv, options) = Fork.fitClasspath(preOptions)
     val command = executable +: options
-
-    val environment: List[(String, String)] = env.toList ++
-      (classpathEnv map { value =>
-        Fork.ClasspathEnvKey -> value
-      })
     val jpb =
       if (Fork.shouldUseArgumentsFile(options))
         new JProcessBuilder(executable, Fork.createArgumentsFile(options))
       else
         new JProcessBuilder(command.toArray: _*)
-    workingDirectory foreach (jpb directory _)
-    environment foreach { case (k, v) => jpb.environment.put(k, v) }
-    if (connectInput) {
-      jpb.redirectInput(Redirect.INHERIT)
-      ()
+    val extraEnv = classpathEnv.toList.map { value =>
+      Fork.ClasspathEnvKey -> value
     }
-    val process = Process(jpb)
-
-    outputStrategy.getOrElse(StdoutOutput: OutputStrategy) match {
-      case StdoutOutput => process.run(connectInput = false)
-      case out: BufferedOutput =>
-        out.logger.buffer { process.run(out.logger, connectInput = false) }
-      case out: LoggedOutput => process.run(out.logger, connectInput = false)
-      case out: CustomOutput => (process #> out.output).run(connectInput = false)
-    }
+    Fork.forkInternal(config, extraEnv, jpb)
   }
+
   private[this] def makeOptions(
       jvmOptions: Seq[String],
       bootJars: Iterable[File],
@@ -184,5 +162,37 @@ object Fork {
     pw.flush()
     pw.close()
     s"@${file.getAbsolutePath}"
+  }
+
+  private[sbt] def forkInternal(
+      config: ForkOptions,
+      extraEnv: List[(String, String)],
+      jpb: JProcessBuilder
+  ): Process = {
+    import config.{ envVars => env, _ }
+    val environment: List[(String, String)] = env.toList ++ extraEnv
+    workingDirectory.foreach(jpb directory _)
+    environment.foreach { case (k, v) => jpb.environment.put(k, v) }
+    if (connectInput) {
+      jpb.redirectInput(Redirect.INHERIT)
+      ()
+    }
+    val process = Process(jpb)
+    outputStrategy.getOrElse(StdoutOutput: OutputStrategy) match {
+      case StdoutOutput => process.run(connectInput = false)
+      case out: BufferedOutput =>
+        out.logger.buffer { process.run(out.logger, connectInput = false) }
+      case out: LoggedOutput => process.run(out.logger, connectInput = false)
+      case out: CustomOutput => (process #> out.output).run(connectInput = false)
+    }
+  }
+
+  private[sbt] def blockForExitCode(p: Process): Int = {
+    RunningProcesses.add(p)
+    try p.exitValue()
+    finally {
+      if (p.isAlive()) p.destroy()
+      RunningProcesses.remove(p)
+    }
   }
 }

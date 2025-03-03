@@ -51,6 +51,7 @@ import sbt.internal.server.{
   BspCompileTask,
   BuildServerProtocol,
   BuildServerReporter,
+  ClientJob,
   Definition,
   LanguageServerProtocol,
   ServerHandler,
@@ -222,7 +223,7 @@ object Defaults extends BuildCommon {
       closeClassLoaders :== SysProp.closeClassLoaders,
       allowZombieClassLoaders :== true,
       packageTimestamp :== Package.defaultTimestamp,
-    ) ++ BuildServerProtocol.globalSettings
+    ) ++ BuildServerProtocol.globalSettings ++ ClientJob.globalSettings
 
   private[sbt] lazy val globalIvyCore: Seq[Setting[_]] =
     Seq(
@@ -2717,7 +2718,7 @@ object Defaults extends BuildCommon {
   lazy val configSettings: Seq[Setting[_]] =
     Classpaths.configSettings ++ configTasks ++ configPaths ++ packageConfig ++
       Classpaths.compilerPluginConfig ++ deprecationSettings ++
-      BuildServerProtocol.configSettings
+      BuildServerProtocol.configSettings ++ ClientJob.configSettings
 
   lazy val compileSettings: Seq[Setting[_]] =
     configSettings ++ (mainBgRunMainTask +: mainBgRunTask) ++ Classpaths.addUnmanagedLibrary
