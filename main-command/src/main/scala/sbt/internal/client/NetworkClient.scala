@@ -153,6 +153,7 @@ class NetworkClient(
   private lazy val noTab = arguments.completionArguments.contains("--no-tab")
   private lazy val noStdErr = arguments.completionArguments.contains("--no-stderr") &&
     !sys.env.contains("SBTN_AUTO_COMPLETE") && !sys.env.contains("SBTC_AUTO_COMPLETE")
+  private def shutdownOnly = arguments.commandArguments == Seq(Shutdown)
 
   private def mkSocket(file: File): (Socket, Option[String]) = ClientSocket.socket(file, useJNI)
 
@@ -188,7 +189,10 @@ class NetworkClient(
   ): (Socket, Option[String]) =
     try {
       if (!portfile.exists) {
-        if (promptCompleteUsers) {
+        if (shutdownOnly) {
+          console.appendLog(Level.Info, "no sbt server is running. ciao")
+          System.exit(0)
+        } else if (promptCompleteUsers) {
           val msg = if (noTab) "" else "No sbt server is running. Press <tab> to start one..."
           errorStream.print(s"\n$msg")
           if (noStdErr) System.exit(0)
