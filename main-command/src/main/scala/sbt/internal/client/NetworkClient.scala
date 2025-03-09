@@ -13,7 +13,7 @@ package client
 import java.io.{ File, IOException, InputStream, PrintStream }
 import java.lang.ProcessBuilder.Redirect
 import java.net.{ Socket, SocketException }
-import java.nio.file.Files
+import java.nio.file.{ Files, Paths }
 import java.util.UUID
 import java.util.concurrent.atomic.{ AtomicBoolean, AtomicReference }
 import java.util.concurrent.{ ConcurrentHashMap, LinkedBlockingQueue, TimeUnit }
@@ -21,8 +21,16 @@ import java.text.DateFormat
 
 import sbt.BasicCommandStrings.{ DashDashDetachStdio, DashDashServer, Shutdown, TerminateAction }
 import sbt.internal.langserver.{ LogMessageParams, MessageType, PublishDiagnosticsParams }
+import sbt.internal.worker.{ ClientJobParams, JvmRunInfo, NativeRunInfo, RunInfo }
 import sbt.internal.protocol.*
-import sbt.internal.util.{ ConsoleAppender, ConsoleOut, Signals, Terminal, Util }
+import sbt.internal.util.{
+  ConsoleAppender,
+  ConsoleOut,
+  MessageOnlyException,
+  Signals,
+  Terminal,
+  Util
+}
 import sbt.io.IO
 import sbt.io.syntax.*
 import sbt.protocol.*
@@ -41,6 +49,7 @@ import Serialization.{
   attach,
   cancelReadSystemIn,
   cancelRequest,
+  clientJob,
   promptChannel,
   readSystemIn,
   systemIn,
@@ -61,6 +70,7 @@ import Serialization.{
 }
 import NetworkClient.Arguments
 import java.util.concurrent.TimeoutException
+import sbt.util.Logger
 
 trait ConsoleInterface {
   def appendLog(level: Level.Value, message: => String): Unit
@@ -141,6 +151,7 @@ class NetworkClient(
   private lazy val noTab = arguments.completionArguments.contains("--no-tab")
   private lazy val noStdErr = arguments.completionArguments.contains("--no-stderr") &&
     !sys.env.contains("SBTN_AUTO_COMPLETE") && !sys.env.contains("SBTC_AUTO_COMPLETE")
+  private def shutdownOnly = arguments.commandArguments == Seq(Shutdown)
 
   private def mkSocket(file: File): (Socket, Option[String]) = ClientSocket.socket(file, useJNI)
 
@@ -164,6 +175,11 @@ class NetworkClient(
     case null => inputThread.set(new RawInputThread)
     case _    =>
   }
+  private lazy val log: Logger = new Logger {
+    def trace(t: => Throwable): Unit = ()
+    def success(message: => String): Unit = ()
+    def log(level: Level.Value, message: => String): Unit = console.appendLog(level, message)
+  }
 
   private[sbt] def connectOrStartServerAndConnect(
       promptCompleteUsers: Boolean,
@@ -171,7 +187,10 @@ class NetworkClient(
   ): (Socket, Option[String]) =
     try {
       if (!portfile.exists) {
-        if (promptCompleteUsers) {
+        if (shutdownOnly) {
+          console.appendLog(Level.Info, "no sbt server is running. ciao")
+          System.exit(0)
+        } else if (promptCompleteUsers) {
           val msg = if (noTab) "" else "No sbt server is running. Press <tab> to start one..."
           errorStream.print(s"\n$msg")
           if (noStdErr) System.exit(0)
@@ -294,7 +313,18 @@ class NetworkClient(
     }
     // initiate handshake
     val execId = UUID.randomUUID.toString
-    val initCommand = InitCommand(tkn, Option(execId), Some(true))
+    val skipAnalysis = true
+    val opts = InitializeOption(
+      token = tkn,
+      skipAnalysis = Some(skipAnalysis),
+      canWork = Some(true),
+    )
+    val initCommand = InitCommand(
+      token = tkn, // duplicated with opts for compatibility
+      execId = Option(execId),
+      skipAnalysis = Some(skipAnalysis), // duplicated with opts for compatibility
+      initializationOptions = Some(opts),
+    )
     conn.sendString(Serialization.serializeCommandAsJsonMessage(initCommand))
     connectionHolder.set(conn)
     conn
@@ -641,6 +671,12 @@ class NetworkClient(
             case Success(params) => splitDiagnostics(params); Vector()
             case Failure(_)      => Vector()
           }
+        case (`clientJob`, Some(json)) =>
+          import sbt.internal.worker.codec.JsonProtocol.*
+          Converter.fromJson[ClientJobParams](json) match {
+            case Success(params) => clientSideRun(params).get; Vector.empty
+            case Failure(_)      => Vector.empty
+          }
         case (`Shutdown`, Some(_))                => Vector.empty
         case (msg, _) if msg.startsWith("build/") => Vector.empty
         case _ =>
@@ -685,6 +721,59 @@ class NetworkClient(
       val msg = s"$f:$line:$offset: ${d.message}"
       (level, msg)
     }
+  }
+
+  private def clientSideRun(params: ClientJobParams): Try[Unit] =
+    params.runInfo match {
+      case Some(info) => clientSideRun(info)
+      case _          => Failure(new MessageOnlyException(s"runInfo is not specified in $params"))
+    }
+
+  private def clientSideRun(runInfo: RunInfo): Try[Unit] = {
+    def jvmRun(info: JvmRunInfo): Try[Unit] = {
+      val option = ForkOptions(
+        javaHome = info.javaHome.map(new File(_)),
+        outputStrategy = None, // TODO: Handle buffered output etc
+        bootJars = Vector.empty,
+        workingDirectory = info.workingDirectory.map(new File(_)),
+        runJVMOptions = info.jvmOptions,
+        connectInput = info.connectInput,
+        envVars = info.environmentVariables,
+      )
+      // ForkRun handles exit code handling and cancellation
+      val runner = new ForkRun(option)
+      runner
+        .run(
+          mainClass = info.mainClass,
+          classpath = info.classpath.map(_.path).map(Paths.get),
+          options = info.args,
+          log = log
+        )
+    }
+    def nativeRun(info: NativeRunInfo): Try[Unit] = {
+      import java.lang.{ ProcessBuilder as JProcessBuilder }
+      val option = ForkOptions(
+        javaHome = None,
+        outputStrategy = None, // TODO: Handle buffered output etc
+        bootJars = Vector.empty,
+        workingDirectory = info.workingDirectory.map(new File(_)),
+        runJVMOptions = Vector.empty,
+        connectInput = info.connectInput,
+        envVars = info.environmentVariables,
+      )
+      val command = info.cmd :: info.args.toList
+      val jpb = new JProcessBuilder(command*)
+      val exitCode =
+        try Fork.blockForExitCode(Fork.forkInternal(option, Nil, jpb))
+        catch {
+          case _: InterruptedException =>
+            log.warn("run canceled")
+            1
+        }
+      Run.processExitCode(exitCode, "runner")
+    }
+    if (runInfo.jvm) jvmRun(runInfo.jvmRunInfo.getOrElse(sys.error("missing jvmRunInfo")))
+    else nativeRun(runInfo.nativeRunInfo.getOrElse(sys.error("missing nativeRunInfo")))
   }
 
   def onRequest(msg: JsonRpcRequestMessage): Unit = {

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 set +e
-declare builtin_sbt_version="1.10.7"
+declare builtin_sbt_version="1.10.10"
 declare -a residual_args
 declare -a java_args
 declare -a scalac_args
@@ -24,7 +24,7 @@ declare build_props_sbt_version=
 declare use_sbtn=
 declare no_server=
 declare sbtn_command="$SBTN_CMD"
-declare sbtn_version="1.10.5"
+declare sbtn_version="1.10.8"
 declare use_colors=1
 
 ###  ------------------------------- ###
@@ -203,6 +203,7 @@ acquire_sbtn () {
       exit 2
     fi
   elif [[ "$OSTYPE" == "darwin"* ]]; then
+    arch="universal"
     archive_target="$p/sbtn-universal-apple-darwin-${sbtn_v}.tar.gz"
     url="https://github.com/sbt/sbtn-dist/releases/download/v${sbtn_v}/sbtn-universal-apple-darwin-${sbtn_v}.tar.gz"
   elif [[ "$OSTYPE" == "cygwin" ]] || [[ "$OSTYPE" == "msys" ]] || [[ "$OSTYPE" == "win32" ]]; then
@@ -641,7 +642,7 @@ process_my_args () {
 
    -allow-empty|--allow-empty|-sbt-create|--sbt-create) allow_empty=true && shift ;;
 
-                        new) sbt_new=true && addResidual "$1" && shift ;;
+                   new|init) sbt_new=true && addResidual "$1" && shift ;;
 
                           *) addResidual "$1" && shift ;;
     esac

@@ -79,6 +79,7 @@ trait ServerCallback {
   private[sbt] def authOptions: Set[ServerAuthentication]
   private[sbt] def authenticate(token: String): Boolean
   private[sbt] def setInitialized(value: Boolean): Unit
+  private[sbt] def setInitializeOption(opts: InitializeOption): Unit
   private[sbt] def onSettingQuery(execId: Option[String], req: Q): Unit
   private[sbt] def onCompletionRequest(execId: Option[String], cp: CP): Unit
   private[sbt] def onCancellationRequest(execId: Option[String], crp: CRP): Unit

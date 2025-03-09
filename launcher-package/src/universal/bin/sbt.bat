@@ -476,6 +476,11 @@ if "%~0" == "new" (
     set sbt_new=true
   )
 )
+if "%~0" == "init" (
+  if not defined SBT_ARGS (
+    set sbt_new=true
+  )
+)
 
 if "%g:~0,2%" == "-D" (
   rem special handling for -D since '=' gets parsed away
