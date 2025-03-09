@@ -1,3 +1,3 @@
-addCommandAlias("demo-success", "runBlock true")
-addCommandAlias("demo-failure", "runBlock false")
+addCommandAlias("demo-success", "run true")
+addCommandAlias("demo-failure", "run false")
 addCommandAlias("z", "scalaVersion")

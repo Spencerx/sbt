@@ -52,7 +52,6 @@ import sbt.internal.server.{
   BspCompileTask,
   BuildServerProtocol,
   BuildServerReporter,
-  ClientJob,
   Definition,
   LanguageServerProtocol,
   ServerHandler,
@@ -141,6 +140,7 @@ import xsbti.compile.{
   TransactionalManagerType
 }
 import sbt.internal.IncrementalTest
+import sbt.internal.RunUtil
 
 object Defaults extends BuildCommon {
   final val CacheDirectoryName = "cache"
@@ -241,7 +241,7 @@ object Defaults extends BuildCommon {
         getRootPaths(out, app) + ("CSR_CACHE" -> coursierCache)
       },
       fileConverter := MappedFileConverter(rootPaths.value, allowMachinePath.value)
-    ) ++ BuildServerProtocol.globalSettings ++ ClientJob.globalSettings
+    ) ++ BuildServerProtocol.globalSettings
 
   private[sbt] def getRootPaths(out: NioPath, app: AppConfiguration): ListMap[String, NioPath] =
     val base = app.baseDirectory.getCanonicalFile.toPath
@@ -391,6 +391,7 @@ object Defaults extends BuildCommon {
       aggregate :== true,
       maxErrors :== 100,
       fork :== false,
+      clientSide :== true,
       initialize :== {},
       templateResolverInfos :== Nil,
       templateDescriptions :== TemplateCommandUtil.defaultTemplateDescriptions,
@@ -1035,27 +1036,12 @@ object Defaults extends BuildCommon {
         })
         pickMainClassOrWarn(discoveredMainClasses.value, streams.value.log, logWarning)
       },
-      runMain := foregroundRunMainTask.evaluated,
-      run := foregroundRunTask.evaluated,
-      runBlock := {
-        val r = run.evaluated
-        val service = bgJobService.value
-        service.waitForTry(r.handle).get
-        ()
-      },
-      runMainBlock := {
-        val r = runMain.evaluated
-        val service = bgJobService.value
-        service.waitForTry(r.handle).get
-        ()
-      },
       fgRun := runTask(fullClasspath, (run / mainClass), (run / runner)).evaluated,
       fgRunMain := runMainTask(fullClasspath, (run / runner)).evaluated,
       copyResources := copyResourcesTask.value,
-      // note that we use the same runner and mainClass as plain run
-      mainBgRunMainTaskForConfig(This),
-      mainBgRunTaskForConfig(This)
-    ) ++ inTask(run)(runnerSettings ++ newRunnerSettings) ++ compileIncrementalTaskSettings
+    ) ++ RunUtil.configTasks(This) ++ inTask(run)(
+      runnerSettings ++ newRunnerSettings
+    ) ++ compileIncrementalTaskSettings
 
   private lazy val configGlobal = globalDefaults(
     Seq(
@@ -1869,122 +1855,6 @@ object Defaults extends BuildCommon {
   /** Implements `cleanFiles` task. */
   private[sbt] def cleanFilesTask: Initialize[Task[Vector[File]]] = Def.task { Vector.empty[File] }
 
-  private def termWrapper(canonical: Boolean, echo: Boolean): (() => Unit) => (() => Unit) =
-    (f: () => Unit) =>
-      () => {
-        val term = ITerminal.get
-        if (!canonical) {
-          term.enterRawMode()
-          if (echo) term.setEchoEnabled(echo)
-        } else if (!echo) term.setEchoEnabled(false)
-        try f()
-        finally {
-          if (!canonical) term.exitRawMode()
-          if (!echo) term.setEchoEnabled(true)
-        }
-      }
-  def bgRunMainTask(
-      products: Initialize[Task[Classpath]],
-      classpath: Initialize[Task[Classpath]],
-      copyClasspath: Initialize[Boolean],
-      scalaRun: Initialize[Task[ScalaRun]]
-  ): Initialize[InputTask[JobHandle]] = {
-    val parser = Defaults.loadForParser(discoveredMainClasses)((s, names) =>
-      Defaults.runMainParser(s, names getOrElse Nil)
-    )
-    Def.inputTask {
-      val service = bgJobService.value
-      val (mainClass, args) = parser.parsed
-      val hashClasspath = (bgRunMain / bgHashClasspath).value
-      val wrapper = termWrapper(canonicalInput.value, echoInput.value)
-      val converter = fileConverter.value
-      service.runInBackgroundWithLoader(resolvedScoped.value, state.value) { (logger, workingDir) =>
-        val cp =
-          if copyClasspath.value then
-            service.copyClasspath(
-              products.value,
-              classpath.value,
-              workingDir,
-              hashClasspath,
-              converter,
-            )
-          else classpath.value
-        given FileConverter = fileConverter.value
-        scalaRun.value match
-          case r: Run =>
-            val loader = r.newLoader(cp.files)
-            (
-              Some(loader),
-              wrapper(() => r.runWithLoader(loader, cp.files, mainClass, args, logger).get)
-            )
-          case sr =>
-            (None, wrapper(() => sr.run(mainClass, cp.files, args, logger).get))
-      }
-    }
-  }
-
-  def bgRunTask(
-      products: Initialize[Task[Classpath]],
-      classpath: Initialize[Task[Classpath]],
-      mainClassTask: Initialize[Task[Option[String]]],
-      copyClasspath: Initialize[Boolean],
-      scalaRun: Initialize[Task[ScalaRun]]
-  ): Initialize[InputTask[JobHandle]] =
-    val parser = Def.spaceDelimited()
-    Def.inputTask {
-      val args = parser.parsed
-      val service = bgJobService.value
-      val mainClass = mainClassTask.value getOrElse sys.error("No main class detected.")
-      val hashClasspath = (bgRun / bgHashClasspath).value
-      val wrapper = termWrapper(canonicalInput.value, echoInput.value)
-      val converter = fileConverter.value
-      service.runInBackgroundWithLoader(resolvedScoped.value, state.value) { (logger, workingDir) =>
-        val cp =
-          if copyClasspath.value then
-            service.copyClasspath(
-              products.value,
-              classpath.value,
-              workingDir,
-              hashClasspath,
-              converter
-            )
-          else classpath.value
-        given FileConverter = converter
-        scalaRun.value match
-          case r: Run =>
-            val loader = r.newLoader(cp.files)
-            (
-              Some(loader),
-              wrapper(() => r.runWithLoader(loader, cp.files, mainClass, args, logger).get)
-            )
-          case sr =>
-            (None, wrapper(() => sr.run(mainClass, cp.files, args, logger).get))
-      }
-    }
-
-  // `runMain` calls bgRunMain in the background and pauses the current channel
-  def foregroundRunMainTask: Initialize[InputTask[EmulateForeground]] =
-    Def.inputTask {
-      val handle = bgRunMain.evaluated
-      handle match
-        case threadJobHandle: AbstractBackgroundJobService#ThreadJobHandle =>
-          threadJobHandle.isAutoCancel = true
-        case _ => ()
-      EmulateForeground(handle)
-    }
-
-  // `run` task calls bgRun in the background and pauses the current channel
-  def foregroundRunTask: Initialize[InputTask[EmulateForeground]] =
-    Def.inputTask {
-      val handle = bgRun.evaluated
-      handle match {
-        case threadJobHandle: AbstractBackgroundJobService#ThreadJobHandle =>
-          threadJobHandle.isAutoCancel = true
-        case _ =>
-      }
-      EmulateForeground(handle)
-    }
-
   def runMainTask(
       classpath: Initialize[Task[Classpath]],
       scalaRun: Initialize[Task[ScalaRun]]
@@ -2005,15 +1875,7 @@ object Defaults extends BuildCommon {
       classpath: Initialize[Task[Classpath]],
       mainClassTask: Initialize[Task[Option[String]]],
       scalaRun: Initialize[Task[ScalaRun]]
-  ): Initialize[InputTask[Unit]] =
-    val parser = Def.spaceDelimited()
-    Def.inputTask {
-      val in = parser.parsed
-      val mainClass = mainClassTask.value getOrElse sys.error("No main class detected.")
-      val cp = classpath.value
-      given FileConverter = fileConverter.value
-      scalaRun.value.run(mainClass, cp.files, in, streams.value.log).get
-    }
+  ): Initialize[InputTask[Unit]] = RunUtil.serverSideRunTask(classpath, mainClassTask, scalaRun)
 
   def runnerTask: Setting[Task[ScalaRun]] = runner := runnerInit.value
 
@@ -2172,26 +2034,6 @@ object Defaults extends BuildCommon {
         }
       )
     )
-
-  def mainBgRunTask = mainBgRunTaskForConfig(Select(Runtime))
-  def mainBgRunMainTask = mainBgRunMainTaskForConfig(Select(Runtime))
-
-  private def mainBgRunTaskForConfig(c: ScopeAxis[ConfigKey]) =
-    bgRun := bgRunTask(
-      exportedProductJars,
-      This / c / This / fullClasspathAsJars,
-      run / mainClass,
-      bgRun / bgCopyClasspath,
-      run / runner
-    ).evaluated
-
-  private def mainBgRunMainTaskForConfig(c: ScopeAxis[ConfigKey]) =
-    bgRunMain := bgRunMainTask(
-      exportedProductJars,
-      This / c / This / fullClasspathAsJars,
-      bgRunMain / bgCopyClasspath,
-      run / runner
-    ).evaluated
 
   def discoverMainClasses(analysis: CompileAnalysis): Seq[String] = analysis match {
     case analysis: Analysis =>
@@ -2649,10 +2491,10 @@ object Defaults extends BuildCommon {
   lazy val configSettings: Seq[Setting[?]] =
     Classpaths.configSettings ++ configTasks ++ configPaths ++ packageConfig ++
       Classpaths.compilerPluginConfig ++ deprecationSettings ++
-      BuildServerProtocol.configSettings ++ ClientJob.configSettings
+      BuildServerProtocol.configSettings
 
   lazy val compileSettings: Seq[Setting[?]] =
-    configSettings ++ (mainBgRunMainTask +: mainBgRunTask) ++ Classpaths.addUnmanagedLibrary
+    configSettings ++ RunUtil.configTasks(Select(Runtime)) ++ Classpaths.addUnmanagedLibrary
 
   lazy val testSettings: Seq[Setting[?]] = configSettings ++ testTasks
 
@@ -4683,19 +4525,6 @@ trait BuildExtra extends BuildCommon with DefExtra {
       val cp = (config / fullClasspath).value
       val args = spaceDelimited().parsed
       r.run(mainClass, cp.files, baseArguments ++ args, streams.value.log).get
-    }
-
-  def runTask(
-      config: Configuration,
-      mainClass: String,
-      arguments: String*
-  ): Initialize[Task[Unit]] =
-    Def.task {
-      given FileConverter = fileConverter.value
-      val cp = (config / fullClasspath).value
-      val r = (config / run / runner).value
-      val s = streams.value
-      r.run(mainClass, cp.files, arguments, s.log).get
     }
 
   // public API

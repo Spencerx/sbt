@@ -122,6 +122,14 @@ class ClientTest extends AbstractServerTest {
   test("three commands with middle failure") {
     assert(client("compile;willFail;willSucceed") == 1)
   }
+  test("run") {
+    val (exitCode, lines) = clientWithStdoutLines("run")
+    assert(exitCode == 0)
+    assert(
+      lines.toList.exists(_.contains("running (fork) hello")),
+      lines.toList.mkString(",")
+    )
+  }
   test("compi completions") {
     val expected = Vector(
       "compile",

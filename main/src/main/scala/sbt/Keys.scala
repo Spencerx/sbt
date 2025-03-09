@@ -316,10 +316,8 @@ object Keys {
   // Run Keys
   val selectMainClass = taskKey[Option[String]]("Selects the main class to run.").withRank(BMinusTask)
   val mainClass = taskKey[Option[String]]("Defines the main class for packaging or running.").withRank(BPlusTask)
-  val run = inputKey[EmulateForeground]("Runs a main class, passing along arguments provided on the command line.").withRank(APlusTask)
-  val runBlock = inputKey[Unit]("Runs a main class, and blocks until it's done.").withRank(DTask)
-  val runMain = inputKey[EmulateForeground]("Runs the main class selected by the first argument, passing the remaining arguments to the main method.").withRank(ATask)
-  val runMainBlock = inputKey[Unit]("Runs the main class selected by the first argument, passing the remaining arguments to the main method.").withRank(DTask)
+  val run = inputKey[Unit | ClientJobParams]("Runs a main class, passing along arguments provided on the command line.").withRank(APlusTask)
+  val runMain = inputKey[Unit | ClientJobParams]("Runs the main class selected by the first argument, passing the remaining arguments to the main method.").withRank(ATask)
   val discoveredMainClasses = taskKey[Seq[String]]("Auto-detects main classes.").withRank(BMinusTask)
   val runner = taskKey[ScalaRun]("Implementation used to run a main class.").withRank(DTask)
   val trapExit = settingKey[Boolean]("If true, enables exit trapping and thread management for 'run'-like tasks. This was removed in sbt 1.6.0 due to JDK 17 deprecating Security Manager.").withRank(CSetting)
@@ -332,6 +330,7 @@ object Keys {
   val discoveredJavaHomes = settingKey[Map[String, File]]("Discovered Java home directories")
   val javaHomes = settingKey[Map[String, File]]("The user-defined additional Java home directories")
   val fullJavaHomes = settingKey[Map[String, File]]("Combines discoveredJavaHomes and custom javaHomes.").withRank(CTask)
+  val clientSide = settingKey[Boolean]("If true, takes the action on the client-side")
 
   val javaOptions = taskKey[Seq[String]]("Options passed to a new JVM when forking.").withRank(BPlusTask)
   val envVars = taskKey[Map[String, String]]("Environment variables used when forking a new JVM").withRank(BTask)
@@ -484,8 +483,6 @@ object Keys {
 
   @cacheLevel(include = Array.empty)
   val bspReporter = taskKey[BuildServerReporter]("").withRank(DTask)
-  val clientJob = inputKey[ClientJobParams]("Translates a task into a job specification").withRank(Invisible)
-  val clientJobRunInfo = inputKey[ClientJobParams]("Translates the run task into a job specification").withRank(Invisible)
 
   val csrCacheDirectory = settingKey[File]("Coursier cache directory. Uses -Dsbt.coursier.home or Coursier's default.").withRank(CSetting)
   val csrMavenProfiles = settingKey[Set[String]]("").withRank(CSetting)

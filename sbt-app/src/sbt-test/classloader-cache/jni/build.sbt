@@ -35,6 +35,6 @@ val root = (project in file(".")).settings(
     val cp = System.getProperty("java.library.path", "").split(":").dropRight(1)
     System.setProperty("java.library.path", cp.mkString(":"))
   },
-  wrappedRun := wrap(Runtime / runBlock).value,
+  wrappedRun := wrap(Runtime / run).value,
   wrappedTest := wrap(Test / testOnly).value
 )
