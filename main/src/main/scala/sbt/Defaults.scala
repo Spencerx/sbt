@@ -52,6 +52,7 @@ import sbt.internal.server.{
   BspCompileTask,
   BuildServerProtocol,
   BuildServerReporter,
+  ClientJob,
   Definition,
   LanguageServerProtocol,
   ServerHandler,
@@ -240,7 +241,7 @@ object Defaults extends BuildCommon {
         getRootPaths(out, app) + ("CSR_CACHE" -> coursierCache)
       },
       fileConverter := MappedFileConverter(rootPaths.value, allowMachinePath.value)
-    ) ++ BuildServerProtocol.globalSettings
+    ) ++ BuildServerProtocol.globalSettings ++ ClientJob.globalSettings
 
   private[sbt] def getRootPaths(out: NioPath, app: AppConfiguration): ListMap[String, NioPath] =
     val base = app.baseDirectory.getCanonicalFile.toPath
@@ -2648,7 +2649,7 @@ object Defaults extends BuildCommon {
   lazy val configSettings: Seq[Setting[?]] =
     Classpaths.configSettings ++ configTasks ++ configPaths ++ packageConfig ++
       Classpaths.compilerPluginConfig ++ deprecationSettings ++
-      BuildServerProtocol.configSettings
+      BuildServerProtocol.configSettings ++ ClientJob.configSettings
 
   lazy val compileSettings: Seq[Setting[?]] =
     configSettings ++ (mainBgRunMainTask +: mainBgRunTask) ++ Classpaths.addUnmanagedLibrary

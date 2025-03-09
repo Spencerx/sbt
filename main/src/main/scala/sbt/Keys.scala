@@ -29,6 +29,7 @@ import sbt.internal.server.BuildServerProtocol.BspFullWorkspace
 import sbt.internal.server.{ BspCompileTask, BuildServerReporter, ServerHandler }
 import sbt.internal.util.{ AttributeKey, ProgressState, SourcePosition }
 import sbt.internal.util.StringAttributeKey
+import sbt.internal.worker.ClientJobParams
 import sbt.io.*
 import sbt.librarymanagement.Configurations.CompilerPlugin
 import sbt.librarymanagement.LibraryManagementCodec.*
@@ -483,6 +484,8 @@ object Keys {
 
   @cacheLevel(include = Array.empty)
   val bspReporter = taskKey[BuildServerReporter]("").withRank(DTask)
+  val clientJob = inputKey[ClientJobParams]("Translates a task into a job specification").withRank(Invisible)
+  val clientJobRunInfo = inputKey[ClientJobParams]("Translates the run task into a job specification").withRank(Invisible)
 
   val csrCacheDirectory = settingKey[File]("Coursier cache directory. Uses -Dsbt.coursier.home or Coursier's default.").withRank(CSetting)
   val csrMavenProfiles = settingKey[Set[String]]("").withRank(CSetting)

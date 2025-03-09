@@ -13,10 +13,13 @@ import sbt.internal.bsp.*
 import sbt.librarymanagement.Configuration
 import sbt.util.InterfaceUtil
 import sjsonnew.support.scalajson.unsafe.Converter
-import xsbti.compile.{ CompileAnalysis, Inputs }
-import xsbti.{ CompileFailed, Problem, Severity }
+import xsbti.CompileFailed
+import xsbti.Problem
+import xsbti.Severity
+import xsbti.compile.CompileAnalysis
+import xsbti.compile.Inputs
 
-object BspCompileTask {
+object BspCompileTask:
   def start(
       targetId: BuildTargetIdentifier,
       project: ProjectRef,
@@ -29,7 +32,7 @@ object BspCompileTask {
     task.notifyStart()
     task
   }
-}
+end BspCompileTask
 
 case class BspCompileTask private (
     targetId: BuildTargetIdentifier,

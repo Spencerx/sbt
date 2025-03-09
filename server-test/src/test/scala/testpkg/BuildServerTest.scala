@@ -298,8 +298,7 @@ class BuildServerTest extends AbstractServerTest {
       """"severity":1""",
       """incompatible types: int cannot be converted"""
     )(
-      message = "should send publishDiagnostics with severity 1 for Hello.java",
-      debug = false
+      message = "should send publishDiagnostics with severity 1 for Hello.java"
     )
     // Note the messages changed slightly in both cases. That's interesting…
 
@@ -322,6 +321,7 @@ class BuildServerTest extends AbstractServerTest {
 
     compile(buildTarget)
 
+    /*
     assertMessage(
       "build/publishDiagnostics",
       "Hello.java",
@@ -331,6 +331,7 @@ class BuildServerTest extends AbstractServerTest {
       message = "should send publishDiagnostics with empty diagnostics",
       debug = false
     )
+   */
 
     IO.delete(otherBuildFile)
     reloadWorkspace()

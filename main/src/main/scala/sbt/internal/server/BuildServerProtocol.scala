@@ -264,7 +264,7 @@ object BuildServerProtocol {
       val result = ScalaMainClassesResult(successfulItems.toVector, None)
       state.value.respondEvent(result)
     }.evaluated,
-    bspScalaMainClasses / aggregate := false
+    bspScalaMainClasses / aggregate := false,
   )
 
   // This will be scoped to Compile, Test, IntegrationTest etc
@@ -357,7 +357,7 @@ object BuildServerProtocol {
       } else {
         new BuildServerForwarder(meta, logger, underlying)
       }
-    }
+    },
   )
   private[sbt] object Method {
     final val Initialize = "build/initialize"
