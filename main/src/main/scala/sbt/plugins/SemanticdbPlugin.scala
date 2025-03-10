@@ -75,11 +75,8 @@ object SemanticdbPlugin extends AutoPlugin {
       val config = configuration.value
       if semanticdbEnabled.value then
         Def.task {
-          val xs =
-            (orig diff semanticdbOptions.?.all(ancestorConfigs(config)).value.flatten.flatten) ++
-              semanticdbOptions.value
-          println(xs.toString)
-          xs
+          (orig diff semanticdbOptions.?.all(ancestorConfigs(config)).value.flatten.flatten) ++
+            semanticdbOptions.value
         }
       else
         Def.task {
