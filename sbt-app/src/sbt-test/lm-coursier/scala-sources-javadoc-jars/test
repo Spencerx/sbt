@@ -1,4 +1,4 @@
 $ delete output
-> runBlock
+> run
 $ exists output
 > updateClassifiersCheck

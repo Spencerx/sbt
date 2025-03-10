@@ -61,10 +61,13 @@ final case class State(
     }
 
   def source: Option[CommandSource] =
-    currentCommand match {
+    currentCommand match
       case Some(x) => x.source
       case _       => None
-    }
+  def isNetworkCommand: Boolean =
+    source match
+      case Some(s) => s.channelName.startsWith("network")
+      case _       => false
 }
 
 /**

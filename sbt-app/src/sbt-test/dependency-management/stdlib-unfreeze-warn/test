@@ -6,6 +6,6 @@
 # macro expansion fails
 -> b/compile
 
-> c/runBlock
+> c/run
 $ exists s2.13.13.txt
 $ delete s2.13.13.txt
