@@ -40,7 +40,6 @@ import scala.collection.immutable.ArraySeq
 import scala.util.{ Success, Failure }
 import sbt.util.*
 import sbt.librarymanagement.{ ModuleDescriptorConfiguration as InlineConfiguration, * }
-import sbt.librarymanagement.Platform
 import sbt.librarymanagement.ivy.*
 import sbt.librarymanagement.syntax.*
 
@@ -54,7 +53,6 @@ import ivyint.{
 }
 import sjsonnew.JsonFormat
 import sjsonnew.support.murmurhash.Hasher
-import sbt.librarymanagement.ModuleSettings
 
 final class IvySbt(
     val configuration: IvyConfiguration,

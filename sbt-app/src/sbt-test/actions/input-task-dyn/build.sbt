@@ -5,7 +5,7 @@ import complete.Parser
 val runFoo = inputKey[Unit]("Runs Foo with passed arguments")
 val check = taskKey[Unit]("")
 
-scalaVersion := "3.6.3"
+scalaVersion := "3.6.4"
 
 lazy val root = (project in file(".")).
   settings(

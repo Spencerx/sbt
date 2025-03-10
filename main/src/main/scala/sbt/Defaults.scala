@@ -139,8 +139,6 @@ import xsbti.compile.{
   TastyFiles,
   TransactionalManagerType
 }
-import sbt.internal.IncrementalTest
-import sbt.internal.RunUtil
 
 object Defaults extends BuildCommon {
   final val CacheDirectoryName = "cache"
