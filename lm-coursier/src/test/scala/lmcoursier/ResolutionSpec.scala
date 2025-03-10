@@ -11,7 +11,7 @@ import sbt.librarymanagement.Resolver.{
   JCenterRepository,
   JavaNet2Repository
 }
-import sbt.librarymanagement.{ Resolver, UnresolvedWarningConfiguration, UpdateConfiguration }
+// import sbt.librarymanagement.{ Resolver, UnresolvedWarningConfiguration, UpdateConfiguration }
 import sbt.librarymanagement.syntax.*
 
 final class ResolutionSpec extends AnyPropSpec with Matchers {
