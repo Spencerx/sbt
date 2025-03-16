@@ -51,6 +51,7 @@ set sbt_args_sbt_version=
 set sbt_args_mem=
 set sbt_args_client=
 set sbt_args_no_server=
+set is_this_dir_sbt=0
 
 rem users can set SBT_OPTS via .sbtopts
 if exist .sbtopts for /F %%A in (.sbtopts) do (
@@ -532,11 +533,18 @@ set SBT_ARGS=!SBT_ARGS! %0
 goto args_loop
 :args_end
 
+if exist build.sbt (
+  set is_this_dir_sbt=1
+)
+if exist project\build.properties (
+  set is_this_dir_sbt=1
+)
+
 rem Confirm a user's intent if the current directory does not look like an sbt
 rem top-level directory and the "new" command was not given.
 
-if not defined sbt_args_allow_empty if not defined sbt_args_print_version if not defined sbt_args_print_sbt_version if not defined sbt_args_print_sbt_script_version if not defined shutdownall if not exist build.sbt (
-  if not exist project\ (
+if not defined sbt_args_allow_empty if not defined sbt_args_print_version if not defined sbt_args_print_sbt_version if not defined sbt_args_print_sbt_script_version if not defined shutdownall (
+  if not !is_this_dir_sbt! equ 1 (
     if not defined sbt_new (
       echo [error] Neither build.sbt nor a 'project' directory in the current directory: "%CD%"
       echo [error] run 'sbt new', touch build.sbt, or run 'sbt --allow-empty'.
@@ -667,9 +675,14 @@ if !sbt_args_print_sbt_version! equ 1 (
 )
 
 if !sbt_args_print_version! equ 1 (
-  call :set_sbt_version
-  echo sbt version in this project: !sbt_version!
-  echo sbt script version: !init_sbt_version!
+  if !is_this_dir_sbt! equ 1 (
+    call :set_sbt_version
+    echo sbt version in this project: !sbt_version!
+  )
+  echo sbt runner version: !init_sbt_version!
+  echo.
+  echo [info] sbt runner ^(sbt-the-batch-script^) is a runner to run any declared version of sbt.
+  echo [info] Actual version of the sbt is declared using project\build.properties for each build.
   goto :eof
 )
 
