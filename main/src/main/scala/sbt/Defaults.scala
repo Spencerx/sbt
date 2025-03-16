@@ -1213,7 +1213,7 @@ object Defaults extends BuildCommon {
       for (lib <- scalaDeps.take(1)) {
         val libVer = lib.module.revision
         val libName = lib.module.name
-        val n = name.value
+        val proj = Def.displayBuildRelative(thisProjectRef.value.build, thisProjectRef.value)
         if (VersionNumber(sv).matchesSemVer(SemanticSelector(s"<$libVer"))) {
           val err = !allowUnsafeScalaLibUpgrade.value
           val fix =
@@ -1227,13 +1227,13 @@ object Defaults extends BuildCommon {
                  |Compilation (macro expansion) or using the Scala REPL in sbt may fail with a LinkageError.""".stripMargin
 
           val msg =
-            s"""Expected `$n/scalaVersion` to be $libVer or later, but found $sv.
+            s"""Expected `$proj scalaVersion` to be $libVer or later, but found $sv.
                |To support backwards-only binary compatibility (SIP-51), the Scala 2.13 compiler
                |should not be older than $libName on the dependency classpath.
                |
                |$fix
                |
-               |See `$n/evicted` to know why $libName $libVer is getting pulled in.
+               |See `$proj evicted` to know why $libName $libVer is getting pulled in.
                |""".stripMargin
           if (err) sys.error(msg)
           else s.log.warn(msg)
