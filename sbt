@@ -26,6 +26,7 @@ declare no_server=
 declare sbtn_command="$SBTN_CMD"
 declare sbtn_version="1.10.8"
 declare use_colors=1
+declare is_this_dir_sbt=""
 
 ###  ------------------------------- ###
 ###  Helper methods for BASH scripts ###
@@ -494,11 +495,17 @@ copyRt() {
   fi
 }
 
+detect_working_directory() {
+  if [[ -f ./build.sbt || -f ./project/build.properties ]]; then
+    is_this_dir_sbt=1
+  fi
+}
+
 # Confirm a user's intent if the current directory does not look like an sbt
 # top-level directory and neither the --allow-empty option nor the "new" command was given.
 checkWorkingDirectory() {
   if [[ ! -n "$allow_empty" ]]; then
-    [[ -f ./build.sbt || -d ./project || -n "$sbt_new" ]] || {
+    [[ -n "$is_this_dir_sbt" || -n "$sbt_new" ]] || {
       echoerr_error "Neither build.sbt nor a 'project' directory in the current directory: $(pwd)"
       echoerr_error "run 'sbt new', touch build.sbt, or run 'sbt --allow-empty'."
       echoerr_error ""
@@ -531,13 +538,19 @@ run() {
     addJava "-Dsbt.cygwin=true"
   fi
 
+  detect_working_directory
   if [[ $print_sbt_version ]]; then
     execRunner "$java_cmd" -jar "$sbt_jar" "sbtVersion" | tail -1 | sed -e 's/\[info\]//g'
   elif [[ $print_sbt_script_version ]]; then
     echo "$init_sbt_version"
   elif [[ $print_version ]]; then
-    execRunner "$java_cmd" -jar "$sbt_jar" "sbtVersion" | tail -1 | sed -e 's/\[info\]/sbt version in this project:/g'
-    echo "sbt script version: $init_sbt_version"
+    if [[ -n "$is_this_dir_sbt" ]]; then
+      execRunner "$java_cmd" -jar "$sbt_jar" "sbtVersion" | tail -1 | sed -e 's/\[info\]/sbt version in this project:/g'
+    fi
+    echo "sbt runner version: $init_sbt_version"
+    echoerr ""
+    echoerr "[info] sbt runner (sbt-the-shell-script) is a runner to run any declared version of sbt."
+    echoerr "[info] Actual version of the sbt is declared using project/build.properties for each build."
   elif [[ $shutdownall ]]; then
     local sbt_processes=( $(jps -v | grep sbt-launch | cut -f1 -d ' ') )
     for procId in "${sbt_processes[@]}"; do
