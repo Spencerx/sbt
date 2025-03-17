@@ -805,7 +805,12 @@ runNativeClient() {
       unset 'original_args[i]'
     fi
   done
-  sbt_script=$0
+
+  if [[ "$OSTYPE" == "cygwin" ]] || [[ "$OSTYPE" == "msys" ]] || [[ "$OSTYPE" == "win32" ]]; then
+    sbt_script="$0.bat"
+  else
+    sbt_script="$0"
+  fi
   sbt_script=${sbt_script/ /%20}
   execRunner "$sbtn_command" "--sbt-script=$sbt_script" "${original_args[@]}"
 }
