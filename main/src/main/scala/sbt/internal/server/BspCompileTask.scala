@@ -16,7 +16,6 @@ import sbt.internal.server.BspCompileTask.exchange
 import sbt.librarymanagement.Configuration
 import sbt.util.InterfaceUtil
 import sjsonnew.support.scalajson.unsafe.Converter
-import xsbti.CompileCancelled
 import xsbti.CompileFailed
 import xsbti.Problem
 import xsbti.Severity
@@ -39,7 +38,7 @@ object BspCompileTask {
     val task = BspCompileTask(targetId, project, config, ci)
     try {
       task.notifyStart()
-      val result = Retry(compile(task), classOf[CompileCancelled], classOf[CompileFailed])
+      val result = Retry.io(compile(task))
       task.notifySuccess(result)
       result
     } catch {
