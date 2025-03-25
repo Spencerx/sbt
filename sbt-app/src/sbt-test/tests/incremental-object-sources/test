@@ -1,0 +1,7 @@
+> testQuick
+
+# https://github.com/sbt/sbt/issues/5504
+$ copy-file changed/MathFunction.scala src/test/scala/MathFunction.scala
+> compile
+> debug
+-> testQuick MathFunctionTest

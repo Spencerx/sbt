@@ -1,0 +1,5 @@
+> debug
+> test
+$ copy-file changes/B.scala src/main/scala/example/B.scala
+
+-> test

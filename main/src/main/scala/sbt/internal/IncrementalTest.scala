@@ -18,7 +18,7 @@ import sbt.internal.util.Attributed
 import sbt.internal.util.Types.const
 import sbt.io.{ GlobFilter, IO, NameFilter }
 import sbt.protocol.testing.TestResult
-import sbt.util.{ ActionCache, BuildWideCacheConfiguration, CacheLevelTag, Digest }
+import sbt.util.{ ActionCache, BuildWideCacheConfiguration, CacheLevelTag, Digest, Logger }
 import sbt.util.CacheImplicits.given
 import scala.collection.concurrent
 import scala.collection.mutable
@@ -29,7 +29,6 @@ object IncrementalTest:
   def filterTask: Initialize[Task[Seq[String] => Seq[String => Boolean]]] =
     Def.task {
       val cp = (Keys.test / fullClasspath).value
-      val s = (Keys.test / streams).value
       val digests = (Keys.definedTestDigests).value
       val config = Def.cacheConfiguration.value
       def hasCachedSuccess(ts: Digest): Boolean =
@@ -45,6 +44,7 @@ object IncrementalTest:
 
   // cache the test digests against the fullClasspath.
   def definedTestDigestTask: Initialize[Task[Map[String, Digest]]] = Def.cachedTask {
+    val s = (Keys.test / streams).value
     val cp = (Keys.test / fullClasspath).value
     val testNames = Keys.definedTests.value.map(_.name).toVector.distinct
     val opts = (Keys.test / Keys.testOptionDigests).value
@@ -54,7 +54,7 @@ object IncrementalTest:
     val stamper = ClassStamper(cp, converter)
     // TODO: Potentially do something about JUnit 5 and others which might not use class name
     Map((testNames.flatMap: name =>
-      stamper.transitiveStamp(name, extra ++ rds ++ opts) match
+      stamper.transitiveStamp(name, extra ++ rds ++ opts, s.log) match
         case Some(ts) => Seq(name -> ts)
         case None     => Nil
     )*)
@@ -155,61 +155,70 @@ class ClassStamper(
 
   /**
    * Given a classpath and a class name, this tries to create a SHA-256 digest.
-   * @param className className to stamp
+   * @param javaClassname Java-enclded class name to stamp
    * @param extraHashes additional information to include into the returning digest
    */
-  private[sbt] def transitiveStamp(className: String, extraHashes: Seq[Digest]): Option[Digest] =
-    val digests = SortedSet(analyses.flatMap(internalStamp(className, _, Set.empty))*)
+  private[sbt] def transitiveStamp(
+      javaClassName: String,
+      extraHashes: Seq[Digest],
+      log: Logger,
+  ): Option[Digest] =
+    val digests = SortedSet(analyses.flatMap(internalStamp(javaClassName, _, Set.empty, log))*)
+    log.debug(s"test: transitiveStamp($javaClassName, $extraHashes) = $digests")
     if digests.nonEmpty then Some(Digest.sha256Hash(digests.toSeq ++ extraHashes*))
     else None
 
   private def internalStamp(
-      className: String,
+      javaClassName: String,
       analysis: Analysis,
       alreadySeen: Set[String],
+      log: Logger,
   ): SortedSet[Digest] =
-    if alreadySeen.contains(className) then SortedSet.empty
+    import analysis.relations
+    // log.debug(s"test: internalStamp($javaClassName)")
+    def internalStamp0(className: String): SortedSet[Digest] =
+      // log.debug(s"  internalStamp: relations = $relations")
+      val internalDeps = relations
+        .internalClassDeps(className)
+        .flatMap: otherCN =>
+          internalStamp(otherCN, analysis, alreadySeen + javaClassName, log)
+      // log.debug(s"  internalStamp: internalDeps: $className = $internalDeps")
+      val internalJarDeps = relations
+        .externalDeps(className)
+        .flatMap: libClassName =>
+          transitiveStamp(libClassName, Nil, log)
+      val externalDeps = relations
+        .externalDeps(className)
+        .flatMap: libClassName =>
+          relations.libraryClassName
+            .reverse(libClassName)
+            .map(stampVf)
+      val classDigests = relations
+        .definesClass(className)
+        .flatMap: sourceFile =>
+          relations
+            .products(sourceFile)
+            .map(stampVf)
+      // TODO: substitute the above with
+      // val classDigests = analysis.apis.internal
+      //   .get(className)
+      //   .map: analyzed =>
+      //   0L // analyzed.??? we need a hash here
+      val xs =
+        (internalDeps union internalJarDeps union externalDeps union classDigests)
+          .to(SortedSet)
+      if xs.nonEmpty then stamps(className) = xs
+      else ()
+      xs
+    if alreadySeen.contains(javaClassName) then SortedSet.empty
     else
-      stamps.get(className) match
+      stamps.get(javaClassName) match
         case Some(xs) => xs
-        case _ =>
-          import analysis.relations
-          val internalDeps = relations
-            .internalClassDeps(className)
-            .flatMap: otherCN =>
-              internalStamp(otherCN, analysis, alreadySeen + className)
-          val internalJarDeps = relations
-            .externalDeps(className)
-            .flatMap: libClassName =>
-              transitiveStamp(libClassName, Nil)
-          val externalDeps = relations
-            .externalDeps(className)
-            .flatMap: libClassName =>
-              relations.libraryClassName
-                .reverse(libClassName)
-                .map(stampVf)
-          val classDigests = relations.productClassName
-            .reverse(className)
-            .flatMap: prodClassName =>
-              relations
-                .definesClass(prodClassName)
-                .flatMap: sourceFile =>
-                  relations
-                    .products(sourceFile)
-                    .map(stampVf)
-          // TODO: substitute the above with
-          // val classDigests = relations.productClassName
-          //   .reverse(className)
-          //   .flatMap: prodClassName =>
-          //     analysis.apis.internal
-          //       .get(prodClassName)
-          //       .map: analyzed =>
-          //         0L // analyzed.??? we need a hash here
-          val xs =
-            (internalDeps union internalJarDeps union externalDeps union classDigests).to(SortedSet)
-          if xs.nonEmpty then stamps(className) = xs
-          else ()
-          xs
+        case _        =>
+          // Note: internalClassDeps uses Scala-encoded class name for companion objects
+          val classNames = relations.productClassName.reverse(javaClassName)
+          SortedSet(classNames.toSeq*).flatMap(internalStamp0)
+
   def stampVf(vf: VirtualFileRef): Digest =
     vf match
       case h: HashedVirtualFileRef => Digest(h)
