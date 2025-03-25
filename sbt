@@ -161,7 +161,7 @@ acquire_sbt_jar () {
     sbt_jar="$download_jar"
   else
     sbt_url=$(jar_url "$launcher_sv")
-    echoerr "downloading sbt launcher $launcher_sv"
+    dlog "downloading sbt launcher $launcher_sv"
     download_url "$sbt_url" "${download_jar}.temp"
     download_url "${sbt_url}.sha1" "${download_jar}.sha1"
     if command -v shasum > /dev/null; then
@@ -197,7 +197,7 @@ acquire_sbtn () {
       archive_target="$p/sbtn-${arch}-pc-linux-${sbtn_v}.tar.gz"
       url="https://github.com/sbt/sbtn-dist/releases/download/v${sbtn_v}/sbtn-${arch}-pc-linux-${sbtn_v}.tar.gz"
     else
-      echoerr "sbtn is not supported on $arch"
+      echoerr_error "sbtn is not supported on $arch"
       exit 2
     fi
   elif [[ "$OSTYPE" == "darwin"* ]]; then
@@ -209,14 +209,14 @@ acquire_sbtn () {
     archive_target="$p/sbtn-x86_64-pc-win32-${sbtn_v}.zip"
     url="https://github.com/sbt/sbtn-dist/releases/download/v${sbtn_v}/sbtn-x86_64-pc-win32-${sbtn_v}.zip"
   else
-    echoerr "sbtn is not supported on $OSTYPE"
+    echoerr_error "sbtn is not supported on $OSTYPE"
     exit 2
   fi
 
   if [[ -f "$target" ]]; then
     sbtn_command="$target"
   else
-    echoerr "downloading sbtn ${sbtn_v} for ${arch}"
+    dlog "downloading sbtn ${sbtn_v} for ${arch}"
     download_url "$url" "$archive_target"
     if [[ "$OSTYPE" == "linux-gnu"* ]] || [[ "$OSTYPE" == "darwin"* ]]; then
       tar zxf "$archive_target" --directory "$p"
@@ -351,7 +351,7 @@ require_arg () {
   local opt="$2"
   local arg="$3"
   if [[ -z "$arg" ]] || [[ "${arg:0:1}" == "-" ]]; then
-    echo "$opt requires <$type> argument"
+    echoerr "$opt requires <$type> argument"
     exit 1
   fi
 }
@@ -455,19 +455,19 @@ checkJava() {
   # Now check to see if it's a good enough version
   local good_enough="$(expr $java_version ">=" $required_version)"
   if [[ "$java_version" == "" ]]; then
-    echo
-    echo "No Java Development Kit (JDK) installation was detected."
-    echo Please go to http://www.oracle.com/technetwork/java/javase/downloads/ and download.
-    echo
+    echoerr
+    echoerr "No Java Development Kit (JDK) installation was detected."
+    echoerr Go to https://adoptium.net/ etc and download.
+    echoerr
     exit 1
   elif [[ "$good_enough" != "1" ]]; then
-    echo
-    echo "The Java Development Kit (JDK) installation you have is not up to date."
-    echo $script_name requires at least version $required_version+, you have
-    echo version $java_version
-    echo
-    echo Please go to http://www.oracle.com/technetwork/java/javase/downloads/ and download
-    echo a valid JDK and install before running $script_name.
+    echoerr
+    echoerr "The Java Development Kit (JDK) installation you have is not up to date."
+    echoerr $script_name requires at least version $required_version+, you have
+    echoerr version $java_version
+    echoerr
+    echoerr Go to https://adoptium.net/ etc and download
+    echoerr a valid JDK and install before running $script_name.
     echo
     exit 1
   fi
@@ -482,7 +482,6 @@ copyRt() {
     java9_rt=$(echo "$java9_ext/rt.jar")
     vlog "[copyRt] java9_rt = '$java9_rt'"
     if [[ ! -f "$java9_rt" ]]; then
-      echo copying runtime jar...
       mkdir -p "$java9_ext"
       "$java_cmd" \
         "${sbt_options[@]}" \
@@ -556,7 +555,7 @@ run() {
     for procId in "${sbt_processes[@]}"; do
       kill -9 $procId
     done
-    echo "shutdown ${#sbt_processes[@]} sbt processes"
+    echoerr "shutdown ${#sbt_processes[@]} sbt processes"
   else
     checkWorkingDirectory
     # run sbt
