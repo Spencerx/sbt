@@ -5,7 +5,7 @@ lazy val expectErrorNotCrash = taskKey[Unit]("Ensures that sbt properly set type
 
 expectErrorNotCrash := {
   val fail = (Compile / compileIncremental).failure.value
-  fail.directCause match
+  Incomplete.allExceptions(fail).headOption match
     case Some(x: xsbti.CompileFailed) => ()
     case _ => sys.error("Compiler crashed instead of providing a compile-time-only exception.")
 }
