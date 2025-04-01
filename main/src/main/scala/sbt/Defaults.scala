@@ -1485,26 +1485,34 @@ object Defaults extends BuildCommon {
         if (stamps.isEmpty) Long.MinValue
         else stamps.max
       }
-      def intlStamp(c: String, analysis: Analysis, s: Set[String]): Long = {
-        if (s contains c) Long.MinValue
+      def intlStamp0(javaClassName: String, analysis: Analysis, alreadySeen: Set[String])(
+          className: String
+      ): Set[Long] = {
+        import analysis.{ apis, relations }
+        relations
+          .internalClassDeps(className)
+          .map(intlStamp(_, analysis, alreadySeen + javaClassName)) ++
+          relations.externalDeps(className).map(stamp) ++
+          apis.internal.get(javaClassName).toSeq.map(_.compilationTimestamp) ++
+          apis.internal.get(className).toSeq.map(_.compilationTimestamp)
+      }
+      def intlStamp(javaClassName: String, analysis: Analysis, alreadySeen: Set[String]): Long =
+        if (alreadySeen contains javaClassName) Long.MinValue
         else
           stamps.getOrElse(
-            c, {
-              val x = {
-                import analysis.{ apis, relations => rel }
-                rel.internalClassDeps(c).map(intlStamp(_, analysis, s + c)) ++
-                  rel.externalDeps(c).map(stamp) ++
-                  rel.productClassName.reverse(c).flatMap { pc =>
-                    apis.internal.get(pc).map(_.compilationTimestamp)
-                  } + Long.MinValue
+            javaClassName, {
+              val x: Long = {
+                val classNames = analysis.relations.productClassName.reverse(javaClassName).toSeq
+                classNames.flatMap(intlStamp0(javaClassName, analysis, alreadySeen)) ++ Seq(
+                  Long.MinValue
+                )
               }.max
               if (x != Long.MinValue) {
-                stamps(c) = x
+                stamps(javaClassName) = x
               }
               x
             }
           )
-      }
       def noSuccessYet(test: String) = succeeded.get(test) match {
         case None     => true
         case Some(ts) => stamps.synchronized(stamp(test)) > ts
