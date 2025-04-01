@@ -1,0 +1,6 @@
+> debug
+> testQuick
+$ sleep 2000
+$ copy-file changes/B.scala src/main/scala/example/B.scala
+
+-> testQuick
