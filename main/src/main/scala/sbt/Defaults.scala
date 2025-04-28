@@ -995,7 +995,7 @@ object Defaults extends BuildCommon {
           Vector(
             "-Ypickle-java",
             "-Ypickle-write",
-            converter.toPath(earlyOutput.value).toString
+            earlyOutput.value.toString
           ) ++ old
         else old
       },
@@ -4221,18 +4221,19 @@ object Classpaths {
     given FileConverter = converter
     (base * (filter -- excl) +++ (base / config.name).descendantsExcept(filter, excl)).classpath
 
-  def autoPlugins(
+  private def autoPlugins(
       report: UpdateReport,
       internalPluginClasspath: Seq[NioPath],
       isDotty: Boolean
-  ): Seq[String] =
+  )(using conv: FileConverter): Seq[String] =
     import sbt.internal.inc.classpath.ClasspathUtil.compilerPlugins
     val pluginClasspath =
       report
         .matching(configurationFilter(CompilerPlugin.name))
         .map(_.toPath) ++ internalPluginClasspath
     val plugins = compilerPlugins(pluginClasspath, isDotty)
-    plugins.map("-Xplugin:" + _.toAbsolutePath.toString).toSeq
+    plugins.toVector.map: p =>
+      "-Xplugin:" + conv.toVirtualFile(p).toString()
 
   private lazy val internalCompilerPluginClasspath: Initialize[Task[Classpath]] =
     (Def
