@@ -64,7 +64,7 @@ object ActionCache:
         result
       else
         cacheEventLog.append(ActionCacheEvent.OnsiteTask)
-        val (input, valuePath) = mkInput(key, codeContentHash, extraHash, config)
+        val (input, valuePath) = mkInput(key, codeContentHash, extraHash)
         val valueFile = StringVirtualFile1(valuePath, CompactPrinter(json))
         val newOutputs = Vector(valueFile) ++ outputs.toVector
         store.put(UpdateActionResultRequest(input, newOutputs, exitCode = 0)) match
@@ -126,7 +126,8 @@ object ActionCache:
       extraHash: Digest,
       config: BuildWideCacheConfiguration,
   ): Either[Throwable, ActionResult] =
-    val (input, valuePath) = mkInput(key, codeContentHash, extraHash, config)
+    // val logger = config.logger
+    val (input, valuePath) = mkInput(key, codeContentHash, extraHash)
     val getRequest =
       GetActionResultRequest(input, inlineStdout = false, inlineStderr = false, Vector(valuePath))
     config.store.get(getRequest)
@@ -134,12 +135,11 @@ object ActionCache:
   private inline def mkInput[I: HashWriter](
       key: I,
       codeContentHash: Digest,
-      extraHash: Digest,
-      config: BuildWideCacheConfiguration
+      extraHash: Digest
   ): (Digest, String) =
     val input =
       Digest.sha256Hash(codeContentHash, extraHash, Digest.dummy(Hasher.hashUnsafe[I](key)))
-    (input, s"${config.outputDirectory}/value/$input.json")
+    (input, s"$${OUT}/value/$input.json")
 
   def manifestFromFile(manifest: Path): Manifest =
     import sbt.internal.util.codec.ManifestCodec.given
