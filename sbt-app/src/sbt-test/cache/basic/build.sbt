@@ -1,9 +1,10 @@
-import sbt.internal.util.StringVirtualFile1
+import sbt.internal.util.{ CacheEventSummary, StringVirtualFile1 }
 import sjsonnew.BasicJsonProtocol.*
 
 val pure1 = taskKey[Unit]("")
 val map1 = taskKey[String]("")
 val mapN1 = taskKey[Unit]("")
+val checkMapN1 = taskKey[Unit]("")
 
 Global / localCacheDirectory := baseDirectory.value / "diskcache"
 
@@ -29,3 +30,11 @@ mapN1 := (Def.cachedTask {
   Def.declareOutput(output)
   ()
 }).value
+
+checkMapN1 := {
+  val config = Def.cacheConfiguration.value
+  val prev = config.cacheEventLog.previous match
+    case s: CacheEventSummary.Data => s
+    case s                         => sys.error(s"empty event log") 
+  assert(prev.hitCount == 2, s"prev.hitCount = ${prev.hitCount}")
+}
