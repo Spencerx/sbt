@@ -266,7 +266,15 @@ trait Cont:
                     (name: String, tpe: Type[x], qual: Term, oldTree: Term) =>
                       given Type[x] = tpe
                       convert[x](name, qual) transform { (replacement: Term) =>
-                        val idx = inputs.indexWhere(input => input.qual == qual)
+                        val idxEq = inputs.indexWhere(input => input.qual == qual)
+                        // use show to compare trees for Def.task comparison
+                        val idx =
+                          if idxEq < 0 then inputs.indexWhere(input => input.qual.show == qual.show)
+                          else idxEq
+                        if idx < 0 then
+                          sys.error(
+                            s"qual (${qual}) not found in ${inputs.map(_.qual)}"
+                          )
                         applyTuple(p0, br.inputTupleTypeRepr, idx)
                     }
                   val modifiedBody =
