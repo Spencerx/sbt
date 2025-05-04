@@ -118,7 +118,7 @@ object Aggregation {
       val transform = nodeView(s, str, roots, extra)
       runTask(toRun, s, str, structure.index.triggers, config)(using transform)
     val stop = System.currentTimeMillis
-    val cacheSummary = Def.cacheEventLog.summary
+    val cacheSummary = Def.cacheEventLog.summary.toString()
     Complete(start, stop, result, cacheSummary, newS)
 
   def runTasks[A1](
