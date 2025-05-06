@@ -23,7 +23,7 @@ import sbt.internal.langserver.ErrorCodes
 import sbt.internal.util.{ Terminal as ITerminal, * }
 import sbt.librarymanagement.{ Resolver, UpdateReport }
 import sbt.std.Transform.DummyTaskMap
-import sbt.util.{ Logger, Show }
+import sbt.util.Show
 import sbt.internal.bsp.BuildTargetIdentifier
 
 import scala.annotation.nowarn
@@ -201,10 +201,6 @@ object EvaluateTask {
       Some(sharedTraceEvent)
     } else None
 
-  // sbt-pgp calls this
-  @deprecated("No longer used", "1.3.0")
-  private[sbt] def defaultProgress(): ExecuteProgress = ExecuteProgress.empty
-
   val SystemProcessors = Runtime.getRuntime.availableProcessors
 
   def extractedTaskConfig(
@@ -338,10 +334,6 @@ object EvaluateTask {
     Global / executionRoots ::= dummyRoots,
   )
 
-  @deprecated("Use variant which doesn't take a logger", "1.1.1")
-  def evalPluginDef(log: Logger)(pluginDef: BuildStructure, state: State): PluginData =
-    evalPluginDef(pluginDef, state)
-
   def evalPluginDef(pluginDef: BuildStructure, state: State): PluginData = {
     val root = ProjectRef(pluginDef.root, Load.getRootProject(pluginDef.units)(pluginDef.root))
     val config = extractedTaskConfig(Project.extract(state), pluginDef, state)
@@ -462,11 +454,6 @@ object EvaluateTask {
       (dummyRoots, roots) :: (Def.dummyStreamsManager, streams) :: (dummyState, state) :: dummies
     )
 
-  @deprecated("use StandardMain.exchange.withState to obtain an instance of State", "1.4.2")
-  val lastEvaluatedState: AtomicReference[SafeState] = new AtomicReference()
-  @deprecated("use currentlyRunningTaskEngine", "1.4.2")
-  val currentlyRunningEngine: AtomicReference[(SafeState, RunningTaskEngine)] =
-    new AtomicReference()
   private[sbt] val currentlyRunningTaskEngine: AtomicReference[RunningTaskEngine] =
     new AtomicReference()
 
@@ -628,17 +615,10 @@ object EvaluateTask {
     case i => i
   }
 
-  @deprecated("Use processResult2 which doesn't take the unused log param", "1.1.1")
-  def processResult[T](result: Result[T], log: Logger, show: Boolean = false): T =
-    processResult2(result, show)
-
   def processResult2[T](result: Result[T], show: Boolean = false): T =
     onResult(result) { v =>
       if (show) println("Result: " + v); v
     }
-
-  @deprecated("Use variant that doesn't take log", "1.1.1")
-  def onResult[T, S](result: Result[T], log: Logger)(f: T => S): S = onResult(result)(f)
 
   def onResult[T, S](result: Result[T])(f: T => S): S =
     result match {
