@@ -91,7 +91,7 @@ trait ContextUtil[C <: Quotes & scala.Singleton](val valStart: Int):
         getAnnotation(tree) match
           case Some(annot) =>
             annot.asExprOf[cacheLevel] match
-              case '{ cacheLevel(include = Array.empty[CacheLevelTag]($_)) } => Nil
+              case '{ cacheLevel(include = Array.empty[CacheLevelTag](using $_)) } => Nil
               case '{ cacheLevel(include = Array[CacheLevelTag]($include*)) } =>
                 include.value.get.toList
               case _ => sys.error(Printer.TreeStructure.show(annot) + " does not match")
