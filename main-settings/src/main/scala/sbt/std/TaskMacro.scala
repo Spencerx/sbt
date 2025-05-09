@@ -142,7 +142,11 @@ object TaskMacro:
     }
 
   /** Implementation of += macro for settings. */
-  def settingAppend1Impl[A1: Type, A2: Type](rec: Expr[SettingKey[A1]], v: Expr[A2])(using
+  def settingAppend1Impl[A1: Type, A2: Type](
+      rec: Expr[SettingKey[A1]],
+      v: Expr[A2],
+      ev: Expr[Append.Value[A1, A2]]
+  )(using
       qctx: Quotes,
   ): Expr[Setting[A1]] =
     import qctx.reflect.*
@@ -158,14 +162,10 @@ object TaskMacro:
           case _ =>
             report.errorAndAbort(s"Append.Value[${Type.show[A1]}, ${Type.show[Task[a]]}] missing")
       case _ =>
-        Expr.summon[Append.Value[A1, A2]] match
-          case Some(ev) =>
-            val init = SettingMacro.settingMacroImpl[A2](v)
-            '{
-              $rec.append1[A2]($init)(using $ev)
-            }
-          case _ =>
-            report.errorAndAbort(s"Append.Value[${Type.show[A1]}, ${Type.show[A2]}] missing")
+        val init = SettingMacro.settingMacroImpl[A2](v)
+        '{
+          $rec.append1[A2]($init)(using $ev)
+        }
 
   /*
   private def transformMacroImpl[A](using qctx: Quotes)(init: Expr[A])(
