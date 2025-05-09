@@ -273,7 +273,6 @@ private[sbt] object ConvertResolver {
      */
     def managedChecksumsEnabled: Boolean
 
-    import sbt.io.syntax.*
     private def downloadChecksum(
         resource: Resource,
         targetChecksumFile: File,
