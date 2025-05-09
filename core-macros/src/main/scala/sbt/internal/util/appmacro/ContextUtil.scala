@@ -9,7 +9,6 @@
 package sbt.internal.util
 package appmacro
 
-import scala.compiletime.summonInline
 import scala.quoted.*
 import scala.collection.mutable
 import sbt.util.cacheLevel

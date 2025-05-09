@@ -4,7 +4,6 @@ import java.io.RandomAccessFile
 import java.nio.ByteBuffer
 import java.nio.file.{ Files, FileSystemException, Path, Paths, StandardCopyOption }
 import java.util.concurrent.atomic.AtomicBoolean
-import sjsonnew.*
 import sjsonnew.support.scalajson.unsafe.{ CompactPrinter, Converter, Parser }
 import sjsonnew.shaded.scalajson.ast.unsafe.JValue
 

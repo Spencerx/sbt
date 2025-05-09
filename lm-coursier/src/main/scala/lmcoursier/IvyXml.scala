@@ -1,6 +1,6 @@
 package lmcoursier
 
-import lmcoursier.definitions.{ Configuration, Project }
+import lmcoursier.definitions.Project
 
 import scala.xml.{ Node, PrefixedAttribute }
 
