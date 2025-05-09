@@ -158,13 +158,13 @@ object FileStamp {
         override def write[J](obj: Seq[(Path, FileStamp)], builder: Builder[J]): Unit = {
           val (hashes, lastModifiedTimes) = obj.partition(_._2.isInstanceOf[Hash])
           builder.beginObject()
-          builder.addField("hashes", hashes.asInstanceOf[Seq[(Path, Hash)]])(
+          builder.addField("hashes", hashes.asInstanceOf[Seq[(Path, Hash)]])(using
             seqPathHashJsonFormatter
           )
           builder.addField(
             "lastModifiedTimes",
             lastModifiedTimes.asInstanceOf[Seq[(Path, LastModified)]]
-          )(seqPathLastModifiedJsonFormatter)
+          )(using seqPathLastModifiedJsonFormatter)
           builder.endObject()
         }
 

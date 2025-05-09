@@ -3551,9 +3551,9 @@ object Classpaths {
       import sjsonnew.support.scalajson.unsafe.*
       val moduleIdFormat: JsonFormat[ModuleID] = implicitly[JsonFormat[ModuleID]]
       def write(key: ModuleID): String =
-        CompactPrinter(Converter.toJsonUnsafe(key)(moduleIdFormat))
+        CompactPrinter(Converter.toJsonUnsafe(key)(using moduleIdFormat))
       def read(key: String): ModuleID =
-        Converter.fromJsonUnsafe[ModuleID](Parser.parseUnsafe(key))(moduleIdFormat)
+        Converter.fromJsonUnsafe[ModuleID](Parser.parseUnsafe(key))(using moduleIdFormat)
     }
 
   def classifiersModuleTask: Initialize[Task[GetClassifiersModule]] =
