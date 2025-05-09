@@ -163,7 +163,7 @@ object ResolutionRun {
               Task.point(Right(value))
           }
 
-      retry(0, period).unsafeRun()(resolveTask.cache.ec)
+      retry(0, period).unsafeRun()(using resolveTask.cache.ec)
     }
 
     finalResult match {

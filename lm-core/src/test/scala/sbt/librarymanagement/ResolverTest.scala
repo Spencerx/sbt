@@ -10,7 +10,7 @@ object ResolverTest extends UnitSpec {
     val pats = Vector("[orgPath]")
     val patsExpected = Vector("http://foo.com/test/[orgPath]")
     val patterns = Resolver
-      .url("test", new URI("http://foo.com/test").toURL)(
+      .url("test", new URI("http://foo.com/test").toURL)(using
         Patterns(
           pats,
           pats,

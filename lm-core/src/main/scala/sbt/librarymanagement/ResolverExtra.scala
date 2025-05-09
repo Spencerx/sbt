@@ -149,13 +149,15 @@ private[librarymanagement] abstract class ResolverFunctions {
     MavenRepository("typesafe-" + status, TypesafeRepositoryRoot + "/" + status)
   def typesafeIvyRepo(status: String) =
     url("typesafe-ivy-" + status, new URI(TypesafeRepositoryRoot + "/ivy-" + status + "/").toURL)(
-      ivyStylePatterns
+      using ivyStylePatterns
     )
   def sbtIvyRepo(status: String) =
-    url(s"sbt-ivy-$status", new URI(s"$SbtRepositoryRoot/ivy-$status/").toURL)(ivyStylePatterns)
+    url(s"sbt-ivy-$status", new URI(s"$SbtRepositoryRoot/ivy-$status/").toURL)(using
+      ivyStylePatterns
+    )
   def sbtPluginRepo(status: String) =
     url("sbt-plugin-" + status, new URI(SbtRepositoryRoot + "/sbt-plugin-" + status + "/").toURL)(
-      ivyStylePatterns
+      using ivyStylePatterns
     )
   @deprecated(
     """Use sonatypeOssRepos instead e.g. `resolvers ++= Resolver.sonatypeOssRepos("snapshots")`""",
@@ -177,7 +179,7 @@ private[librarymanagement] abstract class ResolverFunctions {
   def bintrayRepo(owner: String, repo: String) =
     MavenRepository(s"bintray-$owner-$repo", s"https://dl.bintray.com/$owner/$repo/")
   def bintrayIvyRepo(owner: String, repo: String) =
-    url(s"bintray-$owner-$repo", new URI(s"https://dl.bintray.com/$owner/$repo/").toURL)(
+    url(s"bintray-$owner-$repo", new URI(s"https://dl.bintray.com/$owner/$repo/").toURL)(using
       Resolver.ivyStylePatterns
     )
   def jcenterRepo = JCenterRepository
