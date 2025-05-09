@@ -17,7 +17,6 @@ import sbt.internal.util.Types.const
 import sbt.internal.util.complete.Parser
 import sbt.internal.util.{ Terminal as ITerminal, * }
 import sbt.util.{
-  ActionCacheStore,
   AggregateActionCacheStore,
   BuildWideCacheConfiguration,
   cacheLevel,

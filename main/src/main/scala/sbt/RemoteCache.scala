@@ -36,7 +36,7 @@ import sbt.nio.FileStamp
 import sbt.nio.Keys.{ inputFileStamps, outputFileStamps }
 import sbt.std.TaskExtra.*
 import sbt.util.InterfaceUtil.toOption
-import sbt.util.{ ActionCacheStore, DiskActionCacheStore, Logger }
+import sbt.util.{ DiskActionCacheStore, Logger }
 import sjsonnew.JsonFormat
 import xsbti.{ FileConverter, HashedVirtualFileRef, VirtualFileRef }
 import xsbti.compile.CompileAnalysis
