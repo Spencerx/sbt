@@ -1,6 +1,5 @@
 package sbt.internal
 
-import sbt.internal.util.appmacro.*
 import verify.*
 import ContTestMacro.*
 import sbt.util.Applicative

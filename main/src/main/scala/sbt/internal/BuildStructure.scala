@@ -20,7 +20,7 @@ import sbt.ScopeAxis.{ Select, This, Zero }
 import BuildStreams.Streams
 import sbt.io.syntax.*
 import sbt.internal.inc.MappedFileConverter
-import sbt.internal.util.{ AttributeEntry, AttributeKey, AttributeMap, Attributed }
+import sbt.internal.util.{ AttributeEntry, AttributeKey, AttributeMap }
 import sbt.internal.util.Attributed.data
 import sbt.util.Logger
 import xsbti.FileConverter

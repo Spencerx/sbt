@@ -51,7 +51,6 @@ import sbt.internal.server.{
   BspCompileProgress,
   BspCompileTask,
   BuildServerProtocol,
-  BuildServerReporter,
   Definition,
   LanguageServerProtocol,
   ServerHandler,

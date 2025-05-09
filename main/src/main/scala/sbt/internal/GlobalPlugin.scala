@@ -17,7 +17,6 @@ import sbt.librarymanagement.{
   SbtArtifacts,
   UpdateReport
 }
-import sbt.internal.util.Attributed
 import Def.{ ScopedKey, Setting }
 import Keys.*
 import Configurations.{ Compile, Runtime }

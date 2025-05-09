@@ -23,7 +23,6 @@ import scala.jdk.CollectionConverters.*
 import scala.xml.{ Node, PrefixedAttribute }
 
 object IvyXml {
-  import sbt.Project.*
 
   private def rawContent(
       currentProject: Project,

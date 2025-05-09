@@ -9,7 +9,6 @@
 package sbt
 package internal
 
-import java.io.File
 import java.util.LinkedHashSet
 import sbt.Keys.*
 import sbt.nio.Keys.*
@@ -23,7 +22,6 @@ import sbt.std.TaskExtra.*
 import sbt.util.*
 import scala.jdk.CollectionConverters.*
 import xsbti.{ HashedVirtualFileRef, VirtualFile, VirtualFileRef }
-import xsbti.compile.CompileAnalysis
 
 private[sbt] object ClasspathImpl {
 
