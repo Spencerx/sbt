@@ -543,9 +543,7 @@ object Tests {
             }
         }
       sequence(results.toList, List()) map { res =>
-        val (rs, ms) = res.unzip { e =>
-          (e.overall, e.events)
-        }
+        val (rs, ms) = res.unzip(using (e => (e.overall, e.events)))
         val m = ms reduce { (m1: Map[String, SuiteResult], m2: Map[String, SuiteResult]) =>
           Map((m1.toSeq ++ m2.toSeq)*)
         }

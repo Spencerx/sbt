@@ -37,7 +37,7 @@ private[sbt] object SbtRefactorings:
     val split = SbtParser(FAKE_FILE, lines)
     given ctx: Context = SbtParser.defaultGlobalForParser.compileCtx
     val recordedCommands = recordCommands(commands, split)
-    val sortedRecordedCommands = recordedCommands.sortBy(_._1)(reverseOrderingInt)
+    val sortedRecordedCommands = recordedCommands.sortBy(_._1)(using reverseOrderingInt)
 
     val newContent = replaceFromBottomToTop(lines.mkString(END_OF_LINE), sortedRecordedCommands)
     newContent.linesIterator.toList

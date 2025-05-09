@@ -56,7 +56,7 @@ object RemoteCache {
     import LibraryManagementCodec.*
     import sjsonnew.support.scalajson.unsafe.*
     val format: JsonFormat[Artifact] = summon[JsonFormat[Artifact]]
-    CompactPrinter(Converter.toJsonUnsafe(art)(format))
+    CompactPrinter(Converter.toJsonUnsafe(art)(using format))
   }
 
   def gitCommitId: String =
