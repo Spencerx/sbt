@@ -44,7 +44,6 @@ trait SlashSyntax:
 
   extension (in: RefThenConfig)
     def asScope: Scope = in.project.asScope.copy(config = in.config)
-    def toString(): String = asScope.toString()
     def /[K](key: Scoped.ScopingSetting[K]): K = asScope / key
     def /(task: AttributeKey[?]): Scope = asScope.copy(task = Select(task))
 
