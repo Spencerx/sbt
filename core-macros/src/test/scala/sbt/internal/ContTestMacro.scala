@@ -7,18 +7,18 @@ import scala.quoted.*
 import ConvertTestMacro.InputInitConvert
 
 object ContTestMacro:
-  inline def uncachedContMapNMacro[F[_]: Applicative, A](inline expr: A): List[A] =
-    ${ uncachedContMapNMacroImpl[F, A]('expr) }
+  inline def uncachedContMapNMacro[F[_]: Applicative, A](inline expr: A): F[A] =
+    ${ uncachedContMapNMacroImpl[F, A]('expr, '{ summon[Applicative[F]] }) }
 
-  def uncachedContMapNMacroImpl[F[_]: Type, A: Type](expr: Expr[A])(using
+  def uncachedContMapNMacroImpl[F[_]: Type, A: Type](expr: Expr[A], ev: Expr[Applicative[F]])(using
       qctx: Quotes
-  ): Expr[List[A]] =
+  ): Expr[F[A]] =
     object ContSyntax extends Cont
     import ContSyntax.*
     val convert1: Convert[qctx.type] = new InputInitConvert(qctx)
-    convert1.contMapN[A, List, Id](
+    convert1.contMapN[A, F, Id](
       tree = expr,
-      applicativeExpr = convert1.summonAppExpr[List],
+      applicativeExpr = ev,
       cacheConfigExpr = None,
     )
 end ContTestMacro
