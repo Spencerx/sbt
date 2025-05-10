@@ -436,8 +436,12 @@ trait Cont:
       val exprWithConfig =
         cacheConfigExprOpt.map(config => '{ $config; $expr }).getOrElse(expr)
       val body = transformWrappers(exprWithConfig.asTerm, record, Symbol.spliceOwner)
-      inputBuf.toList match
+      val r = inputBuf.toList match
         case Nil      => pure(body)
         case x :: Nil => genMap(body, x)
         case xs       => genMapN(body, xs)
+      if hasVprintMacroSetting then
+        if hasPrintTreeMacroSetting then Console.err.println(Printer.TreeStructure.show(r.asTerm))
+        else Console.err.println(r.show)
+      r
 end Cont
