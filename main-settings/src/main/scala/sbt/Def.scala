@@ -398,7 +398,7 @@ object Def extends BuildSyntax with Init with InitializeImplicits:
   extension [A1](inline in: TaskKey[A1])
     // implicit def macroPrevious[T](@deprecated("unused", "") in: TaskKey[T]): MacroPrevious[T] = ???
     inline def previous(using JsonFormat[A1]): Option[A1] =
-      ${ TaskMacro.previousImpl[A1]('in) }
+      InputWrapper.`wrapInitTask_\u2603\u2603`[Option[A1]](Previous.runtime[A1](in))
 
   // The following conversions enable the types Parser[T], Initialize[Parser[T]], and
   // Initialize[State => Parser[T]] to be used in the inputTask macro as an input with an ultimate
