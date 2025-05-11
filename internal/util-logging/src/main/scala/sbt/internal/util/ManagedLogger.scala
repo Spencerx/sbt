@@ -66,7 +66,4 @@ class ManagedLogger(
     val entry: ObjectEvent[A] = ObjectEvent(level, v, channelName, execId, tag.key)
     xlogger.log(level, entry)
   }
-
-  @deprecated("No longer used.", "1.0.0")
-  override def ansiCodesSupported = ConsoleAppender.formatEnabledInEnv
 }

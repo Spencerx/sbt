@@ -70,29 +70,6 @@ final case class State(
       case _       => false
 }
 
-/**
- * Data structure extracted form the State Machine for safe observability purposes.
- *
- * @param currentExecId provide the execId extracted from the original State.
- * @param combinedParser the parser extracted from the original State.
- */
-@deprecated("unused", "1.4.2")
-private[sbt] final case class SafeState(
-    currentExecId: Option[String],
-    combinedParser: Parser[() => sbt.State]
-)
-
-@deprecated("unused", "1.4.2")
-private[sbt] object SafeState {
-  @deprecated("use StandardMain.exchange.withState", "1.4.2")
-  def apply(s: State) = {
-    new SafeState(
-      currentExecId = s.currentCommand.map(_.execId).flatten,
-      combinedParser = s.combinedParser
-    )
-  }
-}
-
 trait Identity {
   override final def hashCode = super.hashCode
   override final def equals(a: Any) = super.equals(a)

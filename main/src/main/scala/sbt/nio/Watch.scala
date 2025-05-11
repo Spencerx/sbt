@@ -342,16 +342,6 @@ object Watch {
 
   private type NextAction = Int => Watch.Action
 
-  @deprecated(
-    "Unused in sbt but left for binary compatibility. Use five argument version instead.",
-    "1.4.0"
-  )
-  def apply(
-      task: () => Unit,
-      onStart: () => Watch.Action,
-      nextAction: () => Watch.Action,
-  ): Watch.Action = apply(0, _ => task(), _ => onStart(), _ => nextAction(), recursive = true)
-
   /**
    * Runs a task and then blocks until the task is ready to run again or we no longer wish to
    * block execution.

@@ -125,13 +125,6 @@ final case class Extracted(
   ): T =
     getOrError(key, structure.data.get(key))(using display)
 
-  @deprecated(
-    "This discards session settings. Migrate to appendWithSession or appendWithoutSession.",
-    "1.2.0"
-  )
-  def append(settings: Seq[Setting[?]], state: State): State =
-    appendWithoutSession(settings, state)
-
   /** Appends the given settings to all the build state settings, including session settings. */
   def appendWithSession(settings: Seq[Setting[?]], state: State): State =
     appendImpl(settings, state, session.mergeSettings)

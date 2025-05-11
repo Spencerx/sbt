@@ -760,9 +760,6 @@ object BuiltinCommands {
    */
   def isLastOnly(s: State): Boolean = s.history.previous.forall(_.commandLine == Shell)
 
-  @deprecated("Use variant that doesn't take the state", "1.1.1")
-  def printLast(s: State): Seq[String] => Unit = printLast
-
   def printLast: Seq[String] => Unit = _ foreach println
 
   def autoImports(extracted: Extracted): EvalImports =

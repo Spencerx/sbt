@@ -29,17 +29,9 @@ package sbt
 final class StateTransform private (
     val transform: State => State,
     stateProxy: () => State,
-) {
-  // @deprecated("Exists only for binary compatibility with 1.3.x.", "1.4.0")
-  // private[sbt] def state: State = stateProxy()
-  // @deprecated("1.4.0", "Use the constructor that takes a transform function.")
-  // private[sbt] def this(state: State) = this((_: State) => state, () => state)
-}
+) {}
 
 object StateTransform:
-  // @deprecated("Exists only for binary compatibility with 1.3.x", "1.4.0")
-  // def apply(state: State): State = state
-
   /**
    * Create an instance of [[StateTransform]].
    * @param transform the transformation to apply after task evaluation has completed

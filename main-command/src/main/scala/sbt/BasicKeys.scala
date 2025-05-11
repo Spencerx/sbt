@@ -16,7 +16,6 @@ import sbt.internal.server.ServerHandler
 import sbt.internal.util.AttributeKey
 import sbt.librarymanagement.ModuleID
 import sbt.util.{ ActionCacheStore, Level }
-import scala.annotation.nowarn
 import scala.concurrent.duration.FiniteDuration
 import xsbti.{ FileConverter, VirtualFile }
 
@@ -43,8 +42,6 @@ object BasicKeys {
     "The function that constructs the command prompt from the current build state for a given terminal.",
     10000
   )
-  @nowarn val watch =
-    AttributeKey[Watched]("watched", "Continuous execution configuration.", 1000)
   val serverPort =
     AttributeKey[Int]("server-port", "The port number used by server command.", 10000)
 

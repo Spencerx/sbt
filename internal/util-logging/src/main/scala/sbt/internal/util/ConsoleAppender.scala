@@ -74,7 +74,7 @@ object ConsoleLogger {
  */
 class ConsoleLogger private[ConsoleLogger] (
     out: ConsoleOut,
-    override val ansiCodesSupported: Boolean,
+    ansiCodesSupported: Boolean,
     useFormat: Boolean,
     suppressedMessage: SuppressedTraceContext => Option[String]
 ) extends BasicLogger {

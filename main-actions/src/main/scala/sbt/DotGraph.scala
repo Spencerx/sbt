@@ -9,24 +9,11 @@
 package sbt
 
 import java.io.File
-import sbt.internal.inc.Relations
 import sbt.internal.util.Relation
 
 import sbt.io.IO
 
 object DotGraph {
-  @deprecated("not used", "1.4.0")
-  def sources(relations: Relations, outputDirectory: File, sourceRoots: Iterable[File]): Unit = ???
-  @deprecated("not used", "1.4.0")
-  def packages(relations: Relations, outputDirectory: File, sourceRoots: Iterable[File]): Unit = ???
-  @deprecated("not used", "1.4.0")
-  def apply(
-      relations: Relations,
-      outputDir: File,
-      sourceToString: File => String,
-      externalToString: File => String
-  ): Unit = ???
-
   def generateGraph[K, V](
       file: File,
       graphName: String,

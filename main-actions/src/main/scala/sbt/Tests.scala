@@ -175,8 +175,7 @@ object Tests {
       val tests: Seq[TestDefinition],
       val runPolicy: TestRunPolicy,
       val tags: Seq[(Tag, Int)]
-  ) extends Product
-      with Serializable {
+  ) extends Serializable {
 
     def this(name: String, tests: Seq[TestDefinition], runPolicy: TestRunPolicy) = {
       this(name, tests, runPolicy, Seq.empty)
@@ -198,36 +197,6 @@ object Tests {
       new Group(name, tests, runPolicy, tags)
     }
 
-    // - EXPANDED CASE CLASS METHOD BEGIN -//
-    @deprecated("Methods generated for case class will be removed in the future.", "1.4.0")
-    def copy(
-        name: String = this.name,
-        tests: Seq[TestDefinition] = this.tests,
-        runPolicy: TestRunPolicy = this.runPolicy
-    ): Group = {
-      new Group(name, tests, runPolicy, this.tags)
-    }
-
-    @deprecated("Methods generated for case class will be removed in the future.", "1.4.0")
-    override def productElement(x$1: Int): Any = x$1 match {
-      case 0 => Group.this.name
-      case 1 => Group.this.tests
-      case 2 => Group.this.runPolicy
-      case 3 => Group.this.tags
-    }
-
-    @deprecated("Methods generated for case class will be removed in the future.", "1.4.0")
-    override def productArity: Int = 4
-
-    @deprecated("Methods generated for case class will be removed in the future.", "1.4.0")
-    def canEqual(x$1: Any): Boolean = x$1.isInstanceOf[Group]
-
-    override def hashCode(): Int = {
-      scala.runtime.ScalaRunTime._hashCode(Group.this)
-    }
-
-    override def toString(): String = scala.runtime.ScalaRunTime._toString(Group.this)
-
     override def equals(x$1: Any): Boolean = {
       this.eq(x$1.asInstanceOf[Object]) || (x$1.isInstanceOf[Group] && ({
         val Group$1: Group = x$1.asInstanceOf[Group]
@@ -235,7 +204,6 @@ object Tests {
         runPolicy == Group$1.runPolicy && tags == Group$1.tags
       }))
     }
-    // - EXPANDED CASE CLASS METHOD END -//
   }
 
   object Group
@@ -260,20 +228,6 @@ object Tests {
       new Group(name, tests, runPolicy, tags)
     }
 
-    @deprecated("Methods generated for case class will be removed in the future.", "1.4.0")
-    def unapply(
-        x$0: Group
-    ): Option[(String, Seq[TestDefinition], TestRunPolicy)] = {
-      if (x$0 == null) None
-      else
-        Some.apply[(String, Seq[TestDefinition], TestRunPolicy)](
-          Tuple3.apply[String, Seq[TestDefinition], TestRunPolicy](
-            x$0.name,
-            x$0.tests,
-            x$0.runPolicy
-          )
-        )
-    }
     private def readResolve(): Object = Group
     // - EXPANDED CASE CLASS METHOD END -//
   }
@@ -477,15 +431,6 @@ object Tests {
       }
     }
   }
-
-  @deprecated("Use the variant without tags", "1.1.1")
-  def makeSerial(
-      loader: ClassLoader,
-      runnables: Seq[TestRunnable],
-      setupTasks: Task[Unit],
-      tags: Seq[(Tag, Int)],
-  ): Task[List[(String, SuiteResult)]] =
-    makeSerial(loader, runnables, setupTasks)
 
   def makeSerial(
       loader: ClassLoader,

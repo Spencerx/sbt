@@ -26,7 +26,6 @@ import sbt.Keys.*
 import sbt.ProjectExtra.extract
 import sbt.internal.Continuous.{ ContinuousState, FileStampRepository }
 import sbt.internal.LabeledFunctions.*
-import sbt.internal.io.WatchState
 import sbt.internal.nio.*
 import sbt.internal.ui.UITask
 import sbt.internal.util.JoinThread.*
@@ -68,12 +67,11 @@ import scala.annotation.nowarn
  * system so that we don't rerun tasks if their inputs have not changed. As of 1.3.0, the
  * semantics match previous sbt versions as closely as possible while allowing the user more
  * freedom to adjust the behavior to best suit their use cases.
- *
- * For now Continuous extends DeprecatedContinuous to minimize the number of deprecation warnings
- * produced by this file. In sbt 2.0, the DeprecatedContinuous mixin should be eliminated and
- * the deprecated apis should no longer be supported.
  */
-private[sbt] object Continuous extends DeprecatedContinuous {
+private[sbt] object Continuous {
+  protected type StartMessage =
+    Option[(Int, ProjectRef, Seq[String]) => Option[String]]
+  protected type TriggerMessage = (Int, Path, Seq[String]) => Option[String]
   private type Event = FileEvent[FileAttributes]
 
   /**
@@ -409,12 +407,10 @@ private[sbt] object Continuous extends DeprecatedContinuous {
         val ws = params.watchSettings
         ws.onIteration.map(_(count, project, commands)).getOrElse {
           if (configs.size == 1) { // Only allow custom start messages for single tasks
-            ws.startMessage match {
-              case Some(Left(sm))  => logger.info(sm(params.watchState(count)))
-              case Some(Right(sm)) => sm(count, project, commands).foreach(logger.info(_))
+            ws.startMessage match
+              case Some(sm) => sm(count, project, commands).foreach(logger.info(_))
               case None =>
                 Watch.defaultStartWatch(count, project, commands).foreach(logger.info(_))
-            }
           }
           Watch.Ignore
         }
@@ -616,10 +612,8 @@ private[sbt] object Continuous extends DeprecatedContinuous {
     val onTrigger: (Int, Watch.Event) => Unit = { (count: Int, event: Watch.Event) =>
       if (configs.size == 1) {
         val config = configs.head
-        config.watchSettings.triggerMessage match {
-          case Left(tm)  => logger.info(tm(config.watchState(count)))
-          case Right(tm) => tm(count, event.path, commands).foreach(logger.info(_))
-        }
+        val tm = config.watchSettings.triggerMessage
+        tm(count, event.path, commands).foreach(logger.info(_))
       } else {
         Watch.defaultOnTriggerMessage(count, event.path, commands).foreach(logger.info(_))
       }
@@ -980,16 +974,13 @@ private[sbt] object Continuous extends DeprecatedContinuous {
       val watchSettings: WatchSettings,
   ):
     def inputs() = dynamicInputs.toSeq.sorted
-    private[sbt] def watchState(count: Int): DeprecatedWatchState =
-      WatchState.empty(inputs().map(_.glob)).withCount(count)
-
     def arguments(logger: Logger): Arguments = new Arguments(logger, inputs())
   end Config
 
   @nowarn
   private def getStartMessage(key: ScopedKey[?])(using Extracted): StartMessage = Some {
     lazy val default = key.get(watchStartMessage).getOrElse(Watch.defaultStartWatch)
-    key.get(deprecatedWatchingMessage).map(Left(_)).getOrElse(Right(default))
+    default
   }
 
   @nowarn
@@ -998,7 +989,7 @@ private[sbt] object Continuous extends DeprecatedContinuous {
   )(using Extracted): TriggerMessage = {
     lazy val default =
       key.get(watchTriggeredMessage).getOrElse(Watch.defaultOnTriggerMessage)
-    key.get(deprecatedTriggeredMessage).map(Left(_)).getOrElse(Right(default))
+    default
   }
 
   extension (scope: Scope) {

@@ -9,14 +9,10 @@
 package sbt.internal.util
 
 import sbt.util.*
-import scala.annotation.nowarn
 
 // note that setting the logging level on this logger has no effect on its behavior, only
 //   on the behavior of the delegates.
 class MultiLogger(delegates: List[AbstractLogger]) extends BasicLogger {
-  @deprecated("No longer used.", "1.0.0")
-  override lazy val ansiCodesSupported = delegates exists supported
-  @nowarn private def supported = (_: AbstractLogger).ansiCodesSupported
 
   override def setLevel(newLevel: Level.Value): Unit = {
     super.setLevel(newLevel)

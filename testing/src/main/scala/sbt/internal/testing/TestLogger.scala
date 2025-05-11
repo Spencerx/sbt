@@ -35,12 +35,6 @@ object TestLogger {
       val buffered: Boolean
   )
 
-  @deprecated("Use make variant that accepts a log level.", "1.4.0")
-  def make(
-      global: ManagedLogger,
-      perTest: TestDefinition => PerTest,
-  ): TestLogger = make(global, perTest, Level.Debug)
-
   def make(
       global: ManagedLogger,
       perTest: TestDefinition => PerTest,

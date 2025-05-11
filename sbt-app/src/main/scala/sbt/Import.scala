@@ -91,8 +91,6 @@ trait Import {
   type Cache[I, O] = sbt.util.Cache[I, O]
   val Cache = sbt.util.Cache
   val CacheImplicits = sbt.util.CacheImplicits
-  @deprecated("Use Tracked.inputChanged and Tracked.outputChanged instead", "1.0.1")
-  type Changed[O] = sbt.util.Changed[O]
   type ChangeReport[T] = sbt.util.ChangeReport[T]
   val ChangeReport = sbt.util.ChangeReport
   type ControlEvent = sbt.util.ControlEvent
@@ -159,7 +157,6 @@ trait Import {
   type FilterLogger = sbt.internal.util.FilterLogger
   val FullLogger = sbt.internal.util.FullLogger
   type FullLogger = sbt.internal.util.FullLogger
-  val FullReader = sbt.internal.util.FullReader
   type FullReader = sbt.internal.util.FullReader
   // val HCons = sbt.internal.util.HCons
   // type HCons[H, T <: HList] = sbt.internal.util.HCons[H, T]

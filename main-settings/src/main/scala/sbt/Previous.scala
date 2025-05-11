@@ -53,9 +53,6 @@ object Previous {
   private[sbt] final class Referenced[T](val key: Key[T], val format: JsonFormat[T]) {
     def this(task: ScopedTaskKey[T], format: JsonFormat[T]) = this(Key(task, task), format)
 
-    // @deprecated("unused", "1.3.0")
-    // private[sbt] def task: ScopedKey[Task[T]] = key.task
-
     lazy val stamped: JsonFormat[T] =
       StampedFormat.withStamp(key.task.key.tag.toString)(format)
 
@@ -102,9 +99,6 @@ object Previous {
   private[sbt] final class References {
     private var map = IMap.empty[Key, Referenced]
 
-    @deprecated("unused", "1.3.0")
-    def recordReference[T](key: ScopedKey[Task[T]], format: JsonFormat[T]): Unit =
-      recordReference(Key(key, key), format)
     // TODO: this arbitrarily chooses a JsonFormat.
     // The need to choose is a fundamental problem with this approach, but this should at least make a stable choice.
     def recordReference[T](key: Key[T], format: JsonFormat[T]): Unit = synchronized {
