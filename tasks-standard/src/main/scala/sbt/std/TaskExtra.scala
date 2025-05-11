@@ -9,6 +9,7 @@
 package sbt
 package std
 
+import scala.annotation.nowarn
 import scala.sys.process.{ BasicIO, ProcessIO, ProcessBuilder }
 
 import sbt.internal.util.AttributeMap
@@ -205,7 +206,10 @@ trait TaskExtra extends TaskExtra0 {
 
   extension [Key](
       in: Task[?]
-  )(using streams: Task[TaskStreams[Key]], key: Task[?] => Key) {
+  )(using
+      @nowarn("msg=unused") streams: Task[TaskStreams[Key]],
+      @nowarn("msg=unused") key: Task[?] => Key
+  ) {
     def binary[T](f: BufferedInputStream => T): Task[T] = pipeBinary(None, f)
     def binary[T](sid: String)(f: BufferedInputStream => T): Task[T] = pipeBinary(Some(sid), f)
 

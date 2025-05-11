@@ -16,6 +16,7 @@ import sbt.internal.util.EmptyCacheError
 
 import sjsonnew.{ JsonFormat, JsonWriter }
 import sjsonnew.support.murmurhash.Hasher
+import scala.annotation.nowarn
 
 object Tracked {
 
@@ -199,6 +200,7 @@ object Tracked {
    * cachedDoc(inputs)(() => exists(outputDirectory.allPaths.get.toSet))
    * }}}
    */
+  @nowarn("msg=unused")
   def inputChanged[I: JsonFormat: SingletonCache, O](store: CacheStore)(
       f: (Boolean, I) => O
   ): I => O =

@@ -12,6 +12,7 @@ import scala.util.Try
 
 import sjsonnew.JsonFormat
 import sjsonnew.support.murmurhash.Hasher
+import scala.annotation.nowarn
 
 import CacheImplicits.*
 
@@ -37,6 +38,7 @@ object SingletonCache {
     }
 
   /** A lazy `SingletonCache` */
+  @nowarn("msg=unused")
   def lzy[A: JsonFormat](mkCache: => SingletonCache[A]): SingletonCache[A] =
     new SingletonCache[A] {
       lazy val cache = mkCache

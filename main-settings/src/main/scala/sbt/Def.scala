@@ -298,7 +298,7 @@ object Def extends BuildSyntax with Init with InitializeImplicits:
     )
   }
 
-  inline def cachedTask[A1: JsonFormat](inline a1: A1): Def.Initialize[Task[A1]] =
+  inline def cachedTask[A1](inline a1: A1): Def.Initialize[Task[A1]] =
     ${ TaskMacro.taskMacroImpl[A1]('a1, cached = true) }
 
   inline def task[A1](inline a1: A1): Def.Initialize[Task[A1]] =
