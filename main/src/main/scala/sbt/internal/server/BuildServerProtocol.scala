@@ -789,19 +789,11 @@ object BuildServerProtocol {
     Keys.compile.result.value match {
       case Value(_) => StatusCode.Success
       case Inc(cause) =>
-        var statusCodeOpt: Option[Int]
-        def updateCode(code: Int): Unit =
-          statusCodeOpt = Some(statusCodeOpt match {
-            case None => code
-            case Some(oldCode) => oldCode.max(code)
-          })
-
-        Incomplete.visitAll(cause.getCause) {
-          case _: CompileFailed        => updateCode(StatusCode.Error)
-          case _: InterruptedException => updateCode(StatusCode.Cancelled)
+        cause.getCause match {
+          case _: CompileFailed        => StatusCode.Error
+          case _: InterruptedException => StatusCode.Cancelled
+          case err                     => throw cause
         }
-
-        statusCodeOpt.getOrElse(throw cause)
     }
   }
 
