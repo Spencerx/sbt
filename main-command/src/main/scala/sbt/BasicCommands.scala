@@ -381,16 +381,6 @@ object BasicCommands {
     }
   }
 
-  @deprecated("Replaced by BuiltInCommands.continuous", "1.3.0")
-  def continuous: Command =
-    Command(ContinuousExecutePrefix, continuousBriefHelp, continuousDetail)(otherCommandParser) {
-      (s, arg) =>
-        withAttribute(s, Watched.Configuration, "Continuous execution not configured.") { w =>
-          val repeat = ContinuousExecutePrefix + (if (arg.startsWith(" ")) arg else " " + arg)
-          Watched.executeContinuously(w, s, arg, repeat)
-        }
-    }
-
   def history: Command = Command.custom(historyParser, BasicCommandStrings.historyHelp)
 
   def historyParser(s: State): Parser[() => State] =

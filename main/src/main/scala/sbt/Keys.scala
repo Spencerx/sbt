@@ -22,7 +22,6 @@ import sbt.internal.InMemoryCacheStore.CacheStoreFactoryFactory
 import sbt.internal.*
 import sbt.internal.bsp.*
 import sbt.internal.inc.ScalaInstance
-import sbt.internal.io.WatchState
 import sbt.internal.librarymanagement.{ CompatibilityWarningOptions, IvySbt }
 import sbt.internal.remotecache.RemoteCacheArtifact
 import sbt.internal.server.BuildServerProtocol.BspFullWorkspace
@@ -143,15 +142,7 @@ object Keys {
   val watchService = settingKey[() => WatchService]("Service to use to monitor file system changes.").withRank(BMinusSetting).withRank(DSetting)
 
   // Deprecated watch apis
-  @deprecated("This is no longer used for continuous execution", "1.3.0")
-  val watch = SettingKey(BasicKeys.watch)
   val watchSources = taskKey[Seq[Watched.WatchSource]]("Defines the sources in this project for continuous execution to watch for changes.").withRank(BMinusSetting)
-  @deprecated("This is for legacy builds only and will be removed in a future version of sbt", "1.3.0")
-  val watchTransitiveSources = taskKey[Seq[Watched.WatchSource]]("Defines the sources in all projects for continuous execution to watch.").withRank(CSetting)
-  @deprecated("Use watchStartMessage instead", "1.3.0")
-  val watchingMessage = settingKey[WatchState => String]("The message to show when triggered execution waits for sources to change.").withRank(DSetting)
-  @deprecated("Use watchTriggeredMessage instead", "1.3.0")
-  val triggeredMessage = settingKey[WatchState => String]("The message to show before triggered execution executes an action after sources change.").withRank(DSetting)
 
   // Path Keys
   val baseDirectory = settingKey[File]("The base directory.  Depending on the scope, this is the base directory for the build, project, configuration, or task.").withRank(AMinusSetting)

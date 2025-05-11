@@ -163,7 +163,7 @@ final class RecordingLogger extends BasicLogger {
 
   def getEvents = events.reverse
 
-  override def ansiCodesSupported = true
+  def ansiCodesSupported = true
   def trace(t: => Throwable): Unit = { events ::= new Trace(t) }
   def log(level: Level.Value, message: => String): Unit = { events ::= new Log(level, message) }
   def success(message: => String): Unit = { events ::= new Success(message) }

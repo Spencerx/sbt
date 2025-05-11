@@ -889,8 +889,6 @@ object Terminal {
   private[sbt] def setConsoleProgressState(progressState: ProgressState): Unit =
     consoleProgressState.set(progressState)
 
-  @deprecated("For compatibility only", "1.4.0")
-  private[sbt] def deprecatedTerminal: jline.Terminal = console.toJLine
   private[util] class ConsoleTerminal(
       in: WriteableInputStream,
       out: OutputStream,

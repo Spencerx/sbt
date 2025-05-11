@@ -415,15 +415,6 @@ private[sbt] object Load {
     )
   }
 
-  @deprecated("No longer used. For binary compatibility", "1.2.1")
-  def reapply(
-      newSettings: Seq[Setting[?]],
-      structure: BuildStructure,
-      log: Logger
-  )(using display: Show[ScopedKey[?]]): BuildStructure = {
-    reapply(newSettings, structure)
-  }
-
   def buildConfigurations(
       loaded: LoadedBuild,
       rootProject: URI => String,

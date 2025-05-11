@@ -70,32 +70,6 @@ object InterfaceUtil {
     l.toList
   }
 
-  @deprecated("Use the overload of this method with more arguments", "1.2.2")
-  def position(
-      line0: Option[Integer],
-      content: String,
-      offset0: Option[Integer],
-      pointer0: Option[Integer],
-      pointerSpace0: Option[String],
-      sourcePath0: Option[String],
-      sourceFile0: Option[File]
-  ): Position =
-    position(
-      line0,
-      content,
-      offset0,
-      pointer0,
-      pointerSpace0,
-      sourcePath0,
-      sourceFile0,
-      None,
-      None,
-      None,
-      None,
-      None,
-      None
-    )
-
   def position(
       line0: Option[Integer],
       content: String,
@@ -125,41 +99,6 @@ object InterfaceUtil {
       startColumn0,
       endLine0,
       endColumn0
-    )
-
-  @deprecated("Use the overload of this method with more arguments", "1.2.2")
-  def problem(cat: String, pos: Position, msg: String, sev: Severity): Problem =
-    problem(cat, pos, msg, sev, None)
-
-  @deprecated("Use the overload of this method with more arguments", "1.7.2")
-  def problem(
-      cat: String,
-      pos: Position,
-      msg: String,
-      sev: Severity,
-      rendered: Option[String]
-  ): Problem =
-    problem(cat, pos, msg, sev, rendered, None, List.empty[DiagnosticRelatedInformation])
-
-  @deprecated("Use the overload of this method with more arguments", "1.9.0")
-  def problem(
-      cat: String,
-      pos: Position,
-      msg: String,
-      sev: Severity,
-      rendered: Option[String],
-      diagnosticCode: Option[DiagnosticCode],
-      diagnosticRelatedInformation: List[DiagnosticRelatedInformation]
-  ): Problem =
-    problem(
-      cat,
-      pos,
-      msg,
-      sev,
-      rendered,
-      diagnosticCode,
-      diagnosticRelatedInformation,
-      List.empty[Action],
     )
 
   def problem(

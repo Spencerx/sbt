@@ -120,23 +120,6 @@ object Streams {
       synchronized { streams.values.foreach(_.close()); streams.clear() }
   }
 
-  @deprecated("Use constructor without converter", "1.4")
-  def apply[Key, J: sjsonnew.IsoString](
-      taskDirectory: Key => File,
-      name: Key => String,
-      mkLogger: (Key, PrintWriter) => ManagedLogger,
-      converter: sjsonnew.SupportConverter[J],
-  ): Streams[Key] = apply[Key](taskDirectory, name, mkLogger)
-
-  @deprecated("Use constructor without converter", "1.4")
-  private[sbt] def apply[Key, J: sjsonnew.IsoString](
-      taskDirectory: Key => File,
-      name: Key => String,
-      mkLogger: (Key, PrintWriter) => ManagedLogger,
-      converter: sjsonnew.SupportConverter[J],
-      mkFactory: (File, sjsonnew.SupportConverter[J]) => CacheStoreFactory
-  ): Streams[Key] = apply[Key](taskDirectory, name, mkLogger, mkFactory(_, converter))
-
   def apply[Key](
       taskDirectory: Key => File,
       name: Key => String,

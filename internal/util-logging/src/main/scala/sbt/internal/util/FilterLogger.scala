@@ -9,7 +9,6 @@
 package sbt.internal.util
 
 import sbt.util.*
-import scala.annotation.nowarn
 
 /**
  * A filter logger is used to delegate messages but not the logging level to another logger. This
@@ -17,7 +16,6 @@ import scala.annotation.nowarn
  * delegate.
  */
 class FilterLogger(delegate: AbstractLogger) extends BasicLogger {
-  @nowarn override lazy val ansiCodesSupported = delegate.ansiCodesSupported
   def trace(t: => Throwable): Unit = {
     if (traceEnabled)
       delegate.trace(t)

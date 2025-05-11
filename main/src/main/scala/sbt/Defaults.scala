@@ -21,14 +21,7 @@ import org.scalasbt.ipcsocket.Win32SecurityLevel
 import sbt.Def.{ Initialize, ScopedKey, Setting, SettingsDefinition, parsed }
 import sbt.Keys.*
 import sbt.OptionSyntax.*
-import sbt.Project.{
-  inScope,
-  inTask,
-  // richInitialize,
-  // richInitialize Task,
-  // richTaskSessionVar,
-  // sbtRichTaskPromise
-}
+import sbt.Project.{ inScope, inTask }
 import sbt.ProjectExtra.*
 import sbt.Scope.{ GlobalScope, ThisBuildScope, ThisScope, fillTaskAxis }
 import sbt.ScopeAxis.{ Select, This, Zero }
@@ -40,7 +33,6 @@ import sbt.internal.classpath.AlternativeZincUtil
 import sbt.internal.inc.JavaInterfaceUtil.*
 import sbt.internal.inc.classpath.{ ClasspathFilter, ClasspathUtil }
 import sbt.internal.inc.{ CompileOutput, MappedFileConverter, Stamps, ZincLmUtil, ZincUtil }
-import sbt.internal.io.{ Source, WatchState }
 import sbt.internal.librarymanagement.mavenint.{
   PomExtraDependencyAttributes,
   SbtPomExtraProperties
@@ -811,12 +803,6 @@ object Defaults extends BuildCommon {
     else Vector()
   }
 
-  @deprecated("Use constructor with scalaVersion and scalaBinaryVersion", "1.5.0")
-  def makeCrossTarget(t: File, bv: String, sbtv: String, plugin: Boolean, cross: Boolean): File = {
-    val scalaBase = if (cross) t / ("scala-" + bv) else t
-    if (plugin) scalaBase / ("sbt-" + sbtv) else scalaBase
-  }
-
   def makeCrossTarget(
       t: File,
       scalaVersion: String,
@@ -1056,19 +1042,10 @@ object Defaults extends BuildCommon {
     clean := Clean.scopedTask.value,
     consoleProject := consoleProjectTask.value,
     transitiveDynamicInputs := WatchTransitiveDependencies.task.value,
-  ) ++ sbt.internal.DeprecatedContinuous.taskDefinitions
+  )
 
   def generate(generators: SettingKey[Seq[Task[Seq[File]]]]): Initialize[Task[Seq[File]]] =
     generators { _.join.map(_.flatten) }
-
-  @deprecated(
-    "The watchTransitiveSourcesTask is used only for legacy builds and will be removed in a future version of sbt.",
-    "1.3.0"
-  )
-  def watchTransitiveSourcesTask: Initialize[Task[Seq[Source]]] =
-    import ScopeFilter.Make.*
-    val selectDeps = ScopeFilter(inAggregates(ThisProject) || inDependencies(ThisProject))
-    watchSources.??(Nil).all(selectDeps).map(_.flatten)
 
   def transitiveUpdateTask: Initialize[Task[Seq[UpdateReport]]] = {
     import ScopeFilter.Make.*
@@ -1077,31 +1054,6 @@ object Defaults extends BuildCommon {
     // If I am a "build" (a project inside project/) then I have a globalPluginUpdate.
     Def.task { allUpdates.value.flatten ++ globalPluginUpdate.?.value }
   }
-
-  @deprecated("This is no longer used to implement continuous execution", "1.3.0")
-  def watchSetting: Initialize[Watched] =
-    Def.setting {
-      val getService = watchService.value
-      val interval = pollInterval.value
-      val _antiEntropy = watchAntiEntropy.value
-      val base = thisProjectRef.value
-      val msg = watchingMessage.getOrElse(Watched.defaultWatchingMessage).value
-      val trigMsg = triggeredMessage.getOrElse(Watched.defaultTriggeredMessage).value
-      new Watched {
-        val scoped = (base / watchTransitiveSources)
-        val key = scoped.scopedKey
-        override def antiEntropy: FiniteDuration = _antiEntropy
-        override def pollInterval: FiniteDuration = interval
-        override def watchingMessage(s: WatchState) = msg(s)
-        override def triggeredMessage(s: WatchState) = trigMsg(s)
-        override def watchService() = getService()
-        override def watchSources(s: State) =
-          EvaluateTask(Project.structure(s), key, s, base) match
-            case Some((_, Result.Value(ps))) => ps
-            case Some((_, Result.Inc(i)))    => throw i
-            case None                        => sys.error("key not found: " + Def.displayFull(key))
-      }
-    }
 
   // Returns the ScalaInstance only if it was not constructed via `update`
   //  This is necessary to prevent cycles between `update` and `scalaInstance`
@@ -4054,10 +4006,6 @@ object Classpaths {
 
   def constructBuildDependencies: Initialize[BuildDependencies] =
     loadedBuild(lb => BuildUtil.dependencies(lb.units))
-
-  @deprecated("not used", "1.4.0")
-  def internalDependencies: Initialize[Task[Classpath]] =
-    ClasspathImpl.internalDependencyClasspathTask
 
   def internalDependencyJarsTask: Initialize[Task[Classpath]] =
     ClasspathImpl.internalDependencyJarsTask

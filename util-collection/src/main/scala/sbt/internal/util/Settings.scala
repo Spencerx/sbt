@@ -215,13 +215,6 @@ trait Init:
     compile(dMap)
   }
 
-  @deprecated("Use makeWithCompiledMap", "1.4.0")
-  def make(init: Seq[Setting[?]])(using
-      delegates: ScopeType => Seq[ScopeType],
-      scopeLocal: ScopeLocal,
-      display: Show[ScopedKey[?]]
-  ): Settings = makeWithCompiledMap(init)._2
-
   def makeWithCompiledMap(init: Seq[Setting[?]])(using
       delegates: ScopeType => Seq[ScopeType],
       scopeLocal: ScopeLocal,

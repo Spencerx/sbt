@@ -183,11 +183,6 @@ object EscHelpers {
     }
     (res, index)
   }
-  @deprecated("use EscHelpers.strip", "1.4.2")
-  def stripMoves(s: String): String = {
-    val (bytes, len) = strip(s.getBytes, stripAnsi = true, stripColor = false)
-    new String(bytes, 0, len)
-  }
 
   /**
    * Removes the ansi escape sequences from a string and makes a best attempt at calculating any

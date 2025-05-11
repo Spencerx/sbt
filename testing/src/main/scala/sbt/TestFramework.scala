@@ -8,15 +8,11 @@
 
 package sbt
 
-import java.io.File
 import scala.util.control.NonFatal
 import testing.{ Task as TestTask, * }
 import org.scalatools.testing.{ Framework as OldFramework }
-import sbt.internal.inc.classpath.{ ClasspathUtilities, DualLoader }
-import sbt.internal.inc.ScalaInstance
 import scala.annotation.tailrec
 import sbt.internal.util.ManagedLogger
-import sbt.io.IO
 import sbt.protocol.testing.TestResult
 
 object TestFrameworks {
@@ -303,32 +299,6 @@ object TestFramework {
     } finally {
       Thread.currentThread.setContextClassLoader(oldLoader)
     }
-  }
-  @deprecated("1.3.0", "This has been replaced by the ClassLoaders.test task.")
-  def createTestLoader(
-      classpath: Seq[File],
-      scalaInstance: ScalaInstance,
-      tempDir: File
-  ): ClassLoader = {
-    val interfaceJar = IO.classLocationPath(classOf[testing.Framework]).toFile
-    val interfaceFilter = (name: String) =>
-      name.startsWith("org.scalatools.testing.") || name.startsWith("sbt.testing.")
-    val notInterfaceFilter = (name: String) => !interfaceFilter(name)
-    val dual = new DualLoader(
-      scalaInstance.loader,
-      notInterfaceFilter,
-      x => true,
-      getClass.getClassLoader,
-      interfaceFilter,
-      x => false
-    )
-    val main = ClasspathUtilities.makeLoader(classpath, dual, scalaInstance, tempDir)
-    // TODO - There's actually an issue with the classpath facility such that unmanagedScalaInstances are not added
-    // to the classpath correctly.  We have a temporary workaround here.
-    val cp: Seq[File] =
-      if (scalaInstance.isManagedVersion) interfaceJar +: classpath
-      else scalaInstance.allJars ++ (interfaceJar +: classpath)
-    ClasspathUtilities.filterByClasspath(cp, main)
   }
   def createTestFunction(
       loader: ClassLoader,

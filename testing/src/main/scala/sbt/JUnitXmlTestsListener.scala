@@ -43,9 +43,6 @@ class JUnitXmlTestsListener(val targetDir: File, legacyTestReport: Boolean, logg
   def this(outputDir: String, logger: Logger) = this(outputDir, false, logger)
   def this(outputDir: String) = this(outputDir, false, null)
 
-  @deprecated("Provided for binary compatibility: please use `targetDir` instead", "1.6.0")
-  def outputDir: String = targetDir.getParent
-
   /** Current hostname so we know which machine executed the tests */
   val hostname: String = {
     val start = System.nanoTime

@@ -340,29 +340,6 @@ class Timestamp(val store: CacheStore, useStartTime: Boolean)(using format: Json
     Try { store.read[Long]() } getOrElse 0
 }
 
-@deprecated("Use Tracked.inputChanged and Tracked.outputChanged instead", "1.0.1")
-class Changed[O: Equiv: JsonFormat](val store: CacheStore) extends Tracked {
-  def clean() = store.delete()
-
-  def apply[O2](ifChanged: O => O2, ifUnchanged: O => O2): O => O2 = value => {
-    if (uptodate(value)) ifUnchanged(value)
-    else {
-      update(value)
-      ifChanged(value)
-    }
-  }
-
-  def update(value: O): Unit =
-    store.write(
-      value
-    ) // Using.fileOutputStream(false)(cacheFile)(stream => format.writes(stream, value))
-
-  def uptodate(value: O): Boolean = {
-    val equiv: Equiv[O] = implicitly
-    equiv.equiv(value, store.read[O]())
-  }
-}
-
 object Difference {
   def constructor(
       defineClean: Boolean,

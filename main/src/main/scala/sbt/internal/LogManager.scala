@@ -28,23 +28,12 @@ sealed abstract class LogManager {
       writer: PrintWriter,
       context: LoggerContext,
   ): ManagedLogger
-  @deprecated("Use alternate apply that provides a LoggerContext", "1.4.0")
-  def apply(
-      data: Def.Settings,
-      state: State,
-      task: ScopedKey[?],
-      writer: PrintWriter
-  ): ManagedLogger = apply(data, state, task, writer, LoggerContext.globalContext)
-
   def backgroundLog(
       data: Def.Settings,
       state: State,
       task: ScopedKey[?],
       context: LoggerContext
   ): ManagedLogger
-  @deprecated("Use alternate background log that provides a LoggerContext", "1.4.0")
-  final def backgroundLog(data: Def.Settings, state: State, task: ScopedKey[?]): ManagedLogger =
-    backgroundLog(data, state, task, LoggerContext.globalContext)
 }
 
 /**
@@ -71,15 +60,6 @@ object LogManager {
         (task.scope / logManager).get(data) getOrElse defaultManager(state.globalLogging.console)
       manager(data, state, task, to, context)
     }
-
-  @deprecated("Use alternate constructBackgroundLog that provides a LoggerContext", "1.8.0")
-  def constructBackgroundLog(
-      data: Def.Settings,
-      state: State
-  ): ScopedKey[?] => ManagedLogger = {
-    val context = state.get(Keys.loggerContext).getOrElse(LoggerContext.globalContext)
-    constructBackgroundLog(data, state, context)
-  }
 
   def constructBackgroundLog(
       data: Def.Settings,
@@ -157,17 +137,6 @@ object LogManager {
   ): T =
     data.get(ScopedKey(scope, key)).orElse(state.get(key)).getOrElse(default)
 
-  @deprecated("Use defaultLogger that provides a LoggerContext", "1.4.0")
-  def defaultLogger(
-      data: Def.Settings,
-      state: State,
-      task: ScopedKey[?],
-      console: Appender,
-      backed: Appender,
-      relay: Appender,
-      extra: List[Appender]
-  ): ManagedLogger =
-    defaultLogger(data, state, task, console, backed, relay, extra, LoggerContext.globalContext)
   // This is the main function that is used to generate the logger for tasks.
   def defaultLogger(
       data: Def.Settings,
@@ -314,7 +283,7 @@ object LogManager {
       private def slog: Logger =
         Option(ref.get) getOrElse sys.error("Settings logger used after project was loaded.")
 
-      override val ansiCodesSupported = ITerminal.isAnsiSupported
+      val ansiCodesSupported = ITerminal.isAnsiSupported
       override def trace(t: => Throwable) = slog.trace(t)
       override def success(message: => String) = slog.success(message)
       override def log(level: Level.Value, message: => String) = slog.log(level, message)

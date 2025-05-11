@@ -63,10 +63,6 @@ object CacheStoreFactory {
 class DirectoryStoreFactory[J](base: File) extends CacheStoreFactory {
   IO.createDirectory(base)
 
-  @deprecated("Use constructor without converter", "1.4")
-  def this(base: File, converter: sjsonnew.SupportConverter[J])(using e: sjsonnew.IsoString[J]) =
-    this(base)
-
   def make(identifier: String): CacheStore = new FileBasedStore(base / identifier)
 
   def sub(identifier: String): CacheStoreFactory =
@@ -76,10 +72,6 @@ class DirectoryStoreFactory[J](base: File) extends CacheStoreFactory {
 /** A `CacheStore` that persists information in `file`. */
 class FileBasedStore[J](file: File) extends CacheStore {
   IO.touch(file, setModified = false)
-
-  @deprecated("Use constructor without converter", "1.4")
-  def this(file: File, converter: sjsonnew.SupportConverter[J])(using e: sjsonnew.IsoString[J]) =
-    this(file)
 
   def read[T: JsonReader]() =
     new FileInput(file).read()

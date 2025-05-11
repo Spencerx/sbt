@@ -186,10 +186,6 @@ object Run:
   ) =
     runner.run(mainClass, classpath, options, log)
 
-  /** Executes the given function, trapping calls to System.exit. */
-  @deprecated("TrapExit feature is removed; just call the function instead", "1.6.0")
-  def executeTrapExit(f: => Unit, log: Logger): Try[Unit] = executeSuccess(f)
-
   private[sbt] def executeSuccess(f: => Unit): Try[Unit] = {
     f
     Success(())
