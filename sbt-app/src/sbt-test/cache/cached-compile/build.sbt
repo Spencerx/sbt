@@ -4,7 +4,7 @@ lazy val checkMiss = taskKey[Unit]("")
 
 Global / localCacheDirectory := baseDirectory.value / "diskcache"
 
-scalaVersion := "3.6.4"
+scalaVersion := "3.7.0"
 checkMiss := {
   val s = streams.value
   val config = Def.cacheConfiguration.value

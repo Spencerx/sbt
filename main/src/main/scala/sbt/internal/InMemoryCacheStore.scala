@@ -27,12 +27,10 @@ private[sbt] object InMemoryCacheStore {
       .maximumWeight(maxSize)
       .weigher(weigher)
       .build()
-    def get[T](path: Path): Option[(T, Long)] = {
-      files.getIfPresent(path) match {
-        case null                                   => None
-        case (value: T @unchecked, lastModified, _) => Some((value, lastModified))
-      }
-    }
+    def get[A1](path: Path): Option[(A1, Long)] =
+      files.getIfPresent(path) match
+        case null                     => None
+        case (value, lastModified, _) => Some((value.asInstanceOf[A1], lastModified))
     def put(path: Path, value: Any, lastModified: Long): Unit = {
       try {
         if (lastModified > 0) {
