@@ -58,6 +58,7 @@ object Dependencies {
   }
 
   def addSbtIO = addSbtModule(sbtIoPath, "io", sbtIO)
+  def addSbtIOForTest = addSbtModule(sbtIoPath, "io", sbtIO, Some(Test))
 
   def addSbtCompilerInterface = addSbtModule(sbtZincPath, "compilerInterface", compilerInterface)
   def addSbtCompilerClasspath = addSbtModule(sbtZincPath, "zincClasspath", compilerClasspath)
@@ -91,6 +92,7 @@ object Dependencies {
   val templateResolverApi = "org.scala-sbt" % "template-resolver" % "0.1"
   val remoteapis =
     "com.eed3si9n.remoteapis.shaded" % "shaded-remoteapis-java" % "2.3.0-M1-52317e00d8d4c37fa778c628485d220fb68a8d08"
+  val gson = "com.google.code.gson" % "gson" % "2.13.1"
 
   val scalaCompiler = "org.scala-lang" %% "scala3-compiler" % scala3
   val scala3Library = "org.scala-lang" %% "scala3-library" % scala3
