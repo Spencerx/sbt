@@ -2127,7 +2127,7 @@ object Defaults extends BuildCommon {
       val store = analysisStore(compileAnalysisFile)
       val c = fileConverter.value
       // TODO - Should readAnalysis + saveAnalysis be scoped by the compile task too?
-      val analysisResult = Retry(compileIncrementalTaskImpl(bspTask, s, ci, ping))
+      val analysisResult = Retry.io(compileIncrementalTaskImpl(bspTask, s, ci, ping))
       val analysisOut = c.toVirtualFile(setup.cachePath())
       val contents = AnalysisContents.create(analysisResult.analysis(), analysisResult.setup())
       store.set(contents)

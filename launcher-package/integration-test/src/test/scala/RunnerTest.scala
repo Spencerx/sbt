@@ -33,19 +33,32 @@ object SbtRunnerTest extends SimpleTestSuite with PowerAssertions {
     ()
   }
 
+  def testVersion(lines: List[String]): Unit = {
+    assert(lines.size >= 2)
+    val expected0 = s"(?m)^sbt version in this project: $versionRegEx(\\r)?"
+    assert(lines(0).matches(expected0))
+    val expected1 = s"sbt runner version: $versionRegEx$$"
+    assert(lines(1).matches(expected1))
+  }
+
   test("sbt -V|-version|--version should print sbtVersion") {
     val out = sbtProcess("-version").!!.trim
-    val expectedVersion =
-      s"""|(?m)^sbt version in this project: $versionRegEx(\\r)?
-          |sbt script version: $versionRegEx$$
-          |""".stripMargin.trim.replace("\n", "\\n")
-    assert(out.matches(expectedVersion))
+    testVersion(out.linesIterator.toList)
 
     val out2 = sbtProcess("--version").!!.trim
-    assert(out2.matches(expectedVersion))
+    testVersion(out2.linesIterator.toList)
 
     val out3 = sbtProcess("-V").!!.trim
-    assert(out3.matches(expectedVersion))
+    testVersion(out3.linesIterator.toList)
+  }
+
+  test("sbt -V in empty directory") {
+    IO.withTemporaryDirectory { tmp =>
+      val out = sbtProcessInDir(tmp)("-V").!!.trim
+      val expectedVersion = "^"+versionRegEx+"$"
+      val targetDir = new File(tmp, "target")
+      assert(!targetDir.exists, "expected target directory to not exist, but existed")
+    }
     ()
   }
 
