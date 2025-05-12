@@ -105,7 +105,8 @@ object Compiler:
       for lib <- scalaDeps.take(1) do
         val libVer = lib.module.revision
         val libName = lib.module.name
-        val n = Keys.name.value
+        val proj =
+          Def.displayBuildRelative(Keys.thisProjectRef.value.build, Keys.thisProjectRef.value)
         if VersionNumber(sv).matchesSemVer(SemanticSelector(s"<$libVer")) then
           val err = !Keys.allowUnsafeScalaLibUpgrade.value
           val fix =
@@ -117,13 +118,13 @@ object Compiler:
                  |contain the newer $libName $libVer, even if the scalaVersion is $sv.
                  |Compilation (macro expansion) or using the Scala REPL in sbt may fail with a LinkageError.""".stripMargin
           val msg =
-            s"""Expected `$n/scalaVersion` to be $libVer or later, but found $sv.
+            s"""Expected `$proj scalaVersion` to be $libVer or later, but found $sv.
                |To support backwards-only binary compatibility (SIP-51), the Scala 2.13 compiler
                |should not be older than $libName on the dependency classpath.
                |
                |$fix
                |
-               |See `$n/evicted` to know why $libName $libVer is getting pulled in.
+               |See `$proj evicted` to know why $libName $libVer is getting pulled in.
                |""".stripMargin
           if err then sys.error(msg)
           else s.log.warn(msg)

@@ -51,6 +51,7 @@ set sbt_args_sbt_version=
 set sbt_args_mem=
 set sbt_args_client=
 set sbt_args_no_server=
+set is_this_dir_sbt=0
 
 rem users can set SBT_OPTS via .sbtopts
 if exist .sbtopts for /F %%A in (.sbtopts) do (
@@ -532,14 +533,21 @@ set SBT_ARGS=!SBT_ARGS! %0
 goto args_loop
 :args_end
 
+if exist build.sbt (
+  set is_this_dir_sbt=1
+)
+if exist project\build.properties (
+  set is_this_dir_sbt=1
+)
+
 rem Confirm a user's intent if the current directory does not look like an sbt
 rem top-level directory and the "new" command was not given.
 
-if not defined sbt_args_allow_empty if not defined sbt_args_print_version if not defined sbt_args_print_sbt_version if not defined sbt_args_print_sbt_script_version if not defined shutdownall if not exist build.sbt (
-  if not exist project\ (
+if not defined sbt_args_allow_empty if not defined sbt_args_print_version if not defined sbt_args_print_sbt_version if not defined sbt_args_print_sbt_script_version if not defined shutdownall (
+  if not !is_this_dir_sbt! equ 1 (
     if not defined sbt_new (
-      echo [error] Neither build.sbt nor a 'project' directory in the current directory: "%CD%"
-      echo [error] run 'sbt new', touch build.sbt, or run 'sbt --allow-empty'.
+      >&2 echo [error] Neither build.sbt nor a 'project' directory in the current directory: "%CD%"
+      >&2 echo [error] run 'sbt new', touch build.sbt, or run 'sbt --allow-empty'.
       goto error
     )
   )
@@ -555,7 +563,7 @@ if !shutdownall! equ 1 (
     taskkill /F /PID %%i
     set /a count=!count!+1
   )
-  echo shutdown !count! sbt processes
+  >&2 echo shutdown !count! sbt processes
   goto :eof
 )
 
@@ -667,9 +675,14 @@ if !sbt_args_print_sbt_version! equ 1 (
 )
 
 if !sbt_args_print_version! equ 1 (
-  call :set_sbt_version
-  echo sbt version in this project: !sbt_version!
-  echo sbt script version: !init_sbt_version!
+  if !is_this_dir_sbt! equ 1 (
+    call :set_sbt_version
+    echo sbt version in this project: !sbt_version!
+  )
+  echo sbt runner version: !init_sbt_version!
+  >&2 echo.
+  >&2 echo [info] sbt runner ^(sbt-the-batch-script^) is a runner to run any declared version of sbt.
+  >&2 echo [info] Actual version of the sbt is declared using project\build.properties for each build.
   goto :eof
 )
 
@@ -910,14 +923,14 @@ set /a required_version=8
 if /I !JAVA_VERSION! GEQ !required_version! (
   exit /B 0
 )
-echo.
-echo The Java Development Kit ^(JDK^) installation you have is not up to date.
-echo sbt requires at least version !required_version!+, you have
-echo version "!JAVA_VERSION!"
-echo.
-echo Please go to http://www.oracle.com/technetwork/java/javase/downloads/ and download
-echo a valid JDK and install before running sbt.
-echo.
+>&2 echo.
+>&2 echo The Java Development Kit ^(JDK^) installation you have is not up to date.
+>&2 echo sbt requires at least version !required_version!+, you have
+>&2 echo version "!JAVA_VERSION!"
+>&2 echo.
+>&2 echo Go to https://adoptium.net/ etc and download
+>&2 echo a valid JDK and install before running sbt.
+>&2 echo.
 exit /B 1
 
 :copyrt
