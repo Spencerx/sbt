@@ -269,7 +269,16 @@ object Defaults extends BuildCommon {
       csrMavenDependencyOverride :== false,
       csrSameVersions := Seq(
         ScalaArtifacts.Artifacts.map(a => InclExclRule(scalaOrganization.value, a)).toSet
-      )
+      ),
+      stagingDirectory := (ThisBuild / baseDirectory).value / "target" / "sona-staging",
+      localStaging := Some(Resolver.file("local-staging", stagingDirectory.value)),
+      sonaBundle := Publishing
+        .makeBundle(
+          stagingDirectory.value.toPath(),
+          ((ThisBuild / baseDirectory).value / "target" / "sona-bundle" / "bundle.zip").toPath()
+        )
+        .toFile(),
+      commands ++= Seq(Publishing.sonaRelease, Publishing.sonaUpload),
     )
 
   /** Core non-plugin settings for sbt builds.  These *must* be on every build or the sbt engine will fail to run at all. */
