@@ -56,6 +56,7 @@ import sbt.internal.server.{
   ServerHandler,
   VirtualTerminal
 }
+import sbt.internal.sona.Sona
 import sbt.internal.testing.TestLogger
 import sbt.internal.util.Attributed.data
 import sbt.internal.util.Types._
@@ -227,7 +228,7 @@ object Defaults extends BuildCommon {
   private[sbt] lazy val globalIvyCore: Seq[Setting[_]] =
     Seq(
       internalConfigurationMap :== Configurations.internalMap _,
-      credentials :== SysProp.sbtCredentialsEnv.toList,
+      credentials := SysProp.sbtCredentialsEnv.toList,
       exportJars :== false,
       trackInternalDependencies :== TrackLevel.TrackAlways,
       exportToInternal :== TrackLevel.TrackAlways,
@@ -3091,7 +3092,15 @@ object Classpaths {
     makeIvyXml := deliverTask(makeIvyXmlConfiguration).value,
     publish := publishOrSkip(publishConfiguration, publish / skip).value,
     publishLocal := publishOrSkip(publishLocalConfiguration, publishLocal / skip).value,
-    publishM2 := publishOrSkip(publishM2Configuration, publishM2 / skip).value
+    publishM2 := publishOrSkip(publishM2Configuration, publishM2 / skip).value,
+    credentials ++= {
+      val alreadyContainsCentralCredentials: Boolean = credentials.value.exists {
+        case d: DirectCredentials => d.host == Sona.host
+        case _                    => false
+      }
+      if (!alreadyContainsCentralCredentials) SysProp.sonatypeCredentalsEnv.toSeq
+      else Nil
+    },
   )
 
   @nowarn("cat=deprecation")
