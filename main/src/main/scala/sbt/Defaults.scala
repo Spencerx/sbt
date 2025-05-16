@@ -279,6 +279,7 @@ object Defaults extends BuildCommon {
           ((ThisBuild / baseDirectory).value / "target" / "sona-bundle" / "bundle.zip").toPath()
         )
         .toFile(),
+      sonaBundle / aggregate :== false,
       commands ++= Seq(Publishing.sonaRelease, Publishing.sonaUpload),
     )
 
