@@ -132,4 +132,5 @@ object Dependencies {
   val hedgehog = "qa.hedgehog" %% "hedgehog-sbt" % "0.7.0"
   val disruptor = "com.lmax" % "disruptor" % "3.4.2"
   val kindProjector = ("org.typelevel" % "kind-projector" % "0.13.3").cross(CrossVersion.full)
+  val gigahorseOkHttp = "com.eed3si9n" %% "gigahorse-apache-http" % "0.9.3"
 }

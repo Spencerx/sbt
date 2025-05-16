@@ -56,6 +56,7 @@ import sbt.internal.server.{
   ServerHandler,
   VirtualTerminal
 }
+import sbt.internal.sona.Sona
 import sbt.internal.testing.TestLogger
 import sbt.internal.util.Attributed.data
 import sbt.internal.util.Types._
@@ -227,7 +228,7 @@ object Defaults extends BuildCommon {
   private[sbt] lazy val globalIvyCore: Seq[Setting[_]] =
     Seq(
       internalConfigurationMap :== Configurations.internalMap _,
-      credentials :== SysProp.sbtCredentialsEnv.toList,
+      credentials := SysProp.sbtCredentialsEnv.toList,
       exportJars :== false,
       trackInternalDependencies :== TrackLevel.TrackAlways,
       exportToInternal :== TrackLevel.TrackAlways,
@@ -269,7 +270,17 @@ object Defaults extends BuildCommon {
       csrMavenDependencyOverride :== false,
       csrSameVersions := Seq(
         ScalaArtifacts.Artifacts.map(a => InclExclRule(scalaOrganization.value, a)).toSet
-      )
+      ),
+      stagingDirectory := (ThisBuild / baseDirectory).value / "target" / "sona-staging",
+      localStaging := Some(Resolver.file("local-staging", stagingDirectory.value)),
+      sonaBundle := Publishing
+        .makeBundle(
+          stagingDirectory.value.toPath(),
+          ((ThisBuild / baseDirectory).value / "target" / "sona-bundle" / "bundle.zip").toPath()
+        )
+        .toFile(),
+      sonaBundle / aggregate :== false,
+      commands ++= Seq(Publishing.sonaRelease, Publishing.sonaUpload),
     )
 
   /** Core non-plugin settings for sbt builds.  These *must* be on every build or the sbt engine will fail to run at all. */
@@ -3082,7 +3093,15 @@ object Classpaths {
     makeIvyXml := deliverTask(makeIvyXmlConfiguration).value,
     publish := publishOrSkip(publishConfiguration, publish / skip).value,
     publishLocal := publishOrSkip(publishLocalConfiguration, publishLocal / skip).value,
-    publishM2 := publishOrSkip(publishM2Configuration, publishM2 / skip).value
+    publishM2 := publishOrSkip(publishM2Configuration, publishM2 / skip).value,
+    credentials ++= {
+      val alreadyContainsCentralCredentials: Boolean = credentials.value.exists {
+        case d: DirectCredentials => d.host == Sona.host
+        case _                    => false
+      }
+      if (!alreadyContainsCentralCredentials) SysProp.sonatypeCredentalsEnv.toSeq
+      else Nil
+    },
   )
 
   @nowarn("cat=deprecation")
