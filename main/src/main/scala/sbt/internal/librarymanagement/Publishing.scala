@@ -11,7 +11,6 @@ package internal
 package librarymanagement
 
 import java.nio.file.Path
-import java.util.UUID
 import sbt.internal.util.MessageOnlyException
 import sbt.io.IO
 import sbt.io.Path.contentOf
@@ -40,12 +39,12 @@ object Publishing {
   private def sonatypeReleaseAction(pt: PublishingType)(s0: State): State = {
     val extracted = Project.extract(s0)
     val log = extracted.get(Keys.sLog)
+    val dn = extracted.get(Keys.sonaDeploymentName)
     val (s1, bundle) = extracted.runTask(Keys.sonaBundle, s0)
     val (s2, creds) = extracted.runTask(Keys.credentials, s1)
     val client = fromCreds(creds)
     try {
-      val uuid = UUID.randomUUID().toString().take(8)
-      client.uploadBundle(bundle.toPath(), uuid, pt, log)
+      client.uploadBundle(bundle.toPath(), dn, pt, log)
       s2
     } finally {
       client.close()
