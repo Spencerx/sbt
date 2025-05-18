@@ -11,6 +11,7 @@ package internal
 package sona
 
 import gigahorse.*, support.apachehttp.Gigahorse
+import java.net.URLEncoder
 import java.util.Base64
 import java.nio.charset.StandardCharsets
 import java.nio.file.Path
@@ -30,7 +31,7 @@ class Sona(client: SonaClient) extends AutoCloseable {
       log: Logger,
   ): Unit = {
     val deploymentId = client.uploadBundle(bundleZipPath, deploymentName, pt, log)
-    client.waitForDeploy(deploymentId, pt, log)
+    client.waitForDeploy(deploymentId, deploymentName, pt, 1, log)
   }
   def close(): Unit = client.close()
 }
@@ -49,16 +50,17 @@ class SonaClient(reqTransform: Request => Request) extends AutoCloseable {
       log: Logger,
   ): String = {
     val res = retryF(maxAttempt = 2) { (attempt: Int) =>
-      log.info(s"uploading bundle to Sonatype Central (attempt: $attempt)")
+      log.info(s"uploading bundle to the Central Portal (attempt: $attempt)")
+      // addQuery string doesn't work for post
+      val q = queryString(
+        "name" -> deploymentName,
+        "publishingType" -> (publishingType match {
+          case PublishingType.Automatic   => "AUTOMATIC"
+          case PublishingType.UserManaged => "USER_MANAGED"
+        })
+      )
       val req = Gigahorse
-        .url(s"${baseUrl}/publisher/upload")
-        .addQueryString(
-          "name" -> deploymentName,
-          "publishingType" -> (publishingType match {
-            case PublishingType.Automatic   => "AUTOMATIC"
-            case PublishingType.UserManaged => "USER_MANAGED"
-          })
-        )
+        .url(s"${baseUrl}/publisher/upload?$q")
         .post(
           MultipartFormBody(
             FormPart("bundle", bundleZipPath.toFile())
@@ -70,23 +72,39 @@ class SonaClient(reqTransform: Request => Request) extends AutoCloseable {
     awaitWithMessage(res, "uploading...", log)
   }
 
+  def queryString(kv: (String, String)*): String =
+    kv.map {
+        case (k, v) =>
+          val encodedV = URLEncoder.encode(v, "UTF-8")
+          s"$k=$encodedV"
+      }
+      .mkString("&")
+
   def waitForDeploy(
       deploymentId: String,
+      deploymentName: String,
       publishingType: PublishingType,
+      attempt: Int,
       log: Logger,
   ): Unit = {
     val status = deploymentStatus(deploymentId)
-    log.info(s"deployment $deploymentId ${status.deploymentState}")
+    log.info(s"deployment $deploymentName ${status.deploymentState} ${attempt}/n")
+    val sleepSec =
+      if (attempt <= 3) List(5, 5, 10, 15)(attempt)
+      else 30
     status.deploymentState match {
       case DeploymentState.FAILED => sys.error(s"deployment $deploymentId failed")
       case DeploymentState.PENDING | DeploymentState.PUBLISHING | DeploymentState.VALIDATING =>
-        Thread.sleep(5000)
-        waitForDeploy(deploymentId, publishingType, log)
+        Thread.sleep(sleepSec * 1000L)
+        waitForDeploy(deploymentId, deploymentName, publishingType, attempt + 1, log)
       case DeploymentState.PUBLISHED if publishingType == PublishingType.Automatic   => ()
       case DeploymentState.VALIDATED if publishingType == PublishingType.UserManaged => ()
+      case DeploymentState.VALIDATED =>
+        Thread.sleep(sleepSec * 1000L)
+        waitForDeploy(deploymentId, deploymentName, publishingType, attempt + 1, log)
       case _ =>
-        Thread.sleep(5000)
-        waitForDeploy(deploymentId, publishingType, log)
+        Thread.sleep(sleepSec * 1000L)
+        waitForDeploy(deploymentId, deploymentName, publishingType, attempt + 1, log)
     }
   }
 

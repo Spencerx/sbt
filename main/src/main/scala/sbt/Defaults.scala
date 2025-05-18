@@ -10,7 +10,7 @@ package sbt
 
 import java.io.{ File, PrintWriter }
 import java.nio.file.{ Path => NioPath }
-import java.util.Optional
+import java.util.{ Optional, UUID }
 import java.util.concurrent.TimeUnit
 import lmcoursier.CoursierDependencyResolution
 import lmcoursier.definitions.{ Configuration => CConfiguration }
@@ -3101,6 +3101,12 @@ object Classpaths {
       }
       if (!alreadyContainsCentralCredentials) SysProp.sonatypeCredentalsEnv.toSeq
       else Nil
+    },
+    sonaDeploymentName := {
+      val o = organization.value
+      val v = version.value
+      val uuid = UUID.randomUUID().toString().take(8)
+      s"$o:$v:$uuid"
     },
   )
 
