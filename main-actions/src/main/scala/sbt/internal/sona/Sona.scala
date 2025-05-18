@@ -103,7 +103,7 @@ class SonaClient(reqTransform: Request => Request) extends AutoCloseable {
     val req = Gigahorse
       .url(s"${baseUrl}/publisher/status")
       .addQueryString("id" -> deploymentId)
-      .get
+      .post("", StandardCharsets.UTF_8)
     http.run(reqTransform(req), SonaClient.asPublisherStatus)
   }
 
