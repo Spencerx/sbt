@@ -40,14 +40,22 @@ object Publishing {
     val extracted = Project.extract(s0)
     val log = extracted.get(Keys.sLog)
     val dn = extracted.get(Keys.sonaDeploymentName)
-    val (s1, bundle) = extracted.runTask(Keys.sonaBundle, s0)
-    val (s2, creds) = extracted.runTask(Keys.credentials, s1)
-    val client = fromCreds(creds)
-    try {
-      client.uploadBundle(bundle.toPath(), dn, pt, log)
-      s2
-    } finally {
-      client.close()
+    val v = extracted.get(Keys.version)
+    if (v.endsWith("-SNAPSHOT")) {
+      log.error("""SNAPSHOTs are not supported on the Central Portal;
+configure ThisBuild / publishTo to publish directly to the central-snapshots.
+see https://www.scala-sbt.org/1.x/docs/Using-Sonatype.html for details.""")
+      s0.fail
+    } else {
+      val (s1, bundle) = extracted.runTask(Keys.sonaBundle, s0)
+      val (s2, creds) = extracted.runTask(Keys.credentials, s1)
+      val client = fromCreds(creds)
+      try {
+        client.uploadBundle(bundle.toPath(), dn, pt, log)
+        s2
+      } finally {
+        client.close()
+      }
     }
   }
 
