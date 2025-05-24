@@ -11,6 +11,13 @@ package sbt.internal
 private[sbt] object Banner {
   def apply(version: String): Option[String] =
     version match {
+      case v if v.startsWith("1.11.0") =>
+        Some(s"""
+                |Here are some highlights of sbt 1.11.0:
+                |  - The Central Repository publishing
+                |See https://eed3si9n.com/sbt-1.11.0 for full release notes.
+                |Hide the banner for this release by running `skipBanner`.
+                |""".stripMargin.linesIterator.mkString("\n"))
       case v if v.startsWith("1.10.0") =>
         Some(s"""
                 |Here are some highlights of sbt 1.10.0:
