@@ -1,0 +1,21 @@
+package sbt.internal.sona
+@target(Scala)
+@codecPackage("sbt.internal.sona.codec")
+@fullCodec("JsonProtocol")
+
+enum DeploymentState {
+  PENDING
+  VALIDATING
+  VALIDATED
+  PUBLISHING
+  PUBLISHED
+  FAILED
+}
+
+## https://central.sonatype.org/publish/publish-portal-api/#uploading-a-deployment-bundle
+type PublisherStatus {
+  deploymentId: String!
+  deploymentName: String!
+  deploymentState: sbt.internal.sona.DeploymentState!
+  purls: [String]
+}
