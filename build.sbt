@@ -646,6 +646,7 @@ lazy val remoteCacheProj = (project in file("sbt-remote-cache"))
 
 // Implementation and support code for defining actions.
 lazy val actionsProj = (project in file("main-actions"))
+  .enablePlugins(ContrabandPlugin, JsonCodecPlugin)
   .dependsOn(
     completeProj,
     runProj,
@@ -661,7 +662,11 @@ lazy val actionsProj = (project in file("main-actions"))
     testedBaseSettings,
     name := "Actions",
     libraryDependencies += sjsonNewScalaJson.value,
-    libraryDependencies += jline3Terminal,
+    libraryDependencies ++= Seq(gigahorseApacheHttp, jline3Terminal),
+    Compile / managedSourceDirectories +=
+      baseDirectory.value / "src" / "main" / "contraband-scala",
+    Compile / generateContrabands / sourceManaged := baseDirectory.value / "src" / "main" / "contraband-scala",
+    Compile / generateContrabands / contrabandFormatsForType := ContrabandConfig.getFormats,
     mimaSettings,
     mimaBinaryIssueFilters ++= Seq(
       // Removed unused private[sbt] nested class

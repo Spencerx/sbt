@@ -10,7 +10,7 @@ package sbt
 
 import java.io.{ File, PrintWriter }
 import java.nio.file.{ Files, Path as NioPath }
-import java.util.Optional
+import java.util.{ Optional, UUID }
 import java.util.concurrent.TimeUnit
 import lmcoursier.CoursierDependencyResolution
 import lmcoursier.definitions.{ Configuration as CConfiguration }
@@ -48,6 +48,7 @@ import sbt.internal.server.{
   ServerHandler,
   VirtualTerminal
 }
+import sbt.internal.sona.Sona
 import sbt.internal.testing.TestLogger
 import sbt.internal.util.Attributed.data
 import sbt.internal.util.Types.*
@@ -292,6 +293,16 @@ object Defaults extends BuildCommon {
         ScalaArtifacts.Artifacts.map(a => InclExclRule(scalaOrganization.value, a)).toSet
       ),
       csrCacheDirectory := LMCoursier.defaultCacheLocation,
+      stagingDirectory := (ThisBuild / baseDirectory).value / "target" / "sona-staging",
+      localStaging := Some(Resolver.file("local-staging", stagingDirectory.value)),
+      sonaBundle := Publishing
+        .makeBundle(
+          stagingDirectory.value.toPath(),
+          ((ThisBuild / baseDirectory).value / "target" / "sona-bundle" / "bundle.zip").toPath()
+        )
+        .toFile(),
+      sonaBundle / aggregate :== false,
+      commands ++= Seq(Publishing.sonaRelease, Publishing.sonaUpload),
     )
 
   /** Core non-plugin settings for sbt builds.  These *must* be on every build or the sbt engine will fail to run at all. */
@@ -2810,7 +2821,21 @@ object Classpaths {
     makeIvyXml := deliverTask(makeIvyXmlConfiguration).value,
     publish := publishOrSkip(publishConfiguration, publish / skip).value,
     publishLocal := publishOrSkip(publishLocalConfiguration, publishLocal / skip).value,
-    publishM2 := publishOrSkip(publishM2Configuration, publishM2 / skip).value
+    publishM2 := publishOrSkip(publishM2Configuration, publishM2 / skip).value,
+    credentials ++= {
+      val alreadyContainsCentralCredentials: Boolean = credentials.value.exists {
+        case d: DirectCredentials => d.host == Sona.host
+        case _                    => false
+      }
+      if (!alreadyContainsCentralCredentials) SysProp.sonatypeCredentalsEnv.toSeq
+      else Nil
+    },
+    sonaDeploymentName := {
+      val o = organization.value
+      val v = version.value
+      val uuid = UUID.randomUUID().toString().take(8)
+      s"$o:$v:$uuid"
+    },
   )
 
   def baseGlobalDefaults =

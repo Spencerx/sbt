@@ -241,6 +241,17 @@ object SysProp {
   lazy val sbtCredentialsEnv: Option[Credentials] =
     sys.env.get("SBT_CREDENTIALS").map(raw => new FileCredentials(new File(raw)))
 
+  def sonatypeCredentalsEnv: Option[Credentials] =
+    for {
+      username <- sys.env.get("SONATYPE_USERNAME")
+      password <- sys.env.get("SONATYPE_PASSWORD")
+    } yield Credentials(
+      "Sonatype Nexus Repository Manager",
+      sona.Sona.host,
+      username,
+      password
+    )
+
   private[sbt] def setSwovalTempDir(): Unit = {
     val _ = getOrUpdateSwovalTmpDir(
       runtimeDirectory.resolve("swoval").toString
