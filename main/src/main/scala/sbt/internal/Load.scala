@@ -23,6 +23,7 @@ import sbt.internal.inc.{ MappedFileConverter, ScalaInstance, ZincLmUtil, ZincUt
 import sbt.internal.util.Attributed.data
 import sbt.internal.util.Types.const
 import sbt.internal.util.Attributed
+import sbt.internal.util.appmacro.ContextUtil
 import sbt.internal.server.BuildServerEvalReporter
 import sbt.io.{ GlobFilter, IO }
 import sbt.librarymanagement.ivy.{ InlineIvyConfiguration, IvyDependencyResolution, IvyPaths }
@@ -775,6 +776,8 @@ private[sbt] object Load {
         d.value.extraProjects map { _.setProjectOrigin(ProjectOrigin.ExtraProject) }
       }
       val converter = config.converter
+
+      ContextUtil.appendScalacOptions(plugs.pluginData.scalacOptions)
 
       // NOTE - because we create an eval here, we need a clean-eval later for this URI.
       lazy val eval = timed("Load.loadUnit: mkEval", log) {

@@ -9,10 +9,12 @@
 package sbt.internal.util
 package appmacro
 
+import scala.jdk.CollectionConverters.*
 import scala.quoted.*
 import scala.collection.mutable
 import sbt.util.cacheLevel
 import sbt.util.CacheLevelTag
+import xsbti.Attic
 
 trait ContextUtil[C <: Quotes & scala.Singleton](val valStart: Int):
   val qctx: C
@@ -166,4 +168,15 @@ trait ContextUtil[C <: Quotes & scala.Singleton](val valStart: Int):
     end traverser
     traverser.traverseTree(tree)(Symbol.spliceOwner)
     defs.toSet
+
+  private lazy val atticValues = Attic.getItems().asScala.toSet
+  def hasVprintMacroSetting: Boolean =
+    atticValues.contains("-Xmacro-settings:sbt:Vprint")
+  def hasPrintTreeMacroSetting: Boolean =
+    atticValues.contains("-Xmacro-settings:sbt:print-tree-structure")
+end ContextUtil
+
+object ContextUtil:
+  def appendScalacOptions(options: Seq[String]): Unit =
+    Attic.appendItems(options.asJava);
 end ContextUtil
