@@ -44,6 +44,7 @@ object LintUnused {
       serverConnectionType,
       serverIdleTimeout,
       shellPrompt,
+      sonaDeploymentName,
     ),
     includeLintKeys := Set(
       scalacOptions,
