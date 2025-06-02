@@ -2986,7 +2986,7 @@ object Classpaths {
     Defaults.globalDefaults(
       Seq(
         publishMavenStyle :== true,
-        sbtPluginPublishLegacyMavenStyle :== true,
+        sbtPluginPublishLegacyMavenStyle :== false,
         publishArtifact :== true,
         (Test / publishArtifact) :== false
       )
