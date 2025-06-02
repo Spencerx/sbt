@@ -11,7 +11,7 @@ import scala.util.Try
 // ThisBuild settings take lower precedence,
 // but can be shared across the multi projects.
 ThisBuild / version := {
-  val v = "1.11.0-SNAPSHOT"
+  val v = "1.11.1-SNAPSHOT"
   nightlyVersion.getOrElse(v)
 }
 ThisBuild / version2_13 := "2.0.0-SNAPSHOT"
@@ -671,6 +671,7 @@ lazy val dependencyTreeProj = (project in file("dependency-tree"))
     crossScalaVersions := Seq(baseScalaVersion),
     name := "sbt-dependency-tree",
     publishMavenStyle := true,
+    sbtPluginPublishLegacyMavenStyle := false,
     // mimaSettings,
     mimaPreviousArtifacts := Set.empty,
   )
@@ -1495,7 +1496,8 @@ ThisBuild / pomIncludeRepository := { _ =>
 }
 ThisBuild / publishTo := {
   val centralSnapshots = "https://central.sonatype.com/repository/maven-snapshots/"
-  if (isSnapshot.value) Some("central-snapshots" at centralSnapshots)
+  val v = (ThisBuild / version).value
+  if (v.endsWith("SNAPSHOT")) Some("central-snapshots" at centralSnapshots)
   else localStaging.value
 }
 ThisBuild / publishMavenStyle := true
