@@ -168,7 +168,7 @@ object Sona {
 }
 
 object SonaClient {
-  import sbt.internal.sona.codec.JsonProtocol.{ *, given }
+  import sbt.internal.sona.codec.JsonProtocol.{ given, * }
   val host: String = "central.sonatype.com"
   val baseUrl: String = s"https://$host/api/v1"
   val asJson: FullResponse => JValue = (r: FullResponse) =>
