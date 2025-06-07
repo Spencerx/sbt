@@ -16,6 +16,7 @@ import java.net.URL
 
 import sbt.io.Path
 import Path._
+import scala.annotation.nowarn
 
 /** Options for well-known tasks. */
 object Opts {
@@ -42,22 +43,52 @@ object Opts {
   }
   object resolver {
     import sbt.io.syntax._
-    @deprecated("Use sonatypeOssReleases instead", "1.7.0")
+    @deprecated("Sonatype OSS Repository Hosting (OSSRH) will be sunset on 2025-06-30", "1.7.0")
     val sonatypeReleases = Resolver.sonatypeRepo("releases")
+
+    @deprecated("Sonatype OSS Repository Hosting (OSSRH) will be sunset on 2025-06-30", "1.11.2")
     val sonatypeOssReleases = Resolver.sonatypeOssRepos("releases")
 
-    @deprecated("Use sonatypeOssSnapshots instead", "1.7.0")
+    @deprecated(
+      """Sonatype OSS Repository Hosting (OSSRH) will be sunset on 2025-06-30; use the following instead:
+  resolvers += Resolver.sonatypeCentralSnapshots""",
+      "1.7.0"
+    )
     val sonatypeSnapshots = Resolver.sonatypeRepo("snapshots")
+
+    @deprecated(
+      """Sonatype OSS Repository Hosting (OSSRH) will be sunset on 2025-06-30; use the following instead:
+  resolvers += Resolver.sonatypeCentralSnapshots""",
+      "1.11.2"
+    )
     val sonatypeOssSnapshots = Resolver.sonatypeOssRepos("snapshots")
 
+    @deprecated(
+      """Sonatype OSS Repository Hosting (OSSRH) will be sunset on 2025-06-30; use the following instead:
+  publishTo := {
+    if (isSnapshot.value) Some(Resolver.sonatypeCentralSnapshots)
+    else localStaging.value
+  }""",
+      "1.11.2"
+    )
     val sonatypeStaging = MavenRepository(
       "sonatype-staging",
       "https://oss.sonatype.org/service/local/staging/deploy/maven2"
     )
+
     val mavenLocalFile = Resolver.file("Local Repository", userHome / ".m2" / "repository")(
       Resolver.defaultPatterns
     )
+    @deprecated(
+      """Bintray was shut down""",
+      "1.11.2"
+    )
     val sbtSnapshots = Resolver.bintrayRepo("sbt", "maven-snapshots")
+
+    @deprecated(
+      """Bintray was shut down""",
+      "1.11.2"
+    )
     val sbtIvySnapshots = Resolver.bintrayIvyRepo("sbt", "ivy-snapshots")
   }
 }
@@ -77,10 +108,14 @@ object DefaultOptions {
     doc.title(name) ++ doc.version(version)
 
   def resolvers(snapshot: Boolean): Vector[Resolver] = {
-    if (snapshot) Vector(resolver.sbtSnapshots) else Vector.empty
+    if (snapshot) Vector(resolver.sbtSnapshots: @nowarn("cat=deprecation")) else Vector.empty
   }
   def pluginResolvers(plugin: Boolean, snapshot: Boolean): Vector[Resolver] = {
-    if (plugin && snapshot) Vector(resolver.sbtSnapshots, resolver.sbtIvySnapshots)
+    if (plugin && snapshot)
+      Vector(
+        resolver.sbtSnapshots: @nowarn("cat=deprecation"),
+        resolver.sbtIvySnapshots: @nowarn("cat=deprecation"),
+      )
     else Vector.empty
   }
   def addResolvers: Setting[_] = Keys.resolvers ++= { resolvers(Keys.isSnapshot.value) }
