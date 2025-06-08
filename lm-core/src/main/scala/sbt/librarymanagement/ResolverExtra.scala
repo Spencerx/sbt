@@ -98,42 +98,24 @@ private[sbt] class FakeRepository(resolver: AnyRef, name: String) extends xsbti.
 }
 
 private[librarymanagement] abstract class ResolverFunctions {
-  import sbt.internal.librarymanagement.LMSysProp.useSecureResolvers
-
-  val TypesafeRepositoryRoot = typesafeRepositoryRoot(useSecureResolvers)
-  val SbtRepositoryRoot = sbtRepositoryRoot(useSecureResolvers)
+  val TypesafeRepositoryRoot = "https://repo.typesafe.com/typesafe"
+  val SbtRepositoryRoot = "https://repo.scala-sbt.org/scalasbt"
   @deprecated("Renamed to SbtRepositoryRoot.", "1.0.0")
   val SbtPluginRepositoryRoot = SbtRepositoryRoot
   val SonatypeRepositoryRoot = "https://oss.sonatype.org/content/repositories"
   val SonatypeS01RepositoryRoot = "https://s01.oss.sonatype.org/content/repositories"
   val SonatypeReleasesRepository =
     "https://oss.sonatype.org/service/local/repositories/releases/content/"
+  val SonatypeCentralRepository = "https://central.sonatype.com/repository"
   val JavaNet2RepositoryName = "java.net Maven2 Repository"
-  val JavaNet2RepositoryRoot = javanet2RepositoryRoot(useSecureResolvers)
-  val JCenterRepositoryName = "jcenter"
-  val JCenterRepositoryRoot = "https://jcenter.bintray.com/"
+  val JavaNet2RepositoryRoot = "https://maven.java.net/content/repositories/public/"
   val DefaultMavenRepositoryRoot = "https://repo1.maven.org/maven2/"
   val DefaultMavenRepository =
-    MavenRepository("public", centralRepositoryRoot(useSecureResolvers))
+    MavenRepository("public", "https://repo1.maven.org/maven2/")
   val JavaNet2Repository = MavenRepository(JavaNet2RepositoryName, JavaNet2RepositoryRoot)
-  val JCenterRepository = MavenRepository(JCenterRepositoryName, JCenterRepositoryRoot)
 
   def mavenCentral: Resolver = DefaultMavenRepository
   def defaults: Vector[Resolver] = Vector(mavenCentral)
-
-  // TODO: This switch is only kept for backward compatibility. Hardcode to HTTPS in the future.
-  private[sbt] def centralRepositoryRoot(secure: Boolean) =
-    (if (secure) "https" else "http") + "://repo1.maven.org/maven2/"
-  // TODO: This switch is only kept for backward compatibility. Hardcode to HTTPS in the future.
-  private[sbt] def javanet2RepositoryRoot(secure: Boolean) =
-    if (secure) "https://maven.java.net/content/repositories/public/"
-    else "http://download.java.net/maven/2"
-  // TODO: This switch is only kept for backward compatibility. Hardcode to HTTPS in the future.
-  private[sbt] def typesafeRepositoryRoot(secure: Boolean) =
-    (if (secure) "https" else "http") + "://repo.typesafe.com/typesafe"
-  // TODO: This switch is only kept for backward compatibility. Hardcode to HTTPS in the future.
-  private[sbt] def sbtRepositoryRoot(secure: Boolean) =
-    (if (secure) "https" else "http") + "://repo.scala-sbt.org/scalasbt"
 
   // obsolete: kept only for launcher compatibility
   private[sbt] val ScalaToolsReleasesName = "Sonatype OSS Releases"
@@ -159,8 +141,11 @@ private[librarymanagement] abstract class ResolverFunctions {
     url("sbt-plugin-" + status, new URI(SbtRepositoryRoot + "/sbt-plugin-" + status + "/").toURL)(
       using ivyStylePatterns
     )
+
   @deprecated(
-    """Use sonatypeOssRepos instead e.g. `resolvers ++= Resolver.sonatypeOssRepos("snapshots")`""",
+    """Sonatype OSS Repository Hosting (OSSRH) will be sunset on 2025-06-30; use the following instead:
+  resolvers += Resolver.sonatypeCentralSnapshots
+""",
     "1.7.0"
   )
   def sonatypeRepo(status: String) =
@@ -174,15 +159,23 @@ private[librarymanagement] abstract class ResolverFunctions {
       "sonatype-s01-" + status,
       SonatypeS01RepositoryRoot + "/" + status
     )
+
+  @deprecated(
+    """Sonatype OSS Repository Hosting (OSSRH) will be sunset on 2025-06-30; use the following instead:
+  resolvers += Resolver.sonatypeCentralSnapshots""",
+    "1.11.2"
+  )
   def sonatypeOssRepos(status: String) =
     Vector(sonatypeRepo(status): @nowarn("cat=deprecation"), sonatypeS01Repo(status))
-  def bintrayRepo(owner: String, repo: String) =
-    MavenRepository(s"bintray-$owner-$repo", s"https://dl.bintray.com/$owner/$repo/")
-  def bintrayIvyRepo(owner: String, repo: String) =
-    url(s"bintray-$owner-$repo", new URI(s"https://dl.bintray.com/$owner/$repo/").toURL)(using
-      Resolver.ivyStylePatterns
+
+  def sonatypeCentralSnapshots: MavenRepository =
+    sonatypeCentralRepo("maven-snapshots")
+
+  def sonatypeCentralRepo(status: String): MavenRepository =
+    MavenRepository(
+      "sonatype-central-" + status,
+      SonatypeCentralRepository + "/" + status
     )
-  def jcenterRepo = JCenterRepository
 
   val ApacheMavenSnapshotsRepo = MavenRepository(
     "apache-snapshots",
@@ -206,21 +199,7 @@ private[librarymanagement] abstract class ResolverFunctions {
       userResolvers: Vector[Resolver],
       mavenCentral: Boolean
   ): Vector[Resolver] =
-    combineDefaultResolvers(userResolvers, jcenter = false, mavenCentral)
-
-  /**
-   * Add the local Ivy repository to the user repositories.
-   * If `jcenter` is true, add the JCenter.
-   * If `mavenCentral` is true, add the Maven Central repository.
-   */
-  def combineDefaultResolvers(
-      userResolvers: Vector[Resolver],
-      jcenter: Boolean,
-      mavenCentral: Boolean
-  ): Vector[Resolver] =
     Vector(Resolver.defaultLocal) ++
-      userResolvers ++
-      single(JCenterRepository, jcenter) ++
       single(DefaultMavenRepository, mavenCentral)
 
   /**
@@ -230,22 +209,17 @@ private[librarymanagement] abstract class ResolverFunctions {
    */
   private[sbt] def reorganizeAppResolvers(
       appResolvers: Vector[Resolver],
-      jcenter: Boolean,
       mavenCentral: Boolean
   ): Vector[Resolver] =
     appResolvers.partition(_ == Resolver.defaultLocal) match {
       case (locals, xs) =>
         locals ++
-          (xs.partition(_ == JCenterRepository) match {
+          (xs.partition(_ == DefaultMavenRepository) match {
             case (_, xs) =>
-              single(JCenterRepository, jcenter) ++
-                (xs.partition(_ == DefaultMavenRepository) match {
-                  case (_, xs) =>
-                    single(
-                      DefaultMavenRepository,
-                      mavenCentral
-                    ) ++ xs // TODO - Do we need to filter out duplicates?
-                })
+              single(
+                DefaultMavenRepository,
+                mavenCentral
+              ) ++ xs // TODO - Do we need to filter out duplicates?
           })
     }
 
