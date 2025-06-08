@@ -1,8 +1,7 @@
 package lmcoursier.internal
 
 import java.io.File
-import java.util.GregorianCalendar
-import java.util.concurrent.ConcurrentHashMap
+import java.util.{ Collections, GregorianCalendar, WeakHashMap }
 import coursier.cache.CacheUrl
 import coursier.{ Attributes, Dependency, Module, Project, Resolution }
 import coursier.core.{ Classifier, Configuration, Extension, Info, Publication, Type }
@@ -18,7 +17,7 @@ private[internal] object SbtUpdateReport {
 
   private def caching[K, V](f: K => V): K => V = {
 
-    val cache = new ConcurrentHashMap[K, V]
+    val cache = Collections.synchronizedMap(new WeakHashMap[K, V])
 
     key =>
       val previousValueOpt = Option(cache.get(key))
