@@ -60,8 +60,6 @@ object Opts {
     val mavenLocalFile = Resolver.file("Local Repository", userHome / ".m2" / "repository")(using
       Resolver.defaultPatterns
     )
-    val sbtSnapshots = Resolver.bintrayRepo("sbt", "maven-snapshots")
-    val sbtIvySnapshots = Resolver.bintrayIvyRepo("sbt", "ivy-snapshots")
   }
 }
 
@@ -80,10 +78,10 @@ object DefaultOptions {
     doc.title(name) ++ doc.version(version)
 
   def resolvers(snapshot: Boolean): Vector[Resolver] = {
-    if (snapshot) Vector(resolver.sbtSnapshots) else Vector.empty
+    Vector.empty
   }
   def pluginResolvers(plugin: Boolean, snapshot: Boolean): Vector[Resolver] = {
-    if (plugin && snapshot) Vector(resolver.sbtSnapshots, resolver.sbtIvySnapshots)
+    if (plugin && snapshot) Vector.empty
     else Vector.empty
   }
   def addResolvers: Setting[?] = Keys.resolvers ++= { resolvers(Keys.isSnapshot.value) }

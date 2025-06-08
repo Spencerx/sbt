@@ -2939,13 +2939,13 @@ object Classpaths {
       case (Some(delegated), Seq(), _) => delegated
       case (_, rs, Some(ars))          => ars ++ rs
       case (_, rs, _) =>
-        Resolver.combineDefaultResolvers(rs.toVector, jcenter = false, mavenCentral = true)
+        Resolver.combineDefaultResolvers(rs.toVector, mavenCentral = true)
     }),
     appResolvers := {
       val ac = appConfiguration.value
       appRepositories(ac) map { ars =>
         val useMavenCentral = ars contains Resolver.DefaultMavenRepository
-        Resolver.reorganizeAppResolvers(ars, jcenter = false, useMavenCentral)
+        Resolver.reorganizeAppResolvers(ars, useMavenCentral)
       }
     },
     bootResolvers := {
