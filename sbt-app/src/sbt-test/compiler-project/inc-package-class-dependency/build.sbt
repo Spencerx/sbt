@@ -1,6 +1,6 @@
 import sbt.internal.inc.Analysis
 
-TaskKey[Unit]("verify-binary-deps") := {
+TaskKey[Unit]("verify-binary-deps") := Def.uncached {
   val a = (Compile / compile).value match { case a: Analysis => a }
   val classDir = (Compile / classDirectory).value
   val base = baseDirectory.value

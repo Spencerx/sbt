@@ -127,7 +127,7 @@ private[sbt] object Settings {
         scopedKey.scope.task.toOption.toSeq.map { key =>
           val updatedKey = Def.ScopedKey(scopedKey.scope.copy(task = Zero), key)
           scopedKey.scope / transitiveDynamicInputs :=
-            WatchTransitiveDependencies.task(updatedKey).value
+            Def.uncached(WatchTransitiveDependencies.task(updatedKey).value)
         }
       case dynamicDependency.key => (scopedKey.scope / dynamicDependency := { () }) :: Nil
       case transitiveClasspathDependency.key =>
@@ -158,7 +158,7 @@ private[sbt] object Settings {
   private[sbt] def inputPathSettings(setting: Def.Setting[?]): Seq[Def.Setting[?]] = {
     val scopedKey = setting.key
     val scope = scopedKey.scope
-    (scope / Keys.allInputPathsAndAttributes := {
+    (scope / Keys.allInputPathsAndAttributes := Def.uncached {
       val view = (scope / fileTreeView).value
       val inputs = (scope / fileInputs).value
       val stamper = (scope / inputFileStamper).value
@@ -186,7 +186,7 @@ private[sbt] object Settings {
    * @return a task definition that retrieves all of the input paths scoped to the input key.
    */
   private def allFilesImpl(scope: Scope): Def.Setting[?] = {
-    addTaskDefinition(scope / Keys.allInputFiles := {
+    addTaskDefinition(scope / Keys.allInputFiles := Def.uncached {
       val filter =
         (scope / fileInputIncludeFilter).value && !(scope / fileInputExcludeFilter).value
       (scope / Keys.allInputPathsAndAttributes).value.collect {
@@ -218,7 +218,7 @@ private[sbt] object Settings {
       changeKey: TaskKey[Seq[(Path, FileStamp)] => FileChanges],
       stampKey: TaskKey[Seq[(Path, FileStamp)]]
   ): Def.Setting[?] =
-    addTaskDefinition(scope / changeKey := {
+    addTaskDefinition(scope / changeKey := Def.uncached {
       val current = (scope / stampKey).value
       changedFiles(_, current)
     })
@@ -262,7 +262,7 @@ private[sbt] object Settings {
    * @return a task specific clean implementation
    */
   private[sbt] def cleanImpl(scope: Scope): Def.Setting[?] = addTaskDefinition {
-    scope / sbt.Keys.clean := Clean.task(scope, full = false).value
+    scope / sbt.Keys.clean := Def.uncached(Clean.task(scope, full = false).value)
   }
 
   /**
@@ -275,7 +275,7 @@ private[sbt] object Settings {
   private[sbt] def cleanImpl[T: JsonFormat: ToSeqPath](taskKey: TaskKey[T]): Def.Setting[?] = {
     val taskScope = taskKey.scope.rescope(taskKey.key)
     addTaskDefinition(
-      taskScope / sbt.Keys.clean :=
+      taskScope / sbt.Keys.clean := Def.uncached(
         // the clean file task needs to run first because the previous cache gets blown away
         // by the second task
         Def
@@ -286,6 +286,7 @@ private[sbt] object Settings {
             Clean.task(taskScope, full = false)
           }
           .value
+      )
     )
   }
 
@@ -300,7 +301,7 @@ private[sbt] object Settings {
   private[sbt] def fileStamps(scopedKey: Def.ScopedKey[?]): Def.Setting[?] = {
     import scala.collection.parallel.CollectionConverters.*
     val scope = scopedKey.scope
-    addTaskDefinition(scope / Keys.inputFileStamps := {
+    addTaskDefinition(scope / Keys.inputFileStamps := Def.uncached {
       val cache = (scope / unmanagedFileStampCache).value
       val stamper = (scope / Keys.inputFileStamper).value
       val stampFile: Path => Option[(Path, FileStamp)] =
@@ -335,7 +336,7 @@ private[sbt] object Settings {
   }
 
   private def allOutputPathsImpl(scope: Scope): Def.Setting[?] =
-    addTaskDefinition(scope / allOutputFiles := {
+    addTaskDefinition(scope / allOutputFiles := Def.uncached {
       val filter =
         (scope / fileOutputIncludeFilter).value && !(scope / fileOutputExcludeFilter).value
       val view = (scope / fileTreeView).value
@@ -361,7 +362,7 @@ private[sbt] object Settings {
     })
 
   private def outputFileStampsImpl(scope: Scope): Def.Setting[?] =
-    addTaskDefinition(scope / outputFileStamps := {
+    addTaskDefinition(scope / outputFileStamps := Def.uncached {
       val stamper: Path => Option[FileStamp] = (scope / outputFileStamper).value match {
         case LastModified => FileStamp.lastModified
         case Hash         => FileStamp.hash

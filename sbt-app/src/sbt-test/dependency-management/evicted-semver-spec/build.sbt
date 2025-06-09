@@ -6,7 +6,7 @@ ThisBuild / csrCacheDirectory := (ThisBuild / baseDirectory).value / "coursier-c
 
 def commonSettings: Seq[Def.Setting[_]] =
   Seq(
-    fullResolvers := fullResolvers.value.filterNot(_.name == "inter-project"),
+    fullResolvers := Def.uncached(fullResolvers.value.filterNot(_.name == "inter-project")),
     publishTo := Some(MavenCache("local-maven", (LocalRootProject / target).value / "local-maven")),
     scalaCompilerBridgeResolvers += userLocalFileResolver(appConfiguration.value),
     resolvers += MavenCache("local-maven", (LocalRootProject / target).value / "local-maven"),

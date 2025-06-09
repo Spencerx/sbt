@@ -336,7 +336,7 @@ object BuildServerProtocol {
     bspInternalDependencyConfigurations := internalDependencyConfigurationsSetting.value,
     bspScalaTestClassesItem := scalaTestClassesTask.value,
     bspScalaMainClassesItem := scalaMainClassesTask.value,
-    Keys.compile / bspReporter := {
+    Keys.compile / bspReporter := Def.uncached {
       val targetId = bspTargetIdentifier.value
       val bspCompileStateInstance = bspCompileState.value
       val converter = fileConverter.value

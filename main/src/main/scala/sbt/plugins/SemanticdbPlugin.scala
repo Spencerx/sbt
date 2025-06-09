@@ -15,6 +15,7 @@ import Keys.*
 import sbt.internal.SysProp
 import sbt.librarymanagement.syntax.*
 import sbt.librarymanagement.{ Configuration, CrossVersion }
+import sbt.librarymanagement.LibraryManagementCodec.given
 import ProjectExtra.inConfig
 import sbt.internal.inc.ScalaInstance
 import sbt.ScopeFilter.Make.*

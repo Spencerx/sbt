@@ -22,7 +22,7 @@ lazy val realCommonsIoClient = project.
     libraryDependencies := Seq(
       "commons-io" % "commons-io" % "1.3"
     ),
-    fullResolvers := fullResolvers.value.filterNot(_.name == "inter-project")
+    fullResolvers := Def.uncached(fullResolvers.value.filterNot(_.name == "inter-project"))
   )
 
 lazy val fakeCommonsIo = project.

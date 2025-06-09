@@ -6,7 +6,7 @@ libraryDependencies += "org.slf4j" % "slf4j-api" % "1.7.25"
 csrCacheDirectory := baseDirectory.value / "cache"
 logFile := baseDirectory.value / "log"
 
-csrLogger := {
+csrLogger := Def.uncached {
   var logStream: java.io.PrintStream = null
   def log(msg: String): Unit = {
     println(msg)

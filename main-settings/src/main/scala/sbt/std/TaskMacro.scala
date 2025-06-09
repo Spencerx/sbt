@@ -15,10 +15,9 @@ import sbt.internal.util.appmacro.{
   Cont,
   // Instance,
   // LinterDSL,
-  // MixedBuilder,
-  // MonadInstance
+  ContextUtil,
+  ContextUtil0,
 }
-// import Instance.Transform
 import sbt.internal.util.{ LinePosition, NoPosition, SourcePosition }
 
 import language.experimental.macros
@@ -48,6 +47,42 @@ object TaskMacro:
   import ContSyntax.*
 
   // import LinterDSL.{ Empty => EmptyLinter }
+
+  def taskMacroImpl[A1: Type](t: Expr[A1], key: Expr[TaskKey[?]])(using
+      qctx: Quotes
+  ): Expr[Initialize[Task[A1]]] =
+    import qctx.reflect.*
+    var isUncacheApplied = false
+    object appTransformer extends TreeMap:
+      override def transformTerm(tree: Term)(owner: Symbol): Term =
+        tree match
+          case Apply(TypeApply(s @ Select(Ident("Uncached"), "apply"), targ :: Nil), qual :: Nil)
+              if "sbt.util.Uncached$.apply" == s.symbol.fullName =>
+            isUncacheApplied = true
+            super.transformTerm(tree)(owner)
+          case _ =>
+            super.transformTerm(tree)(owner)
+    end appTransformer
+    val _ = appTransformer.transformTerm(t.asTerm)(Symbol.spliceOwner)
+
+    val cu0 = ContextUtil0(qctx, 0)
+    val cl = cu0.cacheLevels(key.asTerm)
+    val cached = ContextUtil.isTaskCacheByDefault && !isUncacheApplied && cl.nonEmpty
+    t match
+      case '{ if ($cond) then $thenp else $elsep } => taskIfImpl[A1](t, cached)
+      case _ =>
+        val convert1 = new FullConvert(qctx, 0)
+        if cached then
+          convert1.contMapN[A1, F, Id](
+            t,
+            convert1.appExpr,
+            Some('{
+              InputWrapper.`wrapInitTask_\u2603\u2603`[BuildWideCacheConfiguration](
+                Def.cacheConfiguration
+              )
+            })
+          )
+        else convert1.contMapN[A1, F, Id](t, convert1.appExpr, None)
 
   def taskMacroImpl[A1: Type](t: Expr[A1], cached: Boolean)(using
       qctx: Quotes

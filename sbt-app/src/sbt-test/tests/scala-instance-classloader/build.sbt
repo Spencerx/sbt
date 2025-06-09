@@ -11,11 +11,12 @@ lazy val root = (project in file("."))
     libraryDependencies += {
       "org.scala-lang" % "scala-compiler" % scalaVersion.value % OtherScala.name 
     },
-    OtherScala / managedClasspath := 
-      Classpaths.managedJars(OtherScala, classpathTypes.value, update.value, fileConverter.value),
+    OtherScala / managedClasspath := Def.uncached {
+      Classpaths.managedJars(OtherScala, classpathTypes.value, update.value, fileConverter.value) 
+    },
 
     // Hack in the scala instance
-    scalaInstance := {
+    scalaInstance := Def.uncached {
       val converter = fileConverter.value
       val rawJars = (OtherScala / managedClasspath).value.map(c => converter.toPath(c.data).toFile)
       val scalaHome = (target.value / "scala-home")

@@ -1331,7 +1331,7 @@ private[sbt] object Load {
     Seq(
       sbtPlugin :== true,
       isMetaBuild :== true,
-      pluginData := {
+      pluginData := Def.uncached {
         val prod = (Configurations.Runtime / exportedProducts).value
         val cp = (Configurations.Runtime / fullClasspath).value
         val opts = (Configurations.Compile / scalacOptions).value
@@ -1357,7 +1357,7 @@ private[sbt] object Load {
           converter,
         )
       },
-      scalacOptions += "-Wconf:cat=unused-nowarn:s",
+      scalacOptions += Def.uncached("-Wconf:cat=unused-nowarn:s"),
       onLoadMessage := ("loading project definition from " + baseDirectory.value)
     )
   )

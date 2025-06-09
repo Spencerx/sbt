@@ -8,7 +8,7 @@ Global / concurrentRestrictions := Seq(Tags.limit(TestATypeTag, 1), Tags.limit(T
 
 libraryDependencies += specs % Test
 inConfig(Test)(Seq(
-  testGrouping := {
+  testGrouping := Def.uncached {
     val home = javaHome.value
     val strategy = outputStrategy.value
     val baseDir = baseDirectory.value
@@ -29,5 +29,8 @@ inConfig(Test)(Seq(
     ), Seq((if (test.name.contains("TestA")) TestATypeTag else TestBTypeTag) -> 1))
     }
   },
-  TaskKey[Unit]("test-failure") := testFull.failure.value
+  TaskKey[Unit]("test-failure") := Def.uncached {
+    testFull.failure.value
+    ()
+  }
 ))

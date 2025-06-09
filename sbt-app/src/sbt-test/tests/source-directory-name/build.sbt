@@ -5,4 +5,5 @@ TaskKey[Unit]("check") := {
   val c = fileConverter.value
   Using.jarFile(false)(c.toPath(p).toFile()): jar =>
     assert(jar.getJarEntry("ch/epfl/scala/Client.class") ne null)
+  ()
 }

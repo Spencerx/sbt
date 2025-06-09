@@ -180,8 +180,12 @@ object Keys {
   // Output paths
   @cacheLevel(include = Array.empty)
   val classDirectory = settingKey[File]("Directory for compiled classes and copied resources.").withRank(AMinusSetting)
+
+  @cacheLevel(include = Array.empty)
   val earlyOutput = settingKey[VirtualFile]("JAR file for pickles used for build pipelining")
   val backendOutput = settingKey[VirtualFile]("Output directory of the compiler backend")
+
+  @cacheLevel(include = Array.empty)
   val cleanFiles = taskKey[Seq[File]]("The files to recursively delete during a clean.").withRank(BSetting)
   val cleanKeepFiles = settingKey[Seq[File]]("Files or directories to keep during a clean. Must be direct children of target.").withRank(CSetting)
   val cleanKeepGlobs = settingKey[Seq[Glob]]("Globs to keep during a clean. Must be direct children of target.").withRank(CSetting)
@@ -209,6 +213,7 @@ object Keys {
   val compileInputs = taskKey[Inputs]("Collects all inputs needed for compilation.").withRank(DTask)
   val compileInputs2 = taskKey[CompileInputs2]("")
   val scalaHome = settingKey[Option[File]]("If Some, defines the local Scala installation to use for compilation, running, and testing.").withRank(ASetting)
+  @cacheLevel(include = Array.empty)
   val scalaInstance = taskKey[ScalaInstance]("Defines the Scala instance to use for compilation, running, and testing.").withRank(DTask)
   val scalaOrganization = settingKey[String]("Organization/group ID of the Scala used in the project. Default value is 'org.scala-lang'. This is an advanced setting used for clones of the Scala Language. It should be disregarded in standard use cases.").withRank(CSetting)
   val scalaVersion = settingKey[String]("The version of Scala used for building.").withRank(APlusSetting)
@@ -301,7 +306,11 @@ object Keys {
   val artifact = settingKey[Artifact]("Describes an artifact.").withRank(BMinusSetting)
   val artifactClassifier = settingKey[Option[String]]("Sets the classifier used by the default artifact definition.").withRank(BSetting)
   val artifactName = settingKey[(ScalaVersion, ModuleID, Artifact) => String]("Function that produces the artifact name from its definition.").withRank(CSetting)
+
+  @cacheLevel(include = Array.empty)
   val mappings = taskKey[Seq[(HashedVirtualFileRef, String)]]("Defines the mappings from a file to a path, used by packaging, for example.").withRank(BTask)
+
+  @cacheLevel(include = Array.empty)
   val fileMappings = taskKey[Seq[(File, File)]]("Defines the mappings from a file to a file, used for copying files, for example.").withRank(BMinusTask)
 
   // Run Keys
@@ -356,6 +365,8 @@ object Keys {
   val testOptions = taskKey[Seq[TestOption]]("Options for running tests.").withRank(BPlusTask)
   private[sbt] val testOptionDigests = taskKey[Seq[Digest]]("Digest for testOptions").withRank(DTask)
   val testFrameworks = settingKey[Seq[TestFramework]]("Registered, although not necessarily present, test frameworks.").withRank(CTask)
+
+  @cacheLevel(include = Array.empty)
   val testListeners = taskKey[Seq[TestReportListener]]("Defines test listeners.").withRank(DTask)
   val testForkedParallel = settingKey[Boolean]("Whether forked tests should be executed in parallel").withRank(CTask)
   val testExecution = taskKey[Tests.Execution]("Settings controlling test execution").withRank(DTask)
@@ -486,6 +497,8 @@ object Keys {
   val csrExtraProjects = taskKey[Seq[lmcoursier.definitions.Project]]("").withRank(CTask)
   val csrFallbackDependencies = taskKey[Seq[FallbackDependency]]("")
   val csrLogger = taskKey[Option[CacheLogger]]("")
+
+  @cacheLevel(include = Array.empty)
   val csrExtraCredentials = taskKey[Seq[lmcoursier.credentials.Credentials]]("")
   val csrPublications = taskKey[Seq[(lmcoursier.definitions.Configuration, lmcoursier.definitions.Publication)]]("")
   val csrReconciliations = settingKey[Seq[(ModuleMatchers, Reconciliation)]]("Strategy to reconcile version conflicts.")
@@ -535,7 +548,10 @@ object Keys {
   val packagedArtifacts = taskKey[Map[Artifact, HashedVirtualFileRef]]("Packages all artifacts for publishing and maps the Artifact definition to the generated file.").withRank(CTask)
   val publishMavenStyle = settingKey[Boolean]("Configures whether to generate and publish a pom (true) or Ivy file (false).").withRank(BSetting)
   val sbtPluginPublishLegacyMavenStyle = settingKey[Boolean]("Configuration for generating the legacy pom of sbt plugins, to publish to Maven").withRank(CSetting)
+
+  @cacheLevel(include = Array.empty)
   val credentials = taskKey[Seq[Credentials]]("The credentials to use for updating and publishing.").withRank(BMinusTask)
+  @cacheLevel(include = Array.empty)
   val allCredentials = taskKey[Seq[Credentials]]("Aggregated credentials across current and root subprojects. Do not rewire this task.").withRank(DTask)
 
   val makePom = taskKey[HashedVirtualFileRef]("Generates a pom for publishing when publishing Maven-style.").withRank(BPlusTask)
@@ -564,9 +580,15 @@ object Keys {
   val appResolvers = settingKey[Option[Seq[Resolver]]]("The resolvers configured for this application by the sbt launcher.").withRank(BMinusSetting)
   val externalResolvers = taskKey[Seq[Resolver]]("The external resolvers for automatically managed dependencies.").withRank(BMinusSetting)
   val resolvers = settingKey[Seq[Resolver]]("The user-defined additional resolvers for automatically managed dependencies.").withRank(BMinusTask)
+
+  @cacheLevel(include = Array.empty)
   val projectResolver = taskKey[Resolver]("Resolver that handles inter-project dependencies.").withRank(DTask)
   val fullResolvers = taskKey[Seq[Resolver]]("Combines the project resolver, default resolvers, and user-defined resolvers.").withRank(CTask)
+
+  @cacheLevel(include = Array.empty)
   val otherResolvers = taskKey[Seq[Resolver]]("Resolvers not included in the main resolver chain, such as those in module configurations.").withRank(CSetting)
+
+  @cacheLevel(include = Array.empty)
   val scalaCompilerBridgeResolvers = taskKey[Seq[Resolver]]("Resolvers used to resolve compiler bridges.").withRank(CSetting)
   val includePluginResolvers = settingKey[Boolean]("Include the resolvers from the metabuild.").withRank(CSetting)
   val moduleConfigurations = settingKey[Seq[ModuleConfiguration]]("Defines module configurations, which override resolvers on a per-module basis.").withRank(BMinusSetting)
@@ -585,6 +607,8 @@ object Keys {
   val scalaModuleInfo = settingKey[Option[ScalaModuleInfo]]("Configures how Scala dependencies are checked, filtered, and injected.").withRank(CSetting)
   val ivyValidate = settingKey[Boolean]("Enables/disables Ivy validation of module metadata.").withRank(BSetting)
   val ivyLoggingLevel = settingKey[UpdateLogging]("The logging level for updating.").withRank(BSetting)
+
+  @cacheLevel(include = Array.empty)
   val publishTo = taskKey[Option[Resolver]]("The resolver to publish to.").withRank(ASetting)
   val artifacts = settingKey[Seq[Artifact]]("The artifact definitions for the current module.  Must be consistent with " + packagedArtifacts.key.label + ".").withRank(BSetting)
   val projectDescriptors = taskKey[Map[ModuleRevisionId, ModuleDescriptor]]("Project dependency map for the inter-project resolver.").withRank(DTask)
@@ -641,6 +665,8 @@ object Keys {
   val streams = taskKey[TaskStreams]("Provides streams for logging and persisting data.").withRank(DTask)
   val taskDefinitionKey = Def.taskDefinitionKey
   val (executionRoots, dummyRoots) = Def.dummy[Seq[ScopedKey[?]]]("executionRoots", "The list of root tasks for this task execution.  Roots are the top-level tasks that were directly requested to be run.")
+
+  @cacheLevel(include = Array.empty)
   val state = Def.stateKey
   val streamsManager = Def.streamsManagerKey
   // wrapper to work around SI-2915

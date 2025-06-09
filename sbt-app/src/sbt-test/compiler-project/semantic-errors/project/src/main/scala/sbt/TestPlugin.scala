@@ -14,8 +14,8 @@ object TestPlugin extends AutoPlugin {
   import autoImport._
   override def projectSettings = Seq(
     savedReporter := new CollectingReporter,
-    Compile / compile / compilerReporter := savedReporter.value,
-    problems := savedReporter.value.problems
+    Compile / compile / compilerReporter := Def.uncached(savedReporter.value),
+    problems := Def.uncached(savedReporter.value.problems),
   )
 }
 

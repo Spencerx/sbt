@@ -1,7 +1,7 @@
 import scala.xml._
 
 lazy val root = (project in file(".")) settings (
-  readPom := {
+  readPom := Def.uncached {
     val vf = makePom.value
     val converter = fileConverter.value
     XML.loadFile(converter.toPath(vf).toFile)
@@ -37,13 +37,12 @@ def withRepositories[T](pomXML: Elem)(f: NodeSeq => T) = {
   else sys.error("'repositories' element not found in generated pom")
 }
 
-lazy val checkExtra = readPom map { pomXML =>
+lazy val checkExtra = readPom.map: pomXML =>
   checkProject(pomXML)
   val extra = pomXML \ extraTagName
   if (extra.isEmpty) sys.error("'" + extraTagName + "' not found in generated pom.xml.") else ()
-}
 
-lazy val checkVersionPlusMapping = (readPom) map { (pomXml) =>
+lazy val checkVersionPlusMapping = readPom.map: pomXml =>
   var found = false
   for {
     dep <- pomXml \ "dependencies" \ "dependency"
@@ -52,19 +51,18 @@ lazy val checkVersionPlusMapping = (readPom) map { (pomXml) =>
     if (dep \ "version").text != "[1.3,1.4)"
   } sys.error(s"Found dependency with invalid maven version: $dep")
   ()
-}
 
-lazy val checkAPIURL = (readPom) map { (pomXml) =>
+lazy val checkAPIURL = readPom.map: pomXml =>
   val notes = pomXml \ "properties" \ "info.apiURL"
-  if (notes.isEmpty) sys.error("'apiURL' not found in generated pom.xml.") else ()
-}
+  if (notes.isEmpty) sys.error("'apiURL' not found in generated pom.xml.")
+  else ()
 
-lazy val checkReleaseNotesURL = (readPom) map { (pomXml) =>
+lazy val checkReleaseNotesURL = readPom.map: pomXml =>
   val notes = pomXml \ "properties" \ "info.releaseNotesUrl"
-  if (notes.isEmpty) sys.error("'releaseNotesUrl' not found in generated pom.xml.") else ()
-}
+  if (notes.isEmpty) sys.error("'releaseNotesUrl' not found in generated pom.xml.")
+  else ()
 
-lazy val checkPom = Def task {
+lazy val checkPom = Def.task {
   val pomXML = readPom.value
   checkProject(pomXML)
   val ivyRepositories = fullResolvers.value

@@ -54,8 +54,9 @@ object Script {
       val embeddedSettings = blocks(script).flatMap { block =>
         evaluate(eval(), vf, block.lines, currentUnit.imports, block.offset + 1)(currentLoader)
       }
-      val scriptAsSource = (Compile / sources) := script :: Nil
-      val asScript = scalacOptions ++= Seq("-Xscript", script.getName.stripSuffix(".scala"))
+      val scriptAsSource = (Compile / sources) := Def.uncached(script :: Nil)
+      val asScript =
+        scalacOptions ++= Def.uncached(Seq("-Xscript", script.getName.stripSuffix(".scala")))
       val scriptSettings = Seq(
         asScript,
         scriptAsSource,

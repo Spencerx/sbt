@@ -102,6 +102,28 @@ trait ContextUtil[C <: Quotes & scala.Singleton](val valStart: Int):
         case Apply(_, List(arg)) => extractTags(arg)
         case _                   => extractTags0(tree)
 
+  def cacheLevels(tree: Term): Seq[CacheLevelTag] =
+    tree.underlying match
+      // handles foo / bar cases
+      case Apply(TypeApply(_, _), List(t @ Ident(_))) =>
+        t.symbol.getAnnotation(cacheLevelSym) match
+          case Some(_) => cacheLevelsForSym(t.symbol)
+          case None    => CacheLevelTag.all.toList
+      case u =>
+        u.symbol.getAnnotation(cacheLevelSym) match
+          case Some(_) => cacheLevelsForSym(u.symbol)
+          case None    => CacheLevelTag.all.toList
+
+  def cacheLevelsForSym(sym: Symbol): Seq[CacheLevelTag] =
+    sym.getAnnotation(cacheLevelSym) match
+      case Some(annot) =>
+        annot.asExprOf[cacheLevel] match
+          case '{ cacheLevel(include = Array.empty[CacheLevelTag](using $_)) } => Nil
+          case '{ cacheLevel(include = Array[CacheLevelTag]($include*)) } =>
+            include.value.get
+          case _ => report.errorAndAbort(Printer.TreeStructure.show(annot) + " does not match")
+      case None => CacheLevelTag.all.toList
+
   enum OutputType:
     case File
     case Directory
@@ -178,5 +200,15 @@ end ContextUtil
 
 object ContextUtil:
   def appendScalacOptions(options: Seq[String]): Unit =
-    Attic.appendItems(options.asJava);
+    Attic.appendItems(options.asJava)
+
+  def isTaskCacheByDefault: Boolean =
+    val atticValues = Attic.getItems().asScala.toSet
+    val noDefaultMacroSetting = atticValues.contains("-Xmacro-settings:sbt:no-default-task-cache")
+    !noDefaultMacroSetting
 end ContextUtil
+
+class ContextUtil0[C <: Quotes & scala.Singleton](override val qctx: C, valStart: Int)
+    extends ContextUtil[C](valStart):
+// import qctx.reflect.*
+end ContextUtil0

@@ -3,9 +3,10 @@ import xsbti.compile.TastyFiles
 
 ThisBuild / scalaVersion := "3.3.1"
 
-TaskKey[Unit]("check") := {
+TaskKey[Unit]("check") := Def.uncached {
   assert((Compile / auxiliaryClassFiles).value == Seq(TastyFiles.instance))
   assert((Test / auxiliaryClassFiles).value == Seq(TastyFiles.instance))
+  ()
 }
 
 TaskKey[Unit]("check2") := checkTastyFiles(true, true).value

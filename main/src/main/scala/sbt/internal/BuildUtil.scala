@@ -97,6 +97,8 @@ object BuildUtil {
       :: "import _root_.sbt.BareBuildSyntax.*"
       :: "import _root_.sbt.Keys.*"
       :: "import _root_.sbt.nio.Keys.*"
+      :: "import _root_.sbt.util.CacheImplicits.given"
+      :: "import _root_.sbt.librarymanagement.LibraryManagementCodec.given"
       :: Nil)
 
   def getImports(unit: BuildUnit): Seq[String] =

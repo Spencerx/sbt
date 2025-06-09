@@ -1,8 +1,8 @@
-ivyConfiguration := {
+ivyConfiguration := Def.uncached {
   throw new RuntimeException("updateSbtClassifiers should use updateSbtClassifiers / ivyConfiguration")
 }
 
-dependencyResolution := {
+dependencyResolution := Def.uncached {
   throw new RuntimeException("updateSbtClassifiers should use updateSbtClassifiers / dependencyResolution")
 }
 
@@ -12,7 +12,7 @@ lazy val root = (project in file("."))
     scalaOrganization := "doesnt.exist",
     name := "myProjectName",
 
-    TaskKey[Unit]("checkModuleIdsInUpdateSbtClassifiers") := {
+    TaskKey[Unit]("checkModuleIdsInUpdateSbtClassifiers") := Def.uncached {
       val updateReport = updateSbtClassifiers.value
       val moduleReports = updateReport.configurations.find(_.configuration.name == "default").get.modules
 
@@ -82,7 +82,7 @@ lazy val root = (project in file("."))
       )
       def assertCollectionsEqual(message: String, expected: Seq[String], actual: Seq[String]): Unit =
         // using the new line for a more readable comparison failure output
-        org.junit.Assert.assertEquals(message: String, expected.mkString("\n"), actual.mkString("\n"))
+        assert(expected.mkString("\n") == actual.mkString("\n"), message)
 
       assertCollectionsEqual(
         "Unexpected module ids in updateSbtClassifiers",

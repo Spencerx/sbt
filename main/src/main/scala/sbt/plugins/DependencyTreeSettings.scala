@@ -38,11 +38,11 @@ object DependencyTreeSettings {
       // dependency tree
       dependencyTreeIgnoreMissingUpdate / updateOptions := updateOptions.value
         .withCachedResolution(false),
-      dependencyTreeIgnoreMissingUpdate / ivyConfiguration := {
+      dependencyTreeIgnoreMissingUpdate / ivyConfiguration := Def.uncached {
         // inTask will make sure the new definition will pick up `updateOptions in dependencyTreeIgnoreMissingUpdate`
         Project.inTask(dependencyTreeIgnoreMissingUpdate, Classpaths.mkIvyConfiguration).value
       },
-      dependencyTreeIgnoreMissingUpdate / ivyModule := {
+      dependencyTreeIgnoreMissingUpdate / ivyModule := Def.uncached {
         // concatenating & inlining ivySbt & ivyModule default task implementations, as `SbtAccess.inTask` does
         // NOT correctly force the scope when applied to `TaskKey.toTask` instances (as opposed to raw
         // implementations like `Classpaths.mkIvyConfiguration` or `Classpaths.updateTask`)
@@ -52,7 +52,7 @@ object DependencyTreeSettings {
       // don't fail on missing dependencies
       dependencyTreeIgnoreMissingUpdate / updateConfiguration := updateConfiguration.value
         .withMissingOk(true),
-      dependencyTreeIgnoreMissingUpdate := {
+      dependencyTreeIgnoreMissingUpdate := Def.uncached {
         // inTask will make sure the new definition will pick up `ivyModule/updateConfiguration in ignoreMissingUpdate`
         Project.inTask(dependencyTreeIgnoreMissingUpdate, Classpaths.updateTask).value
       },
@@ -67,7 +67,7 @@ object DependencyTreeSettings {
       dependencyTreeCrossProjectId := CrossVersion(scalaVersion.value, scalaBinaryVersion.value)(
         projectID.value
       ),
-      dependencyTreeModuleGraph0 := {
+      dependencyTreeModuleGraph0 := Def.uncached {
         val sv = scalaVersion.value
         val g = dependencyTreeIgnoreMissingUpdate.value
           .configuration(configuration.value)
@@ -107,12 +107,14 @@ object DependencyTreeSettings {
         val config = configuration.value
         target.value / s"dependencies-${config.toString}.dot"
       },
-      dependencyDot / asString := rendering.DOT.dotGraph(
-        dependencyTreeModuleGraph0.value,
-        dependencyDotHeader.value,
-        dependencyDotNodeLabel.value,
-        rendering.DOT.HTMLLabelRendering.AngleBrackets,
-        dependencyDotNodeColors.value
+      dependencyDot / asString := Def.uncached(
+        rendering.DOT.dotGraph(
+          dependencyTreeModuleGraph0.value,
+          dependencyDotHeader.value,
+          dependencyDotNodeLabel.value,
+          rendering.DOT.HTMLLabelRendering.AngleBrackets,
+          dependencyDotNodeColors.value
+        )
       ),
       dependencyDot := writeToFile(dependencyDot / asString, dependencyDotFile).value,
       dependencyDotHeader :=

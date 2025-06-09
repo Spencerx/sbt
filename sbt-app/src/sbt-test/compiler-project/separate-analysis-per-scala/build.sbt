@@ -6,10 +6,10 @@ lazy val root = (project in file("."))
   .settings(
     name := "foo",
     crossScalaVersions := List(scala212, scala213),
-    incOptions := incOptions.value.withClassfileManagerType(
+    incOptions := Def.uncached(incOptions.value.withClassfileManagerType(
       Option(xsbti.compile.TransactionalManagerType.of(
         crossTarget.value / "classes.bak",
         (Compile / compile / streams).value.log
       ): xsbti.compile.ClassFileManagerType).asJava
-    )
+    ))
   )

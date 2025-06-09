@@ -37,6 +37,7 @@ import sbt.nio.Keys.{ inputFileStamps, outputFileStamps }
 import sbt.std.TaskExtra.*
 import sbt.util.InterfaceUtil.toOption
 import sbt.util.{ DiskActionCacheStore, Logger }
+import sbt.util.CacheImplicits.given
 import sjsonnew.JsonFormat
 import xsbti.{ FileConverter, HashedVirtualFileRef, VirtualFileRef }
 import xsbti.compile.CompileAnalysis
@@ -74,7 +75,7 @@ object RemoteCache {
 
   lazy val globalSettings: Seq[Def.Setting[?]] = Seq(
     remoteCacheId := "",
-    remoteCacheIdCandidates := Nil,
+    remoteCacheIdCandidates :== Nil,
     pushRemoteCacheTo :== None,
     localCacheDirectory :== defaultCacheLocation,
     pushRemoteCache / ivyPaths := {
@@ -139,14 +140,14 @@ object RemoteCache {
         }
       })
       .value,
-    pushRemoteCacheConfiguration / remoteCacheArtifacts := {
+    pushRemoteCacheConfiguration / remoteCacheArtifacts := Def.uncached {
       enabledOnly(remoteCacheArtifact.toSettingKey, defaultArtifactTasks).apply(_.join).value
     },
     pushRemoteCacheConfiguration / publishMavenStyle := true,
     Compile / packageCache / pushRemoteCacheArtifact := true,
     Compile / packageCache / artifact := Artifact(moduleName.value, cachedCompileClassifier),
     remoteCachePom / pushRemoteCacheArtifact := true,
-    remoteCachePom := {
+    remoteCachePom := Def.uncached {
       val s = streams.value
       val converter = fileConverter.value
       val config = (remoteCachePom / makePomConfiguration).value
@@ -163,14 +164,14 @@ object RemoteCache {
       val out = converter.toPath((remoteCachePom / artifactPath).value)
       config.withFile(out.toFile())
     },
-    remoteCachePom / remoteCacheArtifact := {
+    remoteCachePom / remoteCacheArtifact := Def.uncached {
       PomRemoteCacheArtifact((makePom / artifact).value, remoteCachePom)
     },
     remoteCacheResolvers := pushRemoteCacheTo.value.toVector,
   ) ++ inTask(pushRemoteCache)(
     Seq(
       ivyPaths := (Scope.Global / pushRemoteCache / ivyPaths).value,
-      ivyConfiguration := {
+      ivyConfiguration := Def.uncached {
         val config0 = Classpaths.mkIvyConfiguration.value
         config0
           .withResolvers(remoteCacheResolvers.value.toVector)
@@ -179,7 +180,7 @@ object RemoteCache {
           .withPaths(ivyPaths.value)
           .withUpdateOptions(UpdateOptions().withGigahorse(true))
       },
-      ivySbt := {
+      ivySbt := Def.uncached {
         Credentials.register(credentials.value, streams.value.log)
         val config0 = ivyConfiguration.value
         new IvySbt(config0)
@@ -187,8 +188,8 @@ object RemoteCache {
     )
   ) ++ inTask(pullRemoteCache)(
     Seq(
-      dependencyResolution := Defaults.dependencyResolutionTask.value,
-      csrConfiguration := {
+      dependencyResolution := Def.uncached(Defaults.dependencyResolutionTask.value),
+      csrConfiguration := Def.uncached {
         val rs = pushRemoteCacheTo.value.toVector ++ remoteCacheResolvers.value.toVector
         LMCoursier.scalaCompilerBridgeConfigurationTask.value
           .withResolvers(rs)
@@ -207,7 +208,7 @@ object RemoteCache {
   ): Seq[Def.Setting[?]] =
     inTask(packageCache)(
       Seq(
-        (Defaults.TaskZero / packageCache) := {
+        (Defaults.TaskZero / packageCache) := Def.uncached {
           val converter = fileConverter.value
           val original = (Defaults.TaskZero / packageBin).value
           val originalFile = converter.toPath(original)
@@ -233,13 +234,13 @@ object RemoteCache {
           converter.toVirtualFile(artpFile)
         },
         pushRemoteCacheArtifact := true,
-        remoteCacheArtifact := cacheArtifactTask.value,
-        packagedArtifact := (artifact.value -> packageCache.value),
+        remoteCacheArtifact := Def.uncached(cacheArtifactTask.value),
+        packagedArtifact := Def.uncached(artifact.value -> packageCache.value),
         artifactPath := Defaults.artifactPathSetting(artifact).value
       )
     ) ++ inTask(pushRemoteCache)(
       Seq(
-        moduleSettings := {
+        moduleSettings := Def.uncached {
           val smi = scalaModuleInfo.value
           ModuleDescriptorConfiguration(remoteCacheProjectId.value, projectInfo.value)
             .withScalaModuleInfo(smi)
@@ -257,7 +258,7 @@ object RemoteCache {
       )
     ) ++ Seq(
       remoteCacheIdCandidates := List(remoteCacheId.value),
-      remoteCacheProjectId := {
+      remoteCacheProjectId := Def.uncached {
         val o = organization.value
         val m = moduleName.value
         val id = remoteCacheId.value
@@ -265,7 +266,7 @@ object RemoteCache {
         val v = toVersion(id)
         ModuleID(o, m, v).cross(c)
       },
-      remoteCacheId := {
+      remoteCacheId := Def.uncached {
         val inputs = (unmanagedSources / inputFileStamps).value
         val cp = (externalDependencyClasspath / outputFileStamps).?.value.getOrElse(Nil)
         val extraInc = (extraIncOptions.value) flatMap { (k, v) =>
@@ -273,7 +274,7 @@ object RemoteCache {
         }
         combineHash(extractHash(inputs) ++ extractHash(cp) ++ extraInc)
       },
-      pushRemoteCacheConfiguration := {
+      pushRemoteCacheConfiguration := Def.uncached {
         val converter = fileConverter.value
         val artifacts =
           (pushRemoteCacheConfiguration / packagedArtifacts).value.toVector.map { (a, vf) =>
@@ -291,7 +292,7 @@ object RemoteCache {
           isSnapshot.value
         )
       },
-      pushRemoteCacheConfiguration / packagedArtifacts :=
+      pushRemoteCacheConfiguration / packagedArtifacts := Def.uncached(
         (Def
           .task { (pushRemoteCacheConfiguration / remoteCacheArtifacts).value })
           .flatMapTask { case artifacts =>
@@ -300,11 +301,12 @@ object RemoteCache {
               .join
               .apply(_.join.map(_.toMap))
           }
-          .value,
-      pushRemoteCacheConfiguration / remoteCacheArtifacts := {
+          .value
+      ),
+      pushRemoteCacheConfiguration / remoteCacheArtifacts := Def.uncached {
         List((packageCache / remoteCacheArtifact).value)
       },
-      pullRemoteCache := {
+      pullRemoteCache := Def.uncached {
         import scala.jdk.CollectionConverters.*
         val log = streams.value.log
         val r = remoteCacheResolvers.value.head

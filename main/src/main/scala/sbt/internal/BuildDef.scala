@@ -16,6 +16,7 @@ import Def.Setting
 import sbt.io.Hash
 import sbt.internal.util.{ Attributed, StringAttributeMap }
 import sbt.internal.inc.{ FileAnalysisStore, ReflectUtilities }
+import sbt.util.CacheImplicits.given
 import xsbti.{ FileConverter, VirtualFileRef }
 import xsbti.compile.CompileAnalysis
 

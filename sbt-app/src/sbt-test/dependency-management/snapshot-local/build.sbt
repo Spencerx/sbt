@@ -33,6 +33,6 @@ lazy val dependent = project
   .settings(
     // Ignore the inter-project resolver, so we force to look remotely.
     resolvers += sharedResolver,
-    fullResolvers := fullResolvers.value.filterNot(_==projectResolver.value),
+    fullResolvers := Def.uncached(fullResolvers.value.filterNot(_==projectResolver.value)),
     libraryDependencies += "com.badexample" % "badexample" % "1.0-SNAPSHOT"
   )

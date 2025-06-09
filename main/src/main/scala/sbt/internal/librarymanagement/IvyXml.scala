@@ -193,7 +193,7 @@ object IvyXml {
       task: TaskKey[T],
       shadedConfigOpt: Option[Configuration]
   ): Setting[Task[T]] =
-    task := task.dependsOnTask {
+    task := Def.uncached(task.dependsOnTask {
       Def.task {
         val currentProject = {
           val proj = csrProject.value
@@ -207,7 +207,7 @@ object IvyXml {
           sbt.Keys.streams.value.log
         )
       }
-    }.value
+    }.value)
 
   private lazy val needsIvyXmlLocal = Seq(publishLocalConfiguration) ++ getPubConf(
     "makeIvyXmlLocalConfiguration"

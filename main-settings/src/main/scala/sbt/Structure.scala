@@ -157,6 +157,9 @@ sealed abstract class TaskKey[A1]
   private[sbt] final inline def rescope(scope: Scope): TaskKey[A1] =
     Scoped.scopedTask(Scope.replaceThis(this.scope)(scope), this.key)
 
+  /**
+   * Appends a single value to the task key.
+   */
   inline def +=[A2](inline v: A2)(using Append.Value[A1, A2]): Setting[Task[A1]] =
     append1[A2](taskMacro(v))
 
@@ -165,6 +168,9 @@ sealed abstract class TaskKey[A1]
   ): Setting[Task[A1]] =
     make(v)(ev.appendValue)
 
+  /**
+   * Appends a sequence of values to the task key.
+   */
   inline def ++=[A2](inline vs: A2)(using Append.Values[A1, A2]): Setting[Task[A1]] =
     appendN(taskMacro[A2](vs))
 
@@ -427,8 +433,8 @@ object Scoped:
   sealed trait DefinableTask[A1] { self: TaskKey[A1] =>
 
     /** Internal function for the task macro. */
-    inline def taskMacro[A](inline a: A): Initialize[Task[A]] =
-      ${ TaskMacro.taskMacroImpl[A]('a, cached = false) }
+    inline def taskMacro[A2](inline a: A2): Initialize[Task[A2]] =
+      ${ TaskMacro.taskMacroImpl[A2]('a, 'this) }
 
     private[sbt] inline def :==(app: A1): Setting[Task[A1]] =
       set(Def.valueStrict(std.TaskExtra.constant(app)))

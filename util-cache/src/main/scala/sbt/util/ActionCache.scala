@@ -215,6 +215,12 @@ class BuildWideCacheConfiguration(
     s"BuildWideCacheConfiguration(store = $store, outputDirectory = $outputDirectory)"
 end BuildWideCacheConfiguration
 
+object Uncached:
+  /**
+   * Marker function to make the task uncached.
+   */
+  def apply[A1](a: A1): A1 = a
+
 @meta.getter
 class cacheLevel(
     include: Array[CacheLevelTag],

@@ -62,16 +62,18 @@ object ScriptedPlugin extends AutoPlugin {
   override lazy val projectSettings: Seq[Setting[?]] = Seq(
     ivyConfigurations ++= Seq(ScriptedConf, ScriptedLaunchConf),
     scriptedSbt := (pluginCrossBuild / sbtVersion).value,
-    sbtLauncher := getJars(ScriptedLaunchConf)
-      .map(_.get().head)
-      .value,
+    sbtLauncher := Def.uncached(
+      getJars(ScriptedLaunchConf)
+        .map(_.get().head)
+        .value
+    ),
     sbtTestDirectory := sourceDirectory.value / "sbt-test",
     libraryDependencies ++= Seq(
       "org.scala-sbt" %% "scripted-sbt" % scriptedSbt.value % ScriptedConf,
       "org.scala-sbt" % "sbt-launch" % scriptedSbt.value % ScriptedLaunchConf
     ),
-    scriptedClasspath := getJars(ScriptedConf).value,
-    scriptedTests := scriptedTestsTask.value,
+    scriptedClasspath := Def.uncached(getJars(ScriptedConf).value),
+    scriptedTests := Def.uncached(scriptedTestsTask.value),
     scriptedParallelInstances := 1,
     scriptedBatchExecution := {
       val binVersion = CrossVersionUtil.binarySbtVersion(scriptedSbt.value)
@@ -82,8 +84,8 @@ object ScriptedPlugin extends AutoPlugin {
         case _                   => false
       }
     },
-    scriptedRun := scriptedRunTask.value,
-    scriptedDependencies := {
+    scriptedRun := Def.uncached(scriptedRunTask.value),
+    scriptedDependencies := Def.uncached {
       def use[A](@deprecated("unused", "") x: A*): Unit = () // avoid unused warnings
       val analysis = (Test / Keys.compile).value
       val pub = publishLocal.all(ScopeFilter(projects = inDependencies(ThisProject))).value

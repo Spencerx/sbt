@@ -68,14 +68,14 @@ val c = project.settings(apiBaseSetting)
 val d = project
   .dependsOn(c)
   .settings(
-    externalResolvers := Seq(aResolver.value, bResolver.value),
+    externalResolvers := Def.uncached(Seq(aResolver.value, bResolver.value)),
     addDep("a"),
     addDep("b"),
-    checkApiMappings := {
+    checkApiMappings := Def.uncached {
       val actual = (Compile / doc / apiMappings).value
       println("Actual API Mappings: " + actual.mkString("\n\t", "\n\t", ""))
       val expected = expectedMappings.value
       println("Expected API Mappings: " + expected.mkString("\n\t", "\n\t", ""))
-      assert(actual == expected)
+      assert(actual.toString.replaceAll(">sha256-.*/256", "") == expected.toString)
     }
   )

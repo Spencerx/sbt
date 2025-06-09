@@ -66,7 +66,7 @@ lazy val root = (project in file("."))
       s0.notifyEvent("foo/something", "something")
       s0
     },
-    fooClasspath := {
+    fooClasspath := Def.uncached {
       val s = state.value
       val converter = fileConverter.value
       val cp = (Compile / fullClasspath).value

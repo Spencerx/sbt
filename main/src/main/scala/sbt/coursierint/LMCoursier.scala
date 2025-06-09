@@ -257,7 +257,9 @@ object LMCoursier {
   }
 
   def publicationsSetting(packageConfigs: Seq[(Configuration, CConfiguration)]): Def.Setting[?] = {
-    csrPublications := CoursierArtifactsTasks.coursierPublicationsTask(packageConfigs*).value
+    csrPublications := Def.uncached(
+      CoursierArtifactsTasks.coursierPublicationsTask(packageConfigs*).value
+    )
   }
 
   // This emulates Ivy's credential registration which basically keeps mutating global registry
