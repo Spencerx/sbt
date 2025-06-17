@@ -1452,8 +1452,6 @@ lazy val lmCoursierDefinitions = project
   .disablePlugins(MimaPlugin)
   .settings(
     lmCoursierSettings,
-    semanticdbEnabled := true,
-    semanticdbVersion := scalafixSemanticdb.revision,
     scalafixDependencies += "net.hamnaberg" %% "dataclass-scalafix" % dataclassScalafixVersion,
     libraryDependencies ++= Seq(
       coursier,
