@@ -2996,7 +2996,7 @@ object Classpaths {
   private lazy val packagedDefaultArtifacts = packaged(defaultArtifactTasks)
   private lazy val sbt2Plus: Def.Initialize[Boolean] = Def.setting {
     val sbtV = (pluginCrossBuild / sbtBinaryVersion).value
-    sbtV != "1.0" && !sbtV.startsWith("0.")
+    !sbtV.startsWith("1.") && !sbtV.startsWith("0.")
   }
   val jvmPublishSettings: Seq[Setting[_]] = Seq(
     artifacts := artifactDefs(defaultArtifactTasks).value,
