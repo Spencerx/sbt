@@ -66,7 +66,7 @@ object Dependencies {
   def addSbtZinc = addSbtModule(sbtZincPath, "zinc", zinc)
   def addSbtZincCompileCore = addSbtModule(sbtZincPath, "zincCompileCore", zincCompileCore)
 
-  lazy val sjsonNewVersion = "0.14.0-M1"
+  lazy val sjsonNewVersion = "0.14.0-M2"
   def sjsonNew(n: String) = Def.setting(
     "com.eed3si9n" %% n % sjsonNewVersion
   ) // contrabandSjsonNewVersion.value
@@ -86,7 +86,7 @@ object Dependencies {
   val jline3Builtins = "org.jline" % "jline-builtins" % jline3Version
   val scalatest = "org.scalatest" %% "scalatest" % "3.2.19"
   val scalacheck = "org.scalacheck" %% "scalacheck" % "1.18.1"
-  val junit = "junit" % "junit" % "4.13.1"
+  val junit = "junit" % "junit" % "4.13.2"
   val scalaVerify = "com.eed3si9n.verify" %% "verify" % "1.0.0"
   val templateResolverApi = "org.scala-sbt" % "template-resolver" % "0.1"
   val remoteapis =
@@ -95,10 +95,10 @@ object Dependencies {
   val scalaCompiler = "org.scala-lang" %% "scala3-compiler" % scala3
   val scala3Library = "org.scala-lang" %% "scala3-library" % scala3
 
-  val scalaXml = "org.scala-lang.modules" %% "scala-xml" % "2.2.0"
-  val scalaParsers = "org.scala-lang.modules" %% "scala-parser-combinators" % "2.1.0"
+  val scalaXml = "org.scala-lang.modules" %% "scala-xml" % "2.4.0"
+  val scalaParsers = "org.scala-lang.modules" %% "scala-parser-combinators" % "2.4.0"
   val scalaReflect = "org.scala-lang" % "scala-reflect" % scala213
-  val scalaPar = "org.scala-lang.modules" %% "scala-parallel-collections" % "1.0.4"
+  val scalaPar = "org.scala-lang.modules" %% "scala-parallel-collections" % "1.2.0"
 
   // specify all of log4j modules to prevent misalignment
   def log4jModule = (n: String) => "org.apache.logging.log4j" % n % "2.17.1"
@@ -107,9 +107,9 @@ object Dependencies {
   val log4jSlf4jImpl = log4jModule("log4j-slf4j-impl")
   val log4jModules = Vector(log4jApi, log4jCore, log4jSlf4jImpl)
 
-  val caffeine = "com.github.ben-manes.caffeine" % "caffeine" % "2.8.5"
+  val caffeine = "com.github.ben-manes.caffeine" % "caffeine" % "3.2.1"
 
-  val hedgehog = "qa.hedgehog" %% "hedgehog-sbt" % "0.7.0"
+  val hedgehog = "qa.hedgehog" %% "hedgehog-sbt" % "0.12.0"
   val disruptor = "com.lmax" % "disruptor" % "3.4.2"
   val ivy = "org.scala-sbt.ivy" % "ivy" % "2.3.0-sbt-77cc781d727b367d3761f097d89f5a4762771d41"
 
