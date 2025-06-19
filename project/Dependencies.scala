@@ -118,7 +118,7 @@ object Dependencies {
   val gigahorseApacheHttp = "com.eed3si9n" %% "gigahorse-apache-http" % "0.9.3"
 
   // lm-coursier dependencies
-  val dataclassScalafixVersion = "0.1.0"
+  val dataclassScalafixVersion = "0.3.0"
   val coursierVersion = "2.1.23"
 
   val coursier = ("io.get-coursier" %% "coursier" % coursierVersion)

@@ -173,7 +173,6 @@ object Utils {
     val to = (Compile / sourceManaged).value
     val outFrom = from.toURI.toString.stripSuffix("/").stripPrefix(root)
     val outTo = to.toURI.toString.stripSuffix("/").stripPrefix(root)
-    val _ = (data / Compile / compile).value
     Def.task {
       val _ = (data / Compile / scalafix)
         .toTask(s" --rules GenerateDataClass --out-from=$outFrom --out-to=$outTo")

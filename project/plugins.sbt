@@ -10,6 +10,6 @@ addSbtPlugin("com.typesafe" % "sbt-mima-plugin" % "1.1.4")
 addSbtPlugin("com.swoval" % "sbt-java-format" % "0.3.1")
 addSbtPlugin("org.scalameta" % "sbt-native-image" % "0.3.1")
 addDependencyTreePlugin
-addSbtPlugin("ch.epfl.scala" % "sbt-scalafix" % "0.13.0")
+addSbtPlugin("ch.epfl.scala" % "sbt-scalafix" % "0.14.3")
 
 // libraryDependencies += "org.scala-sbt" %% "scripted-plugin" % sbtVersion.value
