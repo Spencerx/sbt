@@ -10,6 +10,7 @@ package sbt.test
 
 import java.io.File
 import sjsonnew.*
+import sbt.Def
 import sbt.Def.{ Setting, inputKey, settingKey, taskKey }
 import sbt.Scope.Global
 import sbt.ScopeAxis.Zero
@@ -56,7 +57,7 @@ object SlashSyntaxTest extends sbt.SlashSyntax {
     Compile / bar := {
       (Compile / foo).previous.getOrElse(2)
     },
-    Test / buildInfo := Nil,
+    Test / buildInfo := Def.uncached(Nil),
     baz := {
       val _ = (Test / buildInfo).taskValue
       (Compile / run).evaluated

@@ -16,7 +16,7 @@ lazy val root = (project in file("."))
     // testOptions in Test += Tests.Argument(TestFrameworks.ScalaTest, "-f", "result.txt", "-eNDXEHLO")
     Configurations.Test / testOptions ++= {
       def args(path: String, args: String*): Seq[TestOption] =
-        if(file(path).exists) Tests.Argument(args : _*) :: Nil
+        if file(path).exists then Tests.Argument(args*) :: Nil
         else Nil
       args("success1", "-n", "test2 test3") ++
       args("success2", "-n", "test2") ++

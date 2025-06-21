@@ -25,7 +25,7 @@ lazy val reportWarning = project.in(file("report-warning"))
 // check that the buildTarget/compile request fails with the custom message defined below
 lazy val respondError = project.in(file("respond-error"))
   .settings(
-    Compile / compile := {
+    Compile / compile := Def.uncached {
       val _ = (Compile / compile).value
       throw new MessageOnlyException("custom message")
     }
@@ -51,14 +51,14 @@ def somethingBad = throw new MessageOnlyException("I am a bad build target")
 // other build targets should not be affected by this bad build target
 lazy val badBuildTarget = project.in(file("bad-build-target"))
   .settings(
-    Compile / bspBuildTarget := somethingBad,
-    Compile / bspBuildTargetSourcesItem := somethingBad,
-    Compile / bspBuildTargetResourcesItem := somethingBad,
-    Compile / bspBuildTargetDependencySourcesItem := somethingBad,
-    Compile / bspBuildTargetScalacOptionsItem := somethingBad,
-    Compile / bspBuildTargetCompileItem := somethingBad,
-    Compile / bspBuildTargetOutputPathsItem := somethingBad,
-    Compile / bspScalaMainClasses := somethingBad,
-    Test / bspBuildTarget := somethingBad,
-    Test / bspScalaTestClasses := somethingBad,
+    Compile / bspBuildTarget := Def.uncached(somethingBad),
+    Compile / bspBuildTargetSourcesItem := Def.uncached(somethingBad),
+    Compile / bspBuildTargetResourcesItem := Def.uncached(somethingBad),
+    Compile / bspBuildTargetDependencySourcesItem := Def.uncached(somethingBad),
+    Compile / bspBuildTargetScalacOptionsItem := Def.uncached(somethingBad),
+    Compile / bspBuildTargetCompileItem := Def.uncached(somethingBad),
+    Compile / bspBuildTargetOutputPathsItem := Def.uncached(somethingBad),
+    Compile / bspScalaMainClasses := Def.uncached(somethingBad),
+    Test / bspBuildTarget := Def.uncached(somethingBad),
+    Test / bspScalaTestClasses := Def.uncached(somethingBad),
   )

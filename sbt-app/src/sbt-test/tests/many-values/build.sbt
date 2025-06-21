@@ -48,7 +48,7 @@ a21 := 21
 a22 := 22
 a23 := 23
 
-TaskKey[Unit]("check") := {
+TaskKey[Unit]("check") := Def.uncached {
   val sum = (
     a1.value ++ List(
       a2.value,
@@ -76,4 +76,5 @@ TaskKey[Unit]("check") := {
     )
   ).sum
   assert(sum == 276, sum)
+  ()
 }

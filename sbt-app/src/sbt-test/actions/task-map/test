@@ -1,7 +1,7 @@
 > taskB
-$ exists target/**/task-map/**/b
-$ exists target/**/task-map/**/a
+$ exists target/**/b
+$ exists target/**/a
 
 > taskF
-$ exists target/**/task-map/e
-$ exists target/**/task-map/f
+$ exists target/**/e
+$ exists target/**/f

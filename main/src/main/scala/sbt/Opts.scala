@@ -90,7 +90,7 @@ object DefaultOptions {
 
   def credentials(state: State): Credentials =
     Credentials(getGlobalSettingsDirectory(state, getGlobalBase(state)) / ".credentials")
-  def addCredentials: Setting[?] = Keys.credentials += { credentials(Keys.state.value) }
+  def addCredentials: Setting[?] = Keys.credentials += credentials(Keys.state.value)
 
   def shellPrompt(version: String): State => String =
     s => s"${s.configuration.provider.id.name}:${Project.extract(s).currentProject.id}:${version}> "

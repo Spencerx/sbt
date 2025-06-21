@@ -15,9 +15,10 @@ lazy val baz = project
     scalaVersion := "2.12.20",
   )
 
-someTask := {
+someTask := Def.uncached {
   val x = target.value / (name.value + ".txt")
   val s = streams.value
   s.log.info(s"writing $x")
   IO.touch(x)
+  ()
 }

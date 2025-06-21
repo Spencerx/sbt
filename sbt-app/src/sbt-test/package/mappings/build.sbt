@@ -15,8 +15,9 @@ Compile / packageBin / mappings ++= {
 }
 
 lazy val unzipPackage = taskKey[Unit]("extract jar file")
-unzipPackage := {
+unzipPackage := Def.uncached {
   val converter = fileConverter.value
   val p = converter.toPath((Compile / packageBin).value)
   IO.unzip(p.toFile(), target.value / "extracted")
+  ()
 }

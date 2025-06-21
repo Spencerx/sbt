@@ -42,11 +42,13 @@ object JUnitXmlReportPlugin extends AutoPlugin {
 
     lazy val testReportSettings: Seq[Setting[?]] = Seq(
       testReportsDirectory := target.value / (prefix(configuration.value.name) + "reports"),
-      testListeners += new JUnitXmlTestsListener(
-        testReportsDirectory.value,
-        SysProp.legacyTestReport,
-        streams.value.log
-      )
+      testListeners += Def.uncached {
+        JUnitXmlTestsListener(
+          testReportsDirectory.value,
+          SysProp.legacyTestReport,
+          streams.value.log
+        )
+      }
     )
   }
 

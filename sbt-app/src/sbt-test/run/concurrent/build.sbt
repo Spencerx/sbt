@@ -1,7 +1,7 @@
 lazy val runTest = taskKey[Unit]("Run the test applications.")
 
 def runTestTask(pre: Def.Initialize[Task[Unit]]) =
-  runTest := {
+  runTest := Def.uncached {
     val _ = pre.value
     val r = (Compile / run / runner).value
     val cp = (Compile / fullClasspath).value
@@ -9,11 +9,12 @@ def runTestTask(pre: Def.Initialize[Task[Unit]]) =
     val args = baseDirectory.value.getAbsolutePath :: Nil
     given FileConverter = fileConverter.value
     r.run(main, cp.files, args, streams.value.log).get
+    ()
   }
 
 lazy val b = project.settings(
   runTestTask( waitForCStart ),
-  runTest := {
+  runTest := Def.uncached {
     val _ = runTest.value
     val cFinished = (c / baseDirectory).value / "finished"
     assert( !cFinished.exists, "C finished before B")

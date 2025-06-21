@@ -73,7 +73,7 @@ object Assign {
 
     // ak += z.value + (if (y.value) set.value else plain.value),
     ck := new File(ck.value, "asdf"),
-    ak := sk.value.size,
+    ak := Def.uncached(sk.value.size),
     // bk ++= Seq(z.value)
     intTask := ak.previous.get,
     bgList := { mk.value.toString.toList.map(_.toInt) },

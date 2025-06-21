@@ -94,17 +94,25 @@ trait Cont:
       import conv.qctx
       import qctx.reflect.*
       given qctx.type = qctx
+      def msg: String =
+        s"given evidence sjsonnew.HashWriter[${TypeRepr.of[A].show}] is not found; " +
+          "opt out of caching by annotating the key with @cacheLevel(include = Array.empty), or as" +
+          "foo := Def.uncached(...), or provide a given value"
       Expr
         .summon[HashWriter[A]]
-        .getOrElse(sys.error(s"HashWriter[A] not found for ${TypeRepr.of[A].show}"))
+        .getOrElse(report.errorAndAbort(msg))
 
     def summonJsonFormat[A: Type]: Expr[JsonFormat[A]] =
       import conv.qctx
       import qctx.reflect.*
       given qctx.type = qctx
+      def msg: String =
+        s"given evidence sjsonnew.JsonFormat[${TypeRepr.of[A].show}] is not found; " +
+          "opt out of caching by annotating the key with @cacheLevel(include = Array.empty), or as" +
+          "foo := Def.uncached(...), or provide a given value"
       Expr
         .summon[JsonFormat[A]]
-        .getOrElse(sys.error(s"JsonFormat[A] not found for ${TypeRepr.of[A].show}"))
+        .getOrElse(report.errorAndAbort(msg))
 
     def summonClassTag[A: Type]: Expr[ClassTag[A]] =
       import conv.qctx
@@ -112,7 +120,7 @@ trait Cont:
       given qctx.type = qctx
       Expr
         .summon[ClassTag[A]]
-        .getOrElse(sys.error(s"ClassTag[A] not found for ${TypeRepr.of[A].show}"))
+        .getOrElse(report.errorAndAbort(s"ClassTag[A] not found for ${TypeRepr.of[A].show}"))
 
     /**
      * Implementation of a macro that provides a direct syntax for applicative functors and monads.
@@ -334,7 +342,11 @@ trait Cont:
           cacheConfigExpr: Expr[BuildWideCacheConfiguration],
           tags: List[CacheLevelTag],
       )(body: Expr[A1], input: Expr[A2]): Expr[A1] =
-        val codeContentHash = Expr[Long](body.show.##)
+        val codeContentHash =
+          try Expr[Long](body.show.##)
+          catch
+            case e: Throwable =>
+              Expr[Long](Printer.TreeStructure.show(body.asTerm).##)
         val extraHash = Expr[Long](0L)
         val aJsonFormat = summonJsonFormat[A1]
         val aClassTag = summonClassTag[A1]

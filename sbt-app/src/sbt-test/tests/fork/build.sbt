@@ -16,7 +16,7 @@ ThisBuild / organization := "org.example"
 
 lazy val root = (project in file("."))
   .settings(
-    Test / testGrouping := {
+    Test / testGrouping := Def.uncached {
       val tests = (Test / definedTests).value
       assert(tests.size == 3)
       for (idx <- 0 until groups) yield
@@ -26,7 +26,7 @@ lazy val root = (project in file("."))
           SubProcess(ForkOptions().withRunJVMOptions(Vector("-Dgroup.prefix=" + groupPrefix(idx))))
         )
     },
-    check := {
+    check := Def.uncached {
       val files =
         for(i <- 0 until groups; j <- 1 to groupSize) yield
           file(groupPrefix(i) + j)

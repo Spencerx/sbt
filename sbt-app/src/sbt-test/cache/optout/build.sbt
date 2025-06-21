@@ -4,22 +4,22 @@ import CustomKeys.*
 
 Global / localCacheDirectory := baseDirectory.value / "diskcache"
 
-aa := A()
+aa := Def.uncached(A())
 
 // This tests that aa is opted out from caching
-map1 := (Def.cachedTask {
+map1 := {
   aa.value
   val output1 = StringVirtualFile1("target/out/b1.txt", "foo")
   val output2 = StringVirtualFile1("target/out/b2.txt", "foo")
   Def.declareOutput(output1)
   Def.declareOutput(output2)
   "something"
-}).value
+}
 
-mapN1 := (Def.cachedTask {
+mapN1 := {
   aa.value
   map1.value
   val output = StringVirtualFile1("target/out/c.txt", "foo")
   Def.declareOutput(output)
   ()
-}).value
+}

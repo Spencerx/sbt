@@ -1,4 +1,4 @@
-TaskKey[Unit]("outputEmpty") := {
+TaskKey[Unit]("outputEmpty") := Def.uncached {
   val c = fileConverter.value
   val dir = c.toPath((Compile / backendOutput).value).toFile()
   def classes = dir.**("*.class").get()

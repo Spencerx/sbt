@@ -1,5 +1,7 @@
 // https://github.com/sbt/sbt/issues/1673#issuecomment-537327439
 
+Global / localCacheDirectory := baseDirectory.value / "diskcache"
+
 val Config_0 = config("config-0").extend(Compile)
 val Config_1 = config("config-1").extend(Compile)
 val Config_2 = config("config-2").extend(Compile)
@@ -23,7 +25,7 @@ val t = taskKey[Unit]("")
 val p1 = project
   .configs(CustomConfigs: _*)
   .settings(
-    t := {
+    t := Def.uncached {
         (Config_0 / compile).value
         (Config_1 / compile).value
         (Config_2 / compile).value
@@ -40,6 +42,7 @@ val p1 = project
         (Config_13 / compile).value
         (Config_14 / compile).value
         (Config_15 / compile).value
+        ()
     }
   )
   .settings(CustomConfigs.flatMap(c => inConfig(c)(Defaults.testSettings)))

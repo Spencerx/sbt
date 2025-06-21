@@ -22,6 +22,7 @@ import Keys.*
 import Configurations.{ Compile, Runtime }
 import sbt.ProjectExtra.{ extract, runUnloadHooks, setProject }
 import sbt.SlashSyntax0.*
+import sbt.librarymanagement.LibraryManagementCodec.given
 import java.io.File
 import org.apache.ivy.core.module.{ descriptor, id }
 import descriptor.ModuleDescriptor, id.ModuleRevisionId

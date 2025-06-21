@@ -4,7 +4,7 @@ logLevel := Level.Debug
 
 incOptions ~= { _.withApiDebug(true) }
 
-TaskKey[Unit]("show-apis") := {
+TaskKey[Unit]("show-apis") := Def.uncached {
   val a = (Compile / compile).value match { case a: Analysis => a }
   val scalaSrc = (Compile / scalaSource).value
   val javaSrc = (Compile / javaSource).value
@@ -14,4 +14,5 @@ TaskKey[Unit]("show-apis") := {
   import DefaultShowAPI._
   DefaultShowAPI(aApi)
   DefaultShowAPI(jApi)
+  ()
 }

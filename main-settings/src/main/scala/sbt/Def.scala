@@ -20,7 +20,8 @@ import sbt.util.{
   AggregateActionCacheStore,
   BuildWideCacheConfiguration,
   cacheLevel,
-  DiskActionCacheStore
+  DiskActionCacheStore,
+  Uncached,
 }
 import Util.*
 import sbt.util.Show
@@ -301,6 +302,9 @@ object Def extends BuildSyntax with Init with InitializeImplicits:
   inline def cachedTask[A1](inline a1: A1): Def.Initialize[Task[A1]] =
     ${ TaskMacro.taskMacroImpl[A1]('a1, cached = true) }
 
+  inline def uncachedTask[A1](inline a1: A1): Def.Initialize[Task[A1]] =
+    ${ TaskMacro.taskMacroImpl[A1]('a1, cached = false) }
+
   inline def task[A1](inline a1: A1): Def.Initialize[Task[A1]] =
     ${ TaskMacro.taskMacroImpl[A1]('a1, cached = false) }
 
@@ -465,6 +469,11 @@ object Def extends BuildSyntax with Init with InitializeImplicits:
 
   private[sbt] def isDummy(t: Task[?]): Boolean =
     t.get(isDummyTask).getOrElse(false)
+
+  /**
+   * Marker function to make the task uncached.
+   */
+  inline def uncached[A1](inline a: A1): A1 = Uncached(a)
 end Def
 
 sealed trait InitializeImplicits { self: Def.type =>

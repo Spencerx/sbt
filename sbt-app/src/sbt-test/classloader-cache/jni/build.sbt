@@ -18,22 +18,25 @@ val root = (project in file(".")).settings(
   sourceDirectory.value.toPath.resolve("main/native/include").toString),
   libraryDependencies += "com.lihaoyi" %% "utest" % "0.6.6" % "test",
   testFrameworks := Seq(new TestFramework("utest.runner.Framework")),
-  copyTestResources := {
+  copyTestResources := Def.uncached {
     val key = Def.spaceDelimited().parsed.head
     val base = baseDirectory.value.toPath
     val resources = (baseDirectory.value / "src" / "main" / "resources" / key).toPath
     Files.walk(resources).iterator.asScala.foreach { p =>
       Files.copy(p, base.resolve(p.getFileName), StandardCopyOption.REPLACE_EXISTING)
     }
+    ()
   },
-  appendToLibraryPath := {
+  appendToLibraryPath := Def.uncached {
     val cp = System.getProperty("java.library.path", "").split(":")
     val newCp = if (cp.contains(".")) cp else cp :+ "."
     System.setProperty("java.library.path", newCp.mkString(":"))
+    ()
   },
-  dropLibraryPath := {
+  dropLibraryPath := Def.uncached {
     val cp = System.getProperty("java.library.path", "").split(":").dropRight(1)
     System.setProperty("java.library.path", cp.mkString(":"))
+    ()
   },
   wrappedRun := wrap(Runtime / run).value,
   wrappedTest := wrap(Test / testOnly).value

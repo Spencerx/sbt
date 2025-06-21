@@ -52,7 +52,7 @@ object IvyConsole {
       val depSettings: Seq[Setting[?]] = Seq(
         libraryDependencies ++= managed.reverse,
         resolvers ++= repos.reverse.toVector,
-        Compile / unmanagedJars ++= {
+        Compile / unmanagedJars ++= Def.uncached {
           val converter = fileConverter.value
           val u = unmanaged.reverse.map(_.toPath).map(converter.toVirtualFile)
           u: Seq[HashedVirtualFileRef]

@@ -23,7 +23,7 @@ lazy val b = (project in file("b")).
 
 lazy val root = (project in file(".")).
   settings(
-    check := {
+    check := Def.uncached {
       (a / update).value
       (b / update).value
       val acp = (a / Compile / externalDependencyClasspath).value.sortBy {_.data.name}

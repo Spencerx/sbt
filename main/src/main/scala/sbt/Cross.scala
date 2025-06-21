@@ -399,12 +399,12 @@ object Cross {
       val scope = Scope(Select(project), Zero, Zero, Zero)
 
       instance match {
-        case Some((home, inst)) =>
+        case Some((home, inst1)) =>
           Seq(
             scope / scalaVersion := version,
             scope / crossScalaVersions := scalaVersions,
             scope / scalaHome := Some(home),
-            scope / scalaInstance := inst,
+            scope / scalaInstance := Def.uncached(inst1),
           )
         case None =>
           Seq(

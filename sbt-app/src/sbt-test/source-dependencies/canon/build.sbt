@@ -3,7 +3,7 @@ import complete.DefaultParsers._
 
 // Reset compiler iterations, necessary because tests run in batch mode
 val recordPreviousIterations = taskKey[Unit]("Record previous iterations.")
-recordPreviousIterations := {
+recordPreviousIterations := Def.uncached {
   val log = streams.value.log
   CompileState.previousIterations = {
     val previousAnalysis = (Compile / previousCompile).value.analysis.asScala
@@ -14,6 +14,7 @@ recordPreviousIterations := {
       case Some(a: Analysis) => a.compilations.allCompilations.size
     }
   }
+  ()
 }
 
 val checkIterations = inputKey[Unit]("Verifies the accumulated number of iterations of incremental compilation.")

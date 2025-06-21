@@ -1,4 +1,4 @@
-TaskKey[Unit]("checkJavaFailures") := {
+TaskKey[Unit]("checkJavaFailures") := Def.uncached {
   val reporter = savedReporter.value
   val ignore = (Compile / compile).failure.value
   val ps = reporter.problems.filter(_.severity() != xsbti.Severity.Info)
@@ -9,9 +9,10 @@ TaskKey[Unit]("checkJavaFailures") := {
   val expected = "${BASE}/src/main/java/bad.java"
   val sourcePath = first.position.sourcePath.get
   assert(sourcePath == expected, s"$sourcePath == $expected was false")
+  ()
 }
 
-TaskKey[Unit]("checkScalaFailures") := {
+TaskKey[Unit]("checkScalaFailures") := Def.uncached {
   val reporter = savedReporter.value
   val ignore = (Compile / compile).failure.value
   val ps = reporter.problems
@@ -22,4 +23,5 @@ TaskKey[Unit]("checkScalaFailures") := {
   val expected = "${BASE}/src/main/scala/bad.scala"
   val sourcePath = first.position.sourcePath.get
   assert(sourcePath == expected, s"$sourcePath == $expected was false")
+  ()
 }
