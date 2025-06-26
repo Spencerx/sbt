@@ -5,7 +5,7 @@ import dotty.tools.dotc.ast
 import dotty.tools.dotc.ast.tpd
 import dotty.tools.dotc.CompilationUnit
 import dotty.tools.dotc.core.Contexts.{ atPhase, Context }
-import dotty.tools.dotc.core.{ Flags, Names, Phases, Symbols, Types }
+import dotty.tools.dotc.core.{ Flags, NameKinds, Names, Phases, Symbols, Types }
 import dotty.tools.dotc.Driver
 import dotty.tools.dotc.Run
 import dotty.tools.dotc.util.SourceFile
@@ -391,11 +391,10 @@ object Eval:
         case tpd.ValDef(name, tpt, _)
             if isTopLevelModule(tree.symbol.owner) && isAcceptableType(tpt.tpe) =>
           vals ::= name.mangledString
-        case tpd.ValDef(name, tpt, _) if name.mangledString.contains("$lzy") =>
-          val str = name.mangledString
-          val methodName = str.take(str.indexOf("$"))
+        case tpd.ValDef(name, tpt, _) if name.is(NameKinds.LazyLocalName) =>
+          val methodName = name.underlying
           val m = tree.symbol.owner.requiredMethod(methodName)
-          if isAcceptableType(m.info) then vals ::= methodName
+          if isAcceptableType(m.info) then vals ::= methodName.mangledString
         case t: tpd.Template   => this((), t.body)
         case t: tpd.PackageDef => this((), t.stats)
         case t: tpd.TypeDef    => this((), t.rhs)
