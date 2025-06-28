@@ -33,6 +33,7 @@ lazy val root = (project in file("."))
         "com.eed3si9n:sjson-new-scalajson_3",
         "com.github.ben-manes.caffeine:caffeine",
         "com.github.mwiede:jsch",
+        "com.google.code.gson:gson",
         "com.google.errorprone:error_prone_annotations",
         "com.lmax:disruptor",
         "com.swoval:file-tree-views",
@@ -82,7 +83,7 @@ lazy val root = (project in file("."))
       )
       def assertCollectionsEqual(message: String, expected: Seq[String], actual: Seq[String]): Unit =
         // using the new line for a more readable comparison failure output
-        assert(expected.mkString("\n") == actual.mkString("\n"), message)
+        assert(expected.mkString("\n") == actual.mkString("\n"), message + ": " + actual)
 
       assertCollectionsEqual(
         "Unexpected module ids in updateSbtClassifiers",

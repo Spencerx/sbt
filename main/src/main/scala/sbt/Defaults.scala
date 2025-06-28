@@ -1493,9 +1493,8 @@ object Defaults extends BuildCommon {
         }
       }
       val summaries =
-        runners map { (tf, r) =>
+        runners.map: (tf, r) =>
           Tests.Summary(frameworks(tf).name, r.done())
-        }
       out.copy(summaries = summaries)
     }
     // Def.value[Task[Tests.Output]] {

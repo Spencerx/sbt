@@ -6,7 +6,7 @@
  * Licensed under Apache License 2.0 (see LICENSE)
  */
 
-package sbt;
+package sbt.internal.worker1;
 
 import sbt.testing.*;
 
@@ -14,11 +14,11 @@ import sbt.testing.*;
  * Adapts the old {@link org.scalatools.testing.Framework} interface into the new {@link
  * sbt.testing.Framework}
  */
-final class FrameworkWrapper implements Framework {
+public final class FrameworkWrapper implements Framework {
 
   private final org.scalatools.testing.Framework oldFramework;
 
-  FrameworkWrapper(final org.scalatools.testing.Framework oldFramework) {
+  public FrameworkWrapper(final org.scalatools.testing.Framework oldFramework) {
     this.oldFramework = oldFramework;
   }
 

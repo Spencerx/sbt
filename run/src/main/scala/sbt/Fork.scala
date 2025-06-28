@@ -185,13 +185,13 @@ object Fork {
       ()
     }
     val process = Process(jpb)
-    outputStrategy.getOrElse(StdoutOutput: OutputStrategy) match {
+    outputStrategy.getOrElse(StdoutOutput: OutputStrategy) match
       case StdoutOutput => process.run(connectInput = false)
       case out: BufferedOutput =>
         out.logger.buffer { process.run(out.logger, connectInput = false) }
-      case out: LoggedOutput => process.run(out.logger, connectInput = false)
-      case out: CustomOutput => (process #> out.output).run(connectInput = false)
-    }
+      case out: LoggedOutput      => process.run(out.logger, connectInput = false)
+      case out: CustomOutput      => (process #> out.output).run(connectInput = false)
+      case out: CustomInputOutput => process.run(out.processIO)
   }
 
   private[sbt] def blockForExitCode(p: Process): Int = {

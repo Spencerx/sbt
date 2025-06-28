@@ -8,7 +8,7 @@ object WorkerTest extends verify.BasicTestSuite:
   test("process") {
     val u0 = IO.classLocationPath(classOf[example.Hello]).toUri()
     val u1 = IO.classLocationPath(classOf[scala.quoted.Quotes]).toUri()
-    val u2 = IO.classLocationPath(classOf[scala.AnyVal]).toUri()
+    val u2 = IO.classLocationPath(classOf[scala.collection.immutable.List[?]]).toUri()
     val cp =
       s"""[{ "path": "${u0}", "digest": "" }, { "path": "${u1}", "digest": "" }, { "path": "${u2}", "digest": "" }]"""
     val runInfo =

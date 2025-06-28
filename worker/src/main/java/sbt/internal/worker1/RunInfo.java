@@ -8,10 +8,11 @@
 
 package sbt.internal.worker1;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
-public class RunInfo {
-  public class JvmRunInfo {
+public class RunInfo implements Serializable {
+  public static class JvmRunInfo implements Serializable {
     public ArrayList<String> args;
     public ArrayList<FilePath> classpath;
     public String mainClass;
@@ -29,7 +30,7 @@ public class RunInfo {
     }
   }
 
-  public class NativeRunInfo {}
+  public static class NativeRunInfo implements Serializable {}
 
   public boolean jvm;
   public JvmRunInfo jvmRunInfo;

@@ -8,6 +8,7 @@
 
 package sbt
 
+import scala.sys.process.ProcessIO
 import sbt.util.Logger
 import java.io.OutputStream
 
@@ -102,4 +103,28 @@ object OutputStrategy {
   object CustomOutput {
     def apply(output: OutputStream): CustomOutput = new CustomOutput(output)
   }
+
+  /**
+   * Configures the forked IO.
+   */
+  final class CustomInputOutput private (val processIO: ProcessIO)
+      extends OutputStrategy
+      with Serializable:
+    override def equals(o: Any): Boolean = o match
+      case x: CustomInputOutput => (this.processIO == x.processIO)
+      case _                    => false
+    override def hashCode: Int =
+      37 * (17 + processIO.##) + "CustomInputOutput".##
+    override def toString: String =
+      "CustomInputOutput(...)"
+    private def copy(processIO: ProcessIO = processIO): CustomInputOutput =
+      new CustomInputOutput(processIO)
+
+    def withProcessIO(processIO: ProcessIO): CustomInputOutput =
+      copy(processIO = processIO)
+  end CustomInputOutput
+
+  object CustomInputOutput:
+    def apply(processIO: ProcessIO): CustomInputOutput = new CustomInputOutput(processIO)
+  end CustomInputOutput
 }

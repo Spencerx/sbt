@@ -67,8 +67,9 @@ final class TestFramework(val implClassNames: String*) extends Serializable {
       case head :: tail =>
         try {
           Some(Class.forName(head, true, loader).getDeclaredConstructor().newInstance() match {
-            case newFramework: Framework    => newFramework
-            case oldFramework: OldFramework => new FrameworkWrapper(oldFramework)
+            case newFramework: Framework => newFramework
+            case oldFramework: OldFramework =>
+              new sbt.internal.worker1.FrameworkWrapper(oldFramework)
           })
         } catch {
           case e: NoClassDefFoundError =>

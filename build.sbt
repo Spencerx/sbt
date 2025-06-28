@@ -471,7 +471,7 @@ lazy val utilScripted = (project in file("internal") / "util-scripted")
 // Runner for uniform test interface
 lazy val testingProj = (project in file("testing"))
   .enablePlugins(ContrabandPlugin, JsonCodecPlugin)
-  .dependsOn(testAgentProj, utilLogging)
+  .dependsOn(workerProj, utilLogging)
   .settings(
     baseSettings,
     name := "Testing",
@@ -518,26 +518,15 @@ lazy val testingProj = (project in file("testing"))
   )
   .configure(addSbtIO, addSbtCompilerClasspath)
 
-// Testing agent for running tests in a separate process.
-lazy val testAgentProj = (project in file("testing") / "agent")
-  .settings(
-    minimalSettings,
-    crossPaths := false,
-    autoScalaLibrary := false,
-    Compile / doc / javacOptions := Nil,
-    name := "Test Agent",
-    libraryDependencies += testInterface,
-    mimaSettings,
-  )
-
 lazy val workerProj = (project in file("worker"))
   .dependsOn(exampleWorkProj % Test)
   .settings(
     name := "worker",
     testedBaseSettings,
     Compile / doc / javacOptions := Nil,
+    crossPaths := false,
     autoScalaLibrary := false,
-    libraryDependencies += gson,
+    libraryDependencies ++= Seq(gson, testInterface),
     libraryDependencies += "org.scala-lang" %% "scala3-library" % scalaVersion.value % Test,
     // run / fork := false,
     Test / fork := true,
@@ -1218,7 +1207,6 @@ def allProjects =
     logicProj,
     completeProj,
     testingProj,
-    testAgentProj,
     taskProj,
     stdTaskProj,
     runProj,

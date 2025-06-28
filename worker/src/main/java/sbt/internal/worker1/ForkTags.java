@@ -6,7 +6,7 @@
  * Licensed under Apache License 2.0 (see LICENSE)
  */
 
-package sbt;
+package sbt.internal.worker1;
 
 public enum ForkTags {
   Error,
