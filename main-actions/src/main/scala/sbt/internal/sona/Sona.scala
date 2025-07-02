@@ -36,13 +36,16 @@ class Sona(client: SonaClient) extends AutoCloseable {
   def close(): Unit = client.close()
 }
 
-class SonaClient(reqTransform: Request => Request) extends AutoCloseable {
+class SonaClient(reqTransform: Request => Request, requestTimeout: FiniteDuration)
+    extends AutoCloseable {
   import SonaClient.baseUrl
 
-  val gigahorseConfig = Gigahorse.config
-    .withRequestTimeout(2.minute)
-    .withReadTimeout(2.minute)
-  val http = Gigahorse.http(gigahorseConfig)
+  private val gigahorseConfig = Gigahorse.config
+    .withRequestTimeout(requestTimeout)
+    .withReadTimeout(requestTimeout)
+
+  private val http = Gigahorse.http(gigahorseConfig)
+
   def uploadBundle(
       bundleZipPath: Path,
       deploymentName: String,
@@ -66,7 +69,6 @@ class SonaClient(reqTransform: Request => Request) extends AutoCloseable {
             FormPart("bundle", bundleZipPath.toFile())
           )
         )
-        .withRequestTimeout(600.second)
       http.run(reqTransform(req), Gigahorse.asString)
     }
     awaitWithMessage(res, "uploading...", log)
@@ -155,7 +157,7 @@ class SonaClient(reqTransform: Request => Request) extends AutoCloseable {
         }.foreach(_ => loop(attempt + 1))
       } else ()
     loop(0)
-    Await.result(f, 600.seconds)
+    Await.result(f, requestTimeout + 5.seconds)
   }
 
   def close(): Unit = http.close()
@@ -163,8 +165,8 @@ class SonaClient(reqTransform: Request => Request) extends AutoCloseable {
 
 object Sona {
   def host: String = SonaClient.host
-  def oauthClient(userName: String, userToken: String): Sona =
-    new Sona(SonaClient.oauthClient(userName, userToken))
+  def oauthClient(userName: String, userToken: String, requestTimeout: FiniteDuration): Sona =
+    new Sona(SonaClient.oauthClient(userName, userToken, requestTimeout))
 }
 
 object SonaClient {
@@ -175,8 +177,8 @@ object SonaClient {
     Parser.parseFromByteBuffer(r.bodyAsByteBuffer).get
   def as[A1: JsonFormat]: FullResponse => A1 = asJson.andThen(Converter.fromJsonUnsafe[A1])
   val asPublisherStatus: FullResponse => PublisherStatus = as[PublisherStatus]
-  def oauthClient(userName: String, userToken: String): SonaClient =
-    new SonaClient(OAuthClient(userName, userToken))
+  def oauthClient(userName: String, userToken: String, requestTimeout: FiniteDuration): SonaClient =
+    new SonaClient(OAuthClient(userName, userToken), requestTimeout)
 }
 
 private case class OAuthClient(userName: String, userToken: String)

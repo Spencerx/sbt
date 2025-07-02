@@ -3108,6 +3108,7 @@ object Classpaths {
       val uuid = UUID.randomUUID().toString().take(8)
       s"$o:$v:$uuid"
     },
+    sonaRequestTimeout := 2.minutes,
   )
 
   @nowarn("cat=deprecation")
