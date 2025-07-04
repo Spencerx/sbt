@@ -49,10 +49,10 @@ see https://www.scala-sbt.org/1.x/docs/Using-Sonatype.html for details.""")
       s0.fail
     } else {
       val deploymentName = extracted.get(Keys.sonaDeploymentName)
-      val requestTimeout = extracted.get(Keys.sonaRequestTimeout)
+      val uploadRequestTimeout = extracted.get(Keys.sonaUploadRequestTimeout)
       val (s1, bundle) = extracted.runTask(Keys.sonaBundle, s0)
       val (s2, creds) = extracted.runTask(Keys.credentials, s1)
-      val client = fromCreds(creds, requestTimeout)
+      val client = fromCreds(creds, uploadRequestTimeout)
       try {
         client.uploadBundle(bundle.toPath(), deploymentName, publishingType, log)
         s2
@@ -62,10 +62,10 @@ see https://www.scala-sbt.org/1.x/docs/Using-Sonatype.html for details.""")
     }
   }
 
-  private def fromCreds(creds: Seq[Credentials], requestTimeout: FiniteDuration): Sona = {
+  private def fromCreds(creds: Seq[Credentials], uploadRequestTimeout: FiniteDuration): Sona = {
     val cred = Credentials
       .forHost(creds, Sona.host)
       .getOrElse(throw new MessageOnlyException(s"no credentials are found for ${Sona.host}"))
-    Sona.oauthClient(cred.userName, cred.passwd, requestTimeout)
+    Sona.oauthClient(cred.userName, cred.passwd, uploadRequestTimeout)
   }
 }
