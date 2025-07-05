@@ -10,18 +10,20 @@ package sbt
 package internal
 package sona
 
-import gigahorse.*, support.apachehttp.Gigahorse
-import java.net.URLEncoder
-import java.util.Base64
-import java.nio.charset.StandardCharsets
-import java.nio.file.Path
+import gigahorse.*
+import gigahorse.support.apachehttp.Gigahorse
 import sbt.util.Logger
 import sjsonnew.JsonFormat
-import sjsonnew.support.scalajson.unsafe.{ Converter, Parser }
 import sjsonnew.shaded.scalajson.ast.unsafe.JValue
+import sjsonnew.support.scalajson.unsafe.{ Converter, Parser }
 
+import java.net.URLEncoder
+import java.nio.charset.StandardCharsets
+import java.nio.file.Path
+import java.util.Base64
 import scala.annotation.nowarn
-import scala.concurrent.*, duration.*
+import scala.concurrent.*
+import scala.concurrent.duration.*
 
 class Sona(client: SonaClient) extends AutoCloseable {
   def uploadBundle(
@@ -36,20 +38,32 @@ class Sona(client: SonaClient) extends AutoCloseable {
   def close(): Unit = client.close()
 }
 
-class SonaClient(reqTransform: Request => Request) extends AutoCloseable {
+class SonaClient(reqTransform: Request => Request, uploadRequestTimeout: FiniteDuration)
+    extends AutoCloseable {
   import SonaClient.baseUrl
 
-  val gigahorseConfig = Gigahorse.config
-    .withRequestTimeout(2.minute)
-    .withReadTimeout(2.minute)
-  val http = Gigahorse.http(gigahorseConfig)
+  private val http = {
+    val defaultHttpRequestTimeout = 2.minutes
+
+    val gigahorseConfig = Gigahorse.config
+      .withRequestTimeout(defaultHttpRequestTimeout)
+      .withReadTimeout(defaultHttpRequestTimeout)
+
+    Gigahorse.http(gigahorseConfig)
+  }
+
   def uploadBundle(
       bundleZipPath: Path,
       deploymentName: String,
       publishingType: PublishingType,
       log: Logger,
   ): String = {
-    val res = retryF(maxAttempt = 2) { (attempt: Int) =>
+    val maxAttempt = 2
+    val waitDurationBetweenAtttempt = 5.seconds
+    // Adding an extra 5.seconds as security margins
+    val totalAwaitDuration = maxAttempt * uploadRequestTimeout + maxAttempt * waitDurationBetweenAtttempt + 5.seconds
+
+    val res = retryF(maxAttempt, waitDurationBetweenAtttempt) { (attempt: Int) =>
       log.info(s"uploading bundle to the Central Portal (attempt: $attempt)")
       // addQuery string doesn't work for post
       val q = queryString(
@@ -66,13 +80,13 @@ class SonaClient(reqTransform: Request => Request) extends AutoCloseable {
             FormPart("bundle", bundleZipPath.toFile())
           )
         )
-        .withRequestTimeout(600.second)
+        .withRequestTimeout(uploadRequestTimeout)
       http.run(reqTransform(req), Gigahorse.asString)
     }
-    awaitWithMessage(res, "uploading...", log)
+    awaitWithMessage(res, "uploading...", log, totalAwaitDuration)
   }
 
-  def queryString(kv: (String, String)*): String =
+  private def queryString(kv: (String, String)*): String =
     kv.map {
         case (k, v) =>
           val encodedV = URLEncoder.encode(v, "UTF-8")
@@ -108,16 +122,16 @@ class SonaClient(reqTransform: Request => Request) extends AutoCloseable {
     }
   }
 
-  def deploymentStatus(deploymentId: String): PublisherStatus = {
-    val res = retryF(maxAttempt = 5) { (attempt: Int) =>
+  private def deploymentStatus(deploymentId: String): PublisherStatus = {
+    val res = retryF(maxAttempt = 5, waitDurationBetweenAttempt = 5.seconds) { (attempt: Int) =>
       deploymentStatusF(deploymentId)
     }
-    Await.result(res, 600.seconds)
+    Await.result(res, 10.minutes)
   }
 
   /** https://central.sonatype.org/publish/publish-portal-api/#verify-status-of-the-deployment
    */
-  def deploymentStatusF(deploymentId: String): Future[PublisherStatus] = {
+  private def deploymentStatusF(deploymentId: String): Future[PublisherStatus] = {
     val req = Gigahorse
       .url(s"${baseUrl}/publisher/status")
       .addQueryString("id" -> deploymentId)
@@ -128,43 +142,52 @@ class SonaClient(reqTransform: Request => Request) extends AutoCloseable {
   /** Retry future function on any error.
    */
   @nowarn
-  def retryF[A1](maxAttempt: Int)(f: Int => Future[A1]): Future[A1] = {
+  private def retryF[A1](maxAttempt: Int, waitDurationBetweenAttempt: FiniteDuration)(
+      f: Int => Future[A1]
+  ): Future[A1] = {
     import scala.concurrent.ExecutionContext.Implicits.*
     def impl(retry: Int): Future[A1] = {
       val res = f(retry + 1)
       res.recoverWith {
         case _ if retry < maxAttempt =>
-          Thread.sleep(5000)
-          impl(retry + 1)
+          sleep(waitDurationBetweenAttempt).flatMap(_ => impl(retry + 1))
       }
     }
     impl(0)
   }
 
-  def awaitWithMessage[A1](f: Future[A1], msg: String, log: Logger): A1 = {
+  private def awaitWithMessage[A1](
+      f: Future[A1],
+      msg: String,
+      log: Logger,
+      awaitDuration: FiniteDuration,
+  ): A1 = {
     import scala.concurrent.ExecutionContext.Implicits.*
-    def loop(attempt: Int): Unit =
+    def logLoop(attempt: Int): Unit =
       if (!f.isCompleted) {
         if (attempt > 0) {
           log.info(msg)
         }
-        Future {
-          blocking {
-            Thread.sleep(30.second.toMillis)
-          }
-        }.foreach(_ => loop(attempt + 1))
+        sleep(30.second).foreach(_ => logLoop(attempt + 1))
       } else ()
-    loop(0)
-    Await.result(f, 600.seconds)
+    logLoop(0)
+    Await.result(f, awaitDuration)
   }
 
   def close(): Unit = http.close()
+
+  private def sleep(duration: FiniteDuration)(implicit executor: ExecutionContext): Future[Unit] =
+    Future {
+      blocking {
+        Thread.sleep(duration.toMillis)
+      }
+    }
 }
 
 object Sona {
   def host: String = SonaClient.host
-  def oauthClient(userName: String, userToken: String): Sona =
-    new Sona(SonaClient.oauthClient(userName, userToken))
+  def oauthClient(userName: String, userToken: String, uploadRequestTimeout: FiniteDuration): Sona =
+    new Sona(SonaClient.oauthClient(userName, userToken, uploadRequestTimeout))
 }
 
 object SonaClient {
@@ -175,8 +198,12 @@ object SonaClient {
     Parser.parseFromByteBuffer(r.bodyAsByteBuffer).get
   def as[A1: JsonFormat]: FullResponse => A1 = asJson.andThen(Converter.fromJsonUnsafe[A1])
   val asPublisherStatus: FullResponse => PublisherStatus = as[PublisherStatus]
-  def oauthClient(userName: String, userToken: String): SonaClient =
-    new SonaClient(OAuthClient(userName, userToken))
+  def oauthClient(
+      userName: String,
+      userToken: String,
+      uploadRequestTimeout: FiniteDuration
+  ): SonaClient =
+    new SonaClient(OAuthClient(userName, userToken), uploadRequestTimeout)
 }
 
 private case class OAuthClient(userName: String, userToken: String)
