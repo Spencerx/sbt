@@ -471,7 +471,7 @@ lazy val utilScripted = (project in file("internal") / "util-scripted")
 // Runner for uniform test interface
 lazy val testingProj = (project in file("testing"))
   .enablePlugins(ContrabandPlugin, JsonCodecPlugin)
-  .dependsOn(testAgentProj, utilLogging)
+  .dependsOn(workerProj, utilLogging)
   .settings(
     baseSettings,
     name := "Testing",
@@ -518,16 +518,26 @@ lazy val testingProj = (project in file("testing"))
   )
   .configure(addSbtIO, addSbtCompilerClasspath)
 
-// Testing agent for running tests in a separate process.
-lazy val testAgentProj = (project in file("testing") / "agent")
+lazy val workerProj = (project in file("worker"))
+  .dependsOn(exampleWorkProj % Test)
   .settings(
-    minimalSettings,
+    name := "worker",
+    testedBaseSettings,
+    Compile / doc / javacOptions := Nil,
     crossPaths := false,
     autoScalaLibrary := false,
-    Compile / doc / javacOptions := Nil,
-    name := "Test Agent",
-    libraryDependencies += testInterface,
-    mimaSettings,
+    libraryDependencies ++= Seq(gson, testInterface),
+    libraryDependencies += "org.scala-lang" %% "scala3-library" % scalaVersion.value % Test,
+    // run / fork := false,
+    Test / fork := true,
+  )
+  .configure(addSbtIOForTest)
+
+lazy val exampleWorkProj = (project in file("internal") / "example-work")
+  .settings(
+    minimalSettings,
+    name := "example work",
+    publish / skip := true,
   )
 
 // Basic task engine
@@ -656,6 +666,8 @@ lazy val actionsProj = (project in file("main-actions"))
     utilLogging,
     utilRelation,
     utilTracking,
+    workerProj,
+    protocolProj,
   )
   .settings(
     testedBaseSettings,
@@ -666,18 +678,9 @@ lazy val actionsProj = (project in file("main-actions"))
       baseDirectory.value / "src" / "main" / "contraband-scala",
     Compile / generateContrabands / sourceManaged := baseDirectory.value / "src" / "main" / "contraband-scala",
     Compile / generateContrabands / contrabandFormatsForType := ContrabandConfig.getFormats,
+    // Test / fork := true,
+    Test / classLoaderLayeringStrategy := ClassLoaderLayeringStrategy.Flat,
     mimaSettings,
-    mimaBinaryIssueFilters ++= Seq(
-      // Removed unused private[sbt] nested class
-      exclude[MissingClassProblem]("sbt.Doc$Scaladoc"),
-      // Removed no longer used private[sbt] method
-      exclude[DirectMissingMethodProblem]("sbt.Doc.generate"),
-      exclude[DirectMissingMethodProblem]("sbt.compiler.Eval.filesModifiedBytes"),
-      exclude[DirectMissingMethodProblem]("sbt.compiler.Eval.fileModifiedBytes"),
-      exclude[DirectMissingMethodProblem]("sbt.Doc.$init$"),
-      // Added field in nested private[this] class
-      exclude[ReversedMissingMethodProblem]("sbt.compiler.Eval#EvalType.sourceName"),
-    ),
   )
   .dependsOn(lmCore)
   .configure(
@@ -1204,7 +1207,6 @@ def allProjects =
     logicProj,
     completeProj,
     testingProj,
-    testAgentProj,
     taskProj,
     stdTaskProj,
     runProj,
@@ -1231,6 +1233,7 @@ def allProjects =
     lmCoursier,
     lmCoursierShaded,
     lmCoursierShadedPublishing,
+    workerProj,
   ) ++ lowerUtilProjects
 
 // These need to be cross published to 2.12 and 2.13 for Zinc
