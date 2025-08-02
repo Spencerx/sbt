@@ -5,7 +5,7 @@ val copyTestResources = inputKey[Unit]("Copy the native libraries to the base di
 val appendToLibraryPath = taskKey[Unit]("Append the base directory to the java.library.path system property")
 val dropLibraryPath = taskKey[Unit]("Drop the last path from the java.library.path system property")
 val wrappedRun = taskKey[Unit]("Run with modified java.library.path")
-val wrappedTest = taskKey[Unit]("Test with modified java.library.path")
+val wrappedTest = taskKey[TestResult]("Test with modified java.library.path")
 
 def wrap[A1](task: InputKey[A1]): Def.Initialize[Task[Unit]] =
   Def.sequential(appendToLibraryPath, task.toTask(""), dropLibraryPath)
@@ -39,5 +39,8 @@ val root = (project in file(".")).settings(
     ()
   },
   wrappedRun := wrap(Runtime / run).value,
-  wrappedTest := wrap(Test / testOnly).value
+  wrappedTest := Def.uncached {
+    wrap(Test / testOnly).value
+    TestResult.Passed
+  }
 )

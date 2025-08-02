@@ -106,10 +106,9 @@ object TestResultLogger {
         else
           run(printFailures)
 
-        results.overall match {
+        results.overall match
           case TestResult.Error | TestResult.Failed => throw new TestsFailedException
-          case TestResult.Passed                    =>
-        }
+          case TestResult.Empty | TestResult.Passed => ()
       }
     }
 
@@ -164,11 +163,11 @@ object TestResultLogger {
       val extra = otherCounts.withFilter(_._2 > 0).map { (label, count) => s", $label $count" }
 
       val postfix = base + extra.mkString
-      results.overall match {
+      results.overall match
+        case TestResult.Empty  => ()
         case TestResult.Error  => log.error("Error: " + postfix)
         case TestResult.Passed => log.info("Passed: " + postfix)
         case TestResult.Failed => log.error("Failed: " + postfix)
-      }
     })
 
     val printFailures = TestResultLogger((log, results, _) => {

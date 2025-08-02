@@ -45,7 +45,7 @@ trait TestsListener extends TestReportListener {
 /**
  * Provides the overall `result` of a group of tests (a suite) and test counts for each result type.
  */
-final class SuiteResult(
+private[sbt] final class SuiteResult(
     val result: TestResult,
     val passedCount: Int,
     val failureCount: Int,
@@ -99,7 +99,7 @@ final class SuiteResult(
   }
 }
 
-object SuiteResult {
+private[sbt] object SuiteResult {
 
   /**
    * Computes the overall result and counts for a suite with individual test results in `events`.

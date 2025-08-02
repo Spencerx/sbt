@@ -9,6 +9,7 @@ sealed abstract class TestResult extends Serializable
 object TestResult {
   
   
+  case object Empty extends TestResult
   case object Passed extends TestResult
   case object Failed extends TestResult
   case object Error extends TestResult

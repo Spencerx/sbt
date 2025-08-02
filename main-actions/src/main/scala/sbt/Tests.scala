@@ -50,7 +50,7 @@ object Tests {
    * @param events The result of each test group (suite) executed during this test run.
    * @param summaries Explicit summaries directly provided by test frameworks.  This may be empty, in which case a default summary will be generated.
    */
-  final case class Output(
+  private[sbt] final case class Output(
       overall: TestResult,
       events: Map[String, SuiteResult],
       summaries: Iterable[Summary]
@@ -458,11 +458,10 @@ object Tests {
     Output(overall(results.map(_._2.result)), results.toMap, Iterable.empty)
 
   private def severity(r: TestResult): Int =
-    r match {
-      case TestResult.Passed => 0
-      case TestResult.Failed => 1
-      case TestResult.Error  => 2
-    }
+    r match
+      case TestResult.Passed | TestResult.Empty => 0
+      case TestResult.Failed                    => 1
+      case TestResult.Error                     => 2
 
   def foldTasks(results: Seq[Task[Output]], parallel: Boolean): Task[Output] =
     if (results.isEmpty) {

@@ -11,6 +11,7 @@ implicit lazy val TestResultFormat: JsonFormat[sbt.protocol.testing.TestResult] 
     __jsOpt match {
       case Some(__js) =>
       unbuilder.readString(__js) match {
+        case "Empty" => sbt.protocol.testing.TestResult.Empty
         case "Passed" => sbt.protocol.testing.TestResult.Passed
         case "Failed" => sbt.protocol.testing.TestResult.Failed
         case "Error" => sbt.protocol.testing.TestResult.Error
@@ -21,6 +22,7 @@ implicit lazy val TestResultFormat: JsonFormat[sbt.protocol.testing.TestResult] 
   }
   override def write[J](obj: sbt.protocol.testing.TestResult, builder: Builder[J]): Unit = {
     val str = obj match {
+      case sbt.protocol.testing.TestResult.Empty => "Empty"
       case sbt.protocol.testing.TestResult.Passed => "Passed"
       case sbt.protocol.testing.TestResult.Failed => "Failed"
       case sbt.protocol.testing.TestResult.Error => "Error"

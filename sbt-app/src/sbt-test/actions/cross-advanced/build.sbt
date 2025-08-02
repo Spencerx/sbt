@@ -26,7 +26,7 @@ lazy val foo = project
       // This tests that +testOnly will respect bar's crossScalaVersions and not switch
       val x = (LocalProject("bar") / scalaVersion).value
       assert(x == scala212, s"$x == $scala212")
-      val _ = (Test / testOnly).evaluated
+      (Test / testOnly).evaluated
     },
     compile2 := Def.uncached {
       // This tests that +build will ignore bar's crossScalaVersions and use root's like sbt 0.13
