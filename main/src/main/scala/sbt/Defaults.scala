@@ -76,6 +76,7 @@ import sbt.nio.Keys.*
 import sbt.nio.file.syntax.*
 import sbt.nio.file.{ FileTreeView, Glob, RecursiveGlob }
 import sbt.nio.Watch
+import sbt.protocol.testing.TestResult
 import sbt.std.TaskExtra.*
 import sbt.testing.{ AnnotatedFingerprint, Framework, Runner, SubclassFingerprint }
 import sbt.util.CacheImplicits.given
@@ -1155,7 +1156,10 @@ object Defaults extends BuildCommon {
     testFull := Def.uncached {
       val trl = (Test / testFull / testResultLogger).value
       val taskName = Project.showContextKey(state.value).show(resolvedScoped.value)
-      try trl.run(streams.value.log, executeTests.value, taskName)
+      try
+        val output = executeTests.value
+        trl.run(streams.value.log, output, taskName)
+        output.overall
       finally close(testLoader.value)
     },
     testOnly := {
@@ -1287,10 +1291,10 @@ object Defaults extends BuildCommon {
     }
 
   @nowarn
-  def inputTests(key: InputKey[?]): Initialize[InputTask[Unit]] =
+  def inputTests(key: InputKey[?]): Initialize[InputTask[TestResult]] =
     inputTests0.mapReferenced(Def.mapScope((s) => s.rescope(key.key)))
 
-  private lazy val inputTests0: Initialize[InputTask[Unit]] = {
+  private lazy val inputTests0: Initialize[InputTask[TestResult]] = {
     val parser = loadForParser(definedTestNames)((s, i) => testOnlyParser(s, i getOrElse Nil))
     ParserGen(parser).flatMapTask { (selected, frameworkOptions) =>
       val s = streams.value
@@ -1318,7 +1322,9 @@ object Defaults extends BuildCommon {
       val trl = testResultLogger.value
       (Def
         .value[Task[Tests.Output]] { output })
-        .map { out => trl.run(s.log, out, taskName) }
+        .map: out =>
+          trl.run(s.log, out, taskName)
+          out.overall
     }
   }
 

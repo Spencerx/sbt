@@ -35,6 +35,7 @@ import sbt.librarymanagement.LibraryManagementCodec.*
 import sbt.librarymanagement.*
 import sbt.librarymanagement.ivy.{ Credentials, IvyConfiguration, IvyPaths, UpdateOptions }
 import sbt.nio.file.Glob
+import sbt.protocol.testing.TestResult
 import sbt.testing.Framework
 import sbt.util.{ cacheLevel, ActionCacheStore, Digest, Level, Logger, LoggerContext }
 import xsbti.{ HashedVirtualFileRef, VirtualFile, VirtualFileRef }
@@ -357,10 +358,10 @@ object Keys {
   val definedTestNames = taskKey[Seq[String]]("Provides the set of defined test names.").withRank(BMinusTask)
   val definedTestDigests = taskKey[Map[String, Digest]]("Provides a unique digest of defined tests.").withRank(DTask)
   val executeTests = taskKey[Tests.Output]("Executes all tests, producing a report.").withRank(CTask)
-  val test = inputKey[Unit]("Executes the tests that either failed before, were not run or whose transitive dependencies changed, among those provided as arguments.").withRank(ATask)
-  val testFull = taskKey[Unit]("Executes all tests.").withRank(APlusTask)
-  val testOnly = inputKey[Unit]("Executes the tests provided as arguments or all tests if no arguments are provided.").withRank(ATask)
-  val testQuick = inputKey[Unit]("Alias for test.").withRank(CTask)
+  val test = inputKey[TestResult]("Executes the tests that either failed before, were not run or whose transitive dependencies changed, among those provided as arguments.").withRank(ATask)
+  val testFull = taskKey[TestResult]("Executes all tests.").withRank(APlusTask)
+  val testOnly = inputKey[TestResult]("Executes the tests provided as arguments or all tests if no arguments are provided.").withRank(ATask)
+  val testQuick = inputKey[TestResult]("Alias for test.").withRank(CTask)
   @cacheLevel(include = Array.empty)
   val testOptions = taskKey[Seq[TestOption]]("Options for running tests.").withRank(BPlusTask)
   private[sbt] val testOptionDigests = taskKey[Seq[Digest]]("Digest for testOptions").withRank(DTask)

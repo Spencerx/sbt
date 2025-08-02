@@ -19,7 +19,7 @@ import sbt.Scope.RefThenConfig.{ project, config }
  *
  * @example
  *  {{{
- *  Test / test := ()
+ *  Test / test := TestResult.Empty
  *  console.key / scalacOptions += "-deprecation"
  *  Compile / console / scalacOptions += "-Ywarn-numeric-widen"
  *  }}}

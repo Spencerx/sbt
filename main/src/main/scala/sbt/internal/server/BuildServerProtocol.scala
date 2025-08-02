@@ -938,7 +938,9 @@ object BuildServerProtocol {
             item.classes.toList match {
               case Nil => Def.task(())
               case classes =>
-                (scope / testOnly).toTask(" " + classes.mkString(" "))
+                (scope / testOnly)
+                  .toTask(" " + classes.mkString(" "))
+                  .map(r => ())
             }
           }
           testTasks.joinWith(ts => TaskExtra.joinTasks(ts).join).result
@@ -952,7 +954,7 @@ object BuildServerProtocol {
         case None =>
           // run allTests in testParams.targets
           val filter = ScopeFilter.in(testParams.targets.map(workspace.scopes))
-          test.toTask("").all(filter).result
+          test.toTask("").map(r => ()).all(filter).result
       }
 
       Def.task {
