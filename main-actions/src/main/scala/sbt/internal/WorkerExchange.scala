@@ -11,13 +11,14 @@ package internal
 
 import com.google.gson.Gson
 import java.io.*
-import java.util.concurrent.atomic.AtomicReference
 import sbt.io.IO
 import sbt.internal.worker1.*
 import sbt.testing.Framework
 import scala.sys.process.{ BasicIO, Process, ProcessIO }
 import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
+import scala.concurrent.{ Await, Promise }
+import scala.concurrent.duration.*
 
 object WorkerExchange:
   val listeners: mutable.ListBuffer[WorkerResponseListener] = ListBuffer.empty
@@ -36,15 +37,17 @@ object WorkerExchange:
       fullCp.mkString(File.pathSeparator),
       classOf[WorkerMain].getCanonicalName,
     )
-    val inputRef = AtomicReference[OutputStream]()
+    val inputRef = Promise[OutputStream]()
     val processIo = ProcessIO(
-      in = (input) => inputRef.set(input),
+      in = (input) => inputRef.success(input),
       out = BasicIO.processFully(onStdoutLine),
       err = BasicIO.processFully((line) => scala.Console.err.println(line)),
     )
     val forkWithIo = fo.withOutputStrategy(OutputStrategy.CustomInputOutput(processIo))
     val p = Fork.java.fork(forkWithIo, options)
-    WorkerProxy(inputRef.get(), p, options)
+    val forkTimeout = 30.seconds
+    val input = Await.result(inputRef.future, forkTimeout)
+    WorkerProxy(input, p, options)
 
   def registerListener(listener: WorkerResponseListener): Unit =
     synchronized:
