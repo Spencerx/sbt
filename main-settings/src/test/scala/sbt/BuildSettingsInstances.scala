@@ -51,7 +51,6 @@ object BuildSettingsInstances:
     2 -> Gen.constant[ConfigKey](Compile),
     2 -> Gen.constant[ConfigKey](Test),
     1 -> Gen.constant[ConfigKey](Runtime),
-    1 -> Gen.constant[ConfigKey](IntegrationTest),
     1 -> Gen.constant[ConfigKey](Provided),
   )
 

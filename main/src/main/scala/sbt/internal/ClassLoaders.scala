@@ -34,7 +34,7 @@ private[sbt] object ClassLoaders {
   }
   private val interfaceLoader = classOf[sbt.testing.Framework].getClassLoader
   /*
-   * Get the class loader for a test task. The configuration could be IntegrationTest or Test.
+   * Get the class loader for a test task. The configuration could be Test.
    */
   private[sbt] def testTask: Def.Initialize[Task[ClassLoader]] = Def.task {
     val si = scalaInstance.value

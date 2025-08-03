@@ -21,17 +21,14 @@ object Configurations {
 
   lazy val RuntimeInternal = optionalInternal(Runtime)
   lazy val TestInternal = fullInternal(Test)
-  @nowarn
-  lazy val IntegrationTestInternal = fullInternal(IntegrationTest)
   lazy val CompileInternal = fullInternal(Compile)
 
   @nowarn
   def internalMap(c: Configuration) = c match {
-    case Compile         => CompileInternal
-    case Test            => TestInternal
-    case Runtime         => RuntimeInternal
-    case IntegrationTest => IntegrationTestInternal
-    case _               => c
+    case Compile => CompileInternal
+    case Test    => TestInternal
+    case Runtime => RuntimeInternal
+    case _       => c
   }
 
   private[sbt] def internal(base: Configuration, ext: Configuration*) =
@@ -43,8 +40,6 @@ object Configurations {
 
   lazy val Default = Configuration.of("Default", "default")
   lazy val Compile = Configuration.of("Compile", "compile")
-  @deprecated("Create a separate subproject for testing instead", "1.9.0")
-  lazy val IntegrationTest = Configuration.of("IntegrationTest", "it").extend(Runtime)
   lazy val Provided = Configuration.of("Provided", "provided")
   lazy val Runtime = Configuration.of("Runtime", "runtime").extend(Compile)
   lazy val Test = Configuration.of("Test", "test").extend(Runtime)
@@ -70,11 +65,11 @@ object Configurations {
   @nowarn
   private[sbt] def underScalaVersion(c: Configuration): Boolean =
     c match {
-      case Default | Compile | IntegrationTest | Provided | Runtime | Test | Optional |
-          CompilerPlugin | CompileInternal | RuntimeInternal | TestInternal =>
+      case Default | Compile | Provided | Runtime | Test | Optional | CompilerPlugin |
+          CompileInternal | RuntimeInternal | TestInternal =>
         true
       case config =>
-        config.extendsConfigs exists underScalaVersion
+        config.extendsConfigs.exists(underScalaVersion)
     }
 }
 

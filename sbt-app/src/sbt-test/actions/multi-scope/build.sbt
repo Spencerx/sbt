@@ -69,5 +69,4 @@ lazy val d = project.settings(
 	// these shouldn't get picked up
 	Compile / compile / taskX := Set(32366),
 	compile / taskX := Set(548686),
-	Configurations.IntegrationTest / taskX := Set(11111),
 )

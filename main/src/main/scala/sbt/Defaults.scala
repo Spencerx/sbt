@@ -58,14 +58,7 @@ import sbt.io.Path.*
 import sbt.io.*
 import sbt.io.syntax.*
 import sbt.librarymanagement.Artifact.{ DocClassifier, SourceClassifier }
-import sbt.librarymanagement.Configurations.{
-  Compile,
-  CompilerPlugin,
-  IntegrationTest,
-  Provided,
-  Runtime,
-  Test
-}
+import sbt.librarymanagement.Configurations.{ Compile, CompilerPlugin, Provided, Runtime, Test }
 import sbt.librarymanagement.CrossVersion.{ binarySbtVersion, binaryScalaVersion, partialVersion }
 import sbt.librarymanagement.*
 import sbt.librarymanagement.ivy.*
@@ -2485,12 +2478,6 @@ object Defaults extends BuildCommon {
 
   lazy val testSettings: Seq[Setting[?]] = configSettings ++ testTasks
 
-  @nowarn
-  @deprecated(
-    "Create a separate subproject instead of using IntegrationTest and in addition avoid using itSettings",
-    "1.9.0"
-  )
-  lazy val itSettings: Seq[Setting[?]] = inConfig(IntegrationTest)(testSettings)
   lazy val defaultConfigs: Seq[Setting[?]] = inConfig(Compile)(compileSettings) ++
     inConfig(Test)(testSettings) ++
     inConfig(Runtime)(Classpaths.configSettings)

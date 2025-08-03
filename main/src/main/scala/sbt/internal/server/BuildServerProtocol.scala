@@ -267,7 +267,7 @@ object BuildServerProtocol {
     bspScalaMainClasses / aggregate := false,
   )
 
-  // This will be scoped to Compile, Test, IntegrationTest etc
+  // This will be scoped to Compile, Test, etc
   lazy val configSettings: Seq[Def.Setting[?]] = Seq(
     bspTargetIdentifier := {
       val ref = thisProjectRef.value

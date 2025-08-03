@@ -169,7 +169,6 @@ object Scope:
 
   private[sbt] val configIdents: Map[String, String] =
     Map(
-      "it" -> "IntegrationTest",
       "scala-tool" -> "ScalaTool",
       "plugin" -> "CompilerPlugin"
     )
