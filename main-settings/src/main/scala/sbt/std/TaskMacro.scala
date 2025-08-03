@@ -11,13 +11,7 @@ package std
 
 import Def.{ Initialize, Setting }
 import sbt.internal.util.Types.Id
-import sbt.internal.util.appmacro.{
-  Cont,
-  // Instance,
-  // LinterDSL,
-  ContextUtil,
-  ContextUtil0,
-}
+import sbt.internal.util.appmacro.{ Cont, ContextUtil, ContextUtil0 }
 import sbt.internal.util.{ LinePosition, NoPosition, SourcePosition }
 
 import language.experimental.macros
@@ -189,23 +183,6 @@ object TaskMacro:
           $rec.append1[A2]($init)(using $ev)
         }
 
-  /*
-  private def transformMacroImpl[A](using qctx: Quotes)(init: Expr[A])(
-      newName: String
-  ): qctx.reflect.Term = {
-    import qctx.reflect.*
-    // val target =
-    //   c.macroApplication match {
-    //     case Apply(Select(prefix, _), _) => prefix
-    //     case x                           => ContextUtil.unexpectedTree(x)
-    //   }
-    Apply.apply(
-      Select(This, TermName(newName).encodedName),
-      init.asTerm :: sourcePosition.asTerm :: Nil
-    )
-  }
-   */
-
   private[sbt] def sourcePosition(using qctx: Quotes): Expr[SourcePosition] =
     import qctx.reflect.*
     val pos = Position.ofMacroExpansion
@@ -215,25 +192,6 @@ object TaskMacro:
       '{ LinePosition($name, $line) }
     else '{ NoPosition }
 
-  /*
-  private def settingSource(c: blackbox.Context, path: String, name: String): String = {
-    @tailrec def inEmptyPackage(s: c.Symbol): Boolean = s != c.universe.NoSymbol && (
-      s.owner == c.mirror.EmptyPackage || s.owner == c.mirror.EmptyPackageClass || inEmptyPackage(
-        s.owner
-      )
-    )
-    c.internal.enclosingOwner match {
-      case ec if !ec.isStatic       => name
-      case ec if inEmptyPackage(ec) => path
-      case ec                       => s"(${ec.fullName}) $name"
-    }
-  }
-
-  private def constant[A1: c.TypeTag](c: blackbox.Context, t: T): c.Expr[A1] = {
-    import c.universe._
-    c.Expr[A1](Literal(Constant(t)))
-  }
-   */
 end TaskMacro
 
 object DefinableTaskMacro:
@@ -248,22 +206,3 @@ object DefinableTaskMacro:
       $rec.set0($app, $pos)
     }
 end DefinableTaskMacro
-
-/*
-object PlainTaskMacro:
-  def task[A1](t: T): Task[A1] = macro taskImpl[A1]
-  def taskImpl[A1: Type](c: blackbox.Context)(t: c.Expr[A1]): c.Expr[Task[A1]] =
-    Instance.contImpl[A1, Id](c, TaskInstance, TaskConvert, MixedBuilder, OnlyTaskLinterDSL)(
-      Left(t),
-      Instance.idTransform[c.type]
-    )
-
-  def taskDyn[A1](t: Task[A1]): Task[A1] = macro taskDynImpl[A1]
-  def taskDynImpl[A1: Type](c: blackbox.Context)(t: c.Expr[Task[A1]]): c.Expr[Task[A1]] =
-    Instance.contImpl[A1, Id](c, TaskInstance, TaskConvert, MixedBuilder, OnlyTaskDynLinterDSL)(
-      Right(t),
-      Instance.idTransform[c.type]
-    )
-
-end PlainTaskMacro
- */

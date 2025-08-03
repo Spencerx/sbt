@@ -35,42 +35,7 @@ final class InputTask[A1] private (val parser: State => Parser[Task[A1]]):
 end InputTask
 
 object InputTask:
-  /*
-  implicit class InitializeInput[T](i: Initialize[InputTask[T]]) {
-    def partialInput(in: String): Initialize[InputTask[T]] = i(_ partialInput in)
-    def fullInput(in: String): Initialize[InputTask[T]] = i(_ fullInput in)
-
-    import std.FullInstance._
-    def toTask(in: String): Initialize[Task[T]] = flatten(
-      (Def.stateKey zipWith i)((sTask, it) =>
-        sTask map (s =>
-          Parser.parse(in, it.parser(s)) match {
-            case Right(t) => Def.value(t)
-            case Left(msg) =>
-              val indented = msg.linesIterator.map("   " + _).mkString("\n")
-              sys.error(s"Invalid programmatic input:\n$indented")
-          }
-        )
-      )
-    )
-  }
-
-  implicit def inputTaskParsed[T](
-      @deprecated("unused", "") in: InputTask[T]
-  ): std.ParserInputTask[T] = ???
-
-  implicit def inputTaskInitParsed[T](
-      @deprecated("unused", "") in: Initialize[InputTask[T]]
-  ): std.ParserInputTask[T] = ???
-   */
-
   def make[A1](p: State => Parser[Task[A1]]): InputTask[A1] = new InputTask[A1](p)
-
-  /*
-  def static[T](p: Parser[Task[T]]): InputTask[T] = free(_ => p)
-
-  def static[I, T](p: Parser[I])(c: I => Task[T]): InputTask[T] = static(p map c)
-   */
 
   def free[A1](p: State => Parser[Task[A1]]): InputTask[A1] = make(p)
 
@@ -109,80 +74,6 @@ object InputTask:
   /** A dummy parser that consumes no input and produces nothing useful (unit). */
   def emptyParser: State => Parser[Unit] =
     Types.const(sbt.internal.util.complete.DefaultParsers.success(()))
-
-  /*
-  /** Implementation detail that is public because it is used by a macro. */
-  def parserAsInput[T](p: Parser[T]): Initialize[State => Parser[T]] =
-    Def.valueStrict(Types.const(p))
-
-  /** Implementation detail that is public because it is used by a macro. */
-  def initParserAsInput[T](i: Initialize[Parser[T]]): Initialize[State => Parser[T]] =
-    i(Types.const[State, Parser[T]])
-
-  @deprecated("Use another InputTask constructor or the `Def.inputTask` macro.", "0.13.0")
-  def apply[I, T](
-      p: Initialize[State => Parser[I]]
-  )(action: TaskKey[I] => Initialize[Task[T]]): Initialize[InputTask[T]] = {
-    val dummyKey = localKey[Task[I]]
-    val (marker, dummy) = dummyTask[I]
-    val it = action(TaskKey(dummyKey)) mapConstant subResultForDummy(dummyKey, dummy)
-    val act = it { tsk => (value: I) =>
-      subForDummy(marker, value, tsk)
-    }
-    separate(p)(act)
-  }
-
-  /**
-   * The proper solution is to have a Manifest context bound and accept slight source incompatibility,
-   * The affected InputTask construction methods are all deprecated and so it is better to keep complete
-   * compatibility.  Because the AttributeKey is local, it uses object equality and the manifest is not used.
-   */
-  private def localKey[T]: AttributeKey[T] =
-    AttributeKey.local[Unit].asInstanceOf[AttributeKey[T]]
-
-  private def subResultForDummy[I](dummyKey: AttributeKey[Task[I]], dummyTask: Task[I]) =
-    new (ScopedKey ~> Option) {
-      def apply[T](sk: ScopedKey[T]) =
-        if (sk.key eq dummyKey) {
-          // sk.key: AttributeKey[T], dummy.key: AttributeKey[Task[I]]
-          // (sk.key eq dummy.key) ==> T == Task[I] because AttributeKey is invariant
-          Some(dummyTask.asInstanceOf[T])
-        } else
-          None
-    }
-
-  private def dummyTask[I]: (AttributeKey[Option[I]], Task[I]) = {
-    val key = localKey[Option[I]]
-    val f: () => I = () =>
-      sys.error(s"Internal sbt error: InputTask stub was not substituted properly.")
-    val t: Task[I] = Task(Info[I]().set(key, none), Pure(f, false))
-    (key, t)
-  }
-
-  private def subForDummy[I, T](
-      marker: AttributeKey[Option[I]],
-      value: I,
-      task: Task[T]
-  ): Task[T] = {
-    val seen = new java.util.IdentityHashMap[Task[_], Task[_]]
-    lazy val f: Task ~> Task = new (Task ~> Task) {
-      def apply[A](t: Task[A]): Task[A] = {
-        val t0 = seen.get(t)
-        if (t0 == null) {
-          val newAction =
-            if (t.info.get(marker).isDefined)
-              (Pure[A](() => value.asInstanceOf[A], inline = true): Action[A])
-            else
-              t.work.mapTask(f)
-          val newTask = Task(t.info, newAction)
-          seen.put(t, newTask)
-          newTask
-        } else t0.asInstanceOf[Task[A]]
-      }
-    }
-    f(task)
-  }
-   */
 
   given inputTaskApplicative: Applicative[InputTask] with
     type F[a] = InputTask[a]

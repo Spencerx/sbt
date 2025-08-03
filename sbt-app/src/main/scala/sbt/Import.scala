@@ -17,9 +17,6 @@ trait Import {
   type URI = java.net.URI
   type URL = java.net.URL
 
-  @deprecated("Will be removed in sbt 2", "1.0.0-RC3")
-  def Seq2Vector[T](s: Seq[T]): Vector[T] = s.toVector
-
   // sbt
   val StdoutOutput = sbt.OutputStrategy.StdoutOutput
   type BufferedOutput = sbt.OutputStrategy.BufferedOutput
