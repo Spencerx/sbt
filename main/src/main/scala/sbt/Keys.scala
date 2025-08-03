@@ -629,6 +629,7 @@ object Keys {
   val sonaBundle = taskKey[File]("Local bundle for Sonatype publishing").withRank(DTask)
   val localStaging = settingKey[Option[Resolver]]("Local staging resolver for Sonatype publishing").withRank(CSetting)
   val sonaDeploymentName = settingKey[String]("The name used for deployment").withRank(DSetting)
+  val sonaUploadRequestTimeout = settingKey[FiniteDuration]("Request timeout for Sonatype publishing").withRank(DSetting)
 
   val classifiersModule = taskKey[GetClassifiersModule]("classifiers-module").withRank(CTask)
   val compatibilityWarningOptions = settingKey[CompatibilityWarningOptions]("Configures warnings around Maven incompatibility.").withRank(CSetting)

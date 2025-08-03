@@ -50,6 +50,7 @@ object LintUnused {
       shellPrompt,
       sLog,
       traceLevel,
+      sonaDeploymentName,
     ),
     includeLintKeys := Set(
       scalacOptions,

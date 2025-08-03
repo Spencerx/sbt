@@ -8,7 +8,7 @@
 
 package sbt
 
-import sbt.librarymanagement.{ MavenRepository, Resolver }
+import sbt.librarymanagement.Resolver
 import sbt.librarymanagement.ivy.Credentials
 
 import java.io.File
@@ -42,21 +42,7 @@ object Opts {
   }
   object resolver {
     import sbt.io.syntax.*
-    @deprecated("Use sonatypeOssReleases instead", "1.7.0")
-    val sonatypeReleases = Resolver.sonatypeRepo("releases")
-    // todo: fix
-    // val sonatypeOssReleases = Resolver.sonatypeOssRepos("releases")
 
-    @deprecated("Use sonatypeOssSnapshots instead", "1.7.0")
-    val sonatypeSnapshots = Resolver.sonatypeRepo("snapshots")
-
-    // todo: fix
-    // val sonatypeOssSnapshots = Resolver.sonatypeOssRepos("snapshots")
-
-    val sonatypeStaging = MavenRepository(
-      "sonatype-staging",
-      "https://oss.sonatype.org/service/local/staging/deploy/maven2"
-    )
     val mavenLocalFile = Resolver.file("Local Repository", userHome / ".m2" / "repository")(using
       Resolver.defaultPatterns
     )

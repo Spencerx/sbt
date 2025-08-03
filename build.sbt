@@ -636,6 +636,7 @@ lazy val dependencyTreeProj = (project in file("dependency-tree"))
     name := "sbt-dependency-tree",
     pluginCrossBuild / sbtVersion := version.value,
     publishMavenStyle := true,
+    sbtPluginPublishLegacyMavenStyle := false,
     // mimaSettings,
     mimaPreviousArtifacts := Set.empty,
   )
@@ -1346,8 +1347,10 @@ def customCommands: Seq[Setting[?]] = Seq(
 
 ThisBuild / pomIncludeRepository := (_ => false) // drop repos other than Maven Central from POM
 ThisBuild / publishTo := {
-  val nexus = "https://oss.sonatype.org/"
-  Some("releases" at nexus + "service/local/staging/deploy/maven2")
+  val centralSnapshots = "https://central.sonatype.com/repository/maven-snapshots/"
+  val v = (ThisBuild / version).value
+  if (v.endsWith("SNAPSHOT")) Some("central-snapshots" at centralSnapshots)
+  else localStaging.value
 }
 ThisBuild / publishMavenStyle := true
 
