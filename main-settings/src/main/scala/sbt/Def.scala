@@ -43,9 +43,6 @@ trait BuildSyntax:
   extension [A1](inline in: Task[A1])
     inline def value: A1 = std.InputWrapper.`wrapTask_\u2603\u2603`[A1](in)
 
-  // implicit def macroValueIn[T](@deprecated("unused", "") in: InputTask[T]): std.InputEvaluated[T] =
-  //   ???
-
   extension [A1](inline in: Parser[A1])
     inline def parsed: A1 = ParserInput.`parser_\u2603\u2603`[A1](Def.toSParser(in))
 
@@ -377,8 +374,6 @@ object Def extends BuildSyntax with Init with InitializeImplicits:
   // The following conversions enable the types Initialize[T], Initialize[Task[T]], and Task[T] to
   //  be used in task and setting macros as inputs with an ultimate result of type T
 
-  // implicit def macroValueI[T](@deprecated("unused", "") in: Initialize[T]): MacroValue[T] = ???
-
   extension [A1](inline in: Initialize[A1])
     inline def value: A1 = InputWrapper.`wrapInit_\u2603\u2603`[A1](in)
 
@@ -391,10 +386,6 @@ object Def extends BuildSyntax with Init with InitializeImplicits:
      * instead of evaluating the task.
      */
     inline def taskValue: Task[A1] = InputWrapper.`wrapInit_\u2603\u2603`[Task[A1]](in)
-
-    // implicit def macroValueIInT[T](
-    //     @deprecated("unused", "") in: Initialize[InputTask[T]]
-    // ): InputEvaluated[T] = ???
 
     inline def flatMapTask[A2](f: A1 => Initialize[Task[A2]]): Initialize[Task[A2]] =
       std.FullInstance.initializeTaskMonad.flatMap(in)(f)

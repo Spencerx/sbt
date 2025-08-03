@@ -20,21 +20,6 @@ object Inputs {
     configurations
       .map(cfg => Configuration(cfg.name) -> cfg.extendsConfigs.map(c => Configuration(c.name)))
 
-  @deprecated("Now unused internally, to be removed in the future", "2.0.0-RC6-5")
-  def configExtends(
-      configurations: Seq[sbt.librarymanagement.Configuration]
-  ): Map[Configuration, Seq[Configuration]] =
-    configurations
-      .map(cfg => Configuration(cfg.name) -> cfg.extendsConfigs.map(c => Configuration(c.name)))
-      .toMap
-
-  @deprecated("Use coursierConfigurationsMap instead", "2.0.0-RC6-5")
-  def coursierConfigurations(
-      configurations: Seq[sbt.librarymanagement.Configuration],
-      shadedConfigOpt: Option[String] = None
-  ): Map[Configuration, Set[Configuration]] =
-    coursierConfigurationsMap(configurations)
-
   def coursierConfigurationsMap(
       configurations: Seq[sbt.librarymanagement.Configuration]
   ): Map[Configuration, Set[Configuration]] = {

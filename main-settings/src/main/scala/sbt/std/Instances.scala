@@ -29,12 +29,6 @@ end InitializeInstance
 
 object ParserInstance:
   type F1[x] = State => Parser[x]
-  // import sbt.internal.util.Classes.Applicative
-  // private implicit val parserApplicative: Applicative[M] = new Applicative[M] {
-  //   def apply[S, T](f: M[S => T], v: M[S]): M[A1] = s => (f(s) ~ v(s)) map { case (a, b) => a(b) }
-  //   def pure[S](s: => S) = const(Parser.success(s))
-  //   def map[S, T](f: S => T, v: M[S]) = s => v(s).map(f)
-  // }
 
   given parserFunApplicative: Applicative[F1] with
     type F[x] = State => Parser[x]
