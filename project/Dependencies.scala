@@ -116,7 +116,7 @@ object Dependencies {
   val ivy = "org.scala-sbt.ivy" % "ivy" % "2.3.0-sbt-77cc781d727b367d3761f097d89f5a4762771d41"
 
   // lm dependencies
-  val jsch = "com.github.mwiede" % "jsch" % "0.2.17" intransitive ()
+  val jsch = ("com.github.mwiede" % "jsch" % "0.2.23").intransitive()
   val gigahorseApacheHttp = "com.eed3si9n" %% "gigahorse-apache-http" % "0.9.3"
 
   // lm-coursier dependencies
