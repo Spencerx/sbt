@@ -5,7 +5,7 @@
 // DO NOT EDIT MANUALLY
 package sbt.internal.sona.codec
 import _root_.sjsonnew.{ Unbuilder, Builder, JsonFormat, deserializationError }
-trait PublisherStatusFormats { self: sbt.internal.sona.codec.DeploymentStateFormats with sjsonnew.BasicJsonProtocol =>
+trait PublisherStatusFormats { self: sbt.internal.sona.codec.DeploymentStateFormats with sjsonnew.BasicJsonProtocol with sbt.internal.util.codec.JValueFormats =>
 implicit lazy val PublisherStatusFormat: JsonFormat[sbt.internal.sona.PublisherStatus] = new JsonFormat[sbt.internal.sona.PublisherStatus] {
   override def read[J](__jsOpt: Option[J], unbuilder: Unbuilder[J]): sbt.internal.sona.PublisherStatus = {
     __jsOpt match {
@@ -15,8 +15,9 @@ implicit lazy val PublisherStatusFormat: JsonFormat[sbt.internal.sona.PublisherS
       val deploymentName = unbuilder.readField[String]("deploymentName")
       val deploymentState = unbuilder.readField[sbt.internal.sona.DeploymentState]("deploymentState")
       val purls = unbuilder.readField[Vector[String]]("purls")
+      val errors = unbuilder.readField[Option[sjsonnew.shaded.scalajson.ast.unsafe.JValue]]("errors")
       unbuilder.endObject()
-      sbt.internal.sona.PublisherStatus(deploymentId, deploymentName, deploymentState, purls)
+      sbt.internal.sona.PublisherStatus(deploymentId, deploymentName, deploymentState, purls, errors)
       case None =>
       deserializationError("Expected JsObject but found None")
     }
@@ -27,6 +28,7 @@ implicit lazy val PublisherStatusFormat: JsonFormat[sbt.internal.sona.PublisherS
     builder.addField("deploymentName", obj.deploymentName)
     builder.addField("deploymentState", obj.deploymentState)
     builder.addField("purls", obj.purls)
+    builder.addField("errors", obj.errors)
     builder.endObject()
   }
 }

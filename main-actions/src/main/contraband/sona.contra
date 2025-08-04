@@ -18,4 +18,6 @@ type PublisherStatus {
   deploymentName: String!
   deploymentState: sbt.internal.sona.DeploymentState!
   purls: [String]
+  # Optional errors. The field has non-standard structure and thus we avoid automatic format generation
+  errors: sjsonnew.shaded.scalajson.ast.unsafe.JValue
 }
