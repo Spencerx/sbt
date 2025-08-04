@@ -18,7 +18,7 @@ import KeyRanks.*
 import sbt.ProjectExtra.inConfig
 import sbt.internal.*
 import sbt.io.syntax.*
-import sbt.librarymanagement.Configurations.{ IntegrationTest, Test }
+import sbt.librarymanagement.Configurations.Test
 import scala.annotation.nowarn
 
 /**
@@ -56,6 +56,5 @@ object JUnitXmlReportPlugin extends AutoPlugin {
 
   @nowarn
   override lazy val projectSettings: Seq[Setting[?]] =
-    inConfig(Test)(testReportSettings) ++
-      inConfig(IntegrationTest)(testReportSettings)
+    inConfig(Test)(testReportSettings)
 }

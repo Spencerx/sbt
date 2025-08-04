@@ -17,7 +17,7 @@ object DependencyTreePlugin extends AutoPlugin {
   override def requires = MiniDependencyTreePlugin
 
   @nowarn
-  val configurations = Vector(Compile, Test, IntegrationTest, Runtime, Provided, Optional)
+  val configurations = Vector(Compile, Test, Runtime, Provided, Optional)
 
   // MiniDependencyTreePlugin provides baseBasicReportingSettings for Compile and Test
   override lazy val projectSettings: Seq[Def.Setting[?]] =
