@@ -142,10 +142,10 @@ jobs:
           # ./sbt -v --client headerCheck
           # ./sbt -v --client "Test/headerCheck"
           ./sbt -v --client "Test/compile"
+          ./sbt -v --client doc
           ./sbt -v --client publishLocal
           ./sbt -v --client test
           ./sbt -v --client "serverTestProj/test"
-          # ./sbt -v --client doc
           ./sbt -v --client "all $UTIL_TESTS"
       - name: Build and test (2)
         if: ${{ matrix.jobtype == 2 }}
