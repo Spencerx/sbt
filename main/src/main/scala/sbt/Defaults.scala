@@ -201,7 +201,7 @@ object Defaults extends BuildCommon {
       discoveredJavaHomes := CrossJava.discoverJavaHomes,
       javaHomes :== ListMap.empty,
       fullJavaHomes := CrossJava.expandJavaHomes(discoveredJavaHomes.value ++ javaHomes.value),
-      testForkedParallel :== false,
+      testForkedParallel :== true,
       javaOptions :== Nil,
       sbtPlugin :== false,
       isMetaBuild :== false,
