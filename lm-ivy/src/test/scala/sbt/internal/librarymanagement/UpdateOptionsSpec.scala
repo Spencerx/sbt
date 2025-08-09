@@ -1,6 +1,6 @@
 package sbt.internal.librarymanagement
 
-import sbt.librarymanagement.ivy.*
+import sbt.internal.librarymanagement.ivy.*
 import verify.BasicTestSuite
 
 class UpdateOptionsSpec extends BasicTestSuite {

@@ -8,8 +8,7 @@
 
 package sbt
 
-import sbt.librarymanagement.Resolver
-import sbt.librarymanagement.ivy.Credentials
+import sbt.librarymanagement.{ Credentials, Resolver }
 
 import java.io.File
 import java.net.URI

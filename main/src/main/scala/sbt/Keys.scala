@@ -23,6 +23,7 @@ import sbt.internal.*
 import sbt.internal.bsp.*
 import sbt.internal.inc.ScalaInstance
 import sbt.internal.librarymanagement.{ CompatibilityWarningOptions, IvySbt }
+import sbt.internal.librarymanagement.ivy.{ IvyConfiguration, UpdateOptions }
 import sbt.internal.remotecache.RemoteCacheArtifact
 import sbt.internal.server.BuildServerProtocol.BspFullWorkspace
 import sbt.internal.server.{ BspCompileTask, BuildServerReporter, ServerHandler }
@@ -33,7 +34,6 @@ import sbt.io.*
 import sbt.librarymanagement.Configurations.CompilerPlugin
 import sbt.librarymanagement.LibraryManagementCodec.*
 import sbt.librarymanagement.*
-import sbt.librarymanagement.ivy.{ Credentials, IvyConfiguration, IvyPaths, UpdateOptions }
 import sbt.nio.file.Glob
 import sbt.protocol.testing.TestResult
 import sbt.testing.Framework

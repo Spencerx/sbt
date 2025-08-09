@@ -1,4 +1,4 @@
-package sbt.librarymanagement.ivy
+package sbt.internal.librarymanagement.ivy
 package formats
 
 import sjsonnew.*

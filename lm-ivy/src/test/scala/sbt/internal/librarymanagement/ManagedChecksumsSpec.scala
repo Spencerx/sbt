@@ -1,8 +1,8 @@
 package sbt.internal.librarymanagement
 
 import org.apache.ivy.util.Message
+import sbt.internal.librarymanagement.ivy.*
 import sbt.librarymanagement.*
-import sbt.librarymanagement.ivy.*
 import sbt.io.IO
 
 object ManagedChecksumsSpec extends BaseIvySpecification {

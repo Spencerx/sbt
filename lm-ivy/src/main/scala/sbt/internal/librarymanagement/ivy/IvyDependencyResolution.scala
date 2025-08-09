@@ -1,8 +1,9 @@
 package sbt
+package internal
 package librarymanagement
 package ivy
 
-import sbt.internal.librarymanagement.*
+import sbt.librarymanagement.*
 import sbt.util.Logger
 
 class IvyDependencyResolution private[sbt] (val ivySbt: IvySbt)

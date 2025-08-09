@@ -33,6 +33,7 @@ import sbt.internal.classpath.AlternativeZincUtil
 import sbt.internal.inc.JavaInterfaceUtil.*
 import sbt.internal.inc.classpath.{ ClasspathFilter, ClasspathUtil }
 import sbt.internal.inc.{ CompileOutput, MappedFileConverter, Stamps, ZincLmUtil, ZincUtil }
+import sbt.internal.librarymanagement.ivy.*
 import sbt.internal.librarymanagement.mavenint.{
   PomExtraDependencyAttributes,
   SbtPomExtraProperties
@@ -61,7 +62,6 @@ import sbt.librarymanagement.Artifact.{ DocClassifier, SourceClassifier }
 import sbt.librarymanagement.Configurations.{ Compile, CompilerPlugin, Provided, Runtime, Test }
 import sbt.librarymanagement.CrossVersion.{ binarySbtVersion, binaryScalaVersion, partialVersion }
 import sbt.librarymanagement.*
-import sbt.librarymanagement.ivy.*
 import sbt.librarymanagement.syntax.*
 import sbt.librarymanagement.LibraryManagementCodec.given
 import sbt.nio.FileStamp
@@ -2847,8 +2847,8 @@ object Classpaths {
     publishM2 := publishOrSkip(publishM2Configuration, publishM2 / skip).value,
     credentials ++= Def.uncached {
       val alreadyContainsCentralCredentials: Boolean = credentials.value.exists {
-        case d: DirectCredentials => d.host == Sona.host
-        case _                    => false
+        case d: Credentials.DirectCredentials => d.host == Sona.host
+        case _                                => false
       }
       if (!alreadyContainsCentralCredentials) SysProp.sonatypeCredentalsEnv.toSeq
       else Nil
@@ -3413,7 +3413,7 @@ object Classpaths {
     }
   private[sbt] lazy val ivySbt0: Initialize[Task[IvySbt]] =
     Def.task {
-      Credentials.register(credentials.value, streams.value.log)
+      IvyCredentials.register(credentials.value, streams.value.log)
       new IvySbt(ivyConfiguration.value)
     }
   def moduleSettings0: Initialize[Task[ModuleSettings]] = Def.task {

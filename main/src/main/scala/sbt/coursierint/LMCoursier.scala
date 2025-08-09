@@ -24,13 +24,9 @@ import lmcoursier.*
 import lmcoursier.syntax.*
 import lmcoursier.credentials.Credentials
 import Keys.*
+import sbt.librarymanagement.{ Credentials as IvyCredentials }
 import sbt.internal.util.Util
 import sbt.librarymanagement.*
-import sbt.librarymanagement.ivy.{
-  Credentials as IvyCredentials,
-  DirectCredentials,
-  FileCredentials
-}
 import sbt.util.Logger
 import sbt.io.syntax.*
 import xsbti.AppConfiguration
@@ -267,8 +263,10 @@ object LMCoursier {
     val st = streams.value
     def registerCredentials(creds: IvyCredentials): Unit = {
       (creds match {
-        case dc: DirectCredentials => Right[String, DirectCredentials](dc)
-        case fc: FileCredentials   => IvyCredentials.loadCredentials(fc.path)
+        case dc: IvyCredentials.DirectCredentials =>
+          Right[String, IvyCredentials.DirectCredentials](dc)
+        case fc: IvyCredentials.FileCredentials =>
+          sbt.internal.librarymanagement.ivy.IvyCredentials.loadCredentials(fc.path)
       }) match {
         case Left(err) => st.log.warn(err)
         case Right(d) =>

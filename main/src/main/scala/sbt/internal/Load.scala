@@ -20,14 +20,14 @@ import sbt.SlashSyntax0.*
 import sbt.internal.BuildStreams.*
 import sbt.internal.inc.classpath.ClasspathUtil
 import sbt.internal.inc.{ MappedFileConverter, ScalaInstance, ZincLmUtil, ZincUtil }
+import sbt.internal.librarymanagement.ivy.{ InlineIvyConfiguration, IvyDependencyResolution }
 import sbt.internal.util.Attributed.data
 import sbt.internal.util.Types.const
 import sbt.internal.util.Attributed
 import sbt.internal.util.appmacro.ContextUtil
 import sbt.internal.server.BuildServerEvalReporter
 import sbt.io.{ GlobFilter, IO }
-import sbt.librarymanagement.ivy.{ InlineIvyConfiguration, IvyDependencyResolution, IvyPaths }
-import sbt.librarymanagement.{ Configuration, Configurations, Resolver }
+import sbt.librarymanagement.{ Configuration, Configurations, IvyPaths, Resolver }
 import sbt.nio.Settings
 import sbt.util.{ Logger, Show }
 import xsbti.{ FileConverter, HashedVirtualFileRef, VirtualFile }

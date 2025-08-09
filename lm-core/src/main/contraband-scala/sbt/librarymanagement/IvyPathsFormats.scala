@@ -3,23 +3,23 @@
  */
 
 // DO NOT EDIT MANUALLY
-package sbt.librarymanagement.ivy
+package sbt.librarymanagement
 import _root_.sjsonnew.{ Unbuilder, Builder, JsonFormat, deserializationError }
 trait IvyPathsFormats { self: sjsonnew.BasicJsonProtocol =>
-implicit lazy val IvyPathsFormat: JsonFormat[sbt.librarymanagement.ivy.IvyPaths] = new JsonFormat[sbt.librarymanagement.ivy.IvyPaths] {
-  override def read[J](__jsOpt: Option[J], unbuilder: Unbuilder[J]): sbt.librarymanagement.ivy.IvyPaths = {
+implicit lazy val IvyPathsFormat: JsonFormat[sbt.librarymanagement.IvyPaths] = new JsonFormat[sbt.librarymanagement.IvyPaths] {
+  override def read[J](__jsOpt: Option[J], unbuilder: Unbuilder[J]): sbt.librarymanagement.IvyPaths = {
     __jsOpt match {
       case Some(__js) =>
       unbuilder.beginObject(__js)
       val baseDirectory = unbuilder.readField[String]("baseDirectory")
       val ivyHome = unbuilder.readField[Option[String]]("ivyHome")
       unbuilder.endObject()
-      sbt.librarymanagement.ivy.IvyPaths(baseDirectory, ivyHome)
+      sbt.librarymanagement.IvyPaths(baseDirectory, ivyHome)
       case None =>
       deserializationError("Expected JsObject but found None")
     }
   }
-  override def write[J](obj: sbt.librarymanagement.ivy.IvyPaths, builder: Builder[J]): Unit = {
+  override def write[J](obj: sbt.librarymanagement.IvyPaths, builder: Builder[J]): Unit = {
     builder.beginObject()
     builder.addField("baseDirectory", obj.baseDirectory)
     builder.addField("ivyHome", obj.ivyHome)

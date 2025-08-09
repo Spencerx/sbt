@@ -34,8 +34,12 @@ object DatatypeConfig {
       "sbt.internal.librarymanagement.formats.LoggerFormat" :: Nil
     }
 
-    case "sbt.librarymanagement.ivy.UpdateOptions" => { _ =>
-      "sbt.librarymanagement.ivy.formats.UpdateOptionsFormat" :: Nil
+    case "sbt.librarymanagement.IvyPaths" => { _ =>
+      "sbt.librarymanagement.IvyPathsFormats" :: Nil
+    }
+
+    case "sbt.internal.librarymanagement.ivy.UpdateOptions" => { _ =>
+      "sbt.internal.librarymanagement.ivy.formats.UpdateOptionsFormat" :: Nil
     }
 
     case "sbt.librarymanagement.LogicalClock" => { _ =>

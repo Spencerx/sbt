@@ -255,8 +255,8 @@ trait Import {
   type Caller = sbt.librarymanagement.Caller
   val ChainedResolver = sbt.librarymanagement.ChainedResolver
   type ChainedResolver = sbt.librarymanagement.ChainedResolver
-  val CircularDependencyLevel = sbt.librarymanagement.ivy.CircularDependencyLevel
-  type CircularDependencyLevel = sbt.librarymanagement.ivy.CircularDependencyLevel
+  // val CircularDependencyLevel = sbt.librarymanagement.ivy.CircularDependencyLevel
+  // type CircularDependencyLevel = sbt.librarymanagement.ivy.CircularDependencyLevel
   val ConfigRef = sbt.librarymanagement.ConfigRef
   type ConfigRef = sbt.librarymanagement.ConfigRef
   val Configuration = sbt.librarymanagement.Configuration
@@ -268,8 +268,8 @@ trait Import {
   type ConflictManager = sbt.librarymanagement.ConflictManager
   val ConflictWarning = sbt.librarymanagement.ConflictWarning
   type ConflictWarning = sbt.librarymanagement.ConflictWarning
-  val Credentials = sbt.librarymanagement.ivy.Credentials
-  type Credentials = sbt.librarymanagement.ivy.Credentials
+  val Credentials = sbt.librarymanagement.Credentials
+  type Credentials = sbt.librarymanagement.Credentials
   val CrossVersion = sbt.librarymanagement.CrossVersion
   type CrossVersion = sbt.librarymanagement.CrossVersion
   val DefaultMavenRepository = sbt.librarymanagement.Resolver.DefaultMavenRepository
@@ -277,7 +277,6 @@ trait Import {
   type Developer = sbt.librarymanagement.Developer
   val Disabled = sbt.librarymanagement.Disabled
   type Disabled = sbt.librarymanagement.Disabled
-  type DirectCredentials = sbt.librarymanagement.ivy.DirectCredentials
   val EvictionPair = sbt.librarymanagement.EvictionPair
   type EvictionPair = sbt.librarymanagement.EvictionPair
   val EvictionWarning = sbt.librarymanagement.EvictionWarning
@@ -286,7 +285,6 @@ trait Import {
   type EvictionWarningOptions = sbt.librarymanagement.EvictionWarningOptions
   // val ExclusionRule = sbt.librarymanagement.InclExclRule
   // type ExclusionRule = sbt.librarymanagement.InclExclRule
-  type FileCredentials = sbt.librarymanagement.ivy.FileCredentials
   val FileRepository = sbt.librarymanagement.FileRepository
   type FileRepository = sbt.librarymanagement.FileRepository
   val Full = sbt.librarymanagement.Full
@@ -295,6 +293,8 @@ trait Import {
   type InlineConfiguration = sbt.librarymanagement.ModuleDescriptorConfiguration
   val IvyScala = sbt.librarymanagement.ScalaModuleInfo
   type IvyScala = sbt.librarymanagement.ScalaModuleInfo
+  type IvyPaths = sbt.librarymanagement.IvyPaths
+  val IvyPaths = sbt.librarymanagement.IvyPaths
   val JavaNet2Repository = sbt.librarymanagement.Resolver.JavaNet2Repository
   import sbt.librarymanagement.{ InclExclRule, DependencyBuilders }
   given Conversion[String, InclExclRule] = InclExclRule.stringToExclusionRule
@@ -355,8 +355,8 @@ trait Import {
   val URLRepository = sbt.librarymanagement.URLRepository
   type URLRepository = sbt.librarymanagement.URLRepository
   val UpdateLogging = sbt.librarymanagement.UpdateLogging
-  val UpdateOptions = sbt.librarymanagement.ivy.UpdateOptions
-  type UpdateOptions = sbt.librarymanagement.ivy.UpdateOptions
+  val UpdateOptions = sbt.internal.librarymanagement.ivy.UpdateOptions
+  type UpdateOptions = sbt.internal.librarymanagement.ivy.UpdateOptions
   val UpdateReport = sbt.librarymanagement.UpdateReport
   type UpdateReport = sbt.librarymanagement.UpdateReport
   val UpdateStats = sbt.librarymanagement.UpdateStats
@@ -364,12 +364,6 @@ trait Import {
   val VersionNumber = sbt.librarymanagement.VersionNumber
   type VersionNumber = sbt.librarymanagement.VersionNumber
   type VersionNumberCompatibility = sbt.librarymanagement.VersionNumberCompatibility
-
-  // sbt.librarymanagement.ivy
-  val InlineIvyConfiguration = sbt.librarymanagement.ivy.InlineIvyConfiguration
-  type InlineIvyConfiguration = sbt.librarymanagement.ivy.InlineIvyConfiguration
-  type IvyPaths = sbt.librarymanagement.ivy.IvyPaths
-  val IvyPaths = sbt.librarymanagement.ivy.IvyPaths
 
   type FileConverter = xsbti.FileConverter
   type HashedVirtualFileRef = xsbti.HashedVirtualFileRef

@@ -19,8 +19,8 @@ import scala.concurrent.duration.*
 import sbt.internal.inc.HashUtil
 import sbt.internal.util.{ Terminal as ITerminal, Util }
 import sbt.internal.util.complete.SizeParser
+import sbt.librarymanagement.Credentials
 import sbt.io.syntax.*
-import sbt.librarymanagement.ivy.{ Credentials, FileCredentials }
 import sbt.nio.Keys.*
 
 // See also BuildPaths.scala
@@ -239,7 +239,7 @@ object SysProp {
   }
 
   lazy val sbtCredentialsEnv: Option[Credentials] =
-    sys.env.get("SBT_CREDENTIALS").map(raw => new FileCredentials(new File(raw)))
+    sys.env.get("SBT_CREDENTIALS").map(raw => new Credentials.FileCredentials(new File(raw)))
 
   def sonatypeCredentalsEnv: Option[Credentials] =
     for {

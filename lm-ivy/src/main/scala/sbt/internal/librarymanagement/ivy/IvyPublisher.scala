@@ -1,8 +1,9 @@
 package sbt
+package internal
 package librarymanagement
 package ivy
 
-import sbt.internal.librarymanagement.*
+import sbt.librarymanagement.*
 import sbt.util.Logger
 import java.io.File
 

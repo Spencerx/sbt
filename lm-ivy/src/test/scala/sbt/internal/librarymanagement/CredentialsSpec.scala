@@ -1,6 +1,7 @@
 package sbt.internal.librarymanagement
 
-import sbt.librarymanagement.ivy.Credentials
+import sbt.internal.librarymanagement.ivy.IvyCredentials
+import sbt.librarymanagement.Credentials
 
 import java.io.File
 import java.nio.file.Files
@@ -19,7 +20,7 @@ class CredentialsSpec extends AnyFunSuite {
 
     Files.write(credentialsFile.toPath(), content.getBytes())
 
-    val Right(credentials) = Credentials.loadCredentials(credentialsFile): @unchecked
+    val Right(credentials) = IvyCredentials.loadCredentials(credentialsFile): @unchecked
 
     assert(credentials.realm == null)
 
