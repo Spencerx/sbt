@@ -9,7 +9,6 @@
 package sbt.internal.sona
 
 import org.scalatest.flatspec.AnyFlatSpec
-import org.scalatest.matchers.should.Matchers.convertToAnyShouldWrapper
 import sbt.internal.sona.SonaClientTest.RecordingLogger
 import sbt.internal.util.BasicLogger
 import sbt.util.*
@@ -31,10 +30,10 @@ class SonaClientTest extends AnyFlatSpec {
       errors = errorsNode,
       log = logger
     )
-    result shouldBe expectedErrorMessage
+    assert(result == expectedErrorMessage)
 
     val actualLogText = logger.getLogMessages.mkString("\n")
-    actualLogText shouldBe expectedLogText
+    assert(actualLogText == expectedLogText)
 
     () // to avoid the "discarded non-Unit" value warning
   }
@@ -112,8 +111,6 @@ object SonaClientTest {
     private var events: List[LogEvent] = Nil
 
     def getEvents = events.reverse
-
-    override def ansiCodesSupported = true
     def trace(t: => Throwable): Unit = { events ::= new Trace(t) }
     def log(level: Level.Value, message: => String): Unit = { events ::= new Log(level, message) }
     def success(message: => String): Unit = { events ::= new Success(message) }
