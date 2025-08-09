@@ -628,19 +628,6 @@ lazy val scriptedSbtProj = (project in file("scripted-sbt"))
   .dependsOn(lmCore)
   .configure(addSbtIO, addSbtCompilerInterface)
 
-lazy val dependencyTreeProj = (project in file("dependency-tree"))
-  .dependsOn(sbtProj)
-  .settings(
-    sbtPlugin := true,
-    baseSettings,
-    name := "sbt-dependency-tree",
-    pluginCrossBuild / sbtVersion := version.value,
-    publishMavenStyle := true,
-    sbtPluginPublishLegacyMavenStyle := false,
-    // mimaSettings,
-    mimaPreviousArtifacts := Set.empty,
-  )
-
 lazy val remoteCacheProj = (project in file("sbt-remote-cache"))
   .dependsOn(sbtProj)
   .settings(
@@ -1212,7 +1199,6 @@ def allProjects =
     stdTaskProj,
     runProj,
     scriptedSbtProj,
-    dependencyTreeProj,
     protocolProj,
     actionsProj,
     commandProj,
