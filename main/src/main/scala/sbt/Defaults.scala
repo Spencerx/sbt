@@ -300,6 +300,7 @@ object Defaults extends BuildCommon {
         )
         .toFile(),
       sonaBundle / aggregate :== false,
+      sonaUploadRequestTimeout :== 10.minutes,
       commands ++= Seq(Publishing.sonaRelease, Publishing.sonaUpload),
     )
 
@@ -2859,7 +2860,6 @@ object Classpaths {
       val uuid = UUID.randomUUID().toString().take(8)
       s"$o:$v:$uuid"
     },
-    sonaUploadRequestTimeout := 10.minutes,
   )
 
   def baseGlobalDefaults =
