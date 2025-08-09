@@ -12,10 +12,11 @@ package sona
 
 import gigahorse.*
 import gigahorse.support.apachehttp.Gigahorse
+import sbt.internal.sona.SonaClient.failedDeploymentErrorText
 import sbt.util.Logger
 import sjsonnew.JsonFormat
 import sjsonnew.shaded.scalajson.ast.unsafe.JValue
-import sjsonnew.support.scalajson.unsafe.{ Converter, Parser }
+import sjsonnew.support.scalajson.unsafe.{ Converter, Parser, PrettyPrinter }
 
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
@@ -106,7 +107,9 @@ class SonaClient(reqTransform: Request => Request, uploadRequestTimeout: FiniteD
       if (attempt <= 3) List(5, 5, 10, 15)(attempt)
       else 30
     status.deploymentState match {
-      case DeploymentState.FAILED => sys.error(s"deployment $deploymentId failed")
+      case DeploymentState.FAILED =>
+        val errorText = failedDeploymentErrorText(deploymentId, status.errors, log)
+        sys.error(errorText)
       case DeploymentState.PENDING | DeploymentState.PUBLISHING | DeploymentState.VALIDATING =>
         Thread.sleep(sleepSec * 1000L)
         waitForDeploy(deploymentId, deploymentName, publishingType, attempt + 1, log)
@@ -205,6 +208,54 @@ object SonaClient {
       uploadRequestTimeout: FiniteDuration
   ): SonaClient =
     new SonaClient(OAuthClient(userName, userToken), uploadRequestTimeout)
+
+  /**
+   * @note non-private visibility only for the tests
+   */
+  private[sona] def failedDeploymentErrorText(
+      deploymentId: String,
+      errors: Option[JValue],
+      log: Logger
+  ): String = {
+    val errorsText = errors.map(presentDeploymentValidationErrors(_, log))
+    val errorsMessagePart = errorsText match {
+      case Some(value) =>
+        s" with validation errors:\n$value"
+      case None => ""
+    }
+    s"deployment $deploymentId failed$errorsMessagePart"
+  }
+
+  import sbt.internal.sona.SonaClient.PrettyPrint.*
+
+  private def presentDeploymentValidationErrors(errorsNode: JValue, log: Logger): String = {
+    PackageDeploymentValidationError.parse(errorsNode) match {
+      case Some(errors) =>
+        val errorsPresented: Seq[String] = errors.map {
+          case PackageDeploymentValidationError(packageDescriptor, packageErrors) =>
+            s"""$packageDescriptor
+               |${indent(asList(packageErrors), 2)}""".stripMargin
+        }
+        indent(asList(errorsPresented), 2)
+      case None =>
+        // Sonatype might change the format of the errors in the future.
+        // We shouldn't fail, and as a fallback we pretty print the JSON representation
+        log.warn(
+          "Sonatype deployment validation errors JSON format has changed. Please update to the latest sbt version or report the issue to the sbt project"
+        )
+        PrettyPrinter(errorsNode)
+    }
+  }
+
+  private object PrettyPrint {
+    def asList(lines: Seq[String]): String =
+      lines.map("- " + _).mkString("\n")
+
+    def indent(text: String, indentSize: Int): String = {
+      val indent = " " * indentSize
+      text.linesIterator.map(indent + _).mkString("\n")
+    }
+  }
 }
 
 private case class OAuthClient(userName: String, userToken: String)

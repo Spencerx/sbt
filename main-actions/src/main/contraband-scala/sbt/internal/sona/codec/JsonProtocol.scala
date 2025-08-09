@@ -6,5 +6,6 @@
 package sbt.internal.sona.codec
 trait JsonProtocol extends sjsonnew.BasicJsonProtocol
   with sbt.internal.sona.codec.DeploymentStateFormats
+  with sbt.internal.util.codec.JValueFormats
   with sbt.internal.sona.codec.PublisherStatusFormats
 object JsonProtocol extends JsonProtocol
