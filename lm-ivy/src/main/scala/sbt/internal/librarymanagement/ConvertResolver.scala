@@ -36,11 +36,11 @@ import org.apache.ivy.core.report.DownloadReport
 import org.apache.ivy.plugins.resolver.util.{ ResolvedResource, ResourceMDParser }
 import org.apache.ivy.util.{ ChecksumHelper, FileUtil, Message }
 import scala.jdk.CollectionConverters.*
+import sbt.internal.librarymanagement.ivy.UpdateOptions
 import sbt.internal.librarymanagement.mavenint.PomExtraDependencyAttributes
 import sbt.io.IO
 import sbt.util.Logger
 import sbt.librarymanagement.*
-import sbt.librarymanagement.ivy.UpdateOptions
 
 private[sbt] object ConvertResolver {
   import UpdateOptions.ResolverConverter

@@ -1,9 +1,9 @@
 {
-  "codecNamespace": "sbt.librarymanagement.ivy",
+  "codecNamespace": "sbt.internal.librarymanagement.ivy",
   "types": [
     {
       "name": "IvyConfiguration",
-      "namespace": "sbt.librarymanagement.ivy",
+      "namespace": "sbt.internal.librarymanagement.ivy",
       "target": "Scala",
       "type": "interface",
       "fields": [
@@ -13,7 +13,7 @@
           "default": "None",
           "since": "0.0.1"
         },
-        { 
+        {
           "name": "log",
           "type": "xsbti.Logger?",
           "default": "None",
@@ -21,25 +21,25 @@
         },
         {
           "name": "updateOptions",
-          "type": "sbt.librarymanagement.ivy.UpdateOptions",
-          "default": "sbt.librarymanagement.ivy.UpdateOptions()",
+          "type": "sbt.internal.librarymanagement.ivy.UpdateOptions",
+          "default": "sbt.internal.librarymanagement.ivy.UpdateOptions()",
           "since": "0.0.1"
         }
       ],
       "types": [
         {
           "name": "InlineIvyConfiguration",
-          "namespace": "sbt.librarymanagement.ivy",
+          "namespace": "sbt.internal.librarymanagement.ivy",
           "target": "Scala",
           "type": "record",
           "fields": [
-            { 
+            {
               "name": "paths",
-              "type": "sbt.librarymanagement.ivy.IvyPaths?",
+              "type": "sbt.librarymanagement.IvyPaths?",
               "default": "None",
               "since": "0.0.1"
             },
-            { 
+            {
               "name": "resolvers",
               "type": "sbt.librarymanagement.Resolver*",
               "default": "sbt.librarymanagement.Resolver.defaults",
@@ -60,7 +60,7 @@
             {
               "name": "checksums",
               "type": "String*",
-              "default": "sbt.librarymanagement.ivy.IvyDefaults.defaultChecksums",
+              "default": "sbt.internal.librarymanagement.ivy.IvyDefaults.defaultChecksums",
               "since": "0.0.1"
             },
             {
@@ -75,37 +75,11 @@
               "default": "None",
               "since": "0.0.1"
             }
-          ],
-          "extraCompanion": [
-            "/** Provided for backward compatibility. */",
-            "@deprecated(\"Use an alternative apply\", \"1.2.0\")",
-            "def apply(",
-            "  paths:                sbt.librarymanagement.ivy.IvyPaths,",
-            "  resolvers:            Vector[sbt.librarymanagement.Resolver],",
-            "  otherResolvers:       Vector[sbt.librarymanagement.Resolver],",
-            "  moduleConfigurations: Vector[sbt.librarymanagement.ModuleConfiguration],",
-            "  lock:                 Option[xsbti.GlobalLock],",
-            "  checksums:            Vector[String],",
-            "  managedChecksums:     Boolean,",
-            "  resolutionCacheDir:   Option[java.io.File],",
-            "  updateOptions:        sbt.librarymanagement.ivy.UpdateOptions,",
-            "  log:                  xsbti.Logger",
-            "): InlineIvyConfiguration = {",
-            "  apply()",
-            "    .withLock(lock)",
-            "    .withResolvers(resolvers)",
-            "    .withOtherResolvers(otherResolvers)",
-            "    .withModuleConfigurations(moduleConfigurations)",
-            "    .withChecksums(checksums)",
-            "    .withManagedChecksums(managedChecksums)",
-            "    .withResolutionCacheDir(resolutionCacheDir)",
-            "    .withLog(log)",
-            "}"
           ]
         },
         {
           "name": "ExternalIvyConfiguration",
-          "namespace": "sbt.librarymanagement.ivy",
+          "namespace": "sbt.internal.librarymanagement.ivy",
           "target": "Scala",
           "type": "record",
           "fields": [
@@ -129,16 +103,6 @@
             }
           ]
         }
-      ]
-    },
-    {
-      "name": "IvyPaths",
-      "namespace": "sbt.librarymanagement.ivy",
-      "target": "Scala",
-      "type": "record",
-      "fields": [
-        { "name": "baseDirectory", "type": "String"  },
-        { "name": "ivyHome",       "type": "String?" }
       ]
     }
   ]

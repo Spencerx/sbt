@@ -39,8 +39,8 @@ import scala.collection.mutable
 import scala.collection.immutable.ArraySeq
 import scala.util.{ Success, Failure }
 import sbt.util.*
+import sbt.internal.librarymanagement.ivy.*
 import sbt.librarymanagement.{ ModuleDescriptorConfiguration as InlineConfiguration, * }
-import sbt.librarymanagement.ivy.*
 import sbt.librarymanagement.syntax.*
 
 import IvyInternalDefaults.*

@@ -13,8 +13,8 @@ import java.net.URLClassLoader
 
 import sbt.io.IO
 import sbt.io.syntax.*
+import sbt.internal.librarymanagement.ivy.*
 import sbt.librarymanagement.*
-import sbt.librarymanagement.ivy.*
 import sbt.util.Logger
 import xsbti.compile.CompilerBridgeProvider
 import org.scalatest.*

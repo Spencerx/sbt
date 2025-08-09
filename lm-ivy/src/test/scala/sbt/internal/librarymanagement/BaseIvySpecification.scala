@@ -3,9 +3,9 @@ package sbt.internal.librarymanagement
 import sbt.io.IO
 import sbt.io.syntax.*
 import java.io.File
+import sbt.internal.librarymanagement.ivy.*
 import sbt.internal.util.ConsoleLogger
 import sbt.librarymanagement.*
-import sbt.librarymanagement.ivy.*
 import cross.CrossVersionUtil
 import Configurations.*
 

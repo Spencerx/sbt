@@ -1,4 +1,5 @@
 package sbt
+package internal
 package librarymanagement.ivy
 
 /**

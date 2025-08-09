@@ -10,7 +10,7 @@ package sbt
 package coursierint
 
 import java.net.URI
-import sbt.librarymanagement.*
+import sbt.librarymanagement.{ Credentials as IvyCredentials, * }
 import sbt.util.Logger
 import sbt.Keys.*
 import lmcoursier.definitions.{
@@ -30,11 +30,6 @@ import lmcoursier.definitions.{
 import lmcoursier.credentials.DirectCredentials
 import lmcoursier.{ FallbackDependency, FromSbt, Inputs }
 import sbt.internal.librarymanagement.mavenint.SbtPomExtraProperties
-import sbt.librarymanagement.ivy.{
-  FileCredentials,
-  Credentials,
-  DirectCredentials as IvyDirectCredentials
-}
 import sbt.ProjectExtra.transitiveInterDependencies
 import sbt.ScopeFilter.Make.*
 import scala.jdk.CollectionConverters.*
@@ -233,9 +228,9 @@ object CoursierInputsTasks {
     val log = streams.value.log
     val creds = sbt.Keys.allCredentials.value
       .flatMap {
-        case dc: IvyDirectCredentials => List(dc)
-        case fc: FileCredentials =>
-          Credentials.loadCredentials(fc.path) match {
+        case dc: IvyCredentials.DirectCredentials => List(dc)
+        case fc: IvyCredentials.FileCredentials =>
+          sbt.internal.librarymanagement.ivy.IvyCredentials.loadCredentials(fc.path) match {
             case Left(err) =>
               log.warn(s"$err, ignoring it")
               Nil

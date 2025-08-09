@@ -146,7 +146,10 @@ object RunFromSourceMain {
         log.info(s"""creating $scalaHome1 by downloading scala-compiler $scalaVersion""")
         IO.createDirectories(List(scalaHome1Lib, scalaHome1Temp))
         val lm = {
-          import sbt.librarymanagement.ivy.IvyDependencyResolution
+          import sbt.internal.librarymanagement.ivy.{
+            InlineIvyConfiguration,
+            IvyDependencyResolution
+          }
           val ivyConfig = InlineIvyConfiguration().withLog(log)
           IvyDependencyResolution(
             ivyConfig.withResolvers(

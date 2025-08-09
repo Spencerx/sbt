@@ -3,7 +3,7 @@
  */
 
 // DO NOT EDIT MANUALLY
-package sbt.librarymanagement.ivy
+package sbt.librarymanagement
 final class IvyPaths private (
   val baseDirectory: String,
   val ivyHome: Option[String]) extends Serializable {
@@ -15,7 +15,7 @@ final class IvyPaths private (
     case _ => false
   })
   override def hashCode: Int = {
-    37 * (37 * (37 * (17 + "sbt.librarymanagement.ivy.IvyPaths".##) + baseDirectory.##) + ivyHome.##)
+    37 * (37 * (37 * (17 + "sbt.librarymanagement.IvyPaths".##) + baseDirectory.##) + ivyHome.##)
   }
   override def toString: String = {
     "IvyPaths(" + baseDirectory + ", " + ivyHome + ")"

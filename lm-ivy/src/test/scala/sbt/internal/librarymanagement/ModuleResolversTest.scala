@@ -2,7 +2,7 @@ package sbt.internal.librarymanagement
 
 import sbt.librarymanagement.*
 import sbt.librarymanagement.syntax.*
-import sbt.librarymanagement.ivy.UpdateOptions
+import sbt.internal.librarymanagement.ivy.UpdateOptions
 
 object ModuleResolversTest extends BaseIvySpecification {
   override final val resolvers = Vector(

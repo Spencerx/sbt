@@ -64,4 +64,5 @@ trait LibraryManagementCodec extends sbt.librarymanagement.ConfigRefFormats
   with sbt.librarymanagement.UpdateReportFormats
   with sbt.librarymanagement.ConfigurationReportLiteFormats
   with sbt.librarymanagement.UpdateReportLiteFormats
+  with sbt.librarymanagement.IvyPathsFormats
 object LibraryManagementCodec extends LibraryManagementCodec

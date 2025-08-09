@@ -30,7 +30,7 @@ import sbt.internal.remotecache.*
 import sbt.io.IO
 import sbt.io.syntax.*
 import sbt.librarymanagement.*
-import sbt.librarymanagement.ivy.{ Credentials, IvyPaths, UpdateOptions }
+import sbt.internal.librarymanagement.ivy.{ IvyCredentials, UpdateOptions }
 import sbt.librarymanagement.syntax.*
 import sbt.nio.FileStamp
 import sbt.nio.Keys.{ inputFileStamps, outputFileStamps }
@@ -181,7 +181,7 @@ object RemoteCache {
           .withUpdateOptions(UpdateOptions().withGigahorse(true))
       },
       ivySbt := Def.uncached {
-        Credentials.register(credentials.value, streams.value.log)
+        IvyCredentials.register(credentials.value, streams.value.log)
         val config0 = ivyConfiguration.value
         new IvySbt(config0)
       },

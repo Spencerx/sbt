@@ -14,11 +14,11 @@ import java.io.File
 
 import sbt.io.*, syntax.*
 import sbt.util.*
+import sbt.internal.librarymanagement.ivy.{ IvyConfiguration, IvyDependencyResolution }
 import sbt.internal.util.{ ConsoleAppender, Terminal as ITerminal }
 import sbt.internal.util.complete.{ DefaultParsers, Parser }, DefaultParsers.*
 import xsbti.AppConfiguration
 import sbt.librarymanagement.*
-import sbt.librarymanagement.ivy.{ IvyConfiguration, IvyDependencyResolution }
 import sbt.internal.inc.classpath.ClasspathUtil
 import BasicCommandStrings.*, BasicKeys.*
 import sbt.internal.util.Terminal.hasConsole

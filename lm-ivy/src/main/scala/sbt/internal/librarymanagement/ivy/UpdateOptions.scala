@@ -1,10 +1,10 @@
-package sbt.librarymanagement
+package sbt.internal.librarymanagement
 package ivy
 
 import org.apache.ivy.plugins.resolver.DependencyResolver
 import org.apache.ivy.core.settings.IvySettings
 import sbt.util.Logger
-import sbt.internal.librarymanagement.LMSysProp
+import sbt.librarymanagement.*
 
 /**
  * Represents configurable options for update task.

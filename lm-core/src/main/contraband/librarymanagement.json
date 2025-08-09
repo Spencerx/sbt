@@ -864,6 +864,16 @@
       "fields": [
         { "name": "configurations", "type": "sbt.internal.librarymanagement.ConfigurationReportLite*" }
       ]
+    },
+    {
+      "name": "IvyPaths",
+      "namespace": "sbt.librarymanagement",
+      "target": "Scala",
+      "type": "record",
+      "fields": [
+        { "name": "baseDirectory", "type": "String"  },
+        { "name": "ivyHome",       "type": "String?" }
+      ]
     }
   ]
 }

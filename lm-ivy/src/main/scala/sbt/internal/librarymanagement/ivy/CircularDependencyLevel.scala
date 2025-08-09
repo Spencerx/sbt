@@ -1,4 +1,4 @@
-package sbt.librarymanagement
+package sbt.internal.librarymanagement
 package ivy
 
 import org.apache.ivy.plugins.circular.{
