@@ -1,7 +1,7 @@
 package lmcoursier.internal
 
 import java.io.{ File, FileNotFoundException, IOException }
-import java.net.{ HttpURLConnection, URL, URLConnection }
+import java.net.{ HttpURLConnection, URI, URLConnection }
 
 import coursier.cache.{ ConnectionBuilder, FileCache }
 import coursier.core.*
@@ -22,13 +22,13 @@ object TemporaryInMemoryRepository {
   }
 
   def exists(
-      url: URL,
+      uri: URI,
       localArtifactsShouldBeCached: Boolean
   ): Boolean =
-    exists(url, localArtifactsShouldBeCached, None)
+    exists(uri, localArtifactsShouldBeCached, None)
 
   def exists(
-      url: URL,
+      uri: URI,
       localArtifactsShouldBeCached: Boolean,
       cacheOpt: Option[FileCache[Nothing]]
   ): Boolean = {
@@ -40,12 +40,12 @@ object TemporaryInMemoryRepository {
     val protocolSpecificAttemptOpt = {
 
       def ifFile: Option[Boolean] = {
-        if (localArtifactsShouldBeCached && !new File(url.toURI).exists()) {
+        if (localArtifactsShouldBeCached && !new File(uri).exists()) {
           val cachePath = coursier.cache.CacheDefaults.location
           // 'file' here stands for the protocol (e.g. it's https instead for https:// URLs)
-          Some(new File(cachePath, s"file/${url.getPath}").exists())
+          Some(new File(cachePath, s"file/${uri.getPath}").exists())
         } else {
-          Some(new File(url.toURI).exists()) // FIXME Escaping / de-escaping needed here?
+          Some(new File(uri).exists()) // FIXME Escaping / de-escaping needed here?
         }
       }
 
@@ -54,7 +54,7 @@ object TemporaryInMemoryRepository {
 
         var conn: URLConnection = null
         try {
-          conn = ConnectionBuilder(url.toURI.toASCIIString)
+          conn = ConnectionBuilder(uri.toASCIIString)
             .withFollowHttpToHttpsRedirections(
               cacheOpt.fold(false)(_.followHttpToHttpsRedirections)
             )
@@ -79,7 +79,7 @@ object TemporaryInMemoryRepository {
         }
       }
 
-      url.getProtocol match {
+      uri.getScheme match {
         case "file"           => ifFile
         case "http" | "https" => ifHttp
         case _                => None
@@ -89,7 +89,7 @@ object TemporaryInMemoryRepository {
     def genericAttempt: Boolean = {
       var conn: URLConnection = null
       try {
-        conn = url.openConnection()
+        conn = uri.toURL.openConnection()
         // NOT setting request type to HEAD here.
         conn.getInputStream.close()
         true
@@ -106,18 +106,18 @@ object TemporaryInMemoryRepository {
   }
 
   def apply(
-      fallbacks: Map[(Module, String), (URL, Boolean)]
+      fallbacks: Map[(Module, String), (URI, Boolean)]
   ): TemporaryInMemoryRepository =
     new TemporaryInMemoryRepository(fallbacks, localArtifactsShouldBeCached = false, None)
 
   def apply(
-      fallbacks: Map[(Module, String), (URL, Boolean)],
+      fallbacks: Map[(Module, String), (URI, Boolean)],
       localArtifactsShouldBeCached: Boolean
   ): TemporaryInMemoryRepository =
     new TemporaryInMemoryRepository(fallbacks, localArtifactsShouldBeCached, None)
 
   def apply[F[_]](
-      fallbacks: Map[(Module, String), (URL, Boolean)],
+      fallbacks: Map[(Module, String), (URI, Boolean)],
       cache: FileCache[F]
   ): TemporaryInMemoryRepository =
     new TemporaryInMemoryRepository(
@@ -129,7 +129,7 @@ object TemporaryInMemoryRepository {
 }
 
 final class TemporaryInMemoryRepository private (
-    val fallbacks: Map[(Module, String), (URL, Boolean)],
+    val fallbacks: Map[(Module, String), (URI, Boolean)],
     val localArtifactsShouldBeCached: Boolean,
     val cacheOpt: Option[FileCache[Nothing]]
 ) extends Repository {
@@ -145,16 +145,16 @@ final class TemporaryInMemoryRepository private (
     def res = fallbacks
       .get((module, version))
       .fold[Either[String, (ArtifactSource, Project)]](Left("No fallback URL found")) {
-        case (url, _) =>
-          val urlStr = url.toExternalForm
+        case (uri, _) =>
+          val urlStr = uri.toURL.toExternalForm
           val idx = urlStr.lastIndexOf('/')
 
           if (idx < 0 || urlStr.endsWith("/"))
-            Left(s"$url doesn't point to a file")
+            Left(s"$uri doesn't point to a file")
           else {
             val (dirUrlStr, fileName) = urlStr.splitAt(idx + 1)
 
-            if (TemporaryInMemoryRepository.exists(url, localArtifactsShouldBeCached, cacheOpt)) {
+            if (TemporaryInMemoryRepository.exists(uri, localArtifactsShouldBeCached, cacheOpt)) {
               val proj = Project(
                 module,
                 version,
