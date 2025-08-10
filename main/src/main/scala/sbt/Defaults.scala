@@ -2579,10 +2579,16 @@ object Classpaths {
   )
   private def classpaths: Seq[Setting[?]] =
     Seq(
-      externalDependencyClasspath := concat(unmanagedClasspath, managedClasspath).value,
-      dependencyClasspath := concat(internalDependencyClasspath, externalDependencyClasspath).value,
-      fullClasspath := concatDistinct(exportedProducts, dependencyClasspath).value,
-      internalDependencyClasspath := ClasspathImpl.internalDependencyClasspathTask.value,
+      externalDependencyClasspath := Def.uncached(
+        concat(unmanagedClasspath, managedClasspath).value
+      ),
+      dependencyClasspath := Def.uncached(
+        concat(internalDependencyClasspath, externalDependencyClasspath).value
+      ),
+      fullClasspath := Def.uncached(concatDistinct(exportedProducts, dependencyClasspath).value),
+      internalDependencyClasspath := Def.uncached(
+        ClasspathImpl.internalDependencyClasspathTask.value
+      ),
       unmanagedClasspath := Def.uncached(ClasspathImpl.unmanagedDependenciesTask.value),
       managedClasspath := Def.uncached {
         val converter = fileConverter.value
