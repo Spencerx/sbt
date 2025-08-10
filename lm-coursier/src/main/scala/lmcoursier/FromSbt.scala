@@ -168,10 +168,10 @@ object FromSbt {
     for {
       module <- allDependencies
       artifact <- module.explicitArtifacts
-      url <- artifact.url.toSeq
+      uri <- artifact.url.toSeq
     } yield {
       val (module0, version) = moduleVersion(module, scalaVersion, scalaBinaryVersion)
-      FallbackDependency(module0, version, url.toURL, module.isChanging)
+      FallbackDependency(module0, version, uri, module.isChanging)
     }
 
   def project(

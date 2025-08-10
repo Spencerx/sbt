@@ -50,7 +50,7 @@ final case class ResolutionParams(
       Nil
     else {
       val map = fallbackDependencies.map { dep =>
-        (ToCoursier.module(dep.module), dep.version) -> ((dep.url, dep.changing))
+        (ToCoursier.module(dep.module), dep.version) -> ((dep.uri, dep.changing))
       }.toMap
 
       Seq(

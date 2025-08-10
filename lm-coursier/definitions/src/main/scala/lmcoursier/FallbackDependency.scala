@@ -1,13 +1,13 @@
 package lmcoursier
 
-import java.net.URL
+import java.net.URI
 
 import dataclass.data
 import lmcoursier.definitions.Module
-//FIXME use URI instead of URL
+
 @data class FallbackDependency(
     module: Module,
     version: String,
-    url: URL,
+    uri: URI,
     changing: Boolean
 )
