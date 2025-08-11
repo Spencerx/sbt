@@ -12,8 +12,9 @@ package parser
 
 import sbt.internal.util.LineRange
 import xsbti.VirtualFileRef
+import dotty.tools.dotc.ast.untpd.Tree
 
 object SplitExpressions:
   type SplitExpression =
-    (VirtualFileRef, Seq[String]) => (Seq[(String, Int)], Seq[(String, LineRange)])
+    (VirtualFileRef, Seq[String]) => (Seq[(String, Int)], Seq[(String, Tree, LineRange)])
 end SplitExpressions
