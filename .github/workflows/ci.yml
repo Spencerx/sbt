@@ -133,7 +133,7 @@ jobs:
         shell: bash
         run: |
           rm -rf "$HOME/.sbt/boot/" || true
-          # ./sbt -v --client mimaReportBinaryIssues
+          ./sbt -v --client mimaReportBinaryIssues
           ./sbt -v --client javafmtCheck
           ./sbt -v --client "Test/javafmtCheck"
           ./sbt -v --client scalafmtCheckAll
