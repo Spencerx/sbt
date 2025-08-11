@@ -44,6 +44,7 @@ ThisBuild / scmInfo := Some(
 )
 ThisBuild / resolvers += Resolver.mavenLocal
 ThisBuild / libraryDependencySchemes += "org.scala-lang.modules" %% "scala-xml" % VersionScheme.Always
+ThisBuild / mimaFailOnNoPrevious := false
 
 Global / semanticdbEnabled := !(Global / insideCI).value
 // Change main/src/main/scala/sbt/plugins/SemanticdbPlugin.scala too, if you change this.
@@ -116,45 +117,27 @@ def baseSettings: Seq[Setting[?]] =
 def testedBaseSettings: Seq[Setting[?]] =
   baseSettings ++ testDependencies
 
-val sbt13Plus =
+val sbt20Plus =
   Seq(
-    "1.3.0",
-    "1.4.0",
-    "1.5.0",
-    "1.6.0",
-    "1.7.0",
+    "2.0.0-RC2",
   )
-val sbt10Plus =
-  Seq(
-    "1.0.0",
-    "1.0.1",
-    "1.0.2",
-    "1.0.3",
-    "1.0.4",
-    "1.1.0",
-    "1.1.1",
-    "1.1.2",
-    "1.1.3",
-    "1.1.4",
-    "1.1.5",
-    "1.1.6",
-    "1.2.0",
-    "1.2.1",
-    /*DOA,*/ "1.2.3",
-    "1.2.4",
-    /*DOA,*/ "1.2.6",
-    "1.2.7",
-    "1.2.8",
-  ) ++ sbt13Plus
-val noUtilVersion =
-  Set("1.0.4", "1.1.4", "1.1.5", "1.1.6", "1.2.3", "1.2.4", "1.2.6", "1.2.7", "1.2.8")
-
-val mimaSettings = mimaSettingsSince(sbt10Plus)
-val utilMimaSettings = mimaSettingsSince(sbt10Plus.filterNot(noUtilVersion))
+val mimaSettings = mimaSettingsSince(sbt20Plus)
 def mimaSettingsSince(versions: Seq[String]): Seq[Def.Setting[?]] = Def settings (
   mimaPreviousArtifacts := {
     val crossVersion = if (crossPaths.value) CrossVersion.binary else CrossVersion.disabled
-    versions.map(v => organization.value % moduleName.value % v cross crossVersion).toSet
+    if (sbtPlugin.value) {
+      versions
+        .map(v =>
+          Defaults.sbtPluginExtra(
+            m = organization.value % moduleName.value % v,
+            sbtV = "2",
+            scalaV = scalaBinaryVersion.value
+          )
+        )
+        .toSet
+    } else {
+      versions.map(v => organization.value % moduleName.value % v cross crossVersion).toSet
+    }
   },
   mimaBinaryIssueFilters ++= Seq(
     // Changes in the internal package
@@ -163,12 +146,6 @@ def mimaSettingsSince(versions: Seq[String]): Seq[Def.Setting[?]] = Def settings
     exclude[FinalMethodProblem]("sbt.internal.*"),
     exclude[IncompatibleResultTypeProblem]("sbt.internal.*"),
     exclude[ReversedMissingMethodProblem]("sbt.internal.*"),
-    exclude[DirectMissingMethodProblem]("sbt.PluginData.apply"),
-    exclude[DirectMissingMethodProblem]("sbt.PluginData.copy"),
-    exclude[DirectMissingMethodProblem]("sbt.PluginData.this"),
-    exclude[IncompatibleResultTypeProblem]("sbt.EvaluateTask.executeProgress"),
-    exclude[DirectMissingMethodProblem]("sbt.Keys.currentTaskProgress"),
-    exclude[IncompatibleResultTypeProblem]("sbt.PluginData.copy$default$10")
   ),
 )
 
@@ -278,15 +255,6 @@ val completeProj = (project in file("internal") / "util-complete")
     mimaSettings,
     // Parser is used publicly, so we can't break bincompat.
     mimaBinaryIssueFilters := Seq(
-      exclude[DirectMissingMethodProblem]("sbt.internal.util.complete.SoftInvalid.apply"),
-      exclude[DirectMissingMethodProblem]("sbt.internal.util.complete.Invalid.apply"),
-      exclude[DirectMissingMethodProblem]("sbt.internal.util.complete.Finite.apply"),
-      exclude[DirectMissingMethodProblem]("sbt.internal.util.complete.Infinite.decrement"),
-      exclude[DirectMissingMethodProblem]("sbt.internal.util.complete.History.this"),
-      exclude[IncompatibleMethTypeProblem]("sbt.internal.util.complete.Completion.suggestion"),
-      exclude[IncompatibleMethTypeProblem]("sbt.internal.util.complete.Completion.token"),
-      exclude[IncompatibleMethTypeProblem]("sbt.internal.util.complete.Completion.displayOnly"),
-      exclude[IncompatibleSignatureProblem]("sbt.internal.util.complete.*"),
     ),
   )
   .configure(addSbtIO)
@@ -311,13 +279,13 @@ lazy val utilInterface = (project in file("internal") / "util-interface").settin
   Compile / doc / javacOptions := Nil,
   name := "Util Interface",
   exportJars := true,
-  utilMimaSettings,
+  mimaSettings,
 )
 
 lazy val utilControl = (project in file("internal") / "util-control").settings(
   utilCommonSettings,
   name := "Util Control",
-  utilMimaSettings,
+  mimaSettings,
 )
 
 lazy val utilPosition = (project in file("internal") / "util-position")
@@ -326,7 +294,7 @@ lazy val utilPosition = (project in file("internal") / "util-position")
     name := "Util Position",
     scalacOptions += "-language:experimental.macros",
     libraryDependencies ++= Seq(scalaReflect, scalatest % "test"),
-    utilMimaSettings,
+    mimaSettings,
   )
 
 lazy val utilCore = project
@@ -335,7 +303,7 @@ lazy val utilCore = project
     utilCommonSettings,
     name := "Util Core",
     Utils.keywordsSettings,
-    utilMimaSettings
+    mimaSettings
   )
 
 lazy val utilLogging = project
@@ -368,37 +336,8 @@ lazy val utilLogging = project
       else old(tpe)
     },
     Test / fork := true,
-    utilMimaSettings,
+    mimaSettings,
     mimaBinaryIssueFilters ++= Seq(
-      exclude[DirectMissingMethodProblem]("sbt.internal.util.SuccessEvent.copy*"),
-      exclude[DirectMissingMethodProblem]("sbt.internal.util.TraceEvent.copy*"),
-      exclude[DirectMissingMethodProblem]("sbt.internal.util.StringEvent.copy*"),
-      // Private final class constructors changed
-      exclude[DirectMissingMethodProblem]("sbt.util.InterfaceUtil#ConcretePosition.this"),
-      exclude[DirectMissingMethodProblem]("sbt.util.InterfaceUtil#ConcreteProblem.this"),
-      exclude[ReversedMissingMethodProblem]("sbt.internal.util.ConsoleOut.flush"),
-      // This affects Scala 2.11 only it seems, so it's ok?
-      exclude[InheritedNewAbstractMethodProblem](
-        "sbt.internal.util.codec.JsonProtocol.LogOptionFormat"
-      ),
-      exclude[InheritedNewAbstractMethodProblem](
-        "sbt.internal.util.codec.JsonProtocol.ProgressItemFormat"
-      ),
-      exclude[InheritedNewAbstractMethodProblem](
-        "sbt.internal.util.codec.JsonProtocol.ProgressEventFormat"
-      ),
-      exclude[DirectMissingMethodProblem]("sbt.internal.util.MainAppender.*"),
-      exclude[IncompatibleMethTypeProblem]("sbt.internal.util.BufferedAppender.*"),
-      exclude[IncompatibleMethTypeProblem]("sbt.internal.util.ManagedLogger.this"),
-      exclude[IncompatibleMethTypeProblem]("sbt.internal.util.ManagedLogger.this"),
-      exclude[IncompatibleMethTypeProblem]("sbt.internal.util.MainAppender*"),
-      exclude[IncompatibleMethTypeProblem]("sbt.internal.util.GlobalLogging.*"),
-      exclude[IncompatibleSignatureProblem]("sbt.internal.util.GlobalLogging.*"),
-      exclude[IncompatibleSignatureProblem]("sbt.internal.util.MainAppender*"),
-      exclude[MissingTypesProblem]("sbt.internal.util.ConsoleAppender"),
-      exclude[MissingTypesProblem]("sbt.internal.util.BufferedAppender"),
-      exclude[MissingClassProblem]("sbt.internal.util.Terminal$BlockingInputStream$"),
-      exclude[IncompatibleResultTypeProblem]("sbt.util.LoggerContext#Log4JLoggerContext.loggers"),
     ),
   )
   .configure(addSbtIO)
@@ -408,7 +347,7 @@ lazy val utilRelation = (project in file("internal") / "util-relation")
     utilCommonSettings,
     name := "Util Relation",
     libraryDependencies ++= Seq(scalacheck % "test"),
-    utilMimaSettings,
+    mimaSettings,
   )
 
 // Persisted caching based on sjson-new
@@ -434,7 +373,7 @@ lazy val utilCache = project
       baseDirectory.value / "src" / "main" / "contraband-scala",
     Compile / generateContrabands / sourceManaged := baseDirectory.value / "src" / "main" / "contraband-scala",
     Compile / generateContrabands / contrabandFormatsForType := ContrabandConfig.getFormats,
-    utilMimaSettings,
+    mimaSettings,
     Test / fork := true,
   )
   .configure(
@@ -449,10 +388,8 @@ lazy val utilTracking = (project in file("util-tracking"))
     utilCommonSettings,
     name := "Util Tracking",
     libraryDependencies ++= Seq(scalatest % "test"),
-    utilMimaSettings,
+    mimaSettings,
     mimaBinaryIssueFilters ++= Seq(
-      // Private final class constructors changed
-      ProblemFilters.exclude[IncompatibleMethTypeProblem]("sbt.util.Tracked#CacheHelp.this"),
     )
   )
   .configure(addSbtIO)
@@ -463,7 +400,7 @@ lazy val utilScripted = (project in file("internal") / "util-scripted")
     utilCommonSettings,
     name := "Util Scripted",
     libraryDependencies += scalaParsers,
-    utilMimaSettings,
+    mimaSettings,
   )
   .configure(addSbtIO)
 /* **** Intermediate-level Modules **** */
@@ -489,31 +426,6 @@ lazy val testingProj = (project in file("testing"))
     Compile / generateContrabands / contrabandFormatsForType := ContrabandConfig.getFormats,
     mimaSettings,
     mimaBinaryIssueFilters ++= Seq(
-      // private[sbt]
-      exclude[IncompatibleMethTypeProblem]("sbt.TestStatus.write"),
-      exclude[IncompatibleResultTypeProblem]("sbt.TestStatus.read"),
-      // copy method was never meant to be public
-      exclude[DirectMissingMethodProblem]("sbt.protocol.testing.EndTestGroupErrorEvent.copy"),
-      exclude[DirectMissingMethodProblem](
-        "sbt.protocol.testing.EndTestGroupErrorEvent.copy$default$*"
-      ),
-      exclude[DirectMissingMethodProblem]("sbt.protocol.testing.EndTestGroupEvent.copy"),
-      exclude[DirectMissingMethodProblem]("sbt.protocol.testing.EndTestGroupEvent.copy$default$*"),
-      exclude[DirectMissingMethodProblem]("sbt.protocol.testing.StartTestGroupEvent.copy"),
-      exclude[DirectMissingMethodProblem](
-        "sbt.protocol.testing.StartTestGroupEvent.copy$default$*"
-      ),
-      exclude[DirectMissingMethodProblem]("sbt.protocol.testing.TestCompleteEvent.copy"),
-      exclude[DirectMissingMethodProblem]("sbt.protocol.testing.TestCompleteEvent.copy$default$*"),
-      exclude[DirectMissingMethodProblem]("sbt.protocol.testing.TestInitEvent.copy"),
-      exclude[DirectMissingMethodProblem]("sbt.protocol.testing.TestItemDetail.copy"),
-      exclude[DirectMissingMethodProblem]("sbt.protocol.testing.TestItemDetail.copy$default$*"),
-      exclude[DirectMissingMethodProblem]("sbt.protocol.testing.TestItemEvent.copy"),
-      exclude[DirectMissingMethodProblem]("sbt.protocol.testing.TestItemEvent.copy$default$*"),
-      exclude[DirectMissingMethodProblem]("sbt.protocol.testing.TestStringEvent.copy"),
-      exclude[DirectMissingMethodProblem]("sbt.protocol.testing.TestStringEvent.copy$default$1"),
-      // no reason to use
-      exclude[DirectMissingMethodProblem]("sbt.JUnitXmlTestsListener.testSuite"),
     )
   )
   .configure(addSbtIO, addSbtCompilerClasspath)
@@ -530,6 +442,7 @@ lazy val workerProj = (project in file("worker"))
     libraryDependencies += "org.scala-lang" %% "scala3-library" % scalaVersion.value % Test,
     // run / fork := false,
     Test / fork := true,
+    mimaSettings,
   )
   .configure(addSbtIOForTest)
 
@@ -548,20 +461,6 @@ lazy val taskProj = (project in file("tasks"))
     name := "Tasks",
     mimaSettings,
     mimaBinaryIssueFilters ++= Seq(
-      exclude[IncompatibleSignatureProblem]("sbt.Triggers.this"),
-      exclude[IncompatibleSignatureProblem]("sbt.Triggers.runBefore"),
-      exclude[IncompatibleSignatureProblem]("sbt.Triggers.injectFor"),
-      exclude[IncompatibleSignatureProblem]("sbt.Triggers.onComplete"),
-      exclude[DirectMissingMethodProblem]("sbt.Inc.apply"),
-      // ok because sbt.ExecuteProgress has been under private[sbt]
-      exclude[IncompatibleResultTypeProblem]("sbt.ExecuteProgress.initial"),
-      exclude[DirectMissingMethodProblem]("sbt.ExecuteProgress.*"),
-      exclude[ReversedMissingMethodProblem]("sbt.ExecuteProgress.*"),
-      exclude[IncompatibleSignatureProblem]("sbt.ExecuteProgress.*"),
-      // ok because sbt.Execute has been under private[sbt]
-      exclude[IncompatibleSignatureProblem]("sbt.Execute.*"),
-      exclude[IncompatibleSignatureProblem]("sbt.Execute#CyclicException.*"),
-      exclude[IncompatibleSignatureProblem]("sbt.NodeView.*"),
     )
   )
 
@@ -575,9 +474,6 @@ lazy val stdTaskProj = (project in file("tasks-standard"))
     Utils.testExclusive,
     mimaSettings,
     mimaBinaryIssueFilters ++= Seq(
-      // unused private[sbt]
-      exclude[DirectMissingMethodProblem]("sbt.Task.mapTask"),
-      exclude[NewMixinForwarderProblem]("sbt.std.TaskExtra.joinAnyTasks"),
     ),
   )
   .configure(addSbtIO)
@@ -594,18 +490,6 @@ lazy val runProj = (project in file("run"))
     Compile / generateContrabands / sourceManaged := baseDirectory.value / "src" / "main" / "contraband-scala",
     mimaSettings,
     mimaBinaryIssueFilters ++= Seq(
-      // copy method was never meant to be public
-      exclude[DirectMissingMethodProblem]("sbt.ForkOptions.copy"),
-      exclude[DirectMissingMethodProblem]("sbt.ForkOptions.copy$default$*"),
-      exclude[DirectMissingMethodProblem]("sbt.OutputStrategy#BufferedOutput.copy"),
-      exclude[DirectMissingMethodProblem]("sbt.OutputStrategy#BufferedOutput.copy$default$*"),
-      exclude[DirectMissingMethodProblem]("sbt.OutputStrategy#CustomOutput.copy"),
-      exclude[DirectMissingMethodProblem]("sbt.OutputStrategy#CustomOutput.copy$default$*"),
-      exclude[DirectMissingMethodProblem]("sbt.OutputStrategy#LoggedOutput.copy"),
-      exclude[DirectMissingMethodProblem]("sbt.OutputStrategy#LoggedOutput.copy$default$*"),
-      exclude[Problem]("sbt.TrapExit*"),
-      exclude[MissingClassProblem]("sbt.ExitCode"), // private
-      exclude[MissingClassProblem]("sbt.LoggingExceptionHandler"), // private
     )
   )
   .configure(addSbtIO, addSbtCompilerClasspath)
@@ -624,6 +508,7 @@ lazy val scriptedSbtProj = (project in file("scripted-sbt"))
     libraryDependencies ++= Seq(launcherInterface % "provided"),
     mimaSettings,
     scriptedSbtMimaSettings,
+    mimaSettings,
   )
   .dependsOn(lmCore)
   .configure(addSbtIO, addSbtCompilerInterface)
@@ -636,8 +521,7 @@ lazy val remoteCacheProj = (project in file("sbt-remote-cache"))
     name := "sbt-remote-cache",
     pluginCrossBuild / sbtVersion := version.value,
     publishMavenStyle := true,
-    // mimaSettings,
-    mimaPreviousArtifacts := Set.empty,
+    mimaSettings,
     libraryDependencies += remoteapis,
   )
 
@@ -693,30 +577,9 @@ lazy val protocolProj = (project in file("protocol"))
     Compile / generateContrabands / contrabandFormatsForType := ContrabandConfig.getFormats,
     mimaSettings,
     mimaBinaryIssueFilters ++= Seq(
-      // copy method was never meant to be public
-      exclude[DirectMissingMethodProblem]("sbt.protocol.ChannelAcceptedEvent.copy"),
-      exclude[DirectMissingMethodProblem]("sbt.protocol.ChannelAcceptedEvent.copy$default$1"),
-      exclude[DirectMissingMethodProblem]("sbt.protocol.ExecCommand.copy"),
-      exclude[DirectMissingMethodProblem]("sbt.protocol.ExecCommand.copy$default$1"),
-      exclude[DirectMissingMethodProblem]("sbt.protocol.ExecCommand.copy$default$2"),
-      exclude[DirectMissingMethodProblem]("sbt.protocol.ExecStatusEvent.copy"),
-      exclude[DirectMissingMethodProblem]("sbt.protocol.ExecStatusEvent.copy$default$*"),
-      exclude[DirectMissingMethodProblem]("sbt.protocol.ExecutionEvent.copy"),
-      exclude[DirectMissingMethodProblem]("sbt.protocol.ExecutionEvent.copy$default$*"),
-      exclude[DirectMissingMethodProblem]("sbt.protocol.InitCommand.copy"),
-      exclude[DirectMissingMethodProblem]("sbt.protocol.InitCommand.copy$default$*"),
-      exclude[DirectMissingMethodProblem]("sbt.protocol.LogEvent.copy"),
-      exclude[DirectMissingMethodProblem]("sbt.protocol.LogEvent.copy$default$*"),
-      exclude[DirectMissingMethodProblem]("sbt.protocol.SettingQuery.copy"),
-      exclude[DirectMissingMethodProblem]("sbt.protocol.SettingQuery.copy$default$1"),
-      exclude[DirectMissingMethodProblem]("sbt.protocol.SettingQueryFailure.copy"),
-      exclude[DirectMissingMethodProblem]("sbt.protocol.SettingQueryFailure.copy$default$*"),
-      exclude[DirectMissingMethodProblem]("sbt.protocol.SettingQuerySuccess.copy"),
-      exclude[DirectMissingMethodProblem]("sbt.protocol.SettingQuerySuccess.copy$default$*"),
       // ignore missing or incompatible methods in sbt.internal
       exclude[IncompatibleMethTypeProblem]("sbt.internal.*"),
       exclude[DirectMissingMethodProblem]("sbt.internal.*"),
-      exclude[MissingTypesProblem]("sbt.internal.protocol.JsonRpcResponseError"),
     )
   )
 
@@ -739,36 +602,6 @@ lazy val commandProj = (project in file("main-command"))
     Compile / generateContrabands / contrabandFormatsForType := ContrabandConfig.getFormats,
     mimaSettings,
     mimaBinaryIssueFilters ++= Vector(
-      exclude[DirectMissingMethodProblem]("sbt.Exit.apply"),
-      exclude[DirectMissingMethodProblem]("sbt.Reboot.apply"),
-      exclude[DirectMissingMethodProblem]("sbt.TemplateResolverInfo.apply"),
-      // dropped private[sbt] method
-      exclude[DirectMissingMethodProblem]("sbt.BasicCommands.compatCommands"),
-      // dropped mainly internal command strings holder
-      exclude[MissingClassProblem]("sbt.BasicCommandStrings$Compat$"),
-      exclude[DirectMissingMethodProblem]("sbt.BasicCommands.rebootOptionParser"),
-      // Changed the signature of Server method. nacho cheese.
-      exclude[DirectMissingMethodProblem]("sbt.internal.server.Server.*"),
-      // Added method to ServerInstance. This is also internal.
-      exclude[ReversedMissingMethodProblem]("sbt.internal.server.ServerInstance.*"),
-      // Added method to CommandChannel. internal.
-      exclude[ReversedMissingMethodProblem]("sbt.internal.CommandChannel.*"),
-      // Added an overload to reboot. The overload is private[sbt].
-      exclude[ReversedMissingMethodProblem]("sbt.StateOps.reboot"),
-      // Replace nailgun socket stuff
-      exclude[MissingClassProblem]("sbt.internal.NG*"),
-      exclude[MissingClassProblem]("sbt.internal.ReferenceCountedFileDescriptor"),
-      // made private[sbt] method private[this]
-      exclude[DirectMissingMethodProblem]("sbt.State.handleException"),
-      // copy method was never meant to be public
-      exclude[DirectMissingMethodProblem]("sbt.CommandSource.copy"),
-      exclude[DirectMissingMethodProblem]("sbt.CommandSource.copy$default$*"),
-      exclude[DirectMissingMethodProblem]("sbt.Exec.copy"),
-      exclude[DirectMissingMethodProblem]("sbt.Exec.copy$default$*"),
-      // internal
-      exclude[ReversedMissingMethodProblem]("sbt.internal.client.ServerConnection.*"),
-      exclude[MissingTypesProblem]("sbt.internal.server.ServerConnection*"),
-      exclude[IncompatibleSignatureProblem]("sbt.internal.server.ServerConnection.*")
     ),
     Compile / headerCreate / unmanagedSources := {
       val old = (Compile / headerCreate / unmanagedSources).value
@@ -823,38 +656,6 @@ lazy val mainSettingsProj = (project in file("main-settings"))
     },
     mimaSettings,
     mimaBinaryIssueFilters ++= Seq(
-      exclude[IncompatibleSignatureProblem]("sbt.Previous#References.getReferences"),
-      exclude[IncompatibleSignatureProblem]("sbt.Def.delegate"),
-      exclude[IncompatibleSignatureProblem]("sbt.Def.add"),
-      exclude[IncompatibleSignatureProblem]("sbt.Def.grouped"),
-      exclude[IncompatibleSignatureProblem]("sbt.Def.compile"),
-      exclude[IncompatibleSignatureProblem]("sbt.Def.asTransform"),
-      exclude[DirectMissingMethodProblem]("sbt.Def.StaticScopes"),
-      exclude[IncompatibleSignatureProblem]("sbt.Previous.this"),
-      exclude[DirectMissingMethodProblem]("sbt.BuildRef.apply"),
-      exclude[DirectMissingMethodProblem]("sbt.ScopeMask.apply"),
-      exclude[DirectMissingMethodProblem]("sbt.Def.intersect"),
-      exclude[DirectMissingMethodProblem]("sbt.LocalProject.apply"),
-      exclude[DirectMissingMethodProblem]("sbt.std.InitializeInstance.pure"),
-      exclude[DirectMissingMethodProblem]("sbt.std.InitializeInstance.flatten"),
-      exclude[DirectMissingMethodProblem]("sbt.std.InitializeInstance.map"),
-      exclude[DirectMissingMethodProblem]("sbt.std.InitializeInstance.app"),
-      exclude[DirectMissingMethodProblem]("sbt.std.ParserInstance.pure"),
-      exclude[DirectMissingMethodProblem]("sbt.std.ParserInstance.map"),
-      exclude[DirectMissingMethodProblem]("sbt.std.ParserInstance.app"),
-      exclude[DirectMissingMethodProblem]("sbt.std.ParserInstance.pure"),
-      exclude[DirectMissingMethodProblem]("sbt.std.TaskInstance.pure"),
-      exclude[DirectMissingMethodProblem]("sbt.std.TaskInstance.flatten"),
-      exclude[DirectMissingMethodProblem]("sbt.std.TaskInstance.map"),
-      exclude[DirectMissingMethodProblem]("sbt.std.TaskInstance.app"),
-      exclude[DirectMissingMethodProblem]("sbt.std.FullInstance.flatten"),
-      exclude[DirectMissingMethodProblem]("sbt.Scope.display012StyleMasked"),
-      // added a method to a sealed trait
-      exclude[InheritedNewAbstractMethodProblem]("sbt.Scoped.canEqual"),
-      exclude[InheritedNewAbstractMethodProblem]("sbt.ScopedTaskable.canEqual"),
-      // widened ScopedTaskable parameter to (new) supertype Taskable
-      exclude[IncompatibleSignatureProblem]("sbt.Scoped#RichTaskable*.this"),
-      exclude[IncompatibleSignatureProblem]("sbt.TupleSyntax.t*ToTable*"),
     ),
   )
   .dependsOn(lmCore)
@@ -866,11 +667,8 @@ lazy val zincLmIntegrationProj = (project in file("zinc-lm-integration"))
     testedBaseSettings,
     Test / testOptions +=
       Tests.Argument(TestFrameworks.ScalaTest, s"-Dsbt.zinc.version=$zincVersion"),
-    mimaSettingsSince(sbt13Plus),
+    mimaSettings,
     mimaBinaryIssueFilters ++= Seq(
-      exclude[IncompatibleMethTypeProblem]("sbt.internal.inc.ZincComponentCompiler*"),
-      exclude[IncompatibleSignatureProblem]("sbt.internal.inc.ZincComponentCompiler*"),
-      exclude[IncompatibleSignatureProblem]("sbt.internal.inc.ZincLMHelper.update"),
     ),
     libraryDependencies += launcherInterface,
   )
@@ -885,6 +683,7 @@ lazy val buildFileProj = (project in file("buildfile"))
     testedBaseSettings,
     name := "build file",
     libraryDependencies ++= Seq(scalaCompiler),
+    mimaSettings,
   )
   .dependsOn(lmCore, lmIvy)
   .configure(addSbtIO, addSbtCompilerInterface, addSbtZincCompileCore)
@@ -932,7 +731,7 @@ lazy val mainProj = (project in file("main"))
     SettingKey[Boolean]("usePipelining") := false,
     // TODO: Fix doc
     Compile / doc / sources := Nil,
-    // mimaSettings,
+    mimaSettings,
     // mimaBinaryIssueFilters ++= Vector(),
   )
   .dependsOn(lmCore, lmIvy, lmCoursierShadedPublishing)
@@ -1024,7 +823,6 @@ lazy val sbtClientProj = (project in file("client"))
     commonSettings,
     Utils.noPublish,
     name := "sbt-client",
-    mimaPreviousArtifacts := Set.empty,
     bspEnabled := false,
     crossPaths := false,
     exportJars := true,
@@ -1132,39 +930,6 @@ lazy val upperModules = (project in (file("internal") / "upper"))
 
 lazy val sbtIgnoredProblems = {
   Vector(
-    exclude[IncompatibleSignatureProblem]("sbt.package.some"),
-    exclude[IncompatibleSignatureProblem]("sbt.package.inThisBuild"),
-    exclude[IncompatibleSignatureProblem]("sbt.package.inConfig"),
-    exclude[IncompatibleSignatureProblem]("sbt.package.inTask"),
-    exclude[IncompatibleSignatureProblem]("sbt.package.inScope"),
-    exclude[MissingClassProblem]("buildinfo.BuildInfo"),
-    exclude[MissingClassProblem]("buildinfo.BuildInfo$"),
-    // Added more items to Import trait.
-    exclude[ReversedMissingMethodProblem]("sbt.Import.sbt$Import$_setter_$WatchSource_="),
-    exclude[ReversedMissingMethodProblem]("sbt.Import.WatchSource"),
-    exclude[ReversedMissingMethodProblem]("sbt.Import.AnyPath"),
-    exclude[ReversedMissingMethodProblem]("sbt.Import.sbt$Import$_setter_$**_="),
-    exclude[ReversedMissingMethodProblem]("sbt.Import.sbt$Import$_setter_$*_="),
-    exclude[ReversedMissingMethodProblem]("sbt.Import.sbt$Import$_setter_$ChangedFiles_="),
-    exclude[ReversedMissingMethodProblem]("sbt.Import.sbt$Import$_setter_$AnyPath_="),
-    exclude[ReversedMissingMethodProblem]("sbt.Import.sbt$Import$_setter_$Glob_="),
-    exclude[ReversedMissingMethodProblem]("sbt.Import.sbt$Import$_setter_$RecursiveGlob_="),
-    exclude[ReversedMissingMethodProblem]("sbt.Import.sbt$Import$_setter_$RelativeGlob_="),
-    exclude[ReversedMissingMethodProblem]("sbt.Import.*"),
-    exclude[ReversedMissingMethodProblem]("sbt.Import.**"),
-    exclude[ReversedMissingMethodProblem]("sbt.Import.ChangedFiles"),
-    exclude[ReversedMissingMethodProblem]("sbt.Import.RecursiveGlob"),
-    exclude[ReversedMissingMethodProblem]("sbt.Import.Glob"),
-    exclude[ReversedMissingMethodProblem]("sbt.Import.RelativeGlob"),
-    // Dropped in favour of kind-projector's polymorphic lambda literals
-    exclude[DirectMissingMethodProblem]("sbt.Import.Param"),
-    exclude[DirectMissingMethodProblem]("sbt.package.Param"),
-    exclude[ReversedMissingMethodProblem]("sbt.Import.SemanticSelector"),
-    exclude[ReversedMissingMethodProblem]("sbt.Import.sbt$Import$_setter_$SemanticSelector_="),
-    // Dropped in favour of plain scala.Function, and its compose method
-    exclude[DirectMissingMethodProblem]("sbt.package.toFn1"),
-    exclude[NewMixinForwarderProblem]("sbt.IOSyntax1.singleFileFinder"),
-    exclude[DirectMissingMethodProblem]("sbt.IOSyntax1.$init$"),
   )
 }
 
@@ -1391,6 +1156,7 @@ lazy val lmCore = (project in file("lm-core"))
       import Path._
       (((srcs --- sdirs --- base) pair (relativeTo(sdirs) | relativeTo(base) | flat)) toSeq)
     },
+    mimaSettings,
   )
   .dependsOn(utilLogging, utilPosition, utilCache)
   .configure(addSbtIO, addSbtCompilerInterface)
@@ -1415,7 +1181,8 @@ lazy val lmIvy = (project in file("lm-ivy"))
       baseDirectory.value / "src" / "main" / "contraband-scala",
     Compile / generateContrabands / sourceManaged := baseDirectory.value / "src" / "main" / "contraband-scala",
     Compile / generateContrabands / contrabandFormatsForType := DatatypeConfig.getFormats,
-    Test / classLoaderLayeringStrategy := ClassLoaderLayeringStrategy.Flat
+    Test / classLoaderLayeringStrategy := ClassLoaderLayeringStrategy.Flat,
+    mimaSettings,
   )
 
 lazy val lmCoursierSettings: Seq[Setting[?]] = Def.settings(
