@@ -22,6 +22,7 @@ import scala.jdk.CollectionConverters.*
 import xsbti.PathBasedFile
 import xsbti.VirtualFile
 import xsbti.VirtualFileRef
+import dotty.tools.dotc.ast.untpd.{ Annotated, ValOrDefDef, Tree }
 
 /**
  *  This file is responsible for compiling the .sbt files used to configure sbt builds.
@@ -97,12 +98,13 @@ private[sbt] object EvaluateConfigurations {
       builtinImports: Seq[String],
       offset: Int
   ): ParsedFile = {
+    def loseTree(l: (String, Tree, LineRange)): (String, LineRange) = (l._1, l._3)
     val (importStatements, settingsAndDefinitions) = splitExpressions(file, lines)
     val allImports = builtinImports.map(s => (s, -1)) ++ addOffset(offset, importStatements)
     val (definitions, settings) = splitSettingsDefinitions(
       addOffsetToRange(offset, settingsAndDefinitions)
     )
-    new ParsedFile(allImports, definitions, settings)
+    new ParsedFile(allImports, definitions.map(loseTree), settings.map(loseTree))
   }
 
   /**
@@ -194,11 +196,14 @@ private[sbt] object EvaluateConfigurations {
   private def resolveBase(f: File, p: Project) =
     p.copy(base = IO.resolve(f, p.base))
 
-  def addOffset(offset: Int, lines: Seq[(String, Int)]): Seq[(String, Int)] =
+  private def addOffset(offset: Int, lines: Seq[(String, Int)]): Seq[(String, Int)] =
     lines.map { (s, i) => (s, i + offset) }
 
-  def addOffsetToRange(offset: Int, ranges: Seq[(String, LineRange)]): Seq[(String, LineRange)] =
-    ranges.map { (s, r) => (s, r.shift(offset)) }
+  private def addOffsetToRange(
+      offset: Int,
+      ranges: Seq[(String, Tree, LineRange)]
+  ): Seq[(String, Tree, LineRange)] =
+    ranges.map { (s, t, r) => (s, t, r.shift(offset)) }
 
   /**
    * The name of the class we cast DSL "setting" (vs. definition) lines to.
@@ -286,20 +291,28 @@ private[sbt] object EvaluateConfigurations {
   private[sbt] def splitExpressions(
       file: VirtualFileRef,
       lines: Seq[String]
-  ): (Seq[(String, Int)], Seq[(String, LineRange)]) =
+  ): (Seq[(String, Int)], Seq[(String, Tree, LineRange)]) =
     val split = SbtParser(file, lines)
     // TODO - Look at pulling the parsed expression trees from the SbtParser and stitch them back into a different
     // scala compiler rather than re-parsing.
-    (split.imports, split.settings)
+    (
+      split.imports,
+      split.settings.zip(split.settingsTrees).map { case ((s, r), (_, t)) =>
+        (s, t, r)
+      }
+    )
 
   private def splitSettingsDefinitions(
-      lines: Seq[(String, LineRange)]
-  ): (Seq[(String, LineRange)], Seq[(String, LineRange)]) =
-    lines partition { case (line, _) => isDefinition(line) }
+      lines: Seq[(String, Tree, LineRange)]
+  ): (Seq[(String, Tree, LineRange)], Seq[(String, Tree, LineRange)]) =
+    lines partition { case (_, tree, _) => isDefinition(tree) }
 
-  private def isDefinition(line: String): Boolean = {
-    val trimmed = line.trim
-    DefinitionKeywords.exists(trimmed.startsWith(_))
+  private def isDefinition(tree: Tree): Boolean = {
+    tree match {
+      case Annotated(arg, annot) => isDefinition(arg)
+      case _: ValOrDefDef        => true
+      case _                     => false
+    }
   }
 
   private def extractedValTypes: Seq[String] =

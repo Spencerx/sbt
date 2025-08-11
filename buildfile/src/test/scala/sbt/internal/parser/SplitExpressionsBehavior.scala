@@ -12,10 +12,11 @@ package parser
 
 import sbt.internal.util.LineRange
 import xsbti.VirtualFileRef
+import dotty.tools.dotc.ast.untpd.Tree
 
 trait SplitExpression {
   extension (splitter: SplitExpressions.SplitExpression)
-    def apply(s: String): (Seq[(String, Int)], Seq[(String, LineRange)]) =
+    def apply(s: String): (Seq[(String, Int)], Seq[(String, Tree, LineRange)]) =
       splitter(VirtualFileRef.of("noFile"), s.split('\n').toSeq)
 }
 
@@ -51,6 +52,16 @@ trait SplitExpressionsBehavior extends SplitExpression { this: verify.BasicTestS
            |""".stripMargin
       )
       assert(imports.size == 2)
+      assert(settingsAndDefs.size == 1)
+    }
+
+    test("parse a config containing an annotated definition") {
+      val (imports, settingsAndDefs) = splitter(
+        """|import foo.Bar
+           |@foo
+           |lazy val root = (project in file(".")).enablePlugins(PlayScala)""".stripMargin
+      )
+      assert(imports.size == 1)
       assert(settingsAndDefs.size == 1)
     }
   }
