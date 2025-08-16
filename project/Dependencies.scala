@@ -99,7 +99,6 @@ object Dependencies {
 
   val scalaXml = "org.scala-lang.modules" %% "scala-xml" % "2.4.0"
   val scalaParsers = "org.scala-lang.modules" %% "scala-parser-combinators" % "2.4.0"
-  val scalaReflect = "org.scala-lang" % "scala-reflect" % scala213
   val scalaPar = "org.scala-lang.modules" %% "scala-parallel-collections" % "1.2.0"
 
   // specify all of log4j modules to prevent misalignment
