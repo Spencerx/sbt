@@ -37,7 +37,7 @@ import sbt.librarymanagement.*
 import sbt.nio.file.Glob
 import sbt.protocol.testing.TestResult
 import sbt.testing.Framework
-import sbt.util.{ cacheLevel, ActionCacheStore, Digest, Level, Logger, LoggerContext }
+import sbt.util.{ ActionCacheStore, Digest, Level, Logger, LoggerContext }
 import xsbti.{ HashedVirtualFileRef, VirtualFile, VirtualFileRef }
 import xsbti.compile.*
 import xsbti.compile.analysis.ReadStamps
@@ -87,11 +87,11 @@ object Keys {
   val appConfiguration = settingKey[xsbti.AppConfiguration]("Provides access to the launched sbt configuration, including the ScalaProvider, Launcher, and GlobalLock.").withRank(DSetting)
   val thisProject = settingKey[ResolvedProject]("Provides the current project for the referencing scope.").withRank(CSetting)
 
-  @cacheLevel(include = Array.empty)
+  @transient
   val thisProjectRef = settingKey[ProjectRef]("Provides a fully-resolved reference to the current project for the referencing scope.").withRank(CSetting)
   val configurationStr = StringAttributeKey("configuration")
 
-  @cacheLevel(include = Array.empty)
+  @transient
   val configuration = settingKey[Configuration]("Provides the current configuration of the referencing scope.").withRank(CSetting)
   val commands = settingKey[Seq[Command]]("Defines commands to be registered when this project or build is the current selected one.").withRank(CSetting)
   val initialize = settingKey[Unit]("A convenience setting for performing side-effects during initialization.").withRank(BSetting)
@@ -121,15 +121,15 @@ object Keys {
   val fullServerHandlers = SettingKey(BasicKeys.fullServerHandlers)
   val serverHandlers = settingKey[Seq[ServerHandler]]("User-defined server handlers.")
   val cacheStores = settingKey[Seq[ActionCacheStore]]("Cache backends")
-  @cacheLevel(include = Array.empty)
+  @transient
   val remoteCache = settingKey[Option[URI]]("URI of the remote cache")
-  @cacheLevel(include = Array.empty)
+  @transient
   val remoteCacheTlsCertificate = settingKey[Option[File]]("Path to a TLS certificate (*.crt) that is trusted to sign server certificates")
-  @cacheLevel(include = Array.empty)
+  @transient
   val remoteCacheTlsClientCertificate = settingKey[Option[File]]("Path to a TLS client certificate *.crt used with remoteCacheTlsClientKey ")
-  @cacheLevel(include = Array.empty)
+  @transient
   val remoteCacheTlsClientKey = settingKey[Option[File]]("Path to a TLS client key *.pem used with remoteCacheTlsClientCertificate")
-  @cacheLevel(include = Array.empty)
+  @transient
   val remoteCacheHeaders = settingKey[Seq[String]]("List of key=value headers to be sent to the remote cache.")
   val rootOutputDirectory = SettingKey(BasicKeys.rootOutputDirectory)
 
@@ -179,14 +179,14 @@ object Keys {
   private[sbt] val resourceDigests = taskKey[Seq[Digest]]("All resource files, both managed and unmanaged.").withRank(BTask)
 
   // Output paths
-  @cacheLevel(include = Array.empty)
+  @transient
   val classDirectory = settingKey[File]("Directory for compiled classes and copied resources.").withRank(AMinusSetting)
 
-  @cacheLevel(include = Array.empty)
+  @transient
   val earlyOutput = settingKey[VirtualFile]("JAR file for pickles used for build pipelining")
   val backendOutput = settingKey[VirtualFile]("Output directory of the compiler backend")
 
-  @cacheLevel(include = Array.empty)
+  @transient
   val cleanFiles = taskKey[Seq[File]]("The files to recursively delete during a clean.").withRank(BSetting)
   val cleanKeepFiles = settingKey[Seq[File]]("Files or directories to keep during a clean. Must be direct children of target.").withRank(CSetting)
   val cleanKeepGlobs = settingKey[Seq[Glob]]("Globs to keep during a clean. Must be direct children of target.").withRank(CSetting)
@@ -210,11 +210,11 @@ object Keys {
   val asciiGraphWidth = settingKey[Int]("Determines maximum width of the settings graph in ASCII mode").withRank(AMinusSetting)
   val compileOptions = taskKey[CompileOptions]("Collects basic options to configure compilers").withRank(DTask)
 
-  @cacheLevel(include = Array.empty)
+  @transient
   val compileInputs = taskKey[Inputs]("Collects all inputs needed for compilation.").withRank(DTask)
   val compileInputs2 = taskKey[CompileInputs2]("")
   val scalaHome = settingKey[Option[File]]("If Some, defines the local Scala installation to use for compilation, running, and testing.").withRank(ASetting)
-  @cacheLevel(include = Array.empty)
+  @transient
   val scalaInstance = taskKey[ScalaInstance]("Defines the Scala instance to use for compilation, running, and testing.").withRank(DTask)
   val scalaOrganization = settingKey[String]("Organization/group ID of the Scala used in the project. Default value is 'org.scala-lang'. This is an advanced setting used for clones of the Scala Language. It should be disregarded in standard use cases.").withRank(CSetting)
   val scalaVersion = settingKey[String]("The version of Scala used for building.").withRank(APlusSetting)
@@ -255,7 +255,7 @@ object Keys {
   private[sbt] val compileScalaBackend = taskKey[CompileResult]("Compiles only Scala sources if pipelining is enabled. Compiles both Scala and Java sources otherwise").withRank(Invisible)
   private[sbt] val compileEarly = taskKey[CompileAnalysis]("Compiles only Scala sources if pipelining is enabled, and produce an early output (pickle JAR)").withRank(Invisible)
 
-  @cacheLevel(include = Array.empty)
+  @transient
   private[sbt] val earlyOutputPing = taskKey[PromiseWrap[Boolean]]("When pipelining is enabled, this returns true when early output (pickle JAR) is created; false otherwise").withRank(Invisible)
   private[sbt] val compileJava = taskKey[CompileResult]("Compiles only Java sources (called only for pipelining)").withRank(Invisible)
   private[sbt] val compileSplit = taskKey[CompileResult]("When pipelining is enabled, compile Scala then Java; otherwise compile both").withRank(Invisible)
@@ -265,11 +265,11 @@ object Keys {
   val compileAnalysisFilename = taskKey[String]("Defines the filename used for compileAnalysisFile.").withRank(DTask)
   val compileAnalysisTargetRoot = settingKey[File]("The output directory to produce Zinc Analysis files").withRank(DSetting)
   val earlyCompileAnalysisTargetRoot = settingKey[File]("The output directory to produce Zinc Analysis files").withRank(DSetting)
-  @cacheLevel(include = Array.empty)
+  @transient
   val compileAnalysisFile = taskKey[File]("Zinc analysis storage.").withRank(DSetting)
   val earlyCompileAnalysisFile = taskKey[File]("Zinc analysis storage for early compilation").withRank(DSetting)
 
-  @cacheLevel(include = Array.empty)
+  @transient
   val compileIncSetup = taskKey[Setup]("Configures aspects of incremental compilation.").withRank(DTask)
   val compilerCache = taskKey[GlobalsCache]("Cache of scala.tools.nsc.Global instances.  This should typically be cached so that it isn't recreated every task run.").withRank(DTask)
   val stateCompilerCache = AttributeKey[GlobalsCache]("stateCompilerCache", "Internal use: Global cache.")
@@ -284,7 +284,8 @@ object Keys {
   private[sbt] val externalHooks = taskKey[ExternalHooks]("The external hooks used by zinc.")
   val zincCompilationListeners = settingKey[Seq[RunProfiler]]("Listeners that receive information about incremental compiler decisions.").withRank(DSetting)
   val auxiliaryClassFiles = taskKey[Seq[AuxiliaryClassFiles]]("The auxiliary class files that must be managed by Zinc (for instance the TASTy files)")
-  @cacheLevel(include = Array.empty)
+
+  @transient
   val fileConverter = SettingKey(BasicKeys.fileConverter)
   val allowMachinePath = settingKey[Boolean]("Allow machine-specific paths during conversion.")
   val reportAbsolutePath = settingKey[Boolean]("Report absolute paths during compilation.")
@@ -308,10 +309,10 @@ object Keys {
   val artifactClassifier = settingKey[Option[String]]("Sets the classifier used by the default artifact definition.").withRank(BSetting)
   val artifactName = settingKey[(ScalaVersion, ModuleID, Artifact) => String]("Function that produces the artifact name from its definition.").withRank(CSetting)
 
-  @cacheLevel(include = Array.empty)
+  @transient
   val mappings = taskKey[Seq[(HashedVirtualFileRef, String)]]("Defines the mappings from a file to a path, used by packaging, for example.").withRank(BTask)
 
-  @cacheLevel(include = Array.empty)
+  @transient
   val fileMappings = taskKey[Seq[(File, File)]]("Defines the mappings from a file to a file, used for copying files, for example.").withRank(BMinusTask)
 
   // Run Keys
@@ -353,7 +354,7 @@ object Keys {
   // Test Keys
   val testLoader = taskKey[ClassLoader]("Provides the class loader used for testing.").withRank(DTask)
   val loadedTestFrameworks = taskKey[Map[TestFramework, Framework]]("Loads Framework definitions from the test loader.").withRank(DTask)
-  @cacheLevel(include = Array.empty)
+  @transient
   val definedTests = taskKey[Seq[TestDefinition]]("Provides the list of defined tests.").withRank(BMinusTask)
   val definedTestNames = taskKey[Seq[String]]("Provides the set of defined test names.").withRank(BMinusTask)
   val definedTestDigests = taskKey[Map[String, Digest]]("Provides a unique digest of defined tests.").withRank(DTask)
@@ -362,12 +363,12 @@ object Keys {
   val testFull = taskKey[TestResult]("Executes all tests.").withRank(APlusTask)
   val testOnly = inputKey[TestResult]("Executes the tests provided as arguments or all tests if no arguments are provided.").withRank(ATask)
   val testQuick = inputKey[TestResult]("Alias for test.").withRank(CTask)
-  @cacheLevel(include = Array.empty)
+  @transient
   val testOptions = taskKey[Seq[TestOption]]("Options for running tests.").withRank(BPlusTask)
   private[sbt] val testOptionDigests = taskKey[Seq[Digest]]("Digest for testOptions").withRank(DTask)
   val testFrameworks = settingKey[Seq[TestFramework]]("Registered, although not necessarily present, test frameworks.").withRank(CTask)
 
-  @cacheLevel(include = Array.empty)
+  @transient
   val testListeners = taskKey[Seq[TestReportListener]]("Defines test listeners.").withRank(DTask)
   val testForkedParallel = settingKey[Boolean]("Whether forked tests should be executed in parallel").withRank(CTask)
   val testExecution = taskKey[Tests.Execution]("Settings controlling test execution").withRank(DTask)
@@ -449,7 +450,7 @@ object Keys {
   val bspEnabled = SettingKey[Boolean](BasicKeys.bspEnabled)
   val bspSbtEnabled = settingKey[Boolean]("Should BSP export meta-targets for the SBT build itself?")
 
-  @cacheLevel(include = Array.empty)
+  @transient
   val bspTargetIdentifier = settingKey[BuildTargetIdentifier]("Build target identifier of a project and configuration.").withRank(DSetting)
   val bspWorkspace = settingKey[Map[BuildTargetIdentifier, Scope]]("Mapping of BSP build targets to sbt scopes").withRank(DSetting)
   private[sbt] val bspFullWorkspace = settingKey[BspFullWorkspace]("Mapping of BSP build targets to sbt scopes and meta-targets for the SBT build itself").withRank(DSetting)
@@ -466,7 +467,7 @@ object Keys {
   val bspBuildTargetOutputPathsItem = taskKey[OutputPathsItem]("").withRank(DTask)
   val bspBuildTargetCompile = inputKey[Unit]("").withRank(DTask)
   val bspBuildTargetCompileItem = taskKey[Int]("").withRank(DTask)
-  @cacheLevel(include = Array.empty) private[sbt] val bspCompileTask = taskKey[BspCompileTask]("").withRank(DTask)
+  @transient private[sbt] val bspCompileTask = taskKey[BspCompileTask]("").withRank(DTask)
   val bspBuildTargetTest = inputKey[Unit]("Corresponds to buildTarget/test request").withRank(DTask)
   val bspBuildTargetRun = inputKey[Unit]("Corresponds to buildTarget/run request").withRank(DTask)
   val bspBuildTargetCleanCache = inputKey[Unit]("Corresponds to buildTarget/cleanCache request").withRank(DTask)
@@ -484,7 +485,7 @@ object Keys {
   val bspScalaMainClasses = inputKey[Unit]("Implementation of buildTarget/scalaMainClasses").withRank(DTask)
   val bspScalaMainClassesItem = taskKey[ScalaMainClassesItem]("").withRank(DTask)
 
-  @cacheLevel(include = Array.empty)
+  @transient
   val bspReporter = taskKey[BuildServerReporter]("").withRank(DTask)
 
   val csrCacheDirectory = settingKey[File]("Coursier cache directory. Uses -Dsbt.coursier.home or Coursier's default.").withRank(CSetting)
@@ -499,7 +500,7 @@ object Keys {
   val csrFallbackDependencies = taskKey[Seq[FallbackDependency]]("")
   val csrLogger = taskKey[Option[CacheLogger]]("")
 
-  @cacheLevel(include = Array.empty)
+  @transient
   val csrExtraCredentials = taskKey[Seq[lmcoursier.credentials.Credentials]]("")
   val csrPublications = taskKey[Seq[(lmcoursier.definitions.Configuration, lmcoursier.definitions.Publication)]]("")
   val csrReconciliations = settingKey[Seq[(ModuleMatchers, Reconciliation)]]("Strategy to reconcile version conflicts.")
@@ -550,9 +551,9 @@ object Keys {
   val publishMavenStyle = settingKey[Boolean]("Configures whether to generate and publish a pom (true) or Ivy file (false).").withRank(BSetting)
   val sbtPluginPublishLegacyMavenStyle = settingKey[Boolean]("Configuration for generating the legacy pom of sbt plugins, to publish to Maven").withRank(CSetting)
 
-  @cacheLevel(include = Array.empty)
+  @transient
   val credentials = taskKey[Seq[Credentials]]("The credentials to use for updating and publishing.").withRank(BMinusTask)
-  @cacheLevel(include = Array.empty)
+  @transient
   val allCredentials = taskKey[Seq[Credentials]]("Aggregated credentials across current and root subprojects. Do not rewire this task.").withRank(DTask)
 
   val makePom = taskKey[HashedVirtualFileRef]("Generates a pom for publishing when publishing Maven-style.").withRank(BPlusTask)
@@ -582,14 +583,14 @@ object Keys {
   val externalResolvers = taskKey[Seq[Resolver]]("The external resolvers for automatically managed dependencies.").withRank(BMinusSetting)
   val resolvers = settingKey[Seq[Resolver]]("The user-defined additional resolvers for automatically managed dependencies.").withRank(BMinusTask)
 
-  @cacheLevel(include = Array.empty)
+  @transient
   val projectResolver = taskKey[Resolver]("Resolver that handles inter-project dependencies.").withRank(DTask)
   val fullResolvers = taskKey[Seq[Resolver]]("Combines the project resolver, default resolvers, and user-defined resolvers.").withRank(CTask)
 
-  @cacheLevel(include = Array.empty)
+  @transient
   val otherResolvers = taskKey[Seq[Resolver]]("Resolvers not included in the main resolver chain, such as those in module configurations.").withRank(CSetting)
 
-  @cacheLevel(include = Array.empty)
+  @transient
   val scalaCompilerBridgeResolvers = taskKey[Seq[Resolver]]("Resolvers used to resolve compiler bridges.").withRank(CSetting)
   val includePluginResolvers = settingKey[Boolean]("Include the resolvers from the metabuild.").withRank(CSetting)
   val moduleConfigurations = settingKey[Seq[ModuleConfiguration]]("Defines module configurations, which override resolvers on a per-module basis.").withRank(BMinusSetting)
@@ -609,7 +610,7 @@ object Keys {
   val ivyValidate = settingKey[Boolean]("Enables/disables Ivy validation of module metadata.").withRank(BSetting)
   val ivyLoggingLevel = settingKey[UpdateLogging]("The logging level for updating.").withRank(BSetting)
 
-  @cacheLevel(include = Array.empty)
+  @transient
   val publishTo = taskKey[Option[Resolver]]("The resolver to publish to.").withRank(ASetting)
   val artifacts = settingKey[Seq[Artifact]]("The artifact definitions for the current module.  Must be consistent with " + packagedArtifacts.key.label + ".").withRank(BSetting)
   val projectDescriptors = taskKey[Map[ModuleRevisionId, ModuleDescriptor]]("Project dependency map for the inter-project resolver.").withRank(DTask)
@@ -625,6 +626,7 @@ object Keys {
   val forceUpdatePeriod = settingKey[Option[FiniteDuration]]("Duration after which to force a full update to occur").withRank(CSetting)
   val versionScheme = settingKey[Option[String]]("""Version scheme used for the subproject: Supported values are Some("early-semver"), Some("pvp"), and Some("semver-spec")""").withRank(BSetting)
   val libraryDependencySchemes = settingKey[Seq[ModuleID]]("""Version scheme to use for specific modules set as "org" %% "name" % "<scheme>": Supported values are "early-semver", "pvp", "semver-spec", "always", and "strict".""").withRank(BSetting)
+  @transient
   val stagingDirectory = settingKey[File]("Local staging directory for Sonatype publishing").withRank(CSetting)
   val sonaBundle = taskKey[File]("Local bundle for Sonatype publishing").withRank(DTask)
   val localStaging = settingKey[Option[Resolver]]("Local staging resolver for Sonatype publishing").withRank(CSetting)
@@ -663,12 +665,13 @@ object Keys {
   val minForcegcInterval = settingKey[Duration]("Minimal interval to check for forcing garbage collection.")
   val settingsData = std.FullInstance.settingsData
   private[sbt] val allScopes = settingKey[ScopeFilter.AllScopes]("Internal use: a view of all scopes for filtering")
-  @cacheLevel(include = Array.empty)
+
+  @transient
   val streams = taskKey[TaskStreams]("Provides streams for logging and persisting data.").withRank(DTask)
   val taskDefinitionKey = Def.taskDefinitionKey
   val (executionRoots, dummyRoots) = Def.dummy[Seq[ScopedKey[?]]]("executionRoots", "The list of root tasks for this task execution.  Roots are the top-level tasks that were directly requested to be run.")
 
-  @cacheLevel(include = Array.empty)
+  @transient
   val state = Def.stateKey
   val streamsManager = Def.streamsManagerKey
   // wrapper to work around SI-2915

@@ -96,7 +96,7 @@ trait Cont:
       given qctx.type = qctx
       def msg: String =
         s"given evidence sjsonnew.HashWriter[${TypeRepr.of[A].show}] is not found; " +
-          "opt out of caching by annotating the key with @cacheLevel(include = Array.empty), or as" +
+          "opt out of caching by annotating the key with @transient, or as " +
           "foo := Def.uncached(...), or provide a given value"
       Expr
         .summon[HashWriter[A]]
@@ -108,7 +108,7 @@ trait Cont:
       given qctx.type = qctx
       def msg: String =
         s"given evidence sjsonnew.JsonFormat[${TypeRepr.of[A].show}] is not found; " +
-          "opt out of caching by annotating the key with @cacheLevel(include = Array.empty), or as" +
+          "opt out of caching by annotating the key with @transient, or as " +
           "foo := Def.uncached(...), or provide a given value"
       Expr
         .summon[JsonFormat[A]]

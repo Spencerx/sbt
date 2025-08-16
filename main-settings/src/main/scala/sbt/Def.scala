@@ -19,7 +19,6 @@ import sbt.internal.util.{ Terminal as ITerminal, * }
 import sbt.util.{
   AggregateActionCacheStore,
   BuildWideCacheConfiguration,
-  cacheLevel,
   DiskActionCacheStore,
   Uncached,
 }
@@ -28,6 +27,7 @@ import sbt.util.Show
 import xsbti.{ HashedVirtualFileRef, VirtualFile, VirtualFileRef }
 import sjsonnew.JsonFormat
 import scala.reflect.ClassTag
+import sbt.util.cacheLevel
 
 trait BuildSyntax:
   inline def settingKey[A1](inline description: String): SettingKey[A1] =

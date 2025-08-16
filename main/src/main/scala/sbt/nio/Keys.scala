@@ -20,7 +20,6 @@ import sbt.internal.util.AttributeKey
 import sbt.internal.util.complete.Parser
 import sbt.nio.file.{ FileAttributes, FileTreeView, Glob, PathFilter }
 import sbt.*
-import sbt.util.cacheLevel
 
 import scala.concurrent.duration.FiniteDuration
 
@@ -41,7 +40,7 @@ object Keys {
   val fileInputExcludeFilter =
     settingKey[PathFilter]("An exclusion filter to apply to the input sources of a task.")
 
-  @cacheLevel(include = Array.empty)
+  @transient
   val inputFileStamper = settingKey[FileStamper](
     "Toggles the file stamping implementation used to determine whether or not a file has been modified."
   )
@@ -173,12 +172,12 @@ object Keys {
     taskKey[Seq[(Path, FileAttributes)]]("Get all of the file inputs for a task")
       .withRank(Invisible)
 
-  @cacheLevel(include = Array.empty)
+  @transient
   private[sbt] val unmanagedFileStampCache = taskKey[FileStamp.Cache](
     "Map of managed file stamps that may be cleared between task evaluation runs."
   ).withRank(Invisible)
 
-  @cacheLevel(include = Array.empty)
+  @transient
   private[sbt] val managedFileStampCache = taskKey[FileStamp.Cache](
     "Map of managed file stamps that may be cleared between task evaluation runs."
   ).withRank(Invisible)
