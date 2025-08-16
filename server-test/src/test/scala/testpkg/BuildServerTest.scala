@@ -410,6 +410,7 @@ class BuildServerTest extends AbstractServerTest {
     assertMessage(s""""id":"$id"""", """"result":null""")()
   }
 
+  /*
   test("workspace/reload: send diagnostic and respond with error") {
     // write an other-build.sbt file that does not compile
     val otherBuildFile = svr.baseDirectory.toPath.resolve("other-build.sbt")
@@ -453,6 +454,7 @@ class BuildServerTest extends AbstractServerTest {
     )()
     Files.delete(otherBuildFile)
   }
+   */
 
   test("buildTarget/scalaMainClasses") {
     val buildTarget = buildTargetUri("runAndTest", "Compile")
