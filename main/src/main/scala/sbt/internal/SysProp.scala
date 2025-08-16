@@ -186,17 +186,15 @@ object SysProp {
         }
     }
 
-  def onChangedBuildSource: WatchBuildSourceOption = {
+  def onChangedBuildSource: WatchBuildSourceOption =
     val sysPropKey = "sbt.build.onchange"
-    sys.props.getOrElse(sysPropKey, "warn") match {
+    sys.props.getOrElse(sysPropKey, "reload") match
       case "reload" => ReloadOnSourceChanges
       case "warn"   => WarnOnSourceChanges
       case "ignore" => IgnoreSourceChanges
       case unknown =>
         System.err.println(s"Unknown $sysPropKey: $unknown.\nUsing warn.")
         sbt.nio.Keys.WarnOnSourceChanges
-    }
-  }
 
   def serverUseJni = getOrFalse("sbt.ipcsocket.jni")
 
