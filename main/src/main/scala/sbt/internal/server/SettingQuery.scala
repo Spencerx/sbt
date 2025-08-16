@@ -111,7 +111,7 @@ object SettingQuery {
       case NoJsonWriter()     => Left(s"JsonWriter for ${key.tag} not found")
     }
 
-  def toJson[A: JsonWriter](x: A): JValue = Converter toJsonUnsafe x
+  def toJson[A: JsonWriter](x: A): JValue = Converter.toJsonUnsafe(x)
 
   def getSettingJsonValue[A](
       structure: BuildStructure,

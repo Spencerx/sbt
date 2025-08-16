@@ -12,7 +12,8 @@ import java.io.File
 
 import scala.util.control.NonFatal
 import sbt.io.{ Hash, IO }
-import sjsonnew.{ arrayFormat as _, * }
+import sjsonnew.*
+import sjsonnew.BasicJsonProtocol.given
 import sbt.nio.file.*
 import sbt.nio.file.syntax.*
 

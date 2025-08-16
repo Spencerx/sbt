@@ -112,7 +112,7 @@ private[librarymanagement] abstract class ModuleReportExtra {
 
   private def calendarToString(c: ju.Calendar): String = {
     import sjsonnew.*, BasicJsonProtocol.*
-    implicitly[IsoString[ju.Calendar]] to c
+    implicitly[IsoString[ju.Calendar]].to(c)
   }
 
   def retrieve(f: (ModuleID, Artifact, File) => File): ModuleReport =
