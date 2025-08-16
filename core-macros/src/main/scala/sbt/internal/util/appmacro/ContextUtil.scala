@@ -73,6 +73,7 @@ trait ContextUtil[C <: Quotes & scala.Singleton](val valStart: Int):
       case Nil     => TypeRepr.of[EmptyTuple]
 
   private val cacheLevelSym = Symbol.requiredClass("sbt.util.cacheLevel")
+  private val transientSym = Symbol.requiredClass("scala.transient")
   final class Input(
       val tpe: TypeRepr,
       val qual: Term,
@@ -84,19 +85,26 @@ trait ContextUtil[C <: Quotes & scala.Singleton](val valStart: Int):
     def isCacheInput: Boolean = tags.nonEmpty
     lazy val tags = extractTags(qual)
     private def extractTags(tree: Term): List[CacheLevelTag] =
-      def getAnnotation(tree: Term) =
+      def getCacheLevelAnnotation(tree: Term): Option[Term] =
         Option(tree.tpe.termSymbol) match
           case Some(x) => x.getAnnotation(cacheLevelSym)
           case None    => tree.symbol.getAnnotation(cacheLevelSym)
+      def getTransientAnnotation(tree: Term): Option[Term] =
+        Option(tree.tpe.termSymbol) match
+          case Some(x) => x.getAnnotation(transientSym)
+          case None    => tree.symbol.getAnnotation(transientSym)
       def extractTags0(tree: Term) =
-        getAnnotation(tree) match
+        getCacheLevelAnnotation(tree) match
           case Some(annot) =>
             annot.asExprOf[cacheLevel] match
               case '{ cacheLevel(include = Array.empty[CacheLevelTag](using $_)) } => Nil
               case '{ cacheLevel(include = Array[CacheLevelTag]($include*)) } =>
                 include.value.get.toList
               case _ => sys.error(Printer.TreeStructure.show(annot) + " does not match")
-          case None => CacheLevelTag.all.toList
+          case _ =>
+            getTransientAnnotation(tree) match
+              case Some(annot) => Nil
+              case _           => CacheLevelTag.all.toList
       tree match
         case Inlined(_, _, tree) => extractTags(tree)
         case Apply(_, List(arg)) => extractTags(arg)
@@ -108,21 +116,27 @@ trait ContextUtil[C <: Quotes & scala.Singleton](val valStart: Int):
       case Apply(TypeApply(_, _), List(t @ Ident(_))) =>
         t.symbol.getAnnotation(cacheLevelSym) match
           case Some(_) => cacheLevelsForSym(t.symbol)
-          case None    => CacheLevelTag.all.toList
+          case None =>
+            t.symbol.getAnnotation(transientSym) match
+              case Some(_) => Nil
+              case _       => CacheLevelTag.all.toList
       case u =>
         u.symbol.getAnnotation(cacheLevelSym) match
           case Some(_) => cacheLevelsForSym(u.symbol)
-          case None    => CacheLevelTag.all.toList
+          case None =>
+            u.symbol.getAnnotation(transientSym) match
+              case Some(_) => Nil
+              case _       => CacheLevelTag.all.toList
 
   def cacheLevelsForSym(sym: Symbol): Seq[CacheLevelTag] =
     sym.getAnnotation(cacheLevelSym) match
-      case Some(annot) =>
+      case Some(annot) if annot.symbol.owner.name == "cacheLevel" =>
         annot.asExprOf[cacheLevel] match
           case '{ cacheLevel(include = Array.empty[CacheLevelTag](using $_)) } => Nil
           case '{ cacheLevel(include = Array[CacheLevelTag]($include*)) } =>
             include.value.get
           case _ => report.errorAndAbort(Printer.TreeStructure.show(annot) + " does not match")
-      case None => CacheLevelTag.all.toList
+      case _ => CacheLevelTag.all.toList
 
   enum OutputType:
     case File
