@@ -1357,7 +1357,6 @@ private[sbt] object Load {
           converter,
         )
       },
-      scalacOptions += Def.uncached("-Wconf:cat=unused-nowarn:s"),
       onLoadMessage := ("loading project definition from " + baseDirectory.value)
     )
   )
