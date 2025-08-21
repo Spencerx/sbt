@@ -1002,6 +1002,13 @@ object Defaults extends BuildCommon {
           )
         else Def.uncached(old)
       },
+      scalacOptions := {
+        val old = scalacOptions.value
+        if sbtPlugin.value && VersionNumber(scalaVersion.value)
+            .matchesSemVer(SemanticSelector("=2.12"))
+        then old ++ Seq("-Wconf:cat=unused-nowarn:s", "-Xsource:3")
+        else old
+      },
       persistJarClasspath :== true,
       classpathEntryDefinesClassVF := Def.uncached {
         val cache =
