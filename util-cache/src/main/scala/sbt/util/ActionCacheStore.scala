@@ -2,7 +2,14 @@ package sbt.util
 
 import java.io.RandomAccessFile
 import java.nio.ByteBuffer
-import java.nio.file.{ Files, FileSystemException, Path, Paths, StandardCopyOption }
+import java.nio.file.{
+  Files,
+  FileSystemException,
+  NoSuchFileException,
+  Path,
+  Paths,
+  StandardCopyOption
+}
 import java.util.concurrent.atomic.AtomicBoolean
 import sjsonnew.support.scalajson.unsafe.{ CompactPrinter, Converter, Parser }
 import sjsonnew.shaded.scalajson.ast.unsafe.JValue
@@ -293,13 +300,18 @@ class DiskActionCacheStore(base: Path, converter: FileConverter) extends Abstrac
       case p if !Files.exists(p) =>
         // println(s"- syncFile: $p does not exist")
         writeFileAndNotify(p)
-      case p if Digest.sameDigest(p, d) =>
-        // println(s"- syncFile: $p has same digest")
-        p
       case p =>
-        // println(s"- syncFile: $p has different digest")
-        IO.delete(p.toFile())
-        writeFileAndNotify(p)
+        try
+          if Digest.sameDigest(p, d) then p
+          else
+            // println(s"- syncFile: $p has different digest")
+            IO.delete(p.toFile())
+            writeFileAndNotify(p)
+        catch
+          // in theory, Fies.exists(...) should have caught this,
+          // but in practice, NoSuchFileException is thrown often
+          case _: NoSuchFileException =>
+            writeFileAndNotify(p)
 
   /**
    * Emulate virtual side effects.
