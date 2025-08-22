@@ -93,11 +93,11 @@ jobs:
         python-version: 3.12
     - name: Coursier cache
       uses: coursier/cache-action@v6
-    - name: Cache sbt
-      uses: actions/cache@v4
-      with:
-        path: ~/.sbt
-        key: ${{ runner.os }}-sbt-cache-${{ hashFiles('**/*.sbt') }}-${{ hashFiles('project/build.properties') }}
+    # - name: Cache sbt
+    #   uses: actions/cache@v4
+    #   with:
+    #     path: ~/.sbt
+    #     key: ${{ runner.os }}-sbt-cache-${{ hashFiles('**/*.sbt') }}-${{ hashFiles('project/build.properties') }}
     - name: Setup Windows C++ toolchain
       uses: ilammy/msvc-dev-cmd@v1
       if: ${{ matrix.os == 'windows-latest' }}
@@ -105,7 +105,6 @@ jobs:
       if: ${{ matrix.jobtype == 1 }}
       shell: bash
       run: |
-        rm -rf "$HOME/.sbt/boot/" || true
         ./sbt -v --client mimaReportBinaryIssues
         ./sbt -v --client javafmtCheck
         ./sbt -v --client "Test/javafmtCheck"
