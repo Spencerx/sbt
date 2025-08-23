@@ -3103,9 +3103,10 @@ object Classpaths {
     },
     sonaDeploymentName := {
       val o = organization.value
+      val n = name.value
       val v = version.value
       val uuid = UUID.randomUUID().toString().take(8)
-      s"$o:$v:$uuid"
+      s"$o:$n:$v:$uuid"
     },
   )
 
