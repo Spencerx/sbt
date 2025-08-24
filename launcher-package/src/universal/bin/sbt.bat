@@ -25,6 +25,7 @@ set default_java_opts=-Dfile.encoding=UTF-8
 set sbt_jar=
 set build_props_sbt_version=
 set run_native_client=
+set run_jvm_client=
 set shutdownall=
 
 set sbt_args_print_version=
@@ -50,6 +51,7 @@ set sbt_args_sbt_dir=
 set sbt_args_sbt_version=
 set sbt_args_mem=
 set sbt_args_client=
+set sbt_args_jvm_client=
 set sbt_args_no_server=
 set is_this_dir_sbt=0
 
@@ -190,6 +192,15 @@ if "%~0" == "--client" set _client_arg=true
 if defined _client_arg (
   set _client_arg=
   set sbt_args_client=1
+  goto args_loop
+)
+
+if "%~0" == "--jvm-client" set _jvm_client_arg=true
+
+if defined _jvm_client_arg (
+  set _jvm_client_arg=
+  set sbt_args_jvm_client=1
+  set SBT_ARGS=--client !SBT_ARGS!
   goto args_loop
 )
 
@@ -899,18 +910,28 @@ for /F "delims=.-_ tokens=1-2" %%v in ("!sbtV!") do (
   set sbtBinaryV_1=%%v
   set sbtBinaryV_2=%%w
 )
-rem default to run_native_client=1 for sbt 2.x 
+rem default to run_native_client=1 for sbt 2.x
 if !sbtBinaryV_1! geq 2 (
-  if !sbt_args_client! equ 0 (
+  if !sbt_args_jvm_client! equ 1 (
     set run_native_client=
+    set run_jvm_client=1
   ) else (
-    set run_native_client=1
+    if !sbt_args_client! equ 0 (
+      set run_native_client=
+    ) else (
+      set run_native_client=1
+    )
   )
 ) else (
   if !sbtBinaryV_1! geq 1 (
     if !sbtBinaryV_2! geq 4 (
-      if !sbt_args_client! equ 1 (
-        set run_native_client=1
+      if !sbt_args_jvm_client! equ 1 (
+        set run_native_client=
+        set run_jvm_client=1
+      ) else (
+        if !sbt_args_client! equ 1 (
+          set run_native_client=1
+        )
       )
     )
   )

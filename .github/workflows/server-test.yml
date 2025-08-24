@@ -14,16 +14,14 @@ jobs:
       JVM_OPTS: -Xms800M -Xmx2G -Xss6M -XX:ReservedCodeCacheSize=128M -server -Dsbt.io.virtual=false -Dfile.encoding=UTF-8
       SBT_ETC_FILE: $HOME/etc/sbt/sbtopts
     steps:
-    - name: Checkout sbt/sbt
-      uses: actions/checkout@v4
+    - uses: actions/checkout@v4
     - name: Setup JDK
       uses: actions/setup-java@v5
       with:
         distribution: "zulu"
         java-version: "8"
         cache: sbt
-    - name: Setup SBT
-      uses: sbt/setup-sbt@v1
+    - uses: sbt/setup-sbt@v1
     - name: Server test
       shell: bash
       run: sbt -v --client "serverTestProj/test"
