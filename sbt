@@ -25,7 +25,7 @@ declare use_sbtn=
 declare use_jvm_client=
 declare no_server=
 declare sbtn_command="$SBTN_CMD"
-declare sbtn_version="1.10.8"
+declare sbtn_version="1.11.5"
 declare use_colors=1
 declare is_this_dir_sbt=""
 
