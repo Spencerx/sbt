@@ -55,7 +55,7 @@ jobs:
       JVM_OPTS: -Xms800M -Xmx2G -Xss6M -XX:ReservedCodeCacheSize=128M -server -Dsbt.io.virtual=false -Dfile.encoding=UTF-8
       SCALA_212: 2.12.20
       UTIL_TESTS: "utilCache/test utilControl/test utilInterface/test utilLogging/test utilPosition/test utilRelation/test utilScripted/test utilTracking/test"
-      TEST_SBT_VER: 1.10.7
+      TEST_SBT_VER: 1.11.4
       SBT_ETC_FILE: $HOME/etc/sbt/sbtopts
       JDK11: adopt@1.11.0-9
       SPARK_LOCAL_IP: "127.0.0.1"

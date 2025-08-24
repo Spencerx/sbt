@@ -107,21 +107,19 @@ object SbtRunnerTest extends SimpleTestSuite with PowerAssertions {
     ()
   }
 
-  /*
-  test("sbt --client") {
-    val out = sbtProcess("--client", "--no-colors", "compile").!!.linesIterator.toList
+  test("sbt --jvm-client") {
+    val out = sbtProcess("--jvm-client", "--no-colors", "compile").!!.linesIterator.toList
     if (isWindows) {
       println(out)
     } else {
-      assert(out exists { _.contains("server was not detected") })
+      assert(out.exists { _.contains("server was not detected") })
     }
-    val out2 = sbtProcess("--client", "--no-colors", "shutdown").!!.linesIterator.toList
+    val out2 = sbtProcess("--jvm-client", "--no-colors", "shutdown").!!.linesIterator.toList
     if (isWindows) {
-      println(out)
+      println(out2)
     } else {
-      assert(out2 exists { _.contains("disconnected") })
+      assert(out2.exists { _.contains("disconnected") })
     }
     ()
   }
-  */
 }
