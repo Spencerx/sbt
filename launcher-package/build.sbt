@@ -370,7 +370,8 @@ lazy val integrationTest = (project in file("integration-test"))
     },
     testOnly in Test := {
       (testOnly in Test).dependsOn(((packageBin in Universal) in LocalRootProject).dependsOn(((stage in (Universal) in LocalRootProject)))).evaluated
-    }
+    },
+    parallelExecution in Test := false
   )
 
 def downloadUrlForVersion(v: String) = (v split "[^\\d]" flatMap (i => catching(classOf[Exception]) opt (i.toInt))) match {
