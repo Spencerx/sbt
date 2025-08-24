@@ -16,7 +16,16 @@ object SbtScriptTest extends SimpleTestSuite with PowerAssertions {
 
   private val javaBinDir = new File("integration-test", "bin").getAbsolutePath
 
-  private def makeTest(
+  private def retry[A1](f: () => A1, maxAttempt: Int = 10): A1 =
+    try {
+      f()
+    } catch {
+      case _ if maxAttempt <= 1 =>
+        Thread.sleep(100)
+        retry(f, maxAttempt - 1)
+    }
+
+  def makeTest(
       name: String,
       javaOpts: String = "",
       sbtOpts: String = "",
@@ -25,7 +34,7 @@ object SbtScriptTest extends SimpleTestSuite with PowerAssertions {
   )(args: String*)(f: List[String] => Any) = {
     test(name) {
       val workingDirectory = Files.createTempDirectory("sbt-launcher-package-test").toFile
-      IO.copyDirectory(new File("citest"), workingDirectory)
+      retry(() => IO.copyDirectory(new File("citest"), workingDirectory))
 
       try {
         val sbtOptsFile = new File(workingDirectory, ".sbtopts")
