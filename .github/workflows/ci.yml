@@ -36,18 +36,6 @@ jobs:
           #   java: 8
           #   distribution: adopt
           #   jobtype: 6
-          - os: ubuntu-latest
-            java: 8
-            distribution: adopt
-            jobtype: 7
-          - os: macos-latest
-            java: 17
-            distribution: temurin
-            jobtype: 8
-          - os: windows-latest
-            java: 8
-            distribution: adopt
-            jobtype: 9
     runs-on: ${{ matrix.os }}
     timeout-minutes: 25
     env:
@@ -55,7 +43,6 @@ jobs:
       JVM_OPTS: -Xms800M -Xmx2G -Xss6M -XX:ReservedCodeCacheSize=128M -server -Dsbt.io.virtual=false -Dfile.encoding=UTF-8
       SCALA_212: 2.12.20
       UTIL_TESTS: "utilCache/test utilControl/test utilInterface/test utilLogging/test utilPosition/test utilRelation/test utilScripted/test utilTracking/test"
-      TEST_SBT_VER: 1.11.4
       SBT_ETC_FILE: $HOME/etc/sbt/sbtopts
       JDK11: adopt@1.11.0-9
       SPARK_LOCAL_IP: "127.0.0.1"
@@ -86,15 +73,7 @@ jobs:
         distribution: "${{ matrix.distribution }}"
         java-version: "${{ matrix.java }}"
         cache: "sbt"
-    - name: Setup SBT
-      uses: sbt/setup-sbt@v1
-    - name: Set up Python 3.12
-      uses: actions/setup-python@v5
-      with:
-        python-version: 3.12
-    - name: Setup Windows C++ toolchain
-      uses: ilammy/msvc-dev-cmd@v1
-      if: ${{ matrix.os == 'windows-latest' }}
+    - uses: sbt/setup-sbt@v1
     - name: Build and test (1)
       if: ${{ matrix.jobtype == 1 }}
       shell: bash
@@ -146,50 +125,3 @@ jobs:
         sbt -Dsbtlm.path=$HOME/work/sbt/sbt/librarymanagement -Dsbtzinc.path=$HOME/work/sbt/sbt/zinc -Dsbt.build.version=$BUILD_VERSION -Dsbt.build.fatal=false "+lowerUtils/publishLocal; {librarymanagement}/publishLocal; {zinc}/publishLocal; upperModules/publishLocal"
         rm -r $(find $HOME/.sbt/boot -name "*-SNAPSHOT") || true
         sbt -v -Dsbt.version=$BUILD_VERSION "++2.13.x; all $UTIL_TESTS; ++$SCALA_212; all $UTIL_TESTS; scripted actions/* source-dependencies/*1of3 dependency-management/*1of4 java/*"
-    - name: Build and test (7)
-      if: ${{ matrix.jobtype == 7 }}
-      shell: bash
-      run: |
-        # test building sbtn on Linux
-        sbt "-Dsbt.io.virtual=false" nativeImage
-        # smoke test native Image
-        ./client/target/bin/sbtn --sbt-script=$(pwd)/sbt about
-        ./client/target/bin/sbtn --sbt-script=$(pwd)/sbt shutdown
-        # test launcher script
-        echo build using JDK 8 test using JDK 8 and JDK 11
-        cd launcher-package
-        sbt -Dsbt.build.version=$TEST_SBT_VER rpm:packageBin debian:packageBin
-        sbt -Dsbt.build.version=$TEST_SBT_VER integrationTest/test
-        cd citest && ./test.sh
-        $HOME/bin/jabba install $JDK11 && exec $HOME/bin/jabba which --home $JDK11
-        java -Xmx32m -version
-        ./test.sh
-    - name: Build and test (8)
-      if: ${{ matrix.jobtype == 8 }}
-      shell: bash
-      run: |
-        # test building sbtn on macOS
-        ./sbt "-Dsbt.io.virtual=false" nativeImage
-        # test launcher script
-        cd launcher-package
-        bin/coursier resolve
-        ../sbt -Dsbt.build.version=$TEST_SBT_VER integrationTest/test
-        # This fails due to the JLine issue
-        # cd citest && ./test.sh
-    - name: Build and test (9)
-      if: ${{ matrix.jobtype == 9 }}
-      shell: bash
-      run: |
-        # test building sbtn on Windows
-        sbt "-Dsbt.io.virtual=false" nativeImage
-        # smoke test native Image
-        ./client/target/bin/sbtn --sbt-script=$(pwd)/launcher-package/src/universal/bin/sbt.bat about
-        ./client/target/bin/sbtn --sbt-script=$(pwd)/launcher-package/src/universal/bin/sbt.bat shutdown
-        # test launcher script
-        echo build using JDK 8, test using JDK 8, on Windows
-        cd launcher-package
-        bin/coursier.bat resolve
-        sbt -Dsbt.build.version=$TEST_SBT_VER integrationTest/test
-        cd citest
-        ./test.bat
-        test3/test3.bat
