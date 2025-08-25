@@ -107,6 +107,7 @@ private[librarymanagement] abstract class ResolverFunctions {
   val SonatypeReleasesRepository =
     "https://oss.sonatype.org/service/local/repositories/releases/content/"
   val SonatypeCentralRepository = "https://central.sonatype.com/repository"
+  val ScalaNightlyRepository = "https://repo.scala-lang.org/artifactory/maven-nightlies/"
   val JavaNet2RepositoryName = "java.net Maven2 Repository"
   val JavaNet2RepositoryRoot = "https://maven.java.net/content/repositories/public/"
   val DefaultMavenRepositoryRoot = "https://repo1.maven.org/maven2/"
@@ -116,6 +117,8 @@ private[librarymanagement] abstract class ResolverFunctions {
 
   def mavenCentral: Resolver = DefaultMavenRepository
   def defaults: Vector[Resolver] = Vector(mavenCentral)
+  def scalaNightlyRepository: Resolver =
+    MavenRepository("The Scala Nightly Repository", ScalaNightlyRepository)
 
   // obsolete: kept only for launcher compatibility
   private[sbt] val ScalaToolsReleasesName = "Sonatype OSS Releases"
