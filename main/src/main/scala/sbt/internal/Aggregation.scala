@@ -9,10 +9,8 @@
 package sbt
 package internal
 
-import java.text.DateFormat
-
 import sbt.Def.{ ScopedKey, Settings }
-import sbt.Keys.{ showSuccess, showTiming, timingFormat }
+import sbt.Keys.{ showSuccess, showTiming }
 import sbt.ProjectExtra.*
 import sbt.ScopeAxis.{ Select, Zero }
 import sbt.internal.util.complete.Parser
@@ -146,7 +144,7 @@ object Aggregation {
       (currentRef / key).get(structure.data) getOrElse true
     if get(showSuccess) then
       if get(showTiming) then
-        val msg = timingString(start, stop, structure.data, currentRef) + (
+        val msg = timing(start, stop) + (
           if cacheSummary == "" then ""
           else ", " + cacheSummary
         )
@@ -155,23 +153,8 @@ object Aggregation {
       else if success then log.success("")
     else ()
 
-  private def timingString(
-      startTime: Long,
-      endTime: Long,
-      data: Settings,
-      currentRef: ProjectRef,
-  ): String = {
-    val format = (currentRef / timingFormat).get(data) getOrElse defaultFormat
-    timing(format, startTime, endTime)
-  }
-
-  def timing(format: java.text.DateFormat, startTime: Long, endTime: Long): String =
-    NetworkClient.timing(format, startTime, endTime)
-
-  def defaultFormat: DateFormat = {
-    import java.text.DateFormat
-    DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.MEDIUM)
-  }
+  def timing(startTime: Long, endTime: Long): String =
+    NetworkClient.elapsedString(startTime, endTime)
 
   def applyDynamicTasks[I](
       s: State,

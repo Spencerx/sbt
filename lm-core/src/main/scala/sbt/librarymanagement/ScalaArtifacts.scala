@@ -16,6 +16,7 @@ object ScalaArtifacts {
   final val ScaladocID = "scaladoc"
   final val Scala3DocID = "scala3doc"
   final val Scala3TastyInspectorID = "scala3-tasty-inspector"
+  final val Scala3_8Artifacts = Vector(LibraryID, Scala3LibraryID)
 
   private[sbt] final val Scala3LibraryPrefix = Scala3LibraryID + "_"
   private[sbt] final val Scala3CompilerPrefix = Scala3CompilerID + "_"
