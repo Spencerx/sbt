@@ -17,7 +17,6 @@ import java.nio.file.{ Files, Paths }
 import java.util.UUID
 import java.util.concurrent.atomic.{ AtomicBoolean, AtomicReference }
 import java.util.concurrent.{ ConcurrentHashMap, LinkedBlockingQueue, TimeUnit }
-import java.text.DateFormat
 
 import sbt.BasicCommandStrings.{ DashDashDetachStdio, DashDashServer, Shutdown, TerminateAction }
 import sbt.internal.langserver.{ LogMessageParams, MessageType, PublishDiagnosticsParams }
@@ -431,6 +430,7 @@ class NetworkClient(
       start()
       override def run(): Unit = {
         try {
+          val buffer = mutable.ArrayBuffer.empty[Byte]
           while (readThreadAlive.get) {
             if (socket.isEmpty) {
               socket = Try(ClientSocket.localSocket(bootSocketName, useJNI)).toOption
@@ -446,7 +446,12 @@ class NetworkClient(
                   case 3 if gotInputBack => // ETX: end of text
                     readThreadAlive.set(false)
                   case i if gotInputBack => stdinBytes.offer(i)
-                  case i                 => printStream.write(i)
+                  case 10 => // CR
+                    buffer.append(10.toByte)
+                    printStream.write(buffer.toArray[Byte])
+                    buffer.clear()
+                  case i =>
+                    buffer.append(i.toByte)
                 }
               } catch {
                 case e @ (_: IOException | _: InterruptedException) =>
@@ -573,7 +578,7 @@ class NetworkClient(
       case null => ()
       case (q, startTime, name) =>
         val now = System.currentTimeMillis
-        val message = NetworkClient.timing(startTime, now)
+        val message = NetworkClient.elapsedString(startTime, now)
         if (batchMode.get || !attached.get) {
           if (exitCode == 0) console.success(message)
           else console.appendLog(Level.Error, message)
@@ -863,8 +868,7 @@ class NetworkClient(
     }
   }
 
-  def connect(log: Boolean, promptCompleteUsers: Boolean): Boolean = {
-    if (log) console.appendLog(Level.Info, "entering *experimental* thin client - BEEP WHIRR")
+  def connect(promptCompleteUsers: Boolean): Boolean =
     try {
       init(promptCompleteUsers, retry = true)
       true
@@ -873,7 +877,6 @@ class NetworkClient(
         console.appendLog(Level.Error, "failed to connect to server")
         false
     }
-  }
 
   private val contHandler: () => Unit = () => {
     if (Terminal.console.getLastLine.nonEmpty)
@@ -914,9 +917,8 @@ class NetworkClient(
           catch { case _: InterruptedException => }
           if (exitClean.get) 0 else 1
         }
-        console.appendLog(Level.Info, "terminate the server with `shutdown`")
         if (interactive) {
-          console.appendLog(Level.Info, "disconnect from the server with `exit`")
+          console.appendLog(Level.Info, "terminate the server with `shutdown`")
           block()
         } else if (exit) 0
         else {
@@ -928,8 +930,7 @@ class NetworkClient(
     }
 
   def batchExecute(userCommands: List[String]): Int = {
-    val cmd = userCommands mkString " "
-    printStream.println("> " + cmd)
+    val cmd = userCommands.mkString(" ")
     sendAndWait(cmd, None)
   }
 
@@ -1226,9 +1227,12 @@ object NetworkClient {
     )
   }
 
-  private[sbt] def timing(format: DateFormat, startTime: Long, endTime: Long): String =
+  def elapsedString(startTime: Long, endTime: Long): String =
+    s"elapsed time: ${elapsedStr(startTime, endTime)}"
+
+  private def elapsedStr(startTime: Long, endTime: Long): String = {
     val total = (endTime - startTime + 500) / 1000
-    val totalString = s"$total s" +
+    s"$total s" +
       (if (total <= 60) ""
        else {
          val hours = total / 3600 match
@@ -1238,11 +1242,6 @@ object NetworkClient {
          val secs = f"${total % 60}%02d"
          s" ($hours:$mins:$secs.0)"
        })
-    s"elapsed time: $totalString"
-
-  private[sbt] def timing(startTime: Long, endTime: Long): String = {
-    val format = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.MEDIUM)
-    timing(format, startTime, endTime)
   }
 
   def client(
@@ -1262,7 +1261,7 @@ object NetworkClient {
         useJNI,
       )
     try {
-      if (client.connect(log = true, promptCompleteUsers = false)) client.run()
+      if (client.connect(promptCompleteUsers = false)) client.run()
       else 1
     } catch { case _: Exception => 1 }
     finally client.close()
@@ -1293,7 +1292,7 @@ object NetworkClient {
           client.connectOrStartServerAndConnect(promptCompleteUsers = false, retry = true)
         BspClient.bspRun(socket)
       } else {
-        if (client.connect(log = true, promptCompleteUsers = false)) client.run()
+        if (client.connect(promptCompleteUsers = false)) client.run()
         else 1
       }
     } catch { case _: Exception => 1 }
@@ -1392,7 +1391,7 @@ object NetworkClient {
         )
       try {
         val results =
-          if (client.connect(log = false, promptCompleteUsers = true)) client.getCompletions(cmd)
+          if (client.connect(promptCompleteUsers = true)) client.getCompletions(cmd)
           else Nil
         out.println(results.sorted.distinct mkString "\n")
         0

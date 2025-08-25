@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 set +e
-declare builtin_sbt_version="1.11.4"
+declare builtin_sbt_version="1.11.5"
 declare -a residual_args
 declare -a java_args
 declare -a scalac_args
@@ -22,9 +22,10 @@ declare sbt_verbose=
 declare sbt_debug=
 declare build_props_sbt_version=
 declare use_sbtn=
+declare use_jvm_client=
 declare no_server=
 declare sbtn_command="$SBTN_CMD"
-declare sbtn_version="1.10.8"
+declare sbtn_version="1.11.5"
 declare use_colors=1
 declare is_this_dir_sbt=""
 
@@ -612,6 +613,8 @@ Usage: `basename "$0"` [options]
   --supershell=auto|always|true|false|never
                       enable or disable supershell            (sbt 1.3 and above)
   --traces            generate Trace Event report on shutdown (sbt 1.3 and above)
+  --client            run native client
+  --jvm-client        run JVM client
   --timings           display task timings report on shutdown
   --allow-empty       start sbt even if current directory contains no sbt project
   --sbt-dir   <path>  path to global settings/plugins directory (default: ~/.sbt)
@@ -704,6 +707,7 @@ process_args () {
           -d|-debug|--debug) sbt_debug=1 && addSbt "-debug" && shift ;;
            -client|--client) use_sbtn=1 && shift ;;
                    --server) use_sbtn=0 && shift ;;
+               --jvm-client) use_sbtn=0 && use_jvm_client=1 && addSbt "--client" && shift ;;
 
                  -mem|--mem) require_arg integer "$1" "$2" && addMemory "$2" && shift 2 ;;
      -jvm-debug|--jvm-debug) require_arg port "$1" "$2" && addDebugger $2 && shift 2 ;;

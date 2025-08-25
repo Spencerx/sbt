@@ -287,10 +287,8 @@ object Defaults extends BuildCommon {
       csrMavenProfiles :== Set.empty,
       csrReconciliations :== LMCoursier.relaxedForAllModules,
       csrMavenDependencyOverride :== false,
-      csrSameVersions := Seq(
-        ScalaArtifacts.Artifacts.map(a => InclExclRule(scalaOrganization.value, a)).toSet
-      ),
       csrCacheDirectory := LMCoursier.defaultCacheLocation,
+      csrSameVersions :== Nil,
       stagingDirectory := (ThisBuild / baseDirectory).value / "target" / "sona-staging",
       localStaging := Some(Resolver.file("local-staging", stagingDirectory.value)),
       sonaBundle := Publishing
@@ -388,7 +386,6 @@ object Defaults extends BuildCommon {
       commands :== Nil,
       showSuccess :== true,
       showTiming :== true,
-      timingFormat :== Aggregation.defaultFormat,
       aggregate :== true,
       maxErrors :== 100,
       fork :== false,
@@ -2869,9 +2866,10 @@ object Classpaths {
     },
     sonaDeploymentName := {
       val o = organization.value
+      val n = name.value
       val v = version.value
       val uuid = UUID.randomUUID().toString().take(8)
-      s"$o:$v:$uuid"
+      s"$o:$n:$v:$uuid"
     },
   )
 
@@ -3012,6 +3010,21 @@ object Classpaths {
             (proj +: base).distinct
         }
       }).value),
+    csrSameVersions ++= {
+      partialVersion(scalaVersion.value) match {
+        // See https://github.com/sbt/sbt/issues/8224
+        // Scala 3.8+ should align only Scala3_8Artifacts
+        case Some((3, minor)) if minor >= 8 =>
+          ScalaArtifacts.Scala3_8Artifacts
+            .map(a => InclExclRule(scalaOrganization.value, a))
+            .toSet :: Nil
+        case Some((major, minor)) if major == 2 || major == 3 =>
+          ScalaArtifacts.Artifacts
+            .map(a => InclExclRule(scalaOrganization.value, a))
+            .toSet :: Nil
+        case _ => Nil
+      }
+    },
     moduleName := normalizedName.value,
     outputPath := {
       val p = platform.value

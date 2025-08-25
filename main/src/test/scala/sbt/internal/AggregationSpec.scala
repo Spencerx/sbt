@@ -9,7 +9,7 @@
 package sbt.internal
 
 object AggregationSpec extends verify.BasicTestSuite {
-  val timing = Aggregation.timing(Aggregation.defaultFormat, 0, _: Long)
+  val timing = Aggregation.timing(0, _: Long)
 
   test("timing should format total time properly") {
     assert(timing(101).startsWith("elapsed time: 0 s"))

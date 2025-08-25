@@ -121,7 +121,7 @@ val root = (project in file(".")).
       file
     },
     // update sbt.sh at root
-    sbtnVersion := "1.10.8",
+    sbtnVersion := "1.11.5",
     sbtnJarsBaseUrl := "https://github.com/sbt/sbtn-dist/releases/download",
     sbtnJarsMappings := {
       val baseUrl = sbtnJarsBaseUrl.value
@@ -362,7 +362,7 @@ lazy val integrationTest = (project in file("integration-test"))
     libraryDependencies ++= Seq(
       "io.monix" %% "minitest" % "2.3.2" % Test,
       "com.eed3si9n.expecty" %% "expecty" % "0.11.0" % Test,
-      "org.scala-sbt" %% "io" % "1.3.1" % Test
+      "org.scala-sbt" %% "io" % "1.10.5" % Test
     ),
     testFrameworks += new TestFramework("minitest.runner.Framework"),
     test in Test := {
@@ -370,7 +370,8 @@ lazy val integrationTest = (project in file("integration-test"))
     },
     testOnly in Test := {
       (testOnly in Test).dependsOn(((packageBin in Universal) in LocalRootProject).dependsOn(((stage in (Universal) in LocalRootProject)))).evaluated
-    }
+    },
+    parallelExecution in Test := false
   )
 
 def downloadUrlForVersion(v: String) = (v split "[^\\d]" flatMap (i => catching(classOf[Exception]) opt (i.toInt))) match {
