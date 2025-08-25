@@ -19,14 +19,32 @@ object Compiler:
       val sh = Keys.scalaHome.value
       val app = Keys.appConfiguration.value
       val sv = Keys.scalaVersion.value
+      val managed = Keys.managedScalaInstance.value
       sh match
         case Some(h) => scalaInstanceFromHome(h)
         case _ =>
           val scalaProvider = app.provider.scalaProvider
-          scalaInstanceFromUpdate
+          if !managed then emptyScalaInstance
+          else scalaInstanceFromUpdate
     }
 
-  // use the same class loader as the Scala classes used by sbt
+  /**
+   * A dummy ScalaInstance for Java-only projects.
+   */
+  def emptyScalaInstance: Def.Initialize[Task[ScalaInstance]] = Def.task {
+    makeScalaInstance(
+      "0.0.0",
+      Array.empty,
+      Seq.empty,
+      Seq.empty,
+      Keys.state.value,
+      Keys.scalaInstanceTopLoader.value,
+    )
+  }
+
+  // Use the same class loader as the Scala classes used by sbt
+  // This will fail for "doc" task https://github.com/sbt/sbt/issues/7725
+  // because Scala 3 uses ScalaDocTool configuration to manage doc tools.
   def optimizedScalaInstance(
       sv: String,
       scalaProvider: ScalaProvider
