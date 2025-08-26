@@ -2614,7 +2614,9 @@ object Classpaths {
         if isMeta && !force then (mjars ++ sbtCp).distinct
         else mjars
       },
-      exportedProducts := ClasspathImpl.trackedExportedProducts(TrackLevel.TrackAlways).value,
+      exportedProducts := Def.uncached(
+        ClasspathImpl.trackedExportedProducts(TrackLevel.TrackAlways).value
+      ),
       exportedProductsIfMissing := ClasspathImpl
         .trackedExportedProducts(TrackLevel.TrackIfMissing)
         .value,
