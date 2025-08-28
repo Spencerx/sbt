@@ -1,3 +1,5 @@
 > compile
 
 > show Compile/fullClasspath
+
+> test
