@@ -12,7 +12,7 @@ object Dependencies {
 
   // sbt modules
   private val ioVersion = nightlyVersion.getOrElse("1.10.5")
-  val zincVersion = nightlyVersion.getOrElse("2.0.0-M5")
+  val zincVersion = nightlyVersion.getOrElse("2.0.0-M6")
 
   private val sbtIO = "org.scala-sbt" %% "io" % ioVersion
 
@@ -67,7 +67,7 @@ object Dependencies {
   def addSbtZinc = addSbtModule(sbtZincPath, "zinc", zinc)
   def addSbtZincCompileCore = addSbtModule(sbtZincPath, "zincCompileCore", zincCompileCore)
 
-  lazy val sjsonNewVersion = "0.14.0-M4"
+  lazy val sjsonNewVersion = "0.14.0-M5"
   def sjsonNew(n: String) = Def.setting(
     "com.eed3si9n" %% n % sjsonNewVersion
   ) // contrabandSjsonNewVersion.value
