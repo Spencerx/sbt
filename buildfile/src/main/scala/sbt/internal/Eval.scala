@@ -44,12 +44,8 @@ class Eval(
   private val classpathString = (backingDir.toList ++ classpath)
     .map(_.toString)
     .mkString(java.io.File.pathSeparator)
-  private lazy val driver: EvalDriver = new EvalDriver
-  private lazy val reporter: EvalReporter = mkReporter match
-    case Some(f) => f()
-    case None    => EvalReporter.store
 
-  final class EvalDriver extends Driver:
+  final class EvalDriver(reporter: EvalReporter) extends Driver:
     val compileCtx0 = initCtx.fresh
     val options = nonCpOptions ++ Seq("-classpath", classpathString, "dummy.scala")
     val compileCtx1 = setup(options.toArray, compileCtx0) match
@@ -203,6 +199,9 @@ class Eval(
     val d = digester.digest()
     val hash = Hash.toHex(d)
     val moduleName = makeModuleName(hash)
+    val reporter: EvalReporter = mkReporter match
+      case Some(f) => f()
+      case None    => EvalReporter.store
     val (extra, loader) =
       try
         backingDir match
@@ -211,7 +210,7 @@ class Eval(
               (new URLClassLoader(Array(backing.toUri.toURL), parent): ClassLoader)
             val extra = ev.read(cacheFile(backing, moduleName))
             (extra, loader)
-          case _ => compileAndLoad(ev, moduleName)
+          case _ => compileAndLoad(ev, moduleName, reporter)
       finally reporter.finalReport(ev.sourceName)
     val generatedFiles = getGeneratedFiles(moduleName)
     EvalIntermediate(
@@ -228,7 +227,9 @@ class Eval(
   private def compileAndLoad[A](
       ev: EvalType[A],
       moduleName: String,
+      reporter: EvalReporter,
   ): (A, ClassLoader => ClassLoader) =
+    val driver: EvalDriver = new EvalDriver(reporter)
     given rootCtx: Context = driver.compileCtx
     val run = driver.compiler.newRun
     val source = ev.makeSource(moduleName)
