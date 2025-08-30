@@ -28,9 +28,6 @@ import sbt.nio.file.{ Glob, RecursiveGlob }
 
 object ScriptedPlugin extends AutoPlugin {
 
-  // Force Log4J to not use a thread context classloader otherwise it throws a CCE
-  sys.props(org.apache.logging.log4j.util.LoaderUtil.IGNORE_TCCL_PROPERTY) = "true"
-
   object autoImport {
     val ScriptedConf = Configurations.config("scripted-sbt").hide
     val ScriptedLaunchConf = Configurations.config("scripted-sbt-launch").hide

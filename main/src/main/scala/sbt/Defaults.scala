@@ -16,7 +16,6 @@ import lmcoursier.CoursierDependencyResolution
 import lmcoursier.definitions.{ Configuration as CConfiguration }
 import org.apache.ivy.core.module.descriptor.ModuleDescriptor
 import org.apache.ivy.core.module.id.ModuleRevisionId
-import org.apache.logging.log4j.core.{ Appender as XAppender }
 import org.scalasbt.ipcsocket.Win32SecurityLevel
 import sbt.Def.{ Initialize, ScopedKey, Setting, SettingsDefinition, parsed }
 import sbt.Keys.*
@@ -332,19 +331,11 @@ object Defaults extends BuildCommon {
         try onUnload.value(s)
         finally IO.delete(taskTemporaryDirectory.value)
       },
-      // // extraLoggers is deprecated
-      SettingKey[ScopedKey[?] => Seq[XAppender]]("extraLoggers") :== { _ =>
-        Nil
+      extraAppenders :== {
+        new AppenderSupplier:
+          def apply(s: ScopedKey[?]): Seq[Appender] = Nil
       },
-      extraAppenders := {
-        val f = SettingKey[ScopedKey[?] => Seq[XAppender]]("extraLoggers").value
-        s =>
-          f(s).map {
-            case a: Appender => a
-            case a           => new ConsoleAppenderFromLog4J(a.getName, a)
-          }
-      },
-      useLog4J :== SysProp.useLog4J,
+      useLog4J :== false,
       watchSources :== Nil, // Although this is deprecated, it can't be removed or it breaks += for legacy builds.
       skip :== false,
       taskTemporaryDirectory := {
