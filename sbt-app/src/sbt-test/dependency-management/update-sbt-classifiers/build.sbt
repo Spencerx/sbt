@@ -59,7 +59,6 @@ lazy val root = (project in file("."))
         "org.scala-lang.modules:scala-parser-combinators_3",
         "org.scala-lang.modules:scala-xml_3",
         "org.scala-lang:scala-library",
-        "org.scala-lang:scala-reflect",
         "org.scala-lang:scala3-compiler_3",
         "org.scala-lang:scala3-interfaces",
         "org.scala-lang:scala3-library_3",
