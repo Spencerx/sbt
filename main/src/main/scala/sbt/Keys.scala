@@ -15,7 +15,6 @@ import lmcoursier.definitions.{ CacheLogger, ModuleMatchers, Reconciliation }
 import lmcoursier.{ CoursierConfiguration, FallbackDependency }
 import org.apache.ivy.core.module.descriptor.ModuleDescriptor
 import org.apache.ivy.core.module.id.ModuleRevisionId
-import org.apache.logging.log4j.core.{ Appender as XAppender }
 import sbt.Def.*
 import sbt.KeyRanks.*
 import sbt.internal.InMemoryCacheStore.CacheStoreFactoryFactory
@@ -62,8 +61,7 @@ object Keys {
   val showSuccess = settingKey[Boolean]("If true, displays a success message after running a command successfully.").withRank(CSetting)
   val showTiming = settingKey[Boolean]("If true, the command success message includes the completion time.").withRank(CSetting)
   val timingFormat = settingKey[java.text.DateFormat]("The format used for displaying the completion time.").withRank(CSetting)
-  @deprecated("", "1.4.0")
-  val extraLoggers = settingKey[ScopedKey[?] => Seq[XAppender]]("A function that provides additional loggers for a given setting.").withRank(DSetting)
+  @transient
   val extraAppenders = settingKey[AppenderSupplier]("A function that provides additional loggers for a given setting.").withRank(DSetting)
   val useLog4J = settingKey[Boolean]("Toggles whether or not to use log4j for sbt internal loggers.").withRank(Invisible)
   val logManager = settingKey[LogManager]("The log manager, which creates Loggers for different contexts.").withRank(DSetting)

@@ -10,7 +10,7 @@ import com.eed3si9n.jarjarabrams.ModuleCoordinate
 // ThisBuild settings take lower precedence,
 // but can be shared across the multi projects.
 ThisBuild / version := {
-  val v = "2.0.0-SNAPSHOT"
+  val v = "2.0.0-RC4-bin-SNAPSHOT"
   nightlyVersion.getOrElse(v)
 }
 ThisBuild / Utils.version2_13 := "2.0.0-SNAPSHOT"
@@ -144,6 +144,7 @@ def mimaSettingsSince(versions: Seq[String]): Seq[Def.Setting[?]] = Def settings
     exclude[FinalMethodProblem]("sbt.internal.*"),
     exclude[IncompatibleResultTypeProblem]("sbt.internal.*"),
     exclude[ReversedMissingMethodProblem]("sbt.internal.*"),
+    exclude[DirectMissingMethodProblem]("sbt.Keys.extraLoggers"),
   ),
 )
 
@@ -317,8 +318,6 @@ lazy val utilLogging = project
         jline3Terminal,
         jline3JNI,
         jline3Native,
-        log4jApi,
-        log4jCore,
         disruptor,
         sjsonNewScalaJson.value,
       ),
@@ -336,6 +335,8 @@ lazy val utilLogging = project
     Test / fork := true,
     mimaSettings,
     mimaBinaryIssueFilters ++= Seq(
+      exclude[MissingClassProblem]("sbt.internal.util.ConsoleAppenderFromLog4J"),
+      exclude[MissingClassProblem]("sbt.internal.util.Log4JConsoleAppender"),
     ),
   )
   .configure(addSbtIO)
@@ -709,13 +710,13 @@ lazy val mainProj = (project in file("main"))
       }
     },
     libraryDependencies ++=
-      (Seq(
+      Seq(
         scalaXml,
         sjsonNewScalaJson.value,
         sjsonNewCore.value,
         launcherInterface,
         caffeine,
-      ) ++ log4jModules),
+      ),
     libraryDependencies ++= (scalaVersion.value match {
       case v if v.startsWith("2.12.") => List()
       case _                          => List(scalaPar)

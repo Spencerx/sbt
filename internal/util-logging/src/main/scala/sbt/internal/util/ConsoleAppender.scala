@@ -10,18 +10,10 @@ package sbt.internal.util
 
 import java.io.{ PrintStream, PrintWriter }
 import java.lang.StringBuilder
-import java.nio.channels.ClosedChannelException
 import java.util.concurrent.atomic.{ AtomicBoolean, AtomicInteger }
 
-import org.apache.logging.log4j.core.appender.AbstractAppender
-import org.apache.logging.log4j.core.{ Appender as XAppender, LogEvent as XLogEvent }
-import org.apache.logging.log4j.message.{ Message, ObjectMessage, ReusableObjectMessage }
-import org.apache.logging.log4j.{ Level as XLevel }
 import sbt.internal.util.ConsoleAppender.*
 import sbt.util.*
-import org.apache.logging.log4j.core.AbstractLogEvent
-import org.apache.logging.log4j.message.SimpleMessageFactory
-import java.util.concurrent.atomic.AtomicReference
 
 object ConsoleLogger {
 
@@ -325,41 +317,6 @@ object ConsoleAppender {
     )
   }
 
-  /**
-   * Converts the Log4J `level` to the corresponding sbt level.
-   *
-   * @param level
-   *   A level, as represented by Log4J.
-   * @return
-   *   The corresponding level in sbt's world.
-   */
-  def toLevel(level: XLevel): Level.Value =
-    level match {
-      case XLevel.OFF   => Level.Debug
-      case XLevel.FATAL => Level.Error
-      case XLevel.ERROR => Level.Error
-      case XLevel.WARN  => Level.Warn
-      case XLevel.INFO  => Level.Info
-      case XLevel.DEBUG => Level.Debug
-      case _            => Level.Debug
-    }
-
-  /**
-   * Converts the sbt `level` to the corresponding Log4J level.
-   *
-   * @param level
-   *   A level, as represented by sbt.
-   * @return
-   *   The corresponding level in Log4J's world.
-   */
-  def toXLevel(level: Level.Value): XLevel =
-    level match {
-      case Level.Error => XLevel.ERROR
-      case Level.Warn  => XLevel.WARN
-      case Level.Info  => XLevel.INFO
-      case Level.Debug => XLevel.DEBUG
-    }
-
   private[sbt] def generateName(): String = "out-" + generateId.incrementAndGet
 }
 
@@ -378,33 +335,7 @@ class ConsoleAppender(
     override private[sbt] val properties: Properties,
     override private[sbt] val suppressedMessage: SuppressedTraceContext => Option[String]
 ) extends Appender {
-  private val log4j = new AtomicReference[XAppender](null)
-  override private[sbt] lazy val toLog4J = log4j.get match {
-    case null =>
-      log4j.synchronized {
-        log4j.get match {
-          case null =>
-            val l = new Log4JConsoleAppender(
-              name,
-              properties,
-              suppressedMessage,
-              { event =>
-                val level = ConsoleAppender.toLevel(event.getLevel)
-                val message = event.getMessage
-                try appendMessage(level, message)
-                catch { case _: ClosedChannelException => }
-              }
-            )
-            log4j.set(l)
-            l
-          case l => l
-        }
-      }
-  }
-  override def close(): Unit = log4j.get match {
-    case null =>
-    case a    => a.stop()
-  }
+  override def close(): Unit = ()
 }
 trait Appender extends AutoCloseable {
   private[sbt] def name: String
@@ -430,8 +361,6 @@ trait Appender extends AutoCloseable {
    * Returns the number of lines for stacktrace.
    */
   def getTrace: Int = synchronized { traceEnabledVar }
-
-  private[sbt] def toLog4J: XAppender
 
   /**
    * Logs the stack trace of `t`, possibly shortening it.
@@ -557,13 +486,6 @@ trait Appender extends AutoCloseable {
     out.println(toWrite)
   }
 
-  private[util] def appendMessage(level: Level.Value, msg: Message): Unit =
-    msg match {
-      case o: ObjectMessage         => appendMessageContent(level, o.getParameter)
-      case o: ReusableObjectMessage => appendMessageContent(level, o.getParameter)
-      case _                        => appendLog(level, msg.getFormattedMessage)
-    }
-
   private def appendTraceEvent(te: TraceEvent): Unit = {
     val traceLevel = getTrace
     if (traceLevel >= 0) {
@@ -615,36 +537,6 @@ trait Appender extends AutoCloseable {
   private[sbt] def appendObjectEvent[T](level: Level.Value, message: => ObjectEvent[T]): Unit =
     appendMessageContent(level, message)
 
-}
-private[internal] class Log4JConsoleAppender(
-    override private[sbt] val name: String,
-    override private[sbt] val properties: Properties,
-    override private[sbt] val suppressedMessage: SuppressedTraceContext => Option[String],
-    appendEvent: XLogEvent => Unit,
-) extends AbstractAppender(name, null, LogExchange.dummyLayout, true, Array.empty)
-    with Appender {
-  start()
-  override def close(): Unit = stop()
-  override private[sbt] def toLog4J: XAppender = this
-  override def append(event: XLogEvent): Unit = appendEvent(event)
-}
-private[sbt] class ConsoleAppenderFromLog4J(
-    override private[sbt] val name: String,
-    override private[sbt] val properties: Properties,
-    override private[sbt] val suppressedMessage: SuppressedTraceContext => Option[String],
-    val delegate: XAppender,
-) extends Appender {
-  def this(name: String, delegate: XAppender) =
-    this(name, Properties.from(Terminal.get), _ => None, delegate)
-  override def close(): Unit = delegate.stop()
-  private[sbt] def toLog4J: XAppender = delegate
-  override def appendLog(level: sbt.util.Level.Value, message: => String): Unit = {
-    delegate.append(new AbstractLogEvent {
-      override def getLevel(): XLevel = ConsoleAppender.toXLevel(level)
-      override def getMessage(): Message =
-        SimpleMessageFactory.INSTANCE.newMessage(message.toString, Array.empty[AnyRef])
-    })
-  }
 }
 
 final class SuppressedTraceContext(val traceLevel: Int, val useFormat: Boolean)
