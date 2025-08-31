@@ -69,7 +69,6 @@ def commonSettings: Seq[Setting[?]] = Def.settings(
   scalaVersion := baseScalaVersion,
   evictionErrorLevel := Level.Info,
   Utils.componentID := None,
-  resolvers += Resolver.typesafeIvyRepo("releases").withName("typesafe-sbt-build-ivy-releases"),
   resolvers += Resolver.sonatypeCentralSnapshots,
   testFrameworks += TestFramework("hedgehog.sbt.Framework"),
   testFrameworks += TestFramework("verify.runner.Framework"),

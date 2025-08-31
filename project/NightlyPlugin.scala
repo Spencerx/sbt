@@ -28,6 +28,5 @@ object NightlyPlugin extends AutoPlugin {
   )
 
   override def projectSettings: Seq[Setting[_]] = Seq(
-    resolvers += Resolver.typesafeIvyRepo("releases").withName("typesafe-alt-project-releases")
   )
 }
