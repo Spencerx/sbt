@@ -17,6 +17,15 @@ object Dag {
   import scala.collection.{ mutable, JavaConverters }
   import JavaConverters.asScalaSetConverter
 
+  /**
+   * Returns a reverse topological ordering of the graph rooted at `root`.
+   * In this ordering, each node appears before all of its ancestors (i.e., children are listed before their parents).
+   *
+   * @see [[https://github.com/sbt/sbt/issues/8249]]
+   */
+  def reverseTopologicalSort[T](root: T)(dependencies: T => Iterable[T]): List[T] =
+    topologicalSort(root)(dependencies).reverse
+
   def topologicalSort[T](root: T)(dependencies: T => Iterable[T]): List[T] =
     topologicalSort(root :: Nil)(dependencies)
 
