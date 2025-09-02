@@ -34,6 +34,18 @@ $ sbt
 sbt:sbtRoot> publishLocal
 ```
 
+### Instruction to build sbtn
+
+```bash
+$ sbt nativeImage
+```
+
+On macOS, the following can be used to target ARM64:
+
+```bash
+$ ARCHS=arm64 sbt nativeImage
+```
+
 ### Instruction to build all modules from source
 
 When working on a change that requires changing one or more sub modules, the source code for these modules can be pulled in by running the following script
@@ -69,29 +81,6 @@ To use the locally built sbt, set the version in `build.properties` file in your
 $ cd $YOUR_OWN_PROJECT
 $ sbt
 > compile
-```
-
-### Nightly builds
-
-_Note: The following section may require an update._
-
-The latest development versions are available as nightly builds on sbt-maven-snapshots (<https://repo.scala-sbt.org/scalasbt/maven-snapshots>) repo, which is a redirect proxy whose underlying repository is subject to change it could be Bintray, Linux box, etc.
-
-To use a nightly build:
-
-1. Find out a version from [/org/scala-sbt/sbt/](https://repo.scala-sbt.org/scalasbt/maven-snapshots/org/scala-sbt/sbt/).
-2. Put the version, for example `sbt.version=1.5.0-bin-20201121T081131` in `project/build.properties`.
-
-sbt launcher will resolve the specified sbt core artifacts. Because of the aforementioned redirection, this resolution is going to be very slow for the first time you run sbt, and then it should be ok for subsequent runs.
-
-Unless you're debugging the `sbt` script or the launcher JAR, you should be able to use any recent stable version of sbt installation as the launcher following the [Setup][Setup] instructions first.
-
-If you're overriding the repositories via `~/.sbt/repositories`, make sure that there's a following entry:
-
-```
-[repositories]
-  ...
-  sbt-maven-snapshots: https://repo.scala-sbt.org/scalasbt/maven-snapshots/, bootOnly
 ```
 
 ### Clearing out boot and local cache
