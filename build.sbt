@@ -1193,6 +1193,13 @@ lazy val sbtClientProj = (project in file("client"))
       }
       outputDir.resolve("sbtn").toFile
     },
+    nativeImageCommand := {
+      val orig = nativeImageCommand.value
+      sys.env.get("ARCHS") match {
+        case Some(a) => Seq("arch", s"-$a") ++ orig
+        case None    => orig
+      }
+    },
     nativeImageOptions ++= Seq(
       "--no-fallback",
       s"--initialize-at-run-time=sbt.client",
