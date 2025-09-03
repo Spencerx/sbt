@@ -4,6 +4,13 @@ val intsFromScalaV = settingKey[Seq[Int]]("a seq of ints from scalaVersion")
 val intsSetSetting = settingKey[Set[Int]]("A set of ints setting")
 val stringIntMapSetting = settingKey[Map[String, Int]]("A map of string to int setting")
 
+lazy val intSetting2 = Def.setting {
+  3
+}
+lazy val intsSetting2 = Def.setting {
+  Seq(1, 2, 3)
+}
+
 scalaVersion := "3.7.2"
 
 intsTask := Seq(1, 2, 3, 4, 5, 6, 7)
@@ -11,12 +18,16 @@ intsTask -= 3
 intsTask --= Seq(1, 2)
 intsTask -= Option(6)
 intsTask --= Option(7)
+intsTask -= intSetting2.value
+intsTask --= intsSetting2.value
 
 intsSetting := Seq(1, 2, 3, 4, 5, 6, 7)
 intsSetting -= 3
 intsSetting --= Seq(1, 2)
 intsSetting -= Option(6)
 intsSetting --= Option(7)
+intsSetting -= intSetting2.value
+intsSetting --= intsSetting2.value
 
 intsFromScalaV := Seq(1, 2, 3, 4, 5, 6, 7)
 intsFromScalaV -= { if scalaVersion.value == "3.7.2" then 3 else 5 }

@@ -184,14 +184,14 @@ sealed abstract class TaskKey[A1]
   inline def <++=[A2](vs: Initialize[Task[A2]]): Setting[Task[A1]] =
     ${ TaskMacro.fakeAppendNImpl }
 
-  final inline def -=[A2](v: A2)(using Remove.Value[A1, A2]): Setting[Task[A1]] =
+  final inline def -=[A2](inline v: A2)(using Remove.Value[A1, A2]): Setting[Task[A1]] =
     remove1[A2](taskMacro[A2](v))
 
   final inline def remove1[A2](v: Initialize[Task[A2]])(using
       ev: Remove.Value[A1, A2]
   ): Setting[Task[A1]] = make(v)(ev.removeValue)
 
-  final inline def --=[A2](vs: A2)(using r: Remove.Values[A1, A2]): Setting[Task[A1]] =
+  final inline def --=[A2](inline vs: A2)(using r: Remove.Values[A1, A2]): Setting[Task[A1]] =
     removeN[A2](taskMacro[A2](vs))
 
   final inline def removeN[A2](vs: Initialize[Task[A2]])(using
