@@ -155,7 +155,7 @@ class ClassStamper(
 
   /**
    * Given a classpath and a class name, this tries to create a SHA-256 digest.
-   * @param javaClassname Java-enclded class name to stamp
+   * @param javaClassName Java-enclded class name to stamp
    * @param extraHashes additional information to include into the returning digest
    */
   private[sbt] def transitiveStamp(

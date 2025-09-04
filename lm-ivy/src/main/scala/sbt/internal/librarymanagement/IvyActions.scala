@@ -347,7 +347,6 @@ object IvyActions {
    * It's the cached version of [[resolveAndRetrieve]].
    *
    * @param inputs The resolution inputs.
-   * @param logicalClock The clock to check if a file is outdated or not.
    * @param cache The optional cache dependency.
    * @return The result of the cached resolution.
    */
