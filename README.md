@@ -21,10 +21,10 @@ sbt is a build tool for Scala, Java, and more.
 
 For general documentation, see https://www.scala-sbt.org/.
 
-sbt 1.x
+sbt 2.x
 ---------
 
-This is the 1.x series of sbt. The source code of sbt is split across
+This is the 2.x series of sbt. The source code of sbt is split across
 several GitHub repositories, including this one.
 
 - [sbt/io][sbt/io] hosts `sbt.io` module.
