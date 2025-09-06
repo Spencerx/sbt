@@ -946,10 +946,6 @@ final class NetworkChannel(
 }
 
 object NetworkChannel {
-  sealed trait ChannelState
-  case object SingleLine extends ChannelState
-  case object InHeader extends ChannelState
-  case object InBody extends ChannelState
   private[sbt] def cancel(
       execID: Option[String],
       id: String,

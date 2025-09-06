@@ -117,7 +117,7 @@ def testedBaseSettings: Seq[Setting[?]] =
 
 val sbt20Plus =
   Seq(
-    "2.0.0-RC2",
+    "2.0.0-RC4",
   )
 val mimaSettings = mimaSettingsSince(sbt20Plus)
 def mimaSettingsSince(versions: Seq[String]): Seq[Def.Setting[?]] = Def settings (
@@ -372,6 +372,10 @@ lazy val utilCache = project
     Compile / generateContrabands / sourceManaged := baseDirectory.value / "src" / "main" / "contraband-scala",
     Compile / generateContrabands / contrabandFormatsForType := ContrabandConfig.getFormats,
     mimaSettings,
+    mimaBinaryIssueFilters ++= Seq(
+      ProblemFilters.exclude[MissingClassProblem]("sbt.internal.util.ActionCacheError"),
+      ProblemFilters.exclude[MissingClassProblem]("sbt.internal.util.ActionCacheError$")
+    ),
     Test / fork := true,
   )
   .configure(
@@ -730,7 +734,29 @@ lazy val mainProj = (project in file("main"))
     // TODO: Fix doc
     Compile / doc / sources := Nil,
     mimaSettings,
-    // mimaBinaryIssueFilters ++= Vector(),
+    mimaBinaryIssueFilters ++= Vector(
+      ProblemFilters.exclude[MissingClassProblem]("sbt.internal.ConfigData"),
+      ProblemFilters.exclude[MissingClassProblem]("sbt.internal.ConfigData$"),
+      ProblemFilters.exclude[MissingClassProblem]("sbt.internal.graph.backend.IvyReport"),
+      ProblemFilters.exclude[MissingClassProblem]("sbt.internal.graph.backend.IvyReport$"),
+      ProblemFilters.exclude[MissingClassProblem]("sbt.internal.graph.rendering.LicenseInfo"),
+      ProblemFilters.exclude[MissingClassProblem]("sbt.internal.graph.rendering.LicenseInfo$"),
+      ProblemFilters.exclude[MissingClassProblem](
+        "sbt.internal.librarymanagement.FakeRawRepository"
+      ),
+      ProblemFilters.exclude[MissingClassProblem](
+        "sbt.internal.librarymanagement.FakeRawRepository$"
+      ),
+      ProblemFilters.exclude[MissingFieldProblem]("sbt.internal.server.NetworkChannel.SingleLine"),
+      ProblemFilters.exclude[MissingFieldProblem]("sbt.internal.server.NetworkChannel.InHeader"),
+      ProblemFilters.exclude[MissingFieldProblem]("sbt.internal.server.NetworkChannel.InBody"),
+      ProblemFilters.exclude[MissingClassProblem](
+        "sbt.internal.server.NetworkChannel$ChannelState"
+      ),
+      ProblemFilters.exclude[MissingClassProblem]("sbt.internal.server.NetworkChannel$InBody$"),
+      ProblemFilters.exclude[MissingClassProblem]("sbt.internal.server.NetworkChannel$InHeader$"),
+      ProblemFilters.exclude[MissingClassProblem]("sbt.internal.server.NetworkChannel$SingleLine$"),
+    ),
   )
   .dependsOn(lmCore, lmIvy, lmCoursierShadedPublishing)
   .configure(addSbtIO, addSbtCompilerInterface, addSbtZincCompileCore)

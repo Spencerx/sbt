@@ -3,15 +3,12 @@ package internal
 package util
 
 import scala.collection.concurrent.TrieMap
-import xsbti.VirtualFileRef
 
 enum ActionCacheEvent:
   case Found(storeName: String)
   case OnsiteTask
   case Error
 end ActionCacheEvent
-
-case class ActionCacheError(outputFiles: Seq[VirtualFileRef])
 
 enum CacheEventSummary:
   case Empty

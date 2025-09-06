@@ -132,8 +132,6 @@ private[sbt] final class AKeyIndex(val data: Relation[Option[AttributeKey[?]], S
 
 private[sbt] case class IdentifiableConfig(name: String, ident: Option[String])
 
-private[sbt] case class ConfigData(ident: Option[String], keys: AKeyIndex)
-
 /*
  * data contains the mapping between a configuration name and its keys.
  * configIdentToName contains the mapping between a configuration ident and its name
