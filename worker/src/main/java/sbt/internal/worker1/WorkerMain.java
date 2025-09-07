@@ -51,6 +51,7 @@ public final class WorkerMain {
     return new GsonBuilder()
         .registerTypeAdapterFactory(fingerprintFac)
         .registerTypeAdapterFactory(selectorFac)
+        .registerTypeAdapterFactory(ThrowableAdapterFactory.INSTANCE)
         .create();
   }
 

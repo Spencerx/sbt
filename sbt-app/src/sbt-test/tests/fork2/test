@@ -1,6 +1,10 @@
 > testFull
 
-$ copy-file changes/Test.scala src/test/scala/Test.scala 
+$ copy-file changes/Bad.scala src/test/scala/Test.scala
+
+-> testFull
+
+$ copy-file changes/Test.scala src/test/scala/Test.scala
 
 > testFull
 

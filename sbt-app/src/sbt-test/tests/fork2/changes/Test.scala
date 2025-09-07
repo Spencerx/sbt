@@ -1,8 +1,8 @@
-import org.scalatest.FlatSpec
+import org.scalatest.funsuite.AnyFunSuite
 
-class Test extends FlatSpec {
+class Test extends AnyFunSuite:
   val v = sys.env.getOrElse("tests.max.value", Int.MaxValue)
-  "A simple equation" should "hold" in {
+  test("A simple equation should hold") {
     assert(Int.MaxValue == v)
   }
-}
+end Test

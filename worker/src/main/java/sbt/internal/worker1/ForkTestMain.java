@@ -167,8 +167,8 @@ public class ForkTestMain {
   }
 
   public static class ForkErrorInfo implements Serializable {
-    public final long id;
-    public final ForkError error;
+    public long id;
+    public ForkError error;
 
     public ForkErrorInfo(long id, ForkError error) {
       this.id = id;
