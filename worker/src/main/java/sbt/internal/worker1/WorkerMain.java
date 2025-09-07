@@ -126,14 +126,11 @@ public final class WorkerMain {
         throw new RuntimeException("missing jvmRunInfo element");
       }
       RunInfo.JvmRunInfo jvmRunInfo = info.jvmRunInfo;
-      URLClassLoader cl = createClassLoader(jvmRunInfo, ClassLoader.getSystemClassLoader());
-      try {
+      try (URLClassLoader cl = createClassLoader(jvmRunInfo, ClassLoader.getSystemClassLoader())) {
         Class<?> mainClass = cl.loadClass(jvmRunInfo.mainClass);
         Method mainMethod = mainClass.getMethod("main", String[].class);
         String[] mainArgs = jvmRunInfo.args.stream().toArray(String[]::new);
         mainMethod.invoke(null, (Object) mainArgs);
-      } finally {
-        cl.close();
       }
     } else {
       throw new RuntimeException("only jvm is supported");
@@ -144,13 +141,8 @@ public final class WorkerMain {
     if (info.jvm) {
       RunInfo.JvmRunInfo jvmRunInfo = info.jvmRunInfo;
       ClassLoader parent = new ForkTestMain().getClass().getClassLoader();
-      ClassLoader cl = createClassLoader(jvmRunInfo, parent);
-      try {
+      try (URLClassLoader cl = createClassLoader(jvmRunInfo, parent)) {
         ForkTestMain.main(id, info, this.originalOut, cl);
-      } finally {
-        if (cl instanceof URLClassLoader) {
-          ((URLClassLoader) cl).close();
-        }
       }
     } else {
       throw new RuntimeException("only jvm is supported");
