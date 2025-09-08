@@ -37,6 +37,10 @@ jobs:
           #   distribution: zulu
           #   jobtype: 6
           - os: ubuntu-latest
+            java: 21
+            distribution: zulu
+            jobtype: 7
+          - os: ubuntu-latest
             java: 11
             distribution: temurin
             jobtype: 10
@@ -164,6 +168,11 @@ jobs:
       #    sbt -Dsbtzinc.path=$HOME/work/sbt/sbt/zinc -Dsbt.build.version=$BUILD_VERSION -Dsbt.build.fatal=false "+lowerUtils/publishLocal; {zinc}/publishLocal; upperModules/publishLocal"
       #    rm -r $(find $HOME/.sbt/boot -name "*-SNAPSHOT") || true
       #    sbt -v -Dsbt.version=$BUILD_VERSION "++$SCALA_213; all $UTIL_TESTS; ++$SCALA_212; all $UTIL_TESTS; scripted actions/* source-dependencies/*1of3 dependency-management/*1of4 java/*"
+      - name: Scripted (tests)
+        if: ${{ matrix.jobtype == 7 }}
+        shell: bash
+        run: |
+          ./sbt -v "scripted tests/*"
       - name: Build and test lm-coursier (10)
         if: ${{ matrix.jobtype == 10 }}
         shell: bash
