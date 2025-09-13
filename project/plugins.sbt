@@ -1,10 +1,10 @@
 scalacOptions ++= Seq("-feature", "-language:postfixOps", "-Ywarn-unused:_,-imports")
 
-addSbtPlugin("com.github.sbt" % "sbt-dynver" % "5.1.0")
+addSbtPlugin("com.github.sbt" % "sbt-dynver" % "5.1.1")
 addSbtPlugin("com.github.sbt" % "sbt-pgp" % "2.3.1")
-addSbtPlugin("org.scalameta" % "sbt-scalafmt" % "2.5.4")
+addSbtPlugin("org.scalameta" % "sbt-scalafmt" % "2.5.5")
 addSbtPlugin("org.scala-sbt" % "sbt-contraband" % "0.7.0")
-addSbtPlugin("de.heikoseeberger" % "sbt-header" % "5.10.0")
+addSbtPlugin("com.github.sbt" % "sbt-header" % "5.11.0")
 addSbtPlugin("com.eed3si9n" % "sbt-assembly" % "2.3.1")
 addSbtPlugin("com.typesafe" % "sbt-mima-plugin" % "1.1.4")
 addSbtPlugin("com.swoval" % "sbt-java-format" % "0.3.1")
