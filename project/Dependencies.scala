@@ -86,7 +86,7 @@ object Dependencies {
   val jline3Reader = "org.jline" % "jline-reader" % jline3Version
   val jline3Builtins = "org.jline" % "jline-builtins" % jline3Version
   val scalatest = "org.scalatest" %% "scalatest" % "3.2.19"
-  val scalacheck = "org.scalacheck" %% "scalacheck" % "1.18.1"
+  val scalacheck = "org.scalacheck" %% "scalacheck" % "1.19.0"
   val junit = "junit" % "junit" % "4.13.2"
   val scalaVerify = "com.eed3si9n.verify" %% "verify" % "1.0.0"
   val templateResolverApi = "org.scala-sbt" % "template-resolver" % "0.1"
@@ -110,7 +110,7 @@ object Dependencies {
 
   val caffeine = "com.github.ben-manes.caffeine" % "caffeine" % "2.8.5"
 
-  val hedgehog = "qa.hedgehog" %% "hedgehog-sbt" % "0.12.0"
+  val hedgehog = "qa.hedgehog" %% "hedgehog-sbt" % "0.13.0"
   val disruptor = "com.lmax" % "disruptor" % "3.4.2"
   val ivy = "org.scala-sbt.ivy" % "ivy" % "2.3.0-sbt-77cc781d727b367d3761f097d89f5a4762771d41"
 
