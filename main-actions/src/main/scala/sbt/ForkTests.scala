@@ -8,7 +8,7 @@
 
 package sbt
 
-import com.google.gson.{ JsonObject, JsonParser }
+import com.google.gson.{ JsonObject, JsonParser, JsonSyntaxException }
 import testing.{ Logger as _, Task as _, * }
 import java.io.*
 import java.util.ArrayList
@@ -25,6 +25,7 @@ import scala.collection.mutable
 import scala.concurrent.{ Await, Promise }
 import scala.concurrent.duration.Duration
 import scala.util.Random
+import scala.util.control.NonFatal
 import scala.jdk.CollectionConverters.*
 import scala.sys.process.Process
 
@@ -186,17 +187,20 @@ private class React(
   val g = WorkerMain.mkGson()
   val promise: Promise[Int] = Promise()
   override def apply(line: String): Unit =
-    // scala.Console.err.println(line)
-    val o = JsonParser.parseString(line).getAsJsonObject()
-    if o.has("id") then
-      val resId = o.getAsJsonPrimitive("id").getAsLong()
-      if resId == id then
-        if promise.isCompleted then ()
-        else if o.has("error") then promise.failure(new RuntimeException(line))
-        else promise.success(0)
+    try
+      val o = JsonParser.parseString(line).getAsJsonObject()
+      if o.has("id") then
+        val resId = o.getAsJsonPrimitive("id").getAsLong()
+        if resId == id then
+          if promise.isCompleted then ()
+          else if o.has("error") then promise.failure(new RuntimeException(line))
+          else promise.success(0)
+        else ()
+      else if o.has("method") then processNotification(o)
       else ()
-    else if o.has("method") then processNotification(o)
-    else ()
+    catch
+      case _: JsonSyntaxException => log.info(line)
+      case NonFatal(_)            => ()
 
   override def notifyExit(p: Process): Unit =
     if !process.isAlive then promise.success(process.exitValue())
