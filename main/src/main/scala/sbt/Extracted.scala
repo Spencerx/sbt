@@ -68,7 +68,7 @@ final case class Extracted(
 
   /**
    * Runs the task specified by `key` and returns the unhandled direct result of EvaluateTask.
-   * 
+   *
    * This method differs from `runTask` in that it does not unwrap the option, or process results.
    */
   def runTaskUnhandled[T](key: TaskKey[T], state: State): Option[(State, Result[T])] =
