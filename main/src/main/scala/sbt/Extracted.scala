@@ -67,6 +67,15 @@ final case class Extracted(
   }
 
   /**
+   * Runs the task specified by `key` and returns the unhandled direct result of EvaluateTask.
+   * 
+   * This method differs from `runTask` in that it does not unwrap the option, or process results.
+   */
+  def runTaskUnhandled[T](key: TaskKey[T], state: State): Option[(State, Result[T])] =
+    val config = extractedTaskConfig(this, structure, state)
+    EvaluateTask(structure, key.scopedKey, state, currentRef, config)
+
+  /**
    * Runs the input task specified by `key`, using the `input` as the input to it, and returns the transformed State
    * and the resulting value of the input task.
    *
