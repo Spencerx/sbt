@@ -19,7 +19,7 @@ final class TestProvider private (
   override def toString: String = {
     "TestProvider(" + languageIds + ")"
   }
-  private def copy(languageIds: Vector[String] = languageIds): TestProvider = {
+  private def copy(languageIds: Vector[String]): TestProvider = {
     new TestProvider(languageIds)
   }
   def withLanguageIds(languageIds: Vector[String]): TestProvider = {

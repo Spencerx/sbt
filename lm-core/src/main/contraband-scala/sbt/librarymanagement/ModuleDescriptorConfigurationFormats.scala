@@ -6,7 +6,7 @@
 package sbt.librarymanagement
 import _root_.sjsonnew.{ Unbuilder, Builder, JsonFormat, deserializationError }
 trait ModuleDescriptorConfigurationFormats { self: sbt.librarymanagement.ScalaModuleInfoFormats & sbt.librarymanagement.ConfigurationFormats & sjsonnew.BasicJsonProtocol & sbt.librarymanagement.ModuleIDFormats & sbt.librarymanagement.ArtifactFormats & sbt.librarymanagement.ConfigRefFormats & sbt.librarymanagement.ChecksumFormats & sbt.librarymanagement.InclExclRuleFormats & sbt.librarymanagement.CrossVersionFormats & sbt.librarymanagement.DisabledFormats & sbt.librarymanagement.BinaryFormats & sbt.librarymanagement.ConstantFormats & sbt.librarymanagement.PatchFormats & sbt.librarymanagement.FullFormats & sbt.librarymanagement.For3Use2_13Formats & sbt.librarymanagement.For2_13Use3Formats & sbt.librarymanagement.ModuleInfoFormats & sbt.librarymanagement.LicenseFormats & sbt.librarymanagement.ScmInfoFormats & sbt.librarymanagement.DeveloperFormats & sbt.internal.librarymanagement.formats.NodeSeqFormat & sbt.librarymanagement.ConflictManagerFormats =>
-implicit lazy val ModuleDescriptorConfigurationFormat: JsonFormat[sbt.librarymanagement.ModuleDescriptorConfiguration] = new JsonFormat[sbt.librarymanagement.ModuleDescriptorConfiguration] {
+given ModuleDescriptorConfigurationFormat: JsonFormat[sbt.librarymanagement.ModuleDescriptorConfiguration] = new JsonFormat[sbt.librarymanagement.ModuleDescriptorConfiguration] {
   override def read[J](__jsOpt: Option[J], unbuilder: Unbuilder[J]): sbt.librarymanagement.ModuleDescriptorConfiguration = {
     __jsOpt match {
       case Some(__js) =>

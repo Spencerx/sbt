@@ -641,7 +641,7 @@ class NetworkClient(
       (msg.method, msg.params) match {
         case ("build/logMessage", Some(json)) =>
           if (!attached.get) {
-            import sbt.internal.langserver.codec.JsonProtocol.*
+            import sbt.internal.langserver.codec.JsonProtocol.given
             Converter.fromJson[LogMessageParams](json) match {
               case Success(params) => splitLogMessage(params)
               case Failure(_)      => Vector()
@@ -671,13 +671,13 @@ class NetworkClient(
           batchMode.set(false)
           Vector.empty
         case ("textDocument/publishDiagnostics", Some(json)) =>
-          import sbt.internal.langserver.codec.JsonProtocol.*
+          import sbt.internal.langserver.codec.JsonProtocol.given
           Converter.fromJson[PublishDiagnosticsParams](json) match {
             case Success(params) => splitDiagnostics(params); Vector()
             case Failure(_)      => Vector()
           }
         case (`clientJob`, Some(json)) =>
-          import sbt.internal.worker.codec.JsonProtocol.*
+          import sbt.internal.worker.codec.JsonProtocol.given
           Converter.fromJson[ClientJobParams](json) match {
             case Success(params) => clientSideRun(params).get; Vector.empty
             case Failure(_)      => Vector.empty
@@ -782,7 +782,7 @@ class NetworkClient(
   }
 
   def onRequest(msg: JsonRpcRequestMessage): Unit = {
-    import sbt.protocol.codec.JsonProtocol.*
+    import sbt.protocol.codec.JsonProtocol.given
     (msg.method, msg.params) match {
       case (`terminalCapabilities`, Some(json)) =>
         Converter.fromJson[TerminalCapabilitiesQuery](json) match {

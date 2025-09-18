@@ -6,7 +6,7 @@
 package sbt.librarymanagement
 import _root_.sjsonnew.{ Unbuilder, Builder, JsonFormat, deserializationError }
 trait UpdateLoggingFormats { self: sjsonnew.BasicJsonProtocol =>
-implicit lazy val UpdateLoggingFormat: JsonFormat[sbt.librarymanagement.UpdateLogging] = new JsonFormat[sbt.librarymanagement.UpdateLogging] {
+given UpdateLoggingFormat: JsonFormat[sbt.librarymanagement.UpdateLogging] = new JsonFormat[sbt.librarymanagement.UpdateLogging] {
   override def read[J](__jsOpt: Option[J], unbuilder: Unbuilder[J]): sbt.librarymanagement.UpdateLogging = {
     __jsOpt match {
       case Some(__js) =>

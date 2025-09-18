@@ -6,7 +6,7 @@
 package sbt.librarymanagement
 import _root_.sjsonnew.{ Unbuilder, Builder, JsonFormat, deserializationError }
 trait PublishConfigurationFormats { self: sbt.librarymanagement.ConfigRefFormats & sbt.librarymanagement.ArtifactFormats & sbt.librarymanagement.UpdateLoggingFormats & sjsonnew.BasicJsonProtocol =>
-implicit lazy val PublishConfigurationFormat: JsonFormat[sbt.librarymanagement.PublishConfiguration] = new JsonFormat[sbt.librarymanagement.PublishConfiguration] {
+given PublishConfigurationFormat: JsonFormat[sbt.librarymanagement.PublishConfiguration] = new JsonFormat[sbt.librarymanagement.PublishConfiguration] {
   override def read[J](__jsOpt: Option[J], unbuilder: Unbuilder[J]): sbt.librarymanagement.PublishConfiguration = {
     __jsOpt match {
       case Some(__js) =>

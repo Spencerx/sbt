@@ -6,7 +6,7 @@
 package sbt.internal.bsp.codec
 import _root_.sjsonnew.{ Unbuilder, Builder, JsonFormat, deserializationError }
 trait JvmTestEnvironmentParamsFormats { self: sbt.internal.bsp.codec.BuildTargetIdentifierFormats & sjsonnew.BasicJsonProtocol =>
-implicit lazy val JvmTestEnvironmentParamsFormat: JsonFormat[sbt.internal.bsp.JvmTestEnvironmentParams] = new JsonFormat[sbt.internal.bsp.JvmTestEnvironmentParams] {
+given JvmTestEnvironmentParamsFormat: JsonFormat[sbt.internal.bsp.JvmTestEnvironmentParams] = new JsonFormat[sbt.internal.bsp.JvmTestEnvironmentParams] {
   override def read[J](__jsOpt: Option[J], unbuilder: Unbuilder[J]): sbt.internal.bsp.JvmTestEnvironmentParams = {
     __jsOpt match {
       case Some(__js) =>

@@ -6,7 +6,7 @@
 package sbt.internal.langserver.codec
 import _root_.sjsonnew.{ Unbuilder, Builder, JsonFormat, deserializationError }
 trait RangeFormats { self: sbt.internal.langserver.codec.PositionFormats & sjsonnew.BasicJsonProtocol =>
-implicit lazy val RangeFormat: JsonFormat[sbt.internal.langserver.Range] = new JsonFormat[sbt.internal.langserver.Range] {
+given RangeFormat: JsonFormat[sbt.internal.langserver.Range] = new JsonFormat[sbt.internal.langserver.Range] {
   override def read[J](__jsOpt: Option[J], unbuilder: Unbuilder[J]): sbt.internal.langserver.Range = {
     __jsOpt match {
       case Some(__js) =>

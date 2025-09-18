@@ -355,7 +355,7 @@ private[sbt] final class CommandExchange {
     catch { case _: IOException => removeChannel(channel) }
 
   def respondStatus(event: ExecStatusEvent): Unit = {
-    import sbt.protocol.codec.JsonProtocol.*
+    import sbt.protocol.codec.JsonProtocol.given
     for {
       source <- event.channelName
       channel <- channels.collectFirst {

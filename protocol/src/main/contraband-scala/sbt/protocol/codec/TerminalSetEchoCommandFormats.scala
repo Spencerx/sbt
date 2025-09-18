@@ -6,7 +6,7 @@
 package sbt.protocol.codec
 import _root_.sjsonnew.{ Unbuilder, Builder, JsonFormat, deserializationError }
 trait TerminalSetEchoCommandFormats { self: sjsonnew.BasicJsonProtocol =>
-implicit lazy val TerminalSetEchoCommandFormat: JsonFormat[sbt.protocol.TerminalSetEchoCommand] = new JsonFormat[sbt.protocol.TerminalSetEchoCommand] {
+given TerminalSetEchoCommandFormat: JsonFormat[sbt.protocol.TerminalSetEchoCommand] = new JsonFormat[sbt.protocol.TerminalSetEchoCommand] {
   override def read[J](__jsOpt: Option[J], unbuilder: Unbuilder[J]): sbt.protocol.TerminalSetEchoCommand = {
     __jsOpt match {
       case Some(__js) =>

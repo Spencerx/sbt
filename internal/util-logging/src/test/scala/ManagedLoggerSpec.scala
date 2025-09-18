@@ -47,14 +47,14 @@ class ManagedLoggerSpec extends AnyFlatSpec with Matchers {
   }
 
   it should "support logging Throwable out of the box" in {
-    import sbt.internal.util.codec.JsonProtocol.*
+    import sbt.internal.util.codec.JsonProtocol.given
     val log = newLogger("foo")
     context.addAppender("foo", asyncStdout -> Level.Info)
     log.infoEvent(SuccessEvent("yes"))
   }
 
   it should "allow registering Show[Int]" in {
-    import sjsonnew.BasicJsonProtocol.*
+    import sjsonnew.BasicJsonProtocol.given
     val log = newLogger("foo")
     context.addAppender("foo", asyncStdout -> Level.Info)
     given ShowLines[Int] =
@@ -64,7 +64,7 @@ class ManagedLoggerSpec extends AnyFlatSpec with Matchers {
   }
 
   it should "allow registering Show[Array[Int]]" in {
-    import sjsonnew.BasicJsonProtocol.*
+    import sjsonnew.BasicJsonProtocol.given
     val log = newLogger("foo")
     context.addAppender("foo", asyncStdout -> Level.Info)
     given ShowLines[Array[Int]] =
@@ -74,7 +74,7 @@ class ManagedLoggerSpec extends AnyFlatSpec with Matchers {
   }
 
   it should "allow registering Show[Vector[Vector[Int]]]" in {
-    import sjsonnew.BasicJsonProtocol.*
+    import sjsonnew.BasicJsonProtocol.given
     val log = newLogger("foo")
     context.addAppender("foo", asyncStdout -> Level.Info)
     given ShowLines[Vector[Vector[Int]]] =

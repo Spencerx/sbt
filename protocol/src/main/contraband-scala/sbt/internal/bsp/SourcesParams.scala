@@ -20,7 +20,7 @@ final class SourcesParams private (
   override def toString: String = {
     "SourcesParams(" + targets + ")"
   }
-  private def copy(targets: Vector[sbt.internal.bsp.BuildTargetIdentifier] = targets): SourcesParams = {
+  private def copy(targets: Vector[sbt.internal.bsp.BuildTargetIdentifier]): SourcesParams = {
     new SourcesParams(targets)
   }
   def withTargets(targets: Vector[sbt.internal.bsp.BuildTargetIdentifier]): SourcesParams = {

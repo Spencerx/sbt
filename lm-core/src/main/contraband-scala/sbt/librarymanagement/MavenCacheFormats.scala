@@ -6,7 +6,7 @@
 package sbt.librarymanagement
 import _root_.sjsonnew.{ Unbuilder, Builder, JsonFormat, deserializationError }
 trait MavenCacheFormats { self: sjsonnew.BasicJsonProtocol =>
-implicit lazy val MavenCacheFormat: JsonFormat[sbt.librarymanagement.MavenCache] = new JsonFormat[sbt.librarymanagement.MavenCache] {
+given MavenCacheFormat: JsonFormat[sbt.librarymanagement.MavenCache] = new JsonFormat[sbt.librarymanagement.MavenCache] {
   override def read[J](__jsOpt: Option[J], unbuilder: Unbuilder[J]): sbt.librarymanagement.MavenCache = {
     __jsOpt match {
       case Some(__js) =>

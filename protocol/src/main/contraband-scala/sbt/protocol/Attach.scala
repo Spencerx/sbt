@@ -19,7 +19,7 @@ final class Attach private (
   override def toString: String = {
     "Attach(" + interactive + ")"
   }
-  private def copy(interactive: Boolean = interactive): Attach = {
+  private def copy(interactive: Boolean): Attach = {
     new Attach(interactive)
   }
   def withInteractive(interactive: Boolean): Attach = {

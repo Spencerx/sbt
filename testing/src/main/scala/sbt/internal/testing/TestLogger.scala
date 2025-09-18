@@ -16,7 +16,7 @@ import sbt.protocol.testing.*
 import java.util.concurrent.atomic.AtomicInteger
 
 object TestLogger {
-  import sbt.protocol.testing.codec.JsonProtocol.*
+  import sbt.protocol.testing.codec.JsonProtocol.given
 
   given testStringEventShowLines: ShowLines[TestStringEvent] =
     ShowLines[TestStringEvent]({ case a: TestStringEvent =>
@@ -118,7 +118,7 @@ final class TestLogging(
 class TestLogger(val logging: TestLogging) extends TestsListener {
   import TestLogger.*
   import logging.{ global, logTest, managed }
-  import sbt.protocol.testing.codec.JsonProtocol.*
+  import sbt.protocol.testing.codec.JsonProtocol.given
 
   def doInit(): Unit = managed.logEvent(Level.Info, TestInitEvent())
 

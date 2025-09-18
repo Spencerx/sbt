@@ -174,7 +174,7 @@ private[sbt] object Server {
       }
 
       private def writeTokenfile(): Unit = {
-        import JsonProtocol.*
+        import JsonProtocol.given
 
         val uri = connection.shortName
         val t = TokenFile(uri, token)
@@ -209,7 +209,7 @@ private[sbt] object Server {
 
       // This file exists through the lifetime of the server.
       private def writePortfile(): Unit = {
-        import JsonProtocol.*
+        import JsonProtocol.given
 
         val uri = connection.shortName
         val p =

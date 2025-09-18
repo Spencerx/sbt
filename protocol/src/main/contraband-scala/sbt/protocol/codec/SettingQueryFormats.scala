@@ -6,7 +6,7 @@
 package sbt.protocol.codec
 import _root_.sjsonnew.{ Unbuilder, Builder, JsonFormat, deserializationError }
 trait SettingQueryFormats { self: sjsonnew.BasicJsonProtocol =>
-implicit lazy val SettingQueryFormat: JsonFormat[sbt.protocol.SettingQuery] = new JsonFormat[sbt.protocol.SettingQuery] {
+given SettingQueryFormat: JsonFormat[sbt.protocol.SettingQuery] = new JsonFormat[sbt.protocol.SettingQuery] {
   override def read[J](__jsOpt: Option[J], unbuilder: Unbuilder[J]): sbt.protocol.SettingQuery = {
     __jsOpt match {
       case Some(__js) =>

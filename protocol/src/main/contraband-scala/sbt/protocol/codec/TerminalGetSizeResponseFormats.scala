@@ -6,7 +6,7 @@
 package sbt.protocol.codec
 import _root_.sjsonnew.{ Unbuilder, Builder, JsonFormat, deserializationError }
 trait TerminalGetSizeResponseFormats { self: sjsonnew.BasicJsonProtocol =>
-implicit lazy val TerminalGetSizeResponseFormat: JsonFormat[sbt.protocol.TerminalGetSizeResponse] = new JsonFormat[sbt.protocol.TerminalGetSizeResponse] {
+given TerminalGetSizeResponseFormat: JsonFormat[sbt.protocol.TerminalGetSizeResponse] = new JsonFormat[sbt.protocol.TerminalGetSizeResponse] {
   override def read[J](__jsOpt: Option[J], unbuilder: Unbuilder[J]): sbt.protocol.TerminalGetSizeResponse = {
     __jsOpt match {
       case Some(__js) =>

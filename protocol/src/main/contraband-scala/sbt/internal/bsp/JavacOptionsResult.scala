@@ -19,7 +19,7 @@ final class JavacOptionsResult private (
   override def toString: String = {
     "JavacOptionsResult(" + items + ")"
   }
-  private def copy(items: Vector[sbt.internal.bsp.JavacOptionsItem] = items): JavacOptionsResult = {
+  private def copy(items: Vector[sbt.internal.bsp.JavacOptionsItem]): JavacOptionsResult = {
     new JavacOptionsResult(items)
   }
   def withItems(items: Vector[sbt.internal.bsp.JavacOptionsItem]): JavacOptionsResult = {

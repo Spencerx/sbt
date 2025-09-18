@@ -20,7 +20,7 @@ final class DependencySourcesResult private (
   override def toString: String = {
     "DependencySourcesResult(" + items + ")"
   }
-  private def copy(items: Vector[sbt.internal.bsp.DependencySourcesItem] = items): DependencySourcesResult = {
+  private def copy(items: Vector[sbt.internal.bsp.DependencySourcesItem]): DependencySourcesResult = {
     new DependencySourcesResult(items)
   }
   def withItems(items: Vector[sbt.internal.bsp.DependencySourcesItem]): DependencySourcesResult = {

@@ -47,7 +47,7 @@ import scala.util.control.NonFatal
 import sbt.protocol.*
 import sbt.protocol.Serialization.{ attach, cancelReadSystemIn, readSystemIn, promptChannel }
 
-import sbt.protocol.codec.JsonProtocol.*
+import sbt.protocol.codec.JsonProtocol.given
 
 import sjsonnew.*
 import sjsonnew.support.scalajson.unsafe.{ CompactPrinter, Converter }
@@ -626,7 +626,7 @@ final class NetworkChannel(
   }
 
   def logMessage(level: String, message: String): Unit = {
-    import sbt.internal.langserver.codec.JsonProtocol.*
+    import sbt.internal.langserver.codec.JsonProtocol.given
     jsonRpcNotify(
       "build/logMessage",
       LogMessageParams(MessageType.fromLevelString(level), message)

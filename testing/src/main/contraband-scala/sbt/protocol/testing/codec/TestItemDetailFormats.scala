@@ -6,7 +6,7 @@
 package sbt.protocol.testing.codec
 import _root_.sjsonnew.{ Unbuilder, Builder, JsonFormat, deserializationError }
 trait TestItemDetailFormats { self: sbt.internal.testing.StatusFormats & sjsonnew.BasicJsonProtocol =>
-implicit lazy val TestItemDetailFormat: JsonFormat[sbt.protocol.testing.TestItemDetail] = new JsonFormat[sbt.protocol.testing.TestItemDetail] {
+given TestItemDetailFormat: JsonFormat[sbt.protocol.testing.TestItemDetail] = new JsonFormat[sbt.protocol.testing.TestItemDetail] {
   override def read[J](__jsOpt: Option[J], unbuilder: Unbuilder[J]): sbt.protocol.testing.TestItemDetail = {
     __jsOpt match {
       case Some(__js) =>

@@ -19,7 +19,7 @@ final class TerminalSetEchoCommand private (
   override def toString: String = {
     "TerminalSetEchoCommand(" + toggle + ")"
   }
-  private def copy(toggle: Boolean = toggle): TerminalSetEchoCommand = {
+  private def copy(toggle: Boolean): TerminalSetEchoCommand = {
     new TerminalSetEchoCommand(toggle)
   }
   def withToggle(toggle: Boolean): TerminalSetEchoCommand = {

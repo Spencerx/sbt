@@ -3593,7 +3593,6 @@ object Classpaths {
 
   val moduleIdJsonKeyFormat: sjsonnew.JsonKeyFormat[ModuleID] =
     new sjsonnew.JsonKeyFormat[ModuleID] {
-      import LibraryManagementCodec.*
       import sjsonnew.support.scalajson.unsafe.*
       val moduleIdFormat: JsonFormat[ModuleID] = implicitly[JsonFormat[ModuleID]]
       def write(key: ModuleID): String =

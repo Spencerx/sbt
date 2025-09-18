@@ -20,7 +20,7 @@ final class DependencySourcesParams private (
   override def toString: String = {
     "DependencySourcesParams(" + targets + ")"
   }
-  private def copy(targets: Vector[sbt.internal.bsp.BuildTargetIdentifier] = targets): DependencySourcesParams = {
+  private def copy(targets: Vector[sbt.internal.bsp.BuildTargetIdentifier]): DependencySourcesParams = {
     new DependencySourcesParams(targets)
   }
   def withTargets(targets: Vector[sbt.internal.bsp.BuildTargetIdentifier]): DependencySourcesParams = {

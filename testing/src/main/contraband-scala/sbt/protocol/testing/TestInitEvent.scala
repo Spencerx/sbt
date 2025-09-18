@@ -19,9 +19,7 @@ override def hashCode: Int = {
 override def toString: String = {
   "TestInitEvent()"
 }
-private def copy(): TestInitEvent = {
-  new TestInitEvent()
-}
+
 
 }
 object TestInitEvent {

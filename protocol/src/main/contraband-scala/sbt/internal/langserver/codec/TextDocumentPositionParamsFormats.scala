@@ -6,7 +6,7 @@
 package sbt.internal.langserver.codec
 import _root_.sjsonnew.{ Unbuilder, Builder, JsonFormat, deserializationError }
 trait TextDocumentPositionParamsFormats { self: sbt.internal.langserver.codec.TextDocumentIdentifierFormats & sjsonnew.BasicJsonProtocol & sbt.internal.langserver.codec.PositionFormats =>
-implicit lazy val TextDocumentPositionParamsFormat: JsonFormat[sbt.internal.langserver.TextDocumentPositionParams] = new JsonFormat[sbt.internal.langserver.TextDocumentPositionParams] {
+given TextDocumentPositionParamsFormat: JsonFormat[sbt.internal.langserver.TextDocumentPositionParams] = new JsonFormat[sbt.internal.langserver.TextDocumentPositionParams] {
   override def read[J](__jsOpt: Option[J], unbuilder: Unbuilder[J]): sbt.internal.langserver.TextDocumentPositionParams = {
     __jsOpt match {
       case Some(__js) =>

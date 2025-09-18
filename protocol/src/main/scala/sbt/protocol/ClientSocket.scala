@@ -24,7 +24,7 @@ object ClientSocket {
 
   def socket(portfile: File): (Socket, Option[String]) = socket(portfile, false)
   def socket(portfile: File, useJNI: Boolean): (Socket, Option[String]) = {
-    import fileFormats.*
+    import fileFormats.given
     val json: JValue = Parser.parseFromString(sbt.io.IO.read(portfile)).get
     val p = Converter.fromJson[PortFile](json).get
     val uri = new URI(p.uri)

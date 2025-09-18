@@ -20,7 +20,7 @@ final class StartTestGroupEvent private (
   override def toString: String = {
     "StartTestGroupEvent(" + name + ")"
   }
-  private def copy(name: String = name): StartTestGroupEvent = {
+  private def copy(name: String): StartTestGroupEvent = {
     new StartTestGroupEvent(name)
   }
   def withName(name: String): StartTestGroupEvent = {

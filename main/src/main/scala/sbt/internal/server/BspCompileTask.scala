@@ -41,7 +41,7 @@ case class BspCompileTask private (
     inputs: Inputs,
     startTimeMillis: Long
 ) {
-  import sbt.internal.bsp.codec.JsonProtocol.*
+  import sbt.internal.bsp.codec.JsonProtocol.given
 
   private[sbt] def notifyStart(): Unit = {
     val message = s"Compiling $targetName"

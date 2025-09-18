@@ -6,7 +6,7 @@
 package sbt.internal.bsp.codec
 import _root_.sjsonnew.{ Unbuilder, Builder, JsonFormat, deserializationError }
 trait BuildTargetIdentifierFormats { self: sjsonnew.BasicJsonProtocol =>
-implicit lazy val BuildTargetIdentifierFormat: JsonFormat[sbt.internal.bsp.BuildTargetIdentifier] = new JsonFormat[sbt.internal.bsp.BuildTargetIdentifier] {
+given BuildTargetIdentifierFormat: JsonFormat[sbt.internal.bsp.BuildTargetIdentifier] = new JsonFormat[sbt.internal.bsp.BuildTargetIdentifier] {
   override def read[J](__jsOpt: Option[J], unbuilder: Unbuilder[J]): sbt.internal.bsp.BuildTargetIdentifier = {
     __jsOpt match {
       case Some(__js) =>

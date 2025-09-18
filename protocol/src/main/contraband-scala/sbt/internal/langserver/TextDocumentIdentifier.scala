@@ -23,7 +23,7 @@ final class TextDocumentIdentifier private (
   override def toString: String = {
     "TextDocumentIdentifier(" + uri + ")"
   }
-  private def copy(uri: String = uri): TextDocumentIdentifier = {
+  private def copy(uri: String): TextDocumentIdentifier = {
     new TextDocumentIdentifier(uri)
   }
   def withUri(uri: String): TextDocumentIdentifier = {

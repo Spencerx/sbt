@@ -20,7 +20,7 @@ final class CompileTask private (
   override def toString: String = {
     "CompileTask(" + target + ")"
   }
-  private def copy(target: sbt.internal.bsp.BuildTargetIdentifier = target): CompileTask = {
+  private def copy(target: sbt.internal.bsp.BuildTargetIdentifier): CompileTask = {
     new CompileTask(target)
   }
   def withTarget(target: sbt.internal.bsp.BuildTargetIdentifier): CompileTask = {

@@ -4,9 +4,10 @@
 
 // DO NOT EDIT MANUALLY
 package sbt
-sealed abstract class ServerAuthentication extends Serializable
+enum ServerAuthentication {
+  
+  case Token
+}
 object ServerAuthentication {
   
-  
-  case object Token extends ServerAuthentication
 }

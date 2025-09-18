@@ -23,7 +23,7 @@ final class BuildTargetIdentifier private (
   override def toString: String = {
     "BuildTargetIdentifier(" + uri + ")"
   }
-  private def copy(uri: java.net.URI = uri): BuildTargetIdentifier = {
+  private def copy(uri: java.net.URI): BuildTargetIdentifier = {
     new BuildTargetIdentifier(uri)
   }
   def withUri(uri: java.net.URI): BuildTargetIdentifier = {

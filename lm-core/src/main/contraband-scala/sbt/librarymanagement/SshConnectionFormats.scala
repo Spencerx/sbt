@@ -6,7 +6,7 @@
 package sbt.librarymanagement
 import _root_.sjsonnew.{ Unbuilder, Builder, JsonFormat, deserializationError }
 trait SshConnectionFormats { self: sbt.librarymanagement.SshAuthenticationFormats & sjsonnew.BasicJsonProtocol =>
-implicit lazy val SshConnectionFormat: JsonFormat[sbt.librarymanagement.SshConnection] = new JsonFormat[sbt.librarymanagement.SshConnection] {
+given SshConnectionFormat: JsonFormat[sbt.librarymanagement.SshConnection] = new JsonFormat[sbt.librarymanagement.SshConnection] {
   override def read[J](__jsOpt: Option[J], unbuilder: Unbuilder[J]): sbt.librarymanagement.SshConnection = {
     __jsOpt match {
       case Some(__js) =>

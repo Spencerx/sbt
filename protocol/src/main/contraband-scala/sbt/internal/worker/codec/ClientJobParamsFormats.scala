@@ -6,7 +6,7 @@
 package sbt.internal.worker.codec
 import _root_.sjsonnew.{ Unbuilder, Builder, JsonFormat, deserializationError }
 trait ClientJobParamsFormats { self: sbt.internal.worker.codec.RunInfoFormats & sbt.internal.worker.codec.JvmRunInfoFormats & sbt.internal.worker.codec.FilePathFormats & sjsonnew.BasicJsonProtocol & sbt.internal.worker.codec.NativeRunInfoFormats =>
-implicit lazy val ClientJobParamsFormat: JsonFormat[sbt.internal.worker.ClientJobParams] = new JsonFormat[sbt.internal.worker.ClientJobParams] {
+given ClientJobParamsFormat: JsonFormat[sbt.internal.worker.ClientJobParams] = new JsonFormat[sbt.internal.worker.ClientJobParams] {
   override def read[J](__jsOpt: Option[J], unbuilder: Unbuilder[J]): sbt.internal.worker.ClientJobParams = {
     __jsOpt match {
       case Some(__js) =>

@@ -11,12 +11,13 @@ package sbt.librarymanagement
  * `Quiet` only displays errors.
  * `Default` uses the current log level of `update` task.
  */
-sealed abstract class UpdateLogging extends Serializable
+enum UpdateLogging {
+  
+  case Full
+  case DownloadOnly
+  case Quiet
+  case Default
+}
 object UpdateLogging {
   
-  
-  case object Full extends UpdateLogging
-  case object DownloadOnly extends UpdateLogging
-  case object Quiet extends UpdateLogging
-  case object Default extends UpdateLogging
 }

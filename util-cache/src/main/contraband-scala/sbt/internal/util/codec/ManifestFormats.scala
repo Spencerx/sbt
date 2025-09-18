@@ -6,7 +6,7 @@
 package sbt.internal.util.codec
 import _root_.sjsonnew.{ Unbuilder, Builder, JsonFormat, deserializationError }
 trait ManifestFormats { self: sbt.internal.util.codec.HashedVirtualFileRefFormats & sjsonnew.BasicJsonProtocol =>
-implicit lazy val ManifestFormat: JsonFormat[sbt.util.Manifest] = new JsonFormat[sbt.util.Manifest] {
+given ManifestFormat: JsonFormat[sbt.util.Manifest] = new JsonFormat[sbt.util.Manifest] {
   override def read[J](__jsOpt: Option[J], unbuilder: Unbuilder[J]): sbt.util.Manifest = {
     __jsOpt match {
       case Some(__js) =>

@@ -6,7 +6,7 @@
 package sbt.librarymanagement
 import _root_.sjsonnew.{ Unbuilder, Builder, JsonFormat, deserializationError }
 trait LicenseFormats { self: sjsonnew.BasicJsonProtocol =>
-implicit lazy val LicenseFormat: JsonFormat[sbt.librarymanagement.License] = new JsonFormat[sbt.librarymanagement.License] {
+given LicenseFormat: JsonFormat[sbt.librarymanagement.License] = new JsonFormat[sbt.librarymanagement.License] {
   override def read[J](__jsOpt: Option[J], unbuilder: Unbuilder[J]): sbt.librarymanagement.License = {
     __jsOpt match {
       case Some(__js) =>

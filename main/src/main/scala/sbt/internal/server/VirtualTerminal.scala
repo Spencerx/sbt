@@ -44,7 +44,7 @@ import sbt.protocol.{
   TerminalSetSizeCommand,
   TerminalSetRawModeCommand,
 }
-import sbt.protocol.codec.JsonProtocol.*
+import sbt.protocol.codec.JsonProtocol.given
 
 object VirtualTerminal {
   private val pendingTerminalProperties =

@@ -18,9 +18,7 @@ override def hashCode: Int = {
 override def toString: String = {
   "TerminalSetRawModeResponse()"
 }
-private def copy(): TerminalSetRawModeResponse = {
-  new TerminalSetRawModeResponse()
-}
+
 
 }
 object TerminalSetRawModeResponse {

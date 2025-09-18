@@ -6,7 +6,7 @@
 package sbt.internal.langserver.codec
 import _root_.sjsonnew.{ Unbuilder, Builder, JsonFormat, deserializationError }
 trait InitializeResultFormats { self: sbt.internal.langserver.codec.ServerCapabilitiesFormats & sbt.internal.langserver.codec.TextDocumentSyncOptionsFormats & sbt.internal.langserver.codec.SaveOptionsFormats & sjsonnew.BasicJsonProtocol =>
-implicit lazy val InitializeResultFormat: JsonFormat[sbt.internal.langserver.InitializeResult] = new JsonFormat[sbt.internal.langserver.InitializeResult] {
+given InitializeResultFormat: JsonFormat[sbt.internal.langserver.InitializeResult] = new JsonFormat[sbt.internal.langserver.InitializeResult] {
   override def read[J](__jsOpt: Option[J], unbuilder: Unbuilder[J]): sbt.internal.langserver.InitializeResult = {
     __jsOpt match {
       case Some(__js) =>

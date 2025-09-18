@@ -21,7 +21,7 @@ import sbt.internal.bsp.DiagnosticSeverity
 import sbt.internal.bsp.PublishDiagnosticsParams
 import sbt.internal.bsp.Range
 import sbt.internal.bsp.TextDocumentIdentifier
-import sbt.internal.bsp.codec.JsonProtocol.*
+import sbt.internal.bsp.codec.JsonProtocol.given
 
 import java.nio.file.Path
 import java.nio.file.Paths

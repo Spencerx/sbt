@@ -6,7 +6,7 @@
 package sbt.internal.bsp.codec
 import _root_.sjsonnew.{ Unbuilder, Builder, JsonFormat, deserializationError }
 trait DiagnosticRelatedInformationFormats { self: sbt.internal.bsp.codec.LocationFormats & sbt.internal.bsp.codec.RangeFormats & sbt.internal.bsp.codec.PositionFormats & sjsonnew.BasicJsonProtocol =>
-implicit lazy val DiagnosticRelatedInformationFormat: JsonFormat[sbt.internal.bsp.DiagnosticRelatedInformation] = new JsonFormat[sbt.internal.bsp.DiagnosticRelatedInformation] {
+given DiagnosticRelatedInformationFormat: JsonFormat[sbt.internal.bsp.DiagnosticRelatedInformation] = new JsonFormat[sbt.internal.bsp.DiagnosticRelatedInformation] {
   override def read[J](__jsOpt: Option[J], unbuilder: Unbuilder[J]): sbt.internal.bsp.DiagnosticRelatedInformation = {
     __jsOpt match {
       case Some(__js) =>

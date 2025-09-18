@@ -28,7 +28,7 @@ final class ClientJobParams private (
   override def toString: String = {
     "ClientJobParams(" + runInfo + ")"
   }
-  private def copy(runInfo: Option[sbt.internal.worker.RunInfo] = runInfo): ClientJobParams = {
+  private def copy(runInfo: Option[sbt.internal.worker.RunInfo]): ClientJobParams = {
     new ClientJobParams(runInfo)
   }
   def withRunInfo(runInfo: Option[sbt.internal.worker.RunInfo]): ClientJobParams = {

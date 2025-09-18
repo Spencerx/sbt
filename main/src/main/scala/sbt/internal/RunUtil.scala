@@ -137,7 +137,7 @@ object RunUtil:
         val result = ClientJobParams(
           runInfo = info
         )
-        import sbt.internal.worker.codec.JsonProtocol.*
+        import sbt.internal.worker.codec.JsonProtocol.given
         state.notifyEvent(Serialization.clientJob, result)
         result
       else
@@ -193,7 +193,7 @@ object RunUtil:
         val result = ClientJobParams(
           runInfo = info
         )
-        import sbt.internal.worker.codec.JsonProtocol.*
+        import sbt.internal.worker.codec.JsonProtocol.given
         state.notifyEvent(Serialization.clientJob, result)
         result
       else

@@ -24,7 +24,7 @@ final class JavacOptionsParams private (
   override def toString: String = {
     "JavacOptionsParams(" + targets + ")"
   }
-  private def copy(targets: Vector[sbt.internal.bsp.BuildTargetIdentifier] = targets): JavacOptionsParams = {
+  private def copy(targets: Vector[sbt.internal.bsp.BuildTargetIdentifier]): JavacOptionsParams = {
     new JavacOptionsParams(targets)
   }
   def withTargets(targets: Vector[sbt.internal.bsp.BuildTargetIdentifier]): JavacOptionsParams = {

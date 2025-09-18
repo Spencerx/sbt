@@ -57,19 +57,19 @@ object Serialization {
 
   @deprecated("unused", since = "1.4.0")
   def serializeCommand(command: CommandMessage): Array[Byte] = {
-    import codec.JsonProtocol.*
+    import codec.JsonProtocol.given
     val json: JValue = Converter.toJson[CommandMessage](command).get
     CompactPrinter(json).getBytes("UTF-8")
   }
 
   private[sbt] def serializeCommandAsJsonMessage(command: CommandMessage): String = {
-    import sjsonnew.BasicJsonProtocol.*
+    import sjsonnew.BasicJsonProtocol.given
 
     command match {
       case x: InitCommand =>
         val execId = x.execId.getOrElse(UUID.randomUUID.toString)
         val opts = x.initializationOptions.getOrElse(sys.error("expected initializationOptions"))
-        import sbt.protocol.codec.JsonProtocol.*
+        import sbt.protocol.codec.JsonProtocol.given
         val optsJson = CompactPrinter(Converter.toJson(opts).get)
         s"""{ "jsonrpc": "2.0", "id": "$execId", "method": "initialize", "params": { "initializationOptions": $optsJson } }"""
       case x: ExecCommand =>
@@ -93,7 +93,7 @@ object Serialization {
   }
 
   def serializeEventMessage(event: EventMessage): Array[Byte] = {
-    import codec.JsonProtocol.*
+    import codec.JsonProtocol.given
     val json: JValue = Converter.toJson[EventMessage](event).get
     CompactPrinter(json).getBytes("UTF-8")
   }
@@ -140,7 +140,7 @@ object Serialization {
     val buffer = ByteBuffer.wrap(bytes.toArray)
     Parser.parseFromByteBuffer(buffer) match {
       case Success(json) =>
-        import codec.JsonProtocol.*
+        import codec.JsonProtocol.given
         Converter.fromJson[CommandMessage](json) match {
           case Success(command) => Right(command)
           case Failure(e)       => Left(e.getMessage)
@@ -161,13 +161,13 @@ object Serialization {
       case Success(json) =>
         detectType(json) match {
           case Some("StringEvent") =>
-            import sbt.internal.util.codec.JsonProtocol.*
+            import sbt.internal.util.codec.JsonProtocol.given
             Converter.fromJson[StringEvent](json) match {
               case Success(event) => Right(event)
               case Failure(e)     => Left(e.getMessage)
             }
           case _ =>
-            import codec.JsonProtocol.*
+            import codec.JsonProtocol.given
             Converter.fromJson[EventMessage](json) match {
               case Success(event) => Right(event)
               case Failure(e)     => Left(e.getMessage)
@@ -197,7 +197,7 @@ object Serialization {
     val buffer = ByteBuffer.wrap(bytes.toArray)
     Parser.parseFromByteBuffer(buffer) match {
       case Success(json) =>
-        import codec.JsonProtocol.*
+        import codec.JsonProtocol.given
         Converter.fromJson[EventMessage](json) match {
           case Success(event) => Right(event)
           case Failure(e)     => Left(e.getMessage)

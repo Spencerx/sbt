@@ -20,7 +20,7 @@ final class CancelRequestParams private (
   override def toString: String = {
     "CancelRequestParams(" + id + ")"
   }
-  private def copy(id: String = id): CancelRequestParams = {
+  private def copy(id: String): CancelRequestParams = {
     new CancelRequestParams(id)
   }
   def withId(id: String): CancelRequestParams = {

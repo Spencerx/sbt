@@ -20,7 +20,7 @@ final class DebugSessionAddress private (
   override def toString: String = {
     "DebugSessionAddress(" + uri + ")"
   }
-  private def copy(uri: java.net.URI = uri): DebugSessionAddress = {
+  private def copy(uri: java.net.URI): DebugSessionAddress = {
     new DebugSessionAddress(uri)
   }
   def withUri(uri: java.net.URI): DebugSessionAddress = {

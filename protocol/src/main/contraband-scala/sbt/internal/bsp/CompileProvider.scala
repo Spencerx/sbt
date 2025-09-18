@@ -19,7 +19,7 @@ final class CompileProvider private (
   override def toString: String = {
     "CompileProvider(" + languageIds + ")"
   }
-  private def copy(languageIds: Vector[String] = languageIds): CompileProvider = {
+  private def copy(languageIds: Vector[String]): CompileProvider = {
     new CompileProvider(languageIds)
   }
   def withLanguageIds(languageIds: Vector[String]): CompileProvider = {
