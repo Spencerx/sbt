@@ -35,7 +35,9 @@ jobs:
         distribution: "zulu"
         java-version: "8"
         cache: sbt
-    - uses: sbt/setup-sbt@f20dc1bc1f8be605c44ffbcec6f17f708a4af9d1 # v1.1.12
+    - uses: sbt/setup-sbt@v1
+      with:
+        sbt-runner-version: 1.11.5
     - name: Set up Python 3.12
       uses: actions/setup-python@v6
       with:
@@ -70,7 +72,7 @@ jobs:
         # test launcher script
         cd launcher-package
         bin/coursier resolve
-        ../sbt -Dsbt.build.version=$TEST_SBT_VER integrationTest/test
+        sbt -Dsbt.build.version=$TEST_SBT_VER integrationTest/test
         # This fails due to the JLine issue
         # cd citest && ./test.sh
     - name: Client test (Windows)
