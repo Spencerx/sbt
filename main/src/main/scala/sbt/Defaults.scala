@@ -1258,6 +1258,9 @@ object Defaults extends BuildCommon {
   }
   def forkOptionsTask: Initialize[Task[ForkOptions]] =
     Def.task {
+      val canUseArgumentsFile = sys.props
+        .getOrElse("java.vm.specification.version", "1")
+        .toFloat >= 9.0
       ForkOptions(
         javaHome = javaHome.value,
         outputStrategy = outputStrategy.value,
@@ -1266,7 +1269,8 @@ object Defaults extends BuildCommon {
         workingDirectory = Some(baseDirectory.value),
         runJVMOptions = javaOptions.value.toVector,
         connectInput = connectInput.value,
-        envVars = envVars.value
+        envVars = envVars.value,
+        canUseArgumentsFile = Some(canUseArgumentsFile)
       )
     }
 

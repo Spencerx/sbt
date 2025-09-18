@@ -428,7 +428,7 @@ private[sbt] object ClasspathImpl {
   private def trim(a: Array[String]): List[String] = a.toList.map(_.trim)
 
   def allConfigs(conf: Configuration): Seq[Configuration] =
-    Dag.topologicalSort(conf)(_.extendsConfigs)
+    Dag.reverseTopologicalSort(conf)(_.extendsConfigs)
 
   def getConfigurations(p: ResolvedReference, data: Def.Settings): Seq[Configuration] =
     (p / ivyConfigurations).get(data).getOrElse(Nil)

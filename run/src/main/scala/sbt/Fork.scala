@@ -52,7 +52,11 @@ final class Fork(val commandName: String, val runnerClass: Option[String]) {
     val (classpathEnv, options) = Fork.fitClasspath(preOptions)
     val command = executable +: options
     val jpb =
-      if (Fork.shouldUseArgumentsFile(options))
+      if (
+        config.canUseArgumentsFile.getOrElse(false) &&
+        Fork.booleanOpt("sbt.argsfile").getOrElse(true) &&
+        Fork.shouldUseArgumentsFile(options)
+      )
         new JProcessBuilder(executable, Fork.createArgumentsFile(options))
       else
         new JProcessBuilder(command.toArray*)
@@ -144,9 +148,7 @@ object Fork {
    * - the command line length would exceed MaxConcatenatedOptionLength
    */
   private def shouldUseArgumentsFile(options: Seq[String]): Boolean =
-    (sys.props.getOrElse("java.vm.specification.version", "1").toFloat >= 9.0) &&
-      booleanOpt("sbt.argsfile").getOrElse(true) &&
-      (options.mkString.length > MaxConcatenatedOptionLength)
+    options.mkString.length > MaxConcatenatedOptionLength
 
   /**
    * Create an arguments file from a sequence of command line arguments
