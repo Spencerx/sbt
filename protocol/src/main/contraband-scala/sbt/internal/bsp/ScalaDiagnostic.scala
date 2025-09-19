@@ -27,7 +27,7 @@ final class ScalaDiagnostic private (
   override def toString: String = {
     "ScalaDiagnostic(" + actions + ")"
   }
-  private def copy(actions: Vector[sbt.internal.bsp.ScalaAction] = actions): ScalaDiagnostic = {
+  private def copy(actions: Vector[sbt.internal.bsp.ScalaAction]): ScalaDiagnostic = {
     new ScalaDiagnostic(actions)
   }
   def withActions(actions: Vector[sbt.internal.bsp.ScalaAction]): ScalaDiagnostic = {

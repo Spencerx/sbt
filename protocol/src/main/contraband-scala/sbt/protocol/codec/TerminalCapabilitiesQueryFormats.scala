@@ -6,7 +6,7 @@
 package sbt.protocol.codec
 import _root_.sjsonnew.{ Unbuilder, Builder, JsonFormat, deserializationError }
 trait TerminalCapabilitiesQueryFormats { self: sjsonnew.BasicJsonProtocol =>
-implicit lazy val TerminalCapabilitiesQueryFormat: JsonFormat[sbt.protocol.TerminalCapabilitiesQuery] = new JsonFormat[sbt.protocol.TerminalCapabilitiesQuery] {
+given TerminalCapabilitiesQueryFormat: JsonFormat[sbt.protocol.TerminalCapabilitiesQuery] = new JsonFormat[sbt.protocol.TerminalCapabilitiesQuery] {
   override def read[J](__jsOpt: Option[J], unbuilder: Unbuilder[J]): sbt.protocol.TerminalCapabilitiesQuery = {
     __jsOpt match {
       case Some(__js) =>

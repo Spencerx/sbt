@@ -19,7 +19,7 @@ final class RunProvider private (
   override def toString: String = {
     "RunProvider(" + languageIds + ")"
   }
-  private def copy(languageIds: Vector[String] = languageIds): RunProvider = {
+  private def copy(languageIds: Vector[String]): RunProvider = {
     new RunProvider(languageIds)
   }
   def withLanguageIds(languageIds: Vector[String]): RunProvider = {

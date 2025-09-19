@@ -20,7 +20,7 @@ final class SaveOptions private (
   override def toString: String = {
     "SaveOptions(" + includeText + ")"
   }
-  private def copy(includeText: Option[Boolean] = includeText): SaveOptions = {
+  private def copy(includeText: Option[Boolean]): SaveOptions = {
     new SaveOptions(includeText)
   }
   def withIncludeText(includeText: Option[Boolean]): SaveOptions = {

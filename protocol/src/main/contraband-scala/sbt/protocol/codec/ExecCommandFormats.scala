@@ -6,7 +6,7 @@
 package sbt.protocol.codec
 import _root_.sjsonnew.{ Unbuilder, Builder, JsonFormat, deserializationError }
 trait ExecCommandFormats { self: sjsonnew.BasicJsonProtocol =>
-implicit lazy val ExecCommandFormat: JsonFormat[sbt.protocol.ExecCommand] = new JsonFormat[sbt.protocol.ExecCommand] {
+given ExecCommandFormat: JsonFormat[sbt.protocol.ExecCommand] = new JsonFormat[sbt.protocol.ExecCommand] {
   override def read[J](__jsOpt: Option[J], unbuilder: Unbuilder[J]): sbt.protocol.ExecCommand = {
     __jsOpt match {
       case Some(__js) =>

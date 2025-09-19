@@ -5,12 +5,13 @@
 // DO NOT EDIT MANUALLY
 package sbt.protocol.testing
 /** Testing result */
-sealed abstract class TestResult extends Serializable
+enum TestResult {
+  
+  case Empty
+  case Passed
+  case Failed
+  case Error
+}
 object TestResult {
   
-  
-  case object Empty extends TestResult
-  case object Passed extends TestResult
-  case object Failed extends TestResult
-  case object Error extends TestResult
 }

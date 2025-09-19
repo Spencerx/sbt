@@ -8,7 +8,7 @@
 
 package sbt.internal.util
 
-import sbt.internal.util.codec.JsonProtocol.*
+import sbt.internal.util.codec.JsonProtocol.given
 import sbt.util.*
 import sjsonnew.JsonFormat
 import sbt.internal.util.appmacro.StringTypeTag

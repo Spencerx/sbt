@@ -6,7 +6,7 @@
 package sbt.internal.bsp.codec
 import _root_.sjsonnew.{ Unbuilder, Builder, JsonFormat, deserializationError }
 trait DebugSessionParamsFormats { self: sbt.internal.bsp.codec.BuildTargetIdentifierFormats & sjsonnew.BasicJsonProtocol & sbt.internal.util.codec.JValueFormats =>
-implicit lazy val DebugSessionParamsFormat: JsonFormat[sbt.internal.bsp.DebugSessionParams] = new JsonFormat[sbt.internal.bsp.DebugSessionParams] {
+given DebugSessionParamsFormat: JsonFormat[sbt.internal.bsp.DebugSessionParams] = new JsonFormat[sbt.internal.bsp.DebugSessionParams] {
   override def read[J](__jsOpt: Option[J], unbuilder: Unbuilder[J]): sbt.internal.bsp.DebugSessionParams = {
     __jsOpt match {
       case Some(__js) =>

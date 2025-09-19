@@ -6,7 +6,7 @@
 package sbt.internal.bsp.codec
 import _root_.sjsonnew.{ Unbuilder, Builder, JsonFormat, deserializationError }
 trait LocationFormats { self: sbt.internal.bsp.codec.RangeFormats & sbt.internal.bsp.codec.PositionFormats & sjsonnew.BasicJsonProtocol =>
-implicit lazy val LocationFormat: JsonFormat[sbt.internal.bsp.Location] = new JsonFormat[sbt.internal.bsp.Location] {
+given LocationFormat: JsonFormat[sbt.internal.bsp.Location] = new JsonFormat[sbt.internal.bsp.Location] {
   override def read[J](__jsOpt: Option[J], unbuilder: Unbuilder[J]): sbt.internal.bsp.Location = {
     __jsOpt match {
       case Some(__js) =>

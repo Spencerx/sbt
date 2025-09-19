@@ -6,7 +6,7 @@
 package sbt.internal.worker.codec
 import _root_.sjsonnew.{ Unbuilder, Builder, JsonFormat, deserializationError }
 trait NativeRunInfoFormats { self: sbt.internal.worker.codec.FilePathFormats & sjsonnew.BasicJsonProtocol =>
-implicit lazy val NativeRunInfoFormat: JsonFormat[sbt.internal.worker.NativeRunInfo] = new JsonFormat[sbt.internal.worker.NativeRunInfo] {
+given NativeRunInfoFormat: JsonFormat[sbt.internal.worker.NativeRunInfo] = new JsonFormat[sbt.internal.worker.NativeRunInfo] {
   override def read[J](__jsOpt: Option[J], unbuilder: Unbuilder[J]): sbt.internal.worker.NativeRunInfo = {
     __jsOpt match {
       case Some(__js) =>

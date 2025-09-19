@@ -19,7 +19,7 @@ final class TerminalSetRawModeCommand private (
   override def toString: String = {
     "TerminalSetRawModeCommand(" + toggle + ")"
   }
-  private def copy(toggle: Boolean = toggle): TerminalSetRawModeCommand = {
+  private def copy(toggle: Boolean): TerminalSetRawModeCommand = {
     new TerminalSetRawModeCommand(toggle)
   }
   def withToggle(toggle: Boolean): TerminalSetRawModeCommand = {

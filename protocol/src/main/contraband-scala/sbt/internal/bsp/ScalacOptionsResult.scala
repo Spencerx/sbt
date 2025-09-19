@@ -19,7 +19,7 @@ final class ScalacOptionsResult private (
   override def toString: String = {
     "ScalacOptionsResult(" + items + ")"
   }
-  private def copy(items: Vector[sbt.internal.bsp.ScalacOptionsItem] = items): ScalacOptionsResult = {
+  private def copy(items: Vector[sbt.internal.bsp.ScalacOptionsItem]): ScalacOptionsResult = {
     new ScalacOptionsResult(items)
   }
   def withItems(items: Vector[sbt.internal.bsp.ScalacOptionsItem]): ScalacOptionsResult = {

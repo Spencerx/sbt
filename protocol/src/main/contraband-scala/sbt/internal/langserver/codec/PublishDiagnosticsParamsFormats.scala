@@ -6,7 +6,7 @@
 package sbt.internal.langserver.codec
 import _root_.sjsonnew.{ Unbuilder, Builder, JsonFormat, deserializationError }
 trait PublishDiagnosticsParamsFormats { self: sbt.internal.langserver.codec.DiagnosticFormats & sbt.internal.langserver.codec.RangeFormats & sbt.internal.langserver.codec.PositionFormats & sjsonnew.BasicJsonProtocol =>
-implicit lazy val PublishDiagnosticsParamsFormat: JsonFormat[sbt.internal.langserver.PublishDiagnosticsParams] = new JsonFormat[sbt.internal.langserver.PublishDiagnosticsParams] {
+given PublishDiagnosticsParamsFormat: JsonFormat[sbt.internal.langserver.PublishDiagnosticsParams] = new JsonFormat[sbt.internal.langserver.PublishDiagnosticsParams] {
   override def read[J](__jsOpt: Option[J], unbuilder: Unbuilder[J]): sbt.internal.langserver.PublishDiagnosticsParams = {
     __jsOpt match {
       case Some(__js) =>

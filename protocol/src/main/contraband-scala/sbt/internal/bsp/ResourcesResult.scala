@@ -20,7 +20,7 @@ final class ResourcesResult private (
   override def toString: String = {
     "ResourcesResult(" + items + ")"
   }
-  private def copy(items: Vector[sbt.internal.bsp.ResourcesItem] = items): ResourcesResult = {
+  private def copy(items: Vector[sbt.internal.bsp.ResourcesItem]): ResourcesResult = {
     new ResourcesResult(items)
   }
   def withItems(items: Vector[sbt.internal.bsp.ResourcesItem]): ResourcesResult = {

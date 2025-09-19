@@ -6,7 +6,7 @@
 package sbt.librarymanagement
 import _root_.sjsonnew.{ Unbuilder, Builder, JsonFormat, deserializationError }
 trait GetClassifiersModuleFormats { self: sbt.librarymanagement.ModuleIDFormats & sbt.librarymanagement.ArtifactFormats & sbt.librarymanagement.ConfigRefFormats & sbt.librarymanagement.ChecksumFormats & sjsonnew.BasicJsonProtocol & sbt.librarymanagement.InclExclRuleFormats & sbt.librarymanagement.CrossVersionFormats & sbt.librarymanagement.DisabledFormats & sbt.librarymanagement.BinaryFormats & sbt.librarymanagement.ConstantFormats & sbt.librarymanagement.PatchFormats & sbt.librarymanagement.FullFormats & sbt.librarymanagement.For3Use2_13Formats & sbt.librarymanagement.For2_13Use3Formats & sbt.librarymanagement.ScalaModuleInfoFormats & sbt.librarymanagement.ConfigurationFormats =>
-implicit lazy val GetClassifiersModuleFormat: JsonFormat[sbt.librarymanagement.GetClassifiersModule] = new JsonFormat[sbt.librarymanagement.GetClassifiersModule] {
+given GetClassifiersModuleFormat: JsonFormat[sbt.librarymanagement.GetClassifiersModule] = new JsonFormat[sbt.librarymanagement.GetClassifiersModule] {
   override def read[J](__jsOpt: Option[J], unbuilder: Unbuilder[J]): sbt.librarymanagement.GetClassifiersModule = {
     __jsOpt match {
       case Some(__js) =>

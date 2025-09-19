@@ -6,7 +6,7 @@
 package sbt.internal
 import _root_.sjsonnew.{ Unbuilder, Builder, JsonFormat, deserializationError }
 trait ConnectionTypeFormats { self: sjsonnew.BasicJsonProtocol =>
-implicit lazy val ConnectionTypeFormat: JsonFormat[sbt.ConnectionType] = new JsonFormat[sbt.ConnectionType] {
+given ConnectionTypeFormat: JsonFormat[sbt.ConnectionType] = new JsonFormat[sbt.ConnectionType] {
   override def read[J](__jsOpt: Option[J], unbuilder: Unbuilder[J]): sbt.ConnectionType = {
     __jsOpt match {
       case Some(__js) =>

@@ -20,7 +20,7 @@ final class SbtExecParams private (
   override def toString: String = {
     "SbtExecParams(" + commandLine + ")"
   }
-  private def copy(commandLine: String = commandLine): SbtExecParams = {
+  private def copy(commandLine: String): SbtExecParams = {
     new SbtExecParams(commandLine)
   }
   def withCommandLine(commandLine: String): SbtExecParams = {

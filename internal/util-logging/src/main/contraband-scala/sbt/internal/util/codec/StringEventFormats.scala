@@ -6,7 +6,7 @@
 package sbt.internal.util.codec
 import _root_.sjsonnew.{ Unbuilder, Builder, JsonFormat, deserializationError }
 trait StringEventFormats { self: sjsonnew.BasicJsonProtocol =>
-implicit lazy val StringEventFormat: JsonFormat[sbt.internal.util.StringEvent] = new JsonFormat[sbt.internal.util.StringEvent] {
+given StringEventFormat: JsonFormat[sbt.internal.util.StringEvent] = new JsonFormat[sbt.internal.util.StringEvent] {
   override def read[J](__jsOpt: Option[J], unbuilder: Unbuilder[J]): sbt.internal.util.StringEvent = {
     __jsOpt match {
       case Some(__js) =>

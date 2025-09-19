@@ -6,7 +6,7 @@
 package sbt.internal.bsp.codec
 import _root_.sjsonnew.{ Unbuilder, Builder, JsonFormat, deserializationError }
 trait DebugProviderFormats { self: sjsonnew.BasicJsonProtocol =>
-implicit lazy val DebugProviderFormat: JsonFormat[sbt.internal.bsp.DebugProvider] = new JsonFormat[sbt.internal.bsp.DebugProvider] {
+given DebugProviderFormat: JsonFormat[sbt.internal.bsp.DebugProvider] = new JsonFormat[sbt.internal.bsp.DebugProvider] {
   override def read[J](__jsOpt: Option[J], unbuilder: Unbuilder[J]): sbt.internal.bsp.DebugProvider = {
     __jsOpt match {
       case Some(__js) =>

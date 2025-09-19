@@ -20,7 +20,7 @@ final class InitializeResult private (
   override def toString: String = {
     "InitializeResult(" + capabilities + ")"
   }
-  private def copy(capabilities: sbt.internal.langserver.ServerCapabilities = capabilities): InitializeResult = {
+  private def copy(capabilities: sbt.internal.langserver.ServerCapabilities): InitializeResult = {
     new InitializeResult(capabilities)
   }
   def withCapabilities(capabilities: sbt.internal.langserver.ServerCapabilities): InitializeResult = {

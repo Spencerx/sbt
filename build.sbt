@@ -337,6 +337,8 @@ lazy val utilLogging = project
     mimaBinaryIssueFilters ++= Seq(
       exclude[MissingClassProblem]("sbt.internal.util.ConsoleAppenderFromLog4J"),
       exclude[MissingClassProblem]("sbt.internal.util.Log4JConsoleAppender"),
+      exclude[Problem]("sbt.internal.util.LogOption.*"),
+      exclude[MissingClassProblem]("sbt.internal.util.LogOption$*"),
     ),
   )
   .configure(addSbtIO)
@@ -427,8 +429,10 @@ lazy val testingProj = (project in file("testing"))
     Compile / generateContrabands / sourceManaged := baseDirectory.value / "src" / "main" / "contraband-scala",
     Compile / generateContrabands / contrabandFormatsForType := ContrabandConfig.getFormats,
     mimaSettings,
-    mimaBinaryIssueFilters ++= Seq(
-    )
+    mimaBinaryIssueFilters ++= Vector(
+      exclude[Problem]("sbt.protocol.testing.TestResult.*"),
+      exclude[MissingClassProblem]("sbt.protocol.testing.TestResult$*"),
+    ),
   )
   .configure(addSbtIO, addSbtCompilerClasspath)
 
@@ -555,6 +559,10 @@ lazy val actionsProj = (project in file("main-actions"))
     // Test / fork := true,
     Test / classLoaderLayeringStrategy := ClassLoaderLayeringStrategy.Flat,
     mimaSettings,
+    mimaBinaryIssueFilters ++= Vector(
+      exclude[Problem]("sbt.internal.sona.DeploymentState.*"),
+      exclude[MissingClassProblem]("sbt.internal.sona.DeploymentState$*"),
+    ),
   )
   .dependsOn(lmCore)
   .configure(
@@ -604,6 +612,10 @@ lazy val commandProj = (project in file("main-command"))
     Compile / generateContrabands / contrabandFormatsForType := ContrabandConfig.getFormats,
     mimaSettings,
     mimaBinaryIssueFilters ++= Vector(
+      exclude[Problem]("sbt.ConnectionType.*"),
+      exclude[MissingClassProblem]("sbt.ConnectionType*"),
+      exclude[Problem]("sbt.ServerAuthentication.*"),
+      exclude[MissingClassProblem]("sbt.ServerAuthentication*"),
     ),
     Compile / headerCreate / unmanagedSources := {
       val old = (Compile / headerCreate / unmanagedSources).value
@@ -1191,6 +1203,10 @@ lazy val lmCore = (project in file("lm-core"))
       (((srcs --- sdirs --- base) pair (relativeTo(sdirs) | relativeTo(base) | flat)) toSeq)
     },
     mimaSettings,
+    mimaBinaryIssueFilters ++= Seq(
+      exclude[Problem]("sbt.librarymanagement.UpdateLogging.*"),
+      exclude[MissingClassProblem]("sbt.librarymanagement.UpdateLogging*"),
+    ),
   )
   .dependsOn(utilLogging, utilPosition, utilCache)
   .configure(addSbtIO, addSbtCompilerInterface)

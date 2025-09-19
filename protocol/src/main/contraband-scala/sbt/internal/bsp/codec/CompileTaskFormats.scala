@@ -6,7 +6,7 @@
 package sbt.internal.bsp.codec
 import _root_.sjsonnew.{ Unbuilder, Builder, JsonFormat, deserializationError }
 trait CompileTaskFormats { self: sbt.internal.bsp.codec.BuildTargetIdentifierFormats & sjsonnew.BasicJsonProtocol =>
-implicit lazy val CompileTaskFormat: JsonFormat[sbt.internal.bsp.CompileTask] = new JsonFormat[sbt.internal.bsp.CompileTask] {
+given CompileTaskFormat: JsonFormat[sbt.internal.bsp.CompileTask] = new JsonFormat[sbt.internal.bsp.CompileTask] {
   override def read[J](__jsOpt: Option[J], unbuilder: Unbuilder[J]): sbt.internal.bsp.CompileTask = {
     __jsOpt match {
       case Some(__js) =>

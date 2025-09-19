@@ -27,7 +27,7 @@ private[sbt] object LanguageServerProtocol {
     with sjsonnew.BasicJsonProtocol
     with InitializeOptionFormats
 
-  import internalJsonProtocol.*
+  import internalJsonProtocol.given
 
   def json(r: JsonRpcRequestMessage): JValue =
     r.params.getOrElse(

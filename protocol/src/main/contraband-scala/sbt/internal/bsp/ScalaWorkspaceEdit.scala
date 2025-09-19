@@ -20,7 +20,7 @@ final class ScalaWorkspaceEdit private (
   override def toString: String = {
     "ScalaWorkspaceEdit(" + changes + ")"
   }
-  private def copy(changes: Vector[sbt.internal.bsp.ScalaTextEdit] = changes): ScalaWorkspaceEdit = {
+  private def copy(changes: Vector[sbt.internal.bsp.ScalaTextEdit]): ScalaWorkspaceEdit = {
     new ScalaWorkspaceEdit(changes)
   }
   def withChanges(changes: Vector[sbt.internal.bsp.ScalaTextEdit]): ScalaWorkspaceEdit = {

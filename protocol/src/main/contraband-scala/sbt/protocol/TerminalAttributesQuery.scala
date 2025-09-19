@@ -18,9 +18,7 @@ override def hashCode: Int = {
 override def toString: String = {
   "TerminalAttributesQuery()"
 }
-private def copy(): TerminalAttributesQuery = {
-  new TerminalAttributesQuery()
-}
+
 
 }
 object TerminalAttributesQuery {

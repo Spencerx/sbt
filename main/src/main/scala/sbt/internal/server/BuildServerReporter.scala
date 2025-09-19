@@ -85,7 +85,7 @@ final class BuildServerReporterImpl(
     protected override val logger: ManagedLogger,
     protected override val underlying: Reporter
 ) extends BuildServerReporter {
-  import sbt.internal.bsp.codec.JsonProtocol.*
+  import sbt.internal.bsp.codec.JsonProtocol.given
   import sbt.internal.inc.JavaInterfaceUtil.*
 
   private lazy val exchange = StandardMain.exchange

@@ -19,7 +19,7 @@ final class SettingQueryFailure private (
   override def toString: String = {
     "SettingQueryFailure(" + message + ")"
   }
-  private def copy(message: String = message): SettingQueryFailure = {
+  private def copy(message: String): SettingQueryFailure = {
     new SettingQueryFailure(message)
   }
   def withMessage(message: String): SettingQueryFailure = {

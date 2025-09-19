@@ -6,7 +6,7 @@
 package sbt.protocol.codec
 import _root_.sjsonnew.{ Unbuilder, Builder, JsonFormat, deserializationError }
 trait CompletionResponseFormats { self: sjsonnew.BasicJsonProtocol =>
-implicit lazy val CompletionResponseFormat: JsonFormat[sbt.protocol.CompletionResponse] = new JsonFormat[sbt.protocol.CompletionResponse] {
+given CompletionResponseFormat: JsonFormat[sbt.protocol.CompletionResponse] = new JsonFormat[sbt.protocol.CompletionResponse] {
   override def read[J](__jsOpt: Option[J], unbuilder: Unbuilder[J]): sbt.protocol.CompletionResponse = {
     __jsOpt match {
       case Some(__js) =>

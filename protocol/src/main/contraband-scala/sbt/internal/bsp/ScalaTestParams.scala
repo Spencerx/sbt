@@ -25,7 +25,7 @@ final class ScalaTestParams private (
   override def toString: String = {
     "ScalaTestParams(" + testClasses + ")"
   }
-  private def copy(testClasses: Vector[sbt.internal.bsp.ScalaTestClassesItem] = testClasses): ScalaTestParams = {
+  private def copy(testClasses: Vector[sbt.internal.bsp.ScalaTestClassesItem]): ScalaTestParams = {
     new ScalaTestParams(testClasses)
   }
   def withTestClasses(testClasses: Vector[sbt.internal.bsp.ScalaTestClassesItem]): ScalaTestParams = {

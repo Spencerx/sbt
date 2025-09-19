@@ -54,7 +54,7 @@ object RemoteCache {
     mutable.Map.empty
 
   private[sbt] def artifactToStr(art: Artifact): String = {
-    import LibraryManagementCodec.*
+    import LibraryManagementCodec.given
     import sjsonnew.support.scalajson.unsafe.*
     val format: JsonFormat[Artifact] = summon[JsonFormat[Artifact]]
     CompactPrinter(Converter.toJsonUnsafe(art)(using format))

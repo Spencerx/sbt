@@ -158,7 +158,7 @@ private[sbt] object Definition {
   }
 
   private def getDefinition(jsonDefinition: JValue): Option[TextDocumentPositionParams] = {
-    import langserver.codec.JsonProtocol.*
+    import langserver.codec.JsonProtocol.given
     Converter.fromJson[TextDocumentPositionParams](jsonDefinition).toOption
   }
 
@@ -303,7 +303,7 @@ private[sbt] object Definition {
                 }
             }.seq
             log.debug(s"$LspDefinitionLogHead locations $locations")
-            import langserver.codec.JsonProtocol.*
+            import langserver.codec.JsonProtocol.given
             send(commandSource, requestId)(locations.toArray)
           }
           .recover { case t =>
@@ -319,7 +319,7 @@ private[sbt] object Definition {
         ()
       case None =>
         log.info(s"Symbol not found in definition request $jsonDefinitionString")
-        import langserver.codec.JsonProtocol.*
+        import langserver.codec.JsonProtocol.given
         send(commandSource, requestId)(Array.empty[Location])
     }
   }

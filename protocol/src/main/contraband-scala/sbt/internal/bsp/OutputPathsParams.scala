@@ -20,7 +20,7 @@ final class OutputPathsParams private (
   override def toString: String = {
     "OutputPathsParams(" + targets + ")"
   }
-  private def copy(targets: Vector[sbt.internal.bsp.BuildTargetIdentifier] = targets): OutputPathsParams = {
+  private def copy(targets: Vector[sbt.internal.bsp.BuildTargetIdentifier]): OutputPathsParams = {
     new OutputPathsParams(targets)
   }
   def withTargets(targets: Vector[sbt.internal.bsp.BuildTargetIdentifier]): OutputPathsParams = {

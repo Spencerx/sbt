@@ -378,7 +378,15 @@ final class IvySbt(
     private def toURL(file: File) = file.toURI.toURL
 
     // Todo: We just need writing side of this codec. We can clean up the reads.
-    private[sbt] object AltLibraryManagementCodec extends IvyLibraryManagementCodec {
+    private[sbt] object AltLibraryManagementCodec
+        extends sjsonnew.BasicJsonProtocol
+        with sbt.librarymanagement.LibraryManagementCodec
+        with sbt.internal.librarymanagement.formats.GlobalLockFormat
+        with sbt.internal.librarymanagement.formats.LoggerFormat
+        with sbt.internal.librarymanagement.ivy.formats.UpdateOptionsFormat
+        with sbt.librarymanagement.IvyPathsFormats
+        with sbt.librarymanagement.ResolverFormats
+        with sbt.librarymanagement.ModuleConfigurationFormats:
       import sbt.io.Hash
       type InlineIvyHL = (
           Option[IvyPaths],
@@ -406,7 +414,7 @@ final class IvySbt(
         )
 
       // Redefine to use a subset of properties, that are serializable
-      override given InlineIvyConfigurationFormat: JsonFormat[InlineIvyConfiguration] = {
+      given InlineIvyConfigurationFormat: JsonFormat[InlineIvyConfiguration] = {
         def hlToInlineIvy(i: InlineIvyHL): InlineIvyConfiguration = {
           val (
             paths,
@@ -428,7 +436,7 @@ final class IvySbt(
       }
 
       // Redefine to use a subset of properties, that are serializable
-      override given ExternalIvyConfigurationFormat: JsonFormat[ExternalIvyConfiguration] = {
+      given ExternalIvyConfigurationFormat: JsonFormat[ExternalIvyConfiguration] = {
         def hlToExternalIvy(e: ExternalIvyHL): ExternalIvyConfiguration = {
           val (baseDirectory, _) = e
           ExternalIvyConfiguration(
@@ -444,7 +452,7 @@ final class IvySbt(
       }
 
       // Redefine to switch to unionFormat
-      override given IvyConfigurationFormat: JsonFormat[IvyConfiguration] =
+      given IvyConfigurationFormat: JsonFormat[IvyConfiguration] =
         unionFormat2[IvyConfiguration, InlineIvyConfiguration, ExternalIvyConfiguration]
 
       object NullLogger extends sbt.internal.util.BasicLogger {
@@ -454,15 +462,13 @@ final class IvySbt(
         override def success(message: => String): Unit = ()
         override def trace(t: => Throwable): Unit = ()
       }
-    }
+    end AltLibraryManagementCodec
 
-    def extraInputHash: Long = {
+    def extraInputHash: Long =
       import AltLibraryManagementCodec.given
-      Hasher.hash(owner.configuration) match {
+      Hasher.hash(owner.configuration) match
         case Success(keyHash) => keyHash.toLong
         case Failure(_)       => 0L
-      }
-    }
   }
 }
 

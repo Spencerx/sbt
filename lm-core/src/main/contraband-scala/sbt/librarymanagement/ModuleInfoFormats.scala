@@ -6,7 +6,7 @@
 package sbt.librarymanagement
 import _root_.sjsonnew.{ Unbuilder, Builder, JsonFormat, deserializationError }
 trait ModuleInfoFormats { self: sbt.librarymanagement.LicenseFormats & sjsonnew.BasicJsonProtocol & sbt.librarymanagement.ScmInfoFormats & sbt.librarymanagement.DeveloperFormats =>
-implicit lazy val ModuleInfoFormat: JsonFormat[sbt.librarymanagement.ModuleInfo] = new JsonFormat[sbt.librarymanagement.ModuleInfo] {
+given ModuleInfoFormat: JsonFormat[sbt.librarymanagement.ModuleInfo] = new JsonFormat[sbt.librarymanagement.ModuleInfo] {
   override def read[J](__jsOpt: Option[J], unbuilder: Unbuilder[J]): sbt.librarymanagement.ModuleInfo = {
     __jsOpt match {
       case Some(__js) =>

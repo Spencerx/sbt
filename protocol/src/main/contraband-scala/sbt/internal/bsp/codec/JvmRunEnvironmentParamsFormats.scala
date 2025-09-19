@@ -6,7 +6,7 @@
 package sbt.internal.bsp.codec
 import _root_.sjsonnew.{ Unbuilder, Builder, JsonFormat, deserializationError }
 trait JvmRunEnvironmentParamsFormats { self: sbt.internal.bsp.codec.BuildTargetIdentifierFormats & sjsonnew.BasicJsonProtocol =>
-implicit lazy val JvmRunEnvironmentParamsFormat: JsonFormat[sbt.internal.bsp.JvmRunEnvironmentParams] = new JsonFormat[sbt.internal.bsp.JvmRunEnvironmentParams] {
+given JvmRunEnvironmentParamsFormat: JsonFormat[sbt.internal.bsp.JvmRunEnvironmentParams] = new JsonFormat[sbt.internal.bsp.JvmRunEnvironmentParams] {
   override def read[J](__jsOpt: Option[J], unbuilder: Unbuilder[J]): sbt.internal.bsp.JvmRunEnvironmentParams = {
     __jsOpt match {
       case Some(__js) =>

@@ -6,7 +6,7 @@
 package sbt.internal.util.codec
 import _root_.sjsonnew.{ Unbuilder, Builder, JsonFormat, deserializationError }
 trait SuccessEventFormats { self: sjsonnew.BasicJsonProtocol =>
-implicit lazy val SuccessEventFormat: JsonFormat[sbt.internal.util.SuccessEvent] = new JsonFormat[sbt.internal.util.SuccessEvent] {
+given SuccessEventFormat: JsonFormat[sbt.internal.util.SuccessEvent] = new JsonFormat[sbt.internal.util.SuccessEvent] {
   override def read[J](__jsOpt: Option[J], unbuilder: Unbuilder[J]): sbt.internal.util.SuccessEvent = {
     __jsOpt match {
       case Some(__js) =>

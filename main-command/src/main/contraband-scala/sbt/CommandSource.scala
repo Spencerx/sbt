@@ -19,7 +19,7 @@ final class CommandSource private (
   override def toString: String = {
     "CommandSource(" + channelName + ")"
   }
-  private def copy(channelName: String = channelName): CommandSource = {
+  private def copy(channelName: String): CommandSource = {
     new CommandSource(channelName)
   }
   def withChannelName(channelName: String): CommandSource = {

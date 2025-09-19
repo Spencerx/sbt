@@ -6,7 +6,7 @@
 package sbt.librarymanagement
 import _root_.sjsonnew.{ Unbuilder, Builder, JsonFormat, deserializationError }
 trait ChainedResolverFormats { self: sbt.librarymanagement.ResolverFormats & sjsonnew.BasicJsonProtocol =>
-implicit lazy val ChainedResolverFormat: JsonFormat[sbt.librarymanagement.ChainedResolver] = new JsonFormat[sbt.librarymanagement.ChainedResolver] {
+given ChainedResolverFormat: JsonFormat[sbt.librarymanagement.ChainedResolver] = new JsonFormat[sbt.librarymanagement.ChainedResolver] {
   override def read[J](__jsOpt: Option[J], unbuilder: Unbuilder[J]): sbt.librarymanagement.ChainedResolver = {
     __jsOpt match {
       case Some(__js) =>

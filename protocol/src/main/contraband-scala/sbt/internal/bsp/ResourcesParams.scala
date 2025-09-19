@@ -19,7 +19,7 @@ final class ResourcesParams private (
   override def toString: String = {
     "ResourcesParams(" + targets + ")"
   }
-  private def copy(targets: Vector[sbt.internal.bsp.BuildTargetIdentifier] = targets): ResourcesParams = {
+  private def copy(targets: Vector[sbt.internal.bsp.BuildTargetIdentifier]): ResourcesParams = {
     new ResourcesParams(targets)
   }
   def withTargets(targets: Vector[sbt.internal.bsp.BuildTargetIdentifier]): ResourcesParams = {

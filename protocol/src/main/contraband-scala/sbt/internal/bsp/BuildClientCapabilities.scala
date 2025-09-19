@@ -23,7 +23,7 @@ final class BuildClientCapabilities private (
   override def toString: String = {
     "BuildClientCapabilities(" + languageIds + ")"
   }
-  private def copy(languageIds: Vector[String] = languageIds): BuildClientCapabilities = {
+  private def copy(languageIds: Vector[String]): BuildClientCapabilities = {
     new BuildClientCapabilities(languageIds)
   }
   def withLanguageIds(languageIds: Vector[String]): BuildClientCapabilities = {

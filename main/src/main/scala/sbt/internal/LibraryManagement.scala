@@ -116,7 +116,7 @@ private[sbt] object LibraryManagement {
 
     /* Skip resolve if last output exists, otherwise error. */
     def skipResolve(cache: CacheStore)(inputs: UpdateInputs): UpdateReport = {
-      import sbt.librarymanagement.LibraryManagementCodec.*
+      import sbt.librarymanagement.LibraryManagementCodec.given
       val cachedReport = Tracked
         .lastOutput[UpdateInputs, UpdateReport](cache) {
           case (_, Some(out)) => out
@@ -134,7 +134,7 @@ private[sbt] object LibraryManagement {
 
     def doResolve(cache: CacheStore): UpdateInputs => UpdateReport = {
       val doCachedResolve = { (inChanged: Boolean, updateInputs: UpdateInputs) =>
-        import sbt.librarymanagement.LibraryManagementCodec.*
+        import sbt.librarymanagement.LibraryManagementCodec.given
         try
           var isCached = false
           val report = Tracked
@@ -158,7 +158,7 @@ private[sbt] object LibraryManagement {
             log.trace(t)
             resolvedAgain
       }
-      import LibraryManagementCodec.*
+      import LibraryManagementCodec.given
       Tracked.inputChanged(cacheStoreFactory.make("inputs"))(doCachedResolve)
     }
 
@@ -238,7 +238,7 @@ private[sbt] object LibraryManagement {
 
   val moduleIdJsonKeyFormat: sjsonnew.JsonKeyFormat[ModuleID] =
     new sjsonnew.JsonKeyFormat[ModuleID] {
-      import LibraryManagementCodec.*
+      import LibraryManagementCodec.given
       import sjsonnew.support.scalajson.unsafe.*
       val moduleIdFormat: JsonFormat[ModuleID] = implicitly[JsonFormat[ModuleID]]
       def write(key: ModuleID): String =

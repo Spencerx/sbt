@@ -24,7 +24,7 @@ final class WorkspaceBuildTargetsResult private (
   override def toString: String = {
     "WorkspaceBuildTargetsResult(" + targets + ")"
   }
-  private def copy(targets: Vector[sbt.internal.bsp.BuildTarget] = targets): WorkspaceBuildTargetsResult = {
+  private def copy(targets: Vector[sbt.internal.bsp.BuildTarget]): WorkspaceBuildTargetsResult = {
     new WorkspaceBuildTargetsResult(targets)
   }
   def withTargets(targets: Vector[sbt.internal.bsp.BuildTarget]): WorkspaceBuildTargetsResult = {

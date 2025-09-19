@@ -6,7 +6,7 @@
 package sbt.librarymanagement
 import _root_.sjsonnew.{ Unbuilder, Builder, JsonFormat, deserializationError }
 trait IvyFileConfigurationFormats { self: sbt.librarymanagement.ScalaModuleInfoFormats & sbt.librarymanagement.ConfigurationFormats & sjsonnew.BasicJsonProtocol =>
-implicit lazy val IvyFileConfigurationFormat: JsonFormat[sbt.librarymanagement.IvyFileConfiguration] = new JsonFormat[sbt.librarymanagement.IvyFileConfiguration] {
+given IvyFileConfigurationFormat: JsonFormat[sbt.librarymanagement.IvyFileConfiguration] = new JsonFormat[sbt.librarymanagement.IvyFileConfiguration] {
   override def read[J](__jsOpt: Option[J], unbuilder: Unbuilder[J]): sbt.librarymanagement.IvyFileConfiguration = {
     __jsOpt match {
       case Some(__js) =>

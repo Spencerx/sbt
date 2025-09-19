@@ -23,7 +23,7 @@ final class CleanCacheParams private (
   override def toString: String = {
     "CleanCacheParams(" + targets + ")"
   }
-  private def copy(targets: Vector[sbt.internal.bsp.BuildTargetIdentifier] = targets): CleanCacheParams = {
+  private def copy(targets: Vector[sbt.internal.bsp.BuildTargetIdentifier]): CleanCacheParams = {
     new CleanCacheParams(targets)
   }
   def withTargets(targets: Vector[sbt.internal.bsp.BuildTargetIdentifier]): CleanCacheParams = {

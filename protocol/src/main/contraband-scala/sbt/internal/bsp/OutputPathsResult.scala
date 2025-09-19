@@ -20,7 +20,7 @@ final class OutputPathsResult private (
   override def toString: String = {
     "OutputPathsResult(" + items + ")"
   }
-  private def copy(items: Vector[sbt.internal.bsp.OutputPathsItem] = items): OutputPathsResult = {
+  private def copy(items: Vector[sbt.internal.bsp.OutputPathsItem]): OutputPathsResult = {
     new OutputPathsResult(items)
   }
   def withItems(items: Vector[sbt.internal.bsp.OutputPathsItem]): OutputPathsResult = {

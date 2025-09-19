@@ -24,7 +24,7 @@ final class ScalacOptionsParams private (
   override def toString: String = {
     "ScalacOptionsParams(" + targets + ")"
   }
-  private def copy(targets: Vector[sbt.internal.bsp.BuildTargetIdentifier] = targets): ScalacOptionsParams = {
+  private def copy(targets: Vector[sbt.internal.bsp.BuildTargetIdentifier]): ScalacOptionsParams = {
     new ScalacOptionsParams(targets)
   }
   def withTargets(targets: Vector[sbt.internal.bsp.BuildTargetIdentifier]): ScalacOptionsParams = {

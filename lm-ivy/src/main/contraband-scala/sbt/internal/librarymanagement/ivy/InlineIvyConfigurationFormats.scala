@@ -6,7 +6,7 @@
 package sbt.internal.librarymanagement.ivy
 import _root_.sjsonnew.{ Unbuilder, Builder, JsonFormat, deserializationError }
 trait InlineIvyConfigurationFormats { self: sbt.internal.librarymanagement.formats.GlobalLockFormat & sbt.internal.librarymanagement.formats.LoggerFormat & sbt.internal.librarymanagement.ivy.formats.UpdateOptionsFormat & sbt.librarymanagement.IvyPathsFormats & sbt.librarymanagement.ResolverFormats & sbt.librarymanagement.ModuleConfigurationFormats & sjsonnew.BasicJsonProtocol =>
-implicit lazy val InlineIvyConfigurationFormat: JsonFormat[sbt.internal.librarymanagement.ivy.InlineIvyConfiguration] = new JsonFormat[sbt.internal.librarymanagement.ivy.InlineIvyConfiguration] {
+given InlineIvyConfigurationFormat: JsonFormat[sbt.internal.librarymanagement.ivy.InlineIvyConfiguration] = new JsonFormat[sbt.internal.librarymanagement.ivy.InlineIvyConfiguration] {
   override def read[J](__jsOpt: Option[J], unbuilder: Unbuilder[J]): sbt.internal.librarymanagement.ivy.InlineIvyConfiguration = {
     __jsOpt match {
       case Some(__js) =>

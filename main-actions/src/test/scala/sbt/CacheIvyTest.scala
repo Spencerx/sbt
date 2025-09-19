@@ -130,7 +130,7 @@ class CacheIvyTest extends Properties("CacheIvy") {
       }
 
     }
-    import sbt.librarymanagement.LibraryManagementCodec.*
+    import sbt.librarymanagement.LibraryManagementCodec.given
     cachePreservesEquality(m, eq, str)
   }
 }

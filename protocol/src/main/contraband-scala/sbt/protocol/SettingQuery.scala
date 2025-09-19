@@ -19,7 +19,7 @@ final class SettingQuery private (
   override def toString: String = {
     "SettingQuery(" + setting + ")"
   }
-  private def copy(setting: String = setting): SettingQuery = {
+  private def copy(setting: String): SettingQuery = {
     new SettingQuery(setting)
   }
   def withSetting(setting: String): SettingQuery = {

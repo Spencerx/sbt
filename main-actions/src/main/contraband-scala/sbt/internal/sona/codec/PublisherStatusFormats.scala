@@ -6,7 +6,7 @@
 package sbt.internal.sona.codec
 import _root_.sjsonnew.{ Unbuilder, Builder, JsonFormat, deserializationError }
 trait PublisherStatusFormats { self: sbt.internal.sona.codec.DeploymentStateFormats & sjsonnew.BasicJsonProtocol & sbt.internal.util.codec.JValueFormats =>
-implicit lazy val PublisherStatusFormat: JsonFormat[sbt.internal.sona.PublisherStatus] = new JsonFormat[sbt.internal.sona.PublisherStatus] {
+given PublisherStatusFormat: JsonFormat[sbt.internal.sona.PublisherStatus] = new JsonFormat[sbt.internal.sona.PublisherStatus] {
   override def read[J](__jsOpt: Option[J], unbuilder: Unbuilder[J]): sbt.internal.sona.PublisherStatus = {
     __jsOpt match {
       case Some(__js) =>
