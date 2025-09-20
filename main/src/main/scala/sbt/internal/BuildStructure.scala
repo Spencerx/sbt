@@ -294,7 +294,8 @@ final class PartBuildUnit(
   def resolve(f: Project => ResolvedProject): LoadedBuildUnit =
     new LoadedBuildUnit(unit, defined.view.mapValues(f).toMap, rootProjects, buildSettings)
 
-  def resolveRefs(f: ProjectReference => ProjectRef): LoadedBuildUnit = resolve(_.resolve(f))
+  def resolveRefs(f: ProjectReference => Seq[ProjectRef]): LoadedBuildUnit =
+    resolve(_.resolve(f))
 }
 
 object BuildStreams {
@@ -360,6 +361,7 @@ object BuildStreams {
               case Select(LocalProject(id))                       => id
               case Select(RootProject(_))                         => RootPath
               case Select(LocalRootProject)                       => LocalRootProject.toString
+              case Select(LocalAggregate)                         => LocalAggregate.toString
               case Select(ThisBuild) | Select(ThisProject) | This =>
                 // Don't want to crash if somehow an unresolved key makes it in here.
                 This.toString

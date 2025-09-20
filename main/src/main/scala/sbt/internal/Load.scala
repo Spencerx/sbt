@@ -657,28 +657,25 @@ private[sbt] object Load {
       IO createDirectory base
   }
 
-  def resolveAll(builds: Map[URI, PartBuildUnit]): Map[URI, LoadedBuildUnit] = {
-    val rootProject = getRootProject(builds)
-    builds map { (uri, unit) =>
-      (uri, unit.resolveRefs(ref => Scope.resolveProjectRef(uri, rootProject, ref)))
-    }
-  }
-
   def checkAll(
       referenced: Map[URI, List[ProjectReference]],
       builds: Map[URI, PartBuildUnit]
-  ): Unit = {
+  ): Unit =
     val rootProject = getRootProject(builds)
-    for ((uri, refs) <- referenced; ref <- refs) {
-      val ProjectRef(refURI, refID) = Scope.resolveProjectRef(uri, rootProject, ref)
-      val loadedUnit = builds(refURI)
-      if (!(loadedUnit.defined contains refID)) {
-        val projectIDs = loadedUnit.defined.keys.toSeq.sorted
-        sys.error(s"""No project '$refID' in '$refURI'.
-                     |Valid project IDs: ${projectIDs.mkString(", ")}""".stripMargin)
-      }
-    }
-  }
+    for
+      (uri, refs) <- referenced
+      ref <- refs
+    do
+      ref match
+        case LocalAggregate => ()
+        case _ =>
+          val ProjectRef(refURI, refID) = Scope.resolveProjectRef(uri, rootProject, ref)
+          val loadedUnit = builds(refURI)
+          if (!loadedUnit.defined.contains(refID)) {
+            val projectIDs = loadedUnit.defined.keys.toSeq.sorted
+            sys.error(s"""No project '$refID' in '$refURI'.
+                        |Valid project IDs: ${projectIDs.mkString(", ")}""".stripMargin)
+          }
 
   /**
    * Returns true when value is the subproject base for root project.
@@ -709,16 +706,37 @@ private[sbt] object Load {
       uri: URI,
       unit: PartBuildUnit,
       rootProject: URI => String
-  ): LoadedBuildUnit = {
+  ): LoadedBuildUnit =
     IO.assertAbsolute(uri)
-    val resolve = (_: Project).resolve(ref => Scope.resolveProjectRef(uri, rootProject, ref))
-    new LoadedBuildUnit(
+    val ps = unit.defined.values.toVector
+      .map(p => (p, IO.toURI(p.base).toString()))
+      .sortBy(_._2)
+    val resolve: Project => ResolvedProject = (p: Project) =>
+      p.resolve:
+        case LocalAggregate => resolveAutoAggregate(uri, p, ps)
+        case ref            => Vector(Scope.resolveProjectRef(uri, rootProject, ref))
+    LoadedBuildUnit(
       unit.unit,
       unit.defined.view.mapValues(resolve).toMap,
       unit.rootProjects,
       unit.buildSettings
     )
-  }
+
+  /**
+   * This expands LocalAggregate reference object to all subprojects within the same
+   * build URI under the current subproject's base directory.
+   * This should return all subprojects for root.
+   */
+  private def resolveAutoAggregate(
+      uri: URI,
+      current: Project,
+      ps: Vector[(Project, String)]
+  ): Seq[ProjectRef] =
+    val base = IO.toURI(current.base).toString()
+    ps.flatMap: (p, projBase) =>
+      if projBase == base then Nil
+      else if projBase.startsWith(base) then Vector(ProjectRef(uri, p.id))
+      else Nil
 
   def projects(unit: BuildUnit): Seq[Project] = {
     // we don't have the complete build graph loaded, so we don't have the rootProject function yet.
@@ -826,7 +844,7 @@ private[sbt] object Load {
         loadedProjectsRaw.projects.exists(p => isRootPath(p.base, normBase)) || defsScala.exists(
           _.rootProject.isDefined
         )
-      val (loadedProjects, defaultBuildIfNone, keepClassFiles) =
+      val (loadedProjects0, defaultBuildIfNone, keepClassFiles) =
         if (hasRoot)
           (
             loadedProjectsRaw.projects,
@@ -847,6 +865,7 @@ private[sbt] object Load {
             defaultProjects.generatedConfigClassFiles ++ loadedProjectsRaw.generatedConfigClassFiles
           )
         }
+      val loadedProjects = processAutoAggregate(loadedProjects0, uri)
       // TODO: Uncomment when we fixed https://github.com/sbt/sbt/issues/7424
       // likely keepClassFiles isn't covering enough.
       // timed("Load.loadUnit: cleanEvalClasses", log) {
@@ -869,6 +888,10 @@ private[sbt] object Load {
       )
       new BuildUnit(uri, normBase, loadedDefs, plugs, converter)
     }
+
+  private def processAutoAggregate(inProjects: Seq[Project], uri: URI): Seq[Project] =
+    inProjects.map: proj =>
+      proj
 
   private def autoID(
       localBase: File,
@@ -1005,7 +1028,7 @@ private[sbt] object Load {
     // a. Apply all the project manipulations from .sbt files in order
     // b. Deduce the auto plugins for the project
     // c. Finalize a project with all its settings/configuration.
-    def finalizeProject(
+    def processProject(
         p: Project,
         files: Seq[VirtualFile],
         extraFiles: Seq[VirtualFile],
@@ -1048,14 +1071,14 @@ private[sbt] object Load {
       // phony.  However, we may want to 'merge' the two, or only do this if the original was a
       // default generated project.
       val root = rootOpt.getOrElse(p)
-      val (finalRoot, projectLevelExtra) = finalizeProject(root, files, extraFiles, true)
+      val (finalRoot, projectLevelExtra) = processProject(root, files, extraFiles, true)
       val newProjects = rest ++ discovered ++ projectLevelExtra
       val newAcc = acc :+ finalRoot
       val newGenerated = generated ++ generatedConfigClassFiles
       loadTransitive1(newProjects, newAcc, newGenerated, finalRoot.commonSettings)
     }
 
-    // Load all config files AND finalize the project at the root directory, if it exists.
+    // Load all config files AND process the project at the root directory, if it exists.
     // Continue loading if we find any more.
     newProjects match
       case Seq(next, rest*) =>
@@ -1093,8 +1116,8 @@ private[sbt] object Load {
               val refs = existingIds.map(id => ProjectRef(buildUri, id))
               (root.aggregate(refs*), false, Nil, otherProjects)
         val (finalRoot, projectLevelExtra) =
-          timed(s"Load.loadTransitive: finalizeProject($root)", log) {
-            finalizeProject(root, files, extraFiles, expand)
+          timed(s"Load.loadTransitive: processProject($root)", log) {
+            processProject(root, files, extraFiles, expand)
           }
         val newProjects = moreProjects ++ projectLevelExtra
         val newAcc = finalRoot +: (acc ++ otherProjects.projects)

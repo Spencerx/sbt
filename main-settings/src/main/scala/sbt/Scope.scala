@@ -130,6 +130,7 @@ object Scope:
       case RootProject(uri)    => RootProject(resolveBuild(current, uri))
       case ProjectRef(uri, id) => ProjectRef(resolveBuild(current, uri), id)
       case ThisProject         => ThisProject // haven't exactly "resolved" anything..
+      case LocalAggregate      => LocalAggregate
     }
   def resolveBuild(current: URI, uri: URI): URI =
     if (!uri.isAbsolute && current.isOpaque && uri.getSchemeSpecificPart == ".")
@@ -158,6 +159,7 @@ object Scope:
       case RootProject(uri)    => val u = resolveBuild(current, uri); ProjectRef(u, rootProject(u))
       case ProjectRef(uri, id) => ProjectRef(resolveBuild(current, uri), id)
       case ThisProject         => sys.error("Cannot resolve ThisProject w/o the current project")
+      case LocalAggregate      => sys.error("Cannot resolve LocalAggregate")
     }
   def resolveBuildRef(current: URI, ref: BuildReference): BuildRef =
     ref match {

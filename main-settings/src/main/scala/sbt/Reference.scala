@@ -71,6 +71,9 @@ case object LocalRootProject extends ProjectReference
 /** Identifies the project for the current context. */
 case object ThisProject extends ProjectReference
 
+/** A placeholder for auto aggregation. */
+case object LocalAggregate extends ProjectReference
+
 object ProjectRef {
   def apply(base: File, id: String): ProjectRef = ProjectRef(IO toURI base, id)
 }
@@ -108,6 +111,7 @@ object Reference {
     ref match {
       case ThisProject         => "{<this>}<this>"
       case LocalRootProject    => "{<this>}<root>"
+      case LocalAggregate      => "{<this>}<aggregate>"
       case LocalProject(id)    => "{<this>}" + id
       case RootProject(uri)    => "{" + uri + " }<root>"
       case ProjectRef(uri, id) => s"""ProjectRef(uri("$uri"), "$id")"""
