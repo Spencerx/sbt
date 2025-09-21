@@ -143,6 +143,12 @@ sealed trait Project extends ProjectDefinition[ProjectReference] with CompositeP
   def aggregate(refs: ProjectReference*): Project =
     copy(aggregate = (aggregate: Seq[ProjectReference]) ++ refs)
 
+  /**
+   * Automatically aggregate local subprojects.
+   */
+  def autoAggregate: Project =
+    this.aggregate(LocalAggregate)
+
   /** Appends settings to the current settings sequence for this project. */
   def settings(ss: Def.SettingsDefinition*): Project =
     copy(settings = (settings: Seq[Def.Setting[?]]) ++ Def.settings(ss*))
@@ -217,11 +223,12 @@ sealed trait Project extends ProjectDefinition[ProjectReference] with CompositeP
       dependencies = resolveDeps(dependencies),
     )
 
-  private[sbt] def resolve(resolveRef: ProjectReference => ProjectRef): ResolvedProject =
-    def resolveRefs(prs: Seq[ProjectReference]) = prs.map(resolveRef)
-    def resolveDeps(ds: Seq[ClasspathDep[ProjectReference]]) = ds.map(resolveDep)
-    def resolveDep(d: ClasspathDep[ProjectReference]) =
-      ClasspathDep.ResolvedClasspathDependency(resolveRef(d.project), d.configuration)
+  private[sbt] def resolve(resolveRef: ProjectReference => Seq[ProjectRef]): ResolvedProject =
+    def resolveRefs(prs: Seq[ProjectReference]) = prs.flatMap(resolveRef)
+    def resolveDeps(ds: Seq[ClasspathDep[ProjectReference]]) = ds.flatMap(resolveDep)
+    def resolveDep(d: ClasspathDep[ProjectReference]): Seq[ClasspathDep[ProjectRef]] =
+      resolveRef(d.project).map: ref =>
+        ClasspathDep.ResolvedClasspathDependency(ref, d.configuration)
     Project.resolved(
       id,
       base,

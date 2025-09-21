@@ -173,6 +173,7 @@ object Def extends BuildSyntax with Init with InitializeImplicits:
       case LocalProject(p)  => if (p == current.project) "" else p
       case ThisBuild        => "ThisBuild"
       case LocalRootProject => "<root>"
+      case LocalAggregate   => "<aggregate>"
       case ThisProject      => "<this>"
     }
     val str = loop(project)
