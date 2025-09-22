@@ -117,7 +117,7 @@ def testedBaseSettings: Seq[Setting[?]] =
 
 val sbt20Plus =
   Seq(
-    "2.0.0-RC4",
+    "2.0.0-RC5",
   )
 val mimaSettings = mimaSettingsSince(sbt20Plus)
 def mimaSettingsSince(versions: Seq[String]): Seq[Def.Setting[?]] = Def settings (
@@ -138,13 +138,6 @@ def mimaSettingsSince(versions: Seq[String]): Seq[Def.Setting[?]] = Def settings
     }
   },
   mimaBinaryIssueFilters ++= Seq(
-    // Changes in the internal package
-    exclude[DirectMissingMethodProblem]("sbt.internal.*"),
-    exclude[FinalClassProblem]("sbt.internal.*"),
-    exclude[FinalMethodProblem]("sbt.internal.*"),
-    exclude[IncompatibleResultTypeProblem]("sbt.internal.*"),
-    exclude[ReversedMissingMethodProblem]("sbt.internal.*"),
-    exclude[DirectMissingMethodProblem]("sbt.Keys.extraLoggers"),
   ),
 )
 
@@ -335,10 +328,6 @@ lazy val utilLogging = project
     Test / fork := true,
     mimaSettings,
     mimaBinaryIssueFilters ++= Seq(
-      exclude[MissingClassProblem]("sbt.internal.util.ConsoleAppenderFromLog4J"),
-      exclude[MissingClassProblem]("sbt.internal.util.Log4JConsoleAppender"),
-      exclude[Problem]("sbt.internal.util.LogOption.*"),
-      exclude[MissingClassProblem]("sbt.internal.util.LogOption$*"),
     ),
   )
   .configure(addSbtIO)
@@ -375,8 +364,6 @@ lazy val utilCache = project
     Compile / generateContrabands / contrabandFormatsForType := ContrabandConfig.getFormats,
     mimaSettings,
     mimaBinaryIssueFilters ++= Seq(
-      ProblemFilters.exclude[MissingClassProblem]("sbt.internal.util.ActionCacheError"),
-      ProblemFilters.exclude[MissingClassProblem]("sbt.internal.util.ActionCacheError$")
     ),
     Test / fork := true,
   )
@@ -430,8 +417,6 @@ lazy val testingProj = (project in file("testing"))
     Compile / generateContrabands / contrabandFormatsForType := ContrabandConfig.getFormats,
     mimaSettings,
     mimaBinaryIssueFilters ++= Vector(
-      exclude[Problem]("sbt.protocol.testing.TestResult.*"),
-      exclude[MissingClassProblem]("sbt.protocol.testing.TestResult$*"),
     ),
   )
   .configure(addSbtIO, addSbtCompilerClasspath)
@@ -560,8 +545,6 @@ lazy val actionsProj = (project in file("main-actions"))
     Test / classLoaderLayeringStrategy := ClassLoaderLayeringStrategy.Flat,
     mimaSettings,
     mimaBinaryIssueFilters ++= Vector(
-      exclude[Problem]("sbt.internal.sona.DeploymentState.*"),
-      exclude[MissingClassProblem]("sbt.internal.sona.DeploymentState$*"),
     ),
   )
   .dependsOn(lmCore)
@@ -587,9 +570,6 @@ lazy val protocolProj = (project in file("protocol"))
     Compile / generateContrabands / contrabandFormatsForType := ContrabandConfig.getFormats,
     mimaSettings,
     mimaBinaryIssueFilters ++= Seq(
-      // ignore missing or incompatible methods in sbt.internal
-      exclude[IncompatibleMethTypeProblem]("sbt.internal.*"),
-      exclude[DirectMissingMethodProblem]("sbt.internal.*"),
     )
   )
 
@@ -612,10 +592,6 @@ lazy val commandProj = (project in file("main-command"))
     Compile / generateContrabands / contrabandFormatsForType := ContrabandConfig.getFormats,
     mimaSettings,
     mimaBinaryIssueFilters ++= Vector(
-      exclude[Problem]("sbt.ConnectionType.*"),
-      exclude[MissingClassProblem]("sbt.ConnectionType*"),
-      exclude[Problem]("sbt.ServerAuthentication.*"),
-      exclude[MissingClassProblem]("sbt.ServerAuthentication*"),
     ),
     Compile / headerCreate / unmanagedSources := {
       val old = (Compile / headerCreate / unmanagedSources).value
@@ -747,30 +723,6 @@ lazy val mainProj = (project in file("main"))
     Compile / doc / sources := Nil,
     mimaSettings,
     mimaBinaryIssueFilters ++= Vector(
-      ProblemFilters.exclude[MissingClassProblem]("sbt.internal.LocalProjectMatrix"),
-      ProblemFilters.exclude[MissingClassProblem]("sbt.internal.LocalProjectMatrix$"),
-      ProblemFilters.exclude[MissingClassProblem]("sbt.internal.ProjectMatrixReference"),
-      ProblemFilters.exclude[MissingClassProblem]("sbt.internal.ConfigData"),
-      ProblemFilters.exclude[MissingClassProblem]("sbt.internal.ConfigData$"),
-      ProblemFilters.exclude[MissingClassProblem]("sbt.internal.graph.backend.IvyReport"),
-      ProblemFilters.exclude[MissingClassProblem]("sbt.internal.graph.backend.IvyReport$"),
-      ProblemFilters.exclude[MissingClassProblem]("sbt.internal.graph.rendering.LicenseInfo"),
-      ProblemFilters.exclude[MissingClassProblem]("sbt.internal.graph.rendering.LicenseInfo$"),
-      ProblemFilters.exclude[MissingClassProblem](
-        "sbt.internal.librarymanagement.FakeRawRepository"
-      ),
-      ProblemFilters.exclude[MissingClassProblem](
-        "sbt.internal.librarymanagement.FakeRawRepository$"
-      ),
-      ProblemFilters.exclude[MissingFieldProblem]("sbt.internal.server.NetworkChannel.SingleLine"),
-      ProblemFilters.exclude[MissingFieldProblem]("sbt.internal.server.NetworkChannel.InHeader"),
-      ProblemFilters.exclude[MissingFieldProblem]("sbt.internal.server.NetworkChannel.InBody"),
-      ProblemFilters.exclude[MissingClassProblem](
-        "sbt.internal.server.NetworkChannel$ChannelState"
-      ),
-      ProblemFilters.exclude[MissingClassProblem]("sbt.internal.server.NetworkChannel$InBody$"),
-      ProblemFilters.exclude[MissingClassProblem]("sbt.internal.server.NetworkChannel$InHeader$"),
-      ProblemFilters.exclude[MissingClassProblem]("sbt.internal.server.NetworkChannel$SingleLine$"),
     ),
   )
   .dependsOn(lmCore, lmIvy, lmCoursierShadedPublishing)
@@ -1204,8 +1156,6 @@ lazy val lmCore = (project in file("lm-core"))
     },
     mimaSettings,
     mimaBinaryIssueFilters ++= Seq(
-      exclude[Problem]("sbt.librarymanagement.UpdateLogging.*"),
-      exclude[MissingClassProblem]("sbt.librarymanagement.UpdateLogging*"),
     ),
   )
   .dependsOn(utilLogging, utilPosition, utilCache)
