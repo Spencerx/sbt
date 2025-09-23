@@ -14,7 +14,7 @@ object SbtLauncherPlugin extends AutoPlugin {
   import autoImport.*
 
   override def projectConfigurations: Seq[Configuration] = Seq(SbtLaunchConfiguration)
-  override def projectSettings: Seq[Setting[_]] = Seq(
+  override def projectSettings: Seq[Setting[?]] = Seq(
     libraryDependencies += Dependencies.rawLauncher % SbtLaunchConfiguration.name,
     rawSbtLaunchJar := {
       Classpaths.managedJars(SbtLaunchConfiguration, Set("jar"), update.value).headOption match {

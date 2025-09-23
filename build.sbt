@@ -1,6 +1,6 @@
-import Dependencies._
-import com.typesafe.tools.mima.core.ProblemFilters._
-import com.typesafe.tools.mima.core._
+import Dependencies.*
+import com.typesafe.tools.mima.core.ProblemFilters.*
+import com.typesafe.tools.mima.core.*
 import local.Scripted
 import java.nio.file.{ Files, Path => JPath }
 import java.util.Locale
@@ -146,7 +146,7 @@ val scriptedSbtMimaSettings = Def.settings(mimaPreviousArtifacts := Set())
 lazy val sbtRoot: Project = (project in file("."))
   .aggregate(
     (allProjects diff Seq(lmCoursierShaded))
-      .map(p => LocalProject(p.id)): _*
+      .map(p => LocalProject(p.id))*
   )
   .settings(
     minimalSettings,
@@ -912,7 +912,7 @@ lazy val sbtBig = (project in file(".big"))
 
 // util projects used by Zinc and Lm
 lazy val lowerUtils = (project in (file("internal") / "lower"))
-  .aggregate(lowerUtilProjects.map(p => LocalProject(p.id)): _*)
+  .aggregate(lowerUtilProjects.map(p => LocalProject(p.id))*)
   .settings(
     Utils.noPublish
   )
@@ -920,7 +920,7 @@ lazy val lowerUtils = (project in (file("internal") / "lower"))
 lazy val upperModules = (project in (file("internal") / "upper"))
   .aggregate(
     ((allProjects diff lowerUtilProjects)
-      diff Seq(bundledLauncherProj, lmCoursierShaded)).map(p => LocalProject(p.id)): _*
+      diff Seq(bundledLauncherProj, lmCoursierShaded)).map(p => LocalProject(p.id))*
   )
   .settings(
     Utils.noPublish
@@ -1053,7 +1053,7 @@ lazy val scriptedProjects = ScopeFilter(inAnyProject)
 def customCommands: Seq[Setting[?]] = Seq(
   commands += Command.command("publishLocalAllModule") { state =>
     val extracted = Project.extract(state)
-    import extracted._
+    import extracted.*
     val sv = get(scalaVersion)
     val projs = structure.allProjectRefs
     val ioOpt = projs find { case ProjectRef(_, id) => id == "ioRoot"; case _ => false }
@@ -1151,7 +1151,7 @@ lazy val lmCore = (project in file("lm-core"))
       val srcs = (Compile / managedSources).value
       val sdirs = (Compile / managedSourceDirectories).value
       val base = baseDirectory.value
-      import Path._
+      import Path.*
       (((srcs --- sdirs --- base) pair (relativeTo(sdirs) | relativeTo(base) | flat)) toSeq)
     },
     mimaSettings,

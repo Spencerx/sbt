@@ -18,7 +18,7 @@ object PublishBinPlugin extends AutoPlugin {
   private val dummyDoc = taskKey[File]("").withRank(Int.MaxValue)
   override val globalSettings = Seq(publishLocalBin := (()))
 
-  override val projectSettings: Seq[Def.Setting[_]] = Def settings (
+  override val projectSettings: Seq[Def.Setting[?]] = Def settings (
     publishLocalBin := Classpaths
       .publishOrSkip(publishLocalBinConfig, publishLocalBin / skip)
       .value,
