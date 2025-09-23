@@ -9,7 +9,7 @@ import Sxr.{ sxr, SxrConf }
  */
 
 object Docs {
-  def settings: Seq[Setting[_]] = Nil
+  def settings: Seq[Setting[?]] = Nil
 
   /*
   val siteExcludes = Set(".buildinfo", "objects.inv")

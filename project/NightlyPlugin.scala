@@ -23,10 +23,10 @@ object NightlyPlugin extends AutoPlugin {
   }
   import autoImport.*
 
-  override def buildSettings: Seq[Setting[_]] = Seq(
+  override def buildSettings: Seq[Setting[?]] = Seq(
     includeTestDependencies := true
   )
 
-  override def projectSettings: Seq[Setting[_]] = Seq(
+  override def projectSettings: Seq[Setting[?]] = Seq(
   )
 }

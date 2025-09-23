@@ -20,7 +20,7 @@ object Mima {
       .filter(stable)
       .toSet
 
-  def settings: Seq[Setting[_]] = Seq(
+  def settings: Seq[Setting[?]] = Seq(
     MimaPlugin.autoImport.mimaPreviousArtifacts := Set.empty,
     // MimaPlugin.autoImport.mimaPreviousArtifacts := {
     //   binaryCompatibilityVersions.map { ver =>

@@ -18,12 +18,12 @@ object Utils {
     publish / skip := true,
   )
 
-  def crossBuild: Seq[Setting[_]] =
+  def crossBuild: Seq[Setting[?]] =
     Seq(
       crossPaths := true
     )
 
-  lazy val javaOnlySettings: Seq[Setting[_]] = Seq(
+  lazy val javaOnlySettings: Seq[Setting[?]] = Seq(
     // crossPaths := false,
     // compileOrder := CompileOrder.JavaThenScala,
     Compile / unmanagedSourceDirectories := Seq((Compile / javaSource).value)
@@ -104,7 +104,7 @@ object Utils {
   def binID = "compiler-interface-bin"
   def srcID = "compiler-interface-src"
 
-  def publishPomSettings: Seq[Setting[_]] = Seq(
+  def publishPomSettings: Seq[Setting[?]] = Seq(
     pomPostProcess := cleanPom _
   )
 
@@ -158,7 +158,7 @@ object Utils {
     out
   }
 
-  def keywordsSettings: Seq[Setting[_]] =
+  def keywordsSettings: Seq[Setting[?]] =
     inConfig(Compile)(
       Seq(
         scalaKeywords := getScalaKeywords,
@@ -194,7 +194,7 @@ object Licensed {
   def seePaths(base: File, noticeString: String): Seq[File] =
     seeRegex.findAllIn(noticeString).matchData.map(d => licensePath(base, d.group(1))).toList
 
-  def settings: Seq[Setting[_]] = Seq(
+  def settings: Seq[Setting[?]] = Seq(
     notice := (baseDirectory.value / "NOTICE"),
     Compile / unmanagedResources ++= notice.value +: extractLicenses.value,
     extractLicenses := extractLicenses0(
