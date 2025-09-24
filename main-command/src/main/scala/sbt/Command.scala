@@ -63,10 +63,8 @@ private[sbt] final class ArbitraryCommand(
     new ArbitraryCommand(parser, help, tags.put(key, value))
 }
 
-// format: off
-
 object Command {
-  import DefaultParsers._
+  import DefaultParsers.*
 
   // Lowest-level command construction
 
@@ -152,8 +150,7 @@ object Command {
 
   def combine(cmds: Seq[Command]): State => Parser[() => State] = {
     val (simple, arbs) = separateCommands(cmds)
-    state =>
-      arbs.map(_.parser(state)).foldLeft(simpleParser(simple)(state))(_ | _)
+    state => arbs.map(_.parser(state)).foldLeft(simpleParser(simple)(state))(_ | _)
   }
 
   private def separateCommands(
@@ -168,8 +165,7 @@ object Command {
 
   private def argParser(sc: SimpleCommand): State => Parser[() => State] = {
     def usageError = s"${sc.name} usage:" + Help.message(sc.help0, None)
-    s =>
-      (Parser.softFailure(usageError, definitive = true): Parser[() => State]) | sc.parser(s)
+    s => (Parser.softFailure(usageError, definitive = true): Parser[() => State]) | sc.parser(s)
   }
 
   def simpleParser(
@@ -188,7 +184,7 @@ object Command {
 
   def process(command: String, state: State, onParseError: String => Unit): State = {
     (if (command.contains(";")) parse(command, state.combinedParser)
-    else parse(command, state.nonMultiParser)) match {
+     else parse(command, state.nonMultiParser)) match {
       case Right(s) => s() // apply command.  command side effects happen here
       case Left(errMsg) =>
         state.log.error(errMsg)
@@ -211,7 +207,9 @@ object Command {
       maxDistance: Int = 3,
       maxSuggestions: Int = 3
   ): Seq[String] =
-    bs map (b => (b, distance(a, b))) filter (_._2 <= maxDistance) sortBy (_._2) take (maxSuggestions) map (_._1)
+    bs map (b =>
+      (b, distance(a, b))
+    ) filter (_._2 <= maxDistance) sortBy (_._2) take (maxSuggestions) map (_._1)
 
   def distance(a: String, b: String): Int =
     EditDistance.levenshtein(
@@ -228,10 +226,8 @@ object Command {
   def spacedAny(name: String): Parser[String] = spacedC(name, any)
 
   def spacedC(name: String, c: Parser[Char]): Parser[String] =
-    ((c & opOrIDSpaced(name)) ~ c.+) map {  (f, rem) => (f +: rem).mkString }
+    ((c & opOrIDSpaced(name)) ~ c.+) map { (f, rem) => (f +: rem).mkString }
 }
-
-// format: on
 
 trait Help {
   def detail: Map[String, String]

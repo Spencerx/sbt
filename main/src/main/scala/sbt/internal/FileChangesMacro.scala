@@ -25,7 +25,6 @@ import scala.quoted.*
  */
 object FileChangesMacro:
 
-  // format: off
   extension [A](in: TaskKey[A])
     @compileTimeOnly(
       "`inputFileChanges` can only be called on a task within a task definition macro, such as :=, +=, ++=, or Def.task."
@@ -50,7 +49,7 @@ object FileChangesMacro:
     )
     inline def outputFiles: Seq[NioPath] =
       ${ FileChangesMacro.outputFilesImpl[A]('in) }
-  // format: on
+
   def changedInputFilesImpl[A: Type](in: Expr[TaskKey[A]])(using qctx: Quotes): Expr[FileChanges] =
     impl[A](
       in = in,
