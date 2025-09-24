@@ -339,8 +339,7 @@ object Scoped:
   }
 
   private[sbt] trait Syntax:
-    
-    // format: off
+
     // richInitialize
     extension [A1](init: Initialize[A1])
       @targetName("mapTaskInitialize")
@@ -348,7 +347,6 @@ object Scoped:
 
       @targetName("flatMapValueInitialize")
       def flatMapTaskValue[A2](f: A1 => Task[A2]): Initialize[Task[A2]] = init(f)
-    // format: on
 
     // richInitializeTask
     extension [A1](init: Initialize[Task[A1]])
