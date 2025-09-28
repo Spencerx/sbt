@@ -688,8 +688,7 @@ if defined sbt_args_no_server (
 
 if not defined sbt_args_no_hide_jdk_warnings (
   if /I !JAVA_VERSION! EQU 25 (
-    call :addJava --sun-misc-unsafe-memory-access=allow
-    call :addJava --enable-native-access=ALL-UNNAMED
+    set _SBT_OPTS=--sun-misc-unsafe-memory-access=allow --enable-native-access=ALL-UNNAMED !_SBT_OPTS!
   )
 )
 
