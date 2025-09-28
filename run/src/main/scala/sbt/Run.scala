@@ -19,7 +19,7 @@ import sbt.util.Logger
 
 import scala.sys.process.Process
 import scala.util.control.NonFatal
-import scala.util.{ Failure, Success, Try }
+import scala.util.{ Failure, Properties, Success, Try }
 
 sealed trait ScalaRun {
   def run(mainClass: String, classpath: Seq[File], options: Seq[String], log: Logger): Try[Unit]
@@ -81,7 +81,7 @@ class Run(private[sbt] val newLoader: Seq[File] => ClassLoader, trapExit: Boolea
     def execute(): Unit =
       try {
         log.debug("  Classpath:\n\t" + classpath.mkString("\n\t"))
-        val main = getMainMethod(mainClass, loader)
+        val main = detectMainMethod(mainClass, loader)
         invokeMain(loader, main, options)
       } catch {
         case e: java.lang.reflect.InvocationTargetException =>
@@ -125,14 +125,22 @@ class Run(private[sbt] val newLoader: Seq[File] => ClassLoader, trapExit: Boolea
   }
   private def invokeMain(
       loader: ClassLoader,
-      main: Method,
+      main: DetectedMain,
       options: Seq[String]
   ): Unit = {
     val currentThread = Thread.currentThread
     val oldLoader = Thread.currentThread.getContextClassLoader
     currentThread.setContextClassLoader(loader)
     try {
-      main.invoke(null, options.toArray[String]); ()
+      if (main.isStatic) {
+        if (main.parameterCount > 0) main.method.invoke(null, options.toArray[String])
+        else main.method.invoke(null)
+      } else {
+        val ref = main.mainClass.getDeclaredConstructor().newInstance().asInstanceOf[AnyRef]
+        if (main.parameterCount > 0) main.method.invoke(ref, options.toArray[String])
+        else main.method.invoke(ref)
+      }
+      ()
     } catch {
       case t: Throwable =>
         t.getCause match {
@@ -148,19 +156,39 @@ class Run(private[sbt] val newLoader: Seq[File] => ClassLoader, trapExit: Boolea
       currentThread.setContextClassLoader(oldLoader)
     }
   }
-  def getMainMethod(mainClassName: String, loader: ClassLoader) = {
+  def getMainMethod(mainClassName: String, loader: ClassLoader): Method =
+    detectMainMethod(mainClassName, loader).method
+
+  private def detectMainMethod(mainClassName: String, loader: ClassLoader) = {
     val mainClass = Class.forName(mainClassName, true, loader)
-    val method = mainClass.getMethod("main", classOf[Array[String]])
-    // jvm allows the actual main class to be non-public and to run a method in the non-public class,
-    //  we need to make it accessible
-    method.setAccessible(true)
-    val modifiers = method.getModifiers
-    if (!isPublic(modifiers))
-      throw new NoSuchMethodException(mainClassName + ".main is not public")
-    if (!isStatic(modifiers))
-      throw new NoSuchMethodException(mainClassName + ".main is not static")
-    method
+    if (Run.isJava25Plus) {
+      val method = try {
+        mainClass.getMethod("main", classOf[Array[String]])
+      } catch {
+        case _: NoSuchMethodException => mainClass.getMethod("main")
+      }
+      method.setAccessible(true)
+      val modifiers = method.getModifiers
+      DetectedMain(mainClass, method, isStatic(modifiers), method.getParameterCount())
+    } else {
+      val method = mainClass.getMethod("main", classOf[Array[String]])
+      // jvm allows the actual main class to be non-public and to run a method in the non-public class,
+      //  we need to make it accessible
+      method.setAccessible(true)
+      val modifiers = method.getModifiers
+      if (!isPublic(modifiers))
+        throw new NoSuchMethodException(mainClassName + ".main is not public")
+      if (!isStatic(modifiers))
+        throw new NoSuchMethodException(mainClassName + ".main is not static")
+      DetectedMain(mainClass, method, isStatic = true, method.getParameterCount())
+    }
   }
+  private case class DetectedMain(
+      mainClass: Class[?],
+      method: Method,
+      isStatic: Boolean,
+      parameterCount: Int
+  )
 }
 
 /** This module is an interface to starting the scala interpreter or runner.*/
@@ -195,4 +223,6 @@ object Run {
           s"""nonzero exit code returned from $label: $exitCode""".stripMargin
         )
       )
+
+  private[sbt] lazy val isJava25Plus: Boolean = Properties.isJavaAtLeast("25")
 }

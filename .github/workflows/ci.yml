@@ -21,8 +21,8 @@ jobs:
             distribution: temurin
             jobtype: 2
           - os: ubuntu-latest
-            java: 21
-            distribution: temurin
+            java: 25
+            distribution: zulu
             jobtype: 3
           - os: ubuntu-latest
             java: 21
