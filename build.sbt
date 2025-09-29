@@ -303,7 +303,10 @@ lazy val utilCore = project
     utilCommonSettings,
     name := "Util Core",
     Utils.keywordsSettings,
-    mimaSettings
+    mimaSettings,
+    mimaBinaryIssueFilters ++= Seq(
+      exclude[DirectMissingMethodProblem]("sbt.internal.util.Util.majorJavaVersion"),
+    ),
   )
 
 lazy val utilLogging = project
