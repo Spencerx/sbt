@@ -62,6 +62,22 @@ object DatatypeConfig {
       "sbt.librarymanagement.ConfigRefFormats" :: Nil
     }
 
+    case "sbt.testing.Status" => { _ =>
+      "sbt.internal.testing.StatusFormats" :: Nil
+    }
+
+    case "scalajson.ast.unsafe.JValue" | "sjsonnew.shaded.scalajson.ast.unsafe.JValue" => { _ =>
+      "sbt.internal.util.codec.JValueFormats" :: Nil
+    }
+
+    case "xsbti.HashedVirtualFileRef" => { _ =>
+      "sbt.internal.util.codec.HashedVirtualFileRefFormats" :: Nil
+    }
+
+    case "java.nio.ByteBuffer" => { _ =>
+      "sbt.internal.util.codec.ByteBufferFormats" :: Nil
+    }
+
     // TODO: These are handled by BasicJsonProtocol, and sbt-datatype should handle them by default, imo
     case "Option" | "Set" | "scala.Vector" => { tpe =>
       getFormats(oneArg(tpe))
