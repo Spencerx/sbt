@@ -8,6 +8,6 @@ Compile / run / fork := false
 
 check := {
   if (scala.util.Properties.isJavaAtLeast("25"))
-    (Compile / run).toTask(" ").value
+    (Compile / fgRun).toTask(" ").value
   else ()
 }
