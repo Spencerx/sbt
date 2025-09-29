@@ -25,7 +25,6 @@ object Dependencies {
   private val compilerInterface = "org.scala-sbt" % "compiler-interface" % zincVersion
   private val compilerClasspath = "org.scala-sbt" %% "zinc-classpath" % zincVersion
   private val compilerApiInfo = "org.scala-sbt" %% "zinc-apiinfo" % zincVersion
-  private val compilerBridge = "org.scala-sbt" %% "compiler-bridge" % zincVersion
   private val zinc = "org.scala-sbt" %% "zinc" % zincVersion
   private val zincCompileCore = "org.scala-sbt" %% "zinc-compile-core" % zincVersion
 
@@ -63,7 +62,6 @@ object Dependencies {
   def addSbtCompilerInterface = addSbtModule(sbtZincPath, "compilerInterface", compilerInterface)
   def addSbtCompilerClasspath = addSbtModule(sbtZincPath, "zincClasspath", compilerClasspath)
   def addSbtCompilerApiInfo = addSbtModule(sbtZincPath, "zincApiInfo", compilerApiInfo)
-  def addSbtCompilerBridge = addSbtModule(sbtZincPath, "compilerBridge2_12", compilerBridge)
   def addSbtZinc = addSbtModule(sbtZincPath, "zinc", zinc)
   def addSbtZincCompileCore = addSbtModule(sbtZincPath, "zincCompileCore", zincCompileCore)
 
