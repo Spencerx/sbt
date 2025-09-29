@@ -13,7 +13,7 @@ import java.util.Locale
 
 import scala.collection.concurrent.TrieMap
 import scala.reflect.Selectable.reflectiveSelectable
-import scala.util.control.NonFatal
+import scala.util.Properties
 
 object Util:
   def makeList[T](size: Int, value: T): List[T] = List.fill(size)(value)
@@ -96,17 +96,7 @@ object Util:
   def reduceIntents[A1, A2](intents: PartialFunction[A1, A2]*): PartialFunction[A1, A2] =
     intents.toList.reduceLeft(_ orElse _)
 
-  lazy val majorJavaVersion: Int =
-    try {
-      val javaVersion = sys.props.get("java.version").getOrElse("1.0")
-      if (javaVersion.startsWith("1.")) {
-        javaVersion.split("\\.")(1).toInt
-      } else {
-        javaVersion.split("\\.")(0).toInt
-      }
-    } catch {
-      case NonFatal(_) => 0
-    }
+  lazy val isJava19Plus: Boolean = Properties.isJavaAtLeast("19")
 
   private type GetId = {
     def getId: Long
@@ -121,13 +111,10 @@ object Util:
    * https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Thread.html#threadId()
    */
   def threadId: Long =
-    if (majorJavaVersion < 19) {
-      (Thread.currentThread(): AnyRef) match {
+    if !isJava19Plus then
+      (Thread.currentThread(): AnyRef) match
         case g: GetId @unchecked => g.getId
-      }
-    } else {
-      (Thread.currentThread(): AnyRef) match {
+    else
+      (Thread.currentThread(): AnyRef) match
         case g: ThreadId @unchecked => g.threadId
-      }
-    }
 end Util
