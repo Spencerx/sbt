@@ -117,7 +117,7 @@ def testedBaseSettings: Seq[Setting[?]] =
 
 val sbt20Plus =
   Seq(
-    "2.0.0-RC5",
+    "2.0.0-RC4",
   )
 val mimaSettings = mimaSettingsSince(sbt20Plus)
 def mimaSettingsSince(versions: Seq[String]): Seq[Def.Setting[?]] = Def settings (
@@ -139,6 +139,14 @@ def mimaSettingsSince(versions: Seq[String]): Seq[Def.Setting[?]] = Def settings
   },
   mimaBinaryIssueFilters ++= Seq(
   ),
+)
+
+val contrabandSettings: Seq[Def.Setting[?]] = Seq(
+  Compile / generateContrabands / sourceManaged := baseDirectory.value / "src" / "main" / "contraband-scala",
+  Compile / managedSourceDirectories +=
+    baseDirectory.value / "src" / "main" / "contraband-scala",
+  Compile / generateContrabands / contrabandScala3enum := false,
+  Compile / generateContrabands / contrabandFormatsForType := DatatypeConfig.getFormats,
 )
 
 val scriptedSbtMimaSettings = Def.settings(mimaPreviousArtifacts := Set())
@@ -315,10 +323,7 @@ lazy val utilLogging = project
         sjsonNewScalaJson.value,
       ),
     testDependencies,
-    Compile / generateContrabands / contrabandCodecsDependencies := List(sjsonNewCore.value),
-    Compile / generateContrabands / sourceManaged := baseDirectory.value / "src" / "main" / "contraband-scala",
-    Compile / managedSourceDirectories +=
-      baseDirectory.value / "src" / "main" / "contraband-scala",
+    contrabandSettings,
     Compile / generateContrabands / contrabandFormatsForType := { tpe =>
       val old = (Compile / generateContrabands / contrabandFormatsForType).value
       val name = tpe.removeTypeParameters.name
@@ -358,12 +363,10 @@ lazy val utilCache = project
         sjsonNewScalaJson.value,
         sjsonNewMurmurhash.value
       ),
-    Compile / managedSourceDirectories +=
-      baseDirectory.value / "src" / "main" / "contraband-scala",
-    Compile / generateContrabands / sourceManaged := baseDirectory.value / "src" / "main" / "contraband-scala",
-    Compile / generateContrabands / contrabandFormatsForType := ContrabandConfig.getFormats,
+    contrabandSettings,
     mimaSettings,
     mimaBinaryIssueFilters ++= Seq(
+      exclude[MissingClassProblem]("sbt.internal.util.ActionCacheError*"),
     ),
     Test / fork := true,
   )
@@ -411,10 +414,7 @@ lazy val testingProj = (project in file("testing"))
       sjsonNewCore.value,
     ),
     conflictWarning := ConflictWarning.disable,
-    Compile / managedSourceDirectories +=
-      baseDirectory.value / "src" / "main" / "contraband-scala",
-    Compile / generateContrabands / sourceManaged := baseDirectory.value / "src" / "main" / "contraband-scala",
-    Compile / generateContrabands / contrabandFormatsForType := ContrabandConfig.getFormats,
+    contrabandSettings,
     mimaSettings,
     mimaBinaryIssueFilters ++= Vector(
     ),
@@ -476,9 +476,7 @@ lazy val runProj = (project in file("run"))
   .settings(
     testedBaseSettings,
     name := "Run",
-    Compile / managedSourceDirectories +=
-      baseDirectory.value / "src" / "main" / "contraband-scala",
-    Compile / generateContrabands / sourceManaged := baseDirectory.value / "src" / "main" / "contraband-scala",
+    contrabandSettings,
     mimaSettings,
     mimaBinaryIssueFilters ++= Seq(
     )
@@ -537,10 +535,7 @@ lazy val actionsProj = (project in file("main-actions"))
     name := "Actions",
     libraryDependencies += sjsonNewScalaJson.value,
     libraryDependencies ++= Seq(gigahorseApacheHttp, jline3Terminal),
-    Compile / managedSourceDirectories +=
-      baseDirectory.value / "src" / "main" / "contraband-scala",
-    Compile / generateContrabands / sourceManaged := baseDirectory.value / "src" / "main" / "contraband-scala",
-    Compile / generateContrabands / contrabandFormatsForType := ContrabandConfig.getFormats,
+    contrabandSettings,
     // Test / fork := true,
     Test / classLoaderLayeringStrategy := ClassLoaderLayeringStrategy.Flat,
     mimaSettings,
@@ -564,10 +559,7 @@ lazy val protocolProj = (project in file("protocol"))
     name := "Protocol",
     libraryDependencies ++= Seq(sjsonNewScalaJson.value, sjsonNewCore.value, ipcSocket),
     Compile / scalacOptions += "-source:3.7",
-    Compile / managedSourceDirectories +=
-      baseDirectory.value / "src" / "main" / "contraband-scala",
-    Compile / generateContrabands / sourceManaged := baseDirectory.value / "src" / "main" / "contraband-scala",
-    Compile / generateContrabands / contrabandFormatsForType := ContrabandConfig.getFormats,
+    contrabandSettings,
     mimaSettings,
     mimaBinaryIssueFilters ++= Seq(
     )
@@ -586,10 +578,7 @@ lazy val commandProj = (project in file("main-command"))
       sjsonNewScalaJson.value,
       templateResolverApi
     ),
-    Compile / managedSourceDirectories +=
-      baseDirectory.value / "src" / "main" / "contraband-scala",
-    Compile / generateContrabands / sourceManaged := baseDirectory.value / "src" / "main" / "contraband-scala",
-    Compile / generateContrabands / contrabandFormatsForType := ContrabandConfig.getFormats,
+    contrabandSettings,
     mimaSettings,
     mimaBinaryIssueFilters ++= Vector(
     ),
@@ -713,9 +702,7 @@ lazy val mainProj = (project in file("main"))
       case v if v.startsWith("2.12.") => List()
       case _                          => List(scalaPar)
     }),
-    Compile / managedSourceDirectories +=
-      baseDirectory.value / "src" / "main" / "contraband-scala",
-    Compile / generateContrabands / sourceManaged := baseDirectory.value / "src" / "main" / "contraband-scala",
+    contrabandSettings,
     Test / testOptions += Tests
       .Argument(TestFrameworks.ScalaCheck, "-minSuccessfulTests", "1000"),
     SettingKey[Boolean]("usePipelining") := false,
@@ -723,6 +710,8 @@ lazy val mainProj = (project in file("main"))
     Compile / doc / sources := Nil,
     mimaSettings,
     mimaBinaryIssueFilters ++= Vector(
+      exclude[MissingClassProblem]("sbt.internal.*"),
+      exclude[MissingFieldProblem]("sbt.internal.server.NetworkChannel.*"),
     ),
   )
   .dependsOn(lmCore, lmIvy, lmCoursierShadedPublishing)
@@ -1142,10 +1131,7 @@ lazy val lmCore = (project in file("lm-core"))
       case v if v.startsWith("2.12.") => List("-Ywarn-unused:-locals,-explicits,-privates")
       case _                          => List()
     }),
-    Compile / managedSourceDirectories +=
-      baseDirectory.value / "src" / "main" / "contraband-scala",
-    Compile / generateContrabands / sourceManaged := baseDirectory.value / "src" / "main" / "contraband-scala",
-    Compile / generateContrabands / contrabandFormatsForType := DatatypeConfig.getFormats,
+    contrabandSettings,
     // WORKAROUND sbt/sbt#2205 include managed sources in packageSrc
     Compile / packageSrc / mappings ++= {
       val srcs = (Compile / managedSources).value
@@ -1177,10 +1163,7 @@ lazy val lmIvy = (project in file("lm-ivy"))
       scalacheck % Test,
       scalaVerify % Test,
     ),
-    Compile / managedSourceDirectories +=
-      baseDirectory.value / "src" / "main" / "contraband-scala",
-    Compile / generateContrabands / sourceManaged := baseDirectory.value / "src" / "main" / "contraband-scala",
-    Compile / generateContrabands / contrabandFormatsForType := DatatypeConfig.getFormats,
+    contrabandSettings,
     Test / classLoaderLayeringStrategy := ClassLoaderLayeringStrategy.Flat,
     mimaSettings,
   )
