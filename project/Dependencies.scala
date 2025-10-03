@@ -91,9 +91,9 @@ object Dependencies {
   val jline3Native = "org.jline" % "jline-native" % jline3Version
   val jline3Reader = "org.jline" % "jline-reader" % jline3Version
   val jline3Builtins = "org.jline" % "jline-builtins" % jline3Version
-  val scalatest = "org.scalatest" %% "scalatest" % "3.2.10"
-  val scalacheck = "org.scalacheck" %% "scalacheck" % "1.15.4"
-  val junit = "junit" % "junit" % "4.13.1"
+  val scalatest = "org.scalatest" %% "scalatest" % "3.2.19"
+  val scalacheck = "org.scalacheck" %% "scalacheck" % "1.19.0"
+  val junit = "junit" % "junit" % "4.13.2"
   val scalaVerify = "com.eed3si9n.verify" %% "verify" % "1.0.0"
   val templateResolverApi = "org.scala-sbt" % "template-resolver" % "0.1"
 
@@ -129,8 +129,8 @@ object Dependencies {
 
   val caffeine = "com.github.ben-manes.caffeine" % "caffeine" % "2.8.5"
 
-  val hedgehog = "qa.hedgehog" %% "hedgehog-sbt" % "0.7.0"
+  val hedgehog = "qa.hedgehog" %% "hedgehog-sbt" % "0.13.0"
   val disruptor = "com.lmax" % "disruptor" % "3.4.2"
-  val kindProjector = ("org.typelevel" % "kind-projector" % "0.13.3").cross(CrossVersion.full)
+  val kindProjector = ("org.typelevel" % "kind-projector" % "0.13.4").cross(CrossVersion.full)
   val gigahorseOkHttp = "com.eed3si9n" %% "gigahorse-apache-http" % "0.9.3"
 }
