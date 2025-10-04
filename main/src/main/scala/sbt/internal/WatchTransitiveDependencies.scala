@@ -21,7 +21,7 @@ import sbt.nio.FileStamper
 import sbt.nio.Keys.*
 import sbt.nio.file.Glob
 
-import scala.annotation.{ nowarn, tailrec }
+import scala.annotation.tailrec
 
 private[sbt] object WatchTransitiveDependencies {
   extension (source: Source) {
@@ -165,7 +165,6 @@ private[sbt] object WatchTransitiveDependencies {
     }
   }
 
-  @nowarn
   @tailrec
   private def collectKeys(
       arguments: Arguments,

@@ -24,7 +24,6 @@ import sbt.nio.file.syntax.pathToPathOps
 import sbt.nio.file.Glob.{ GlobOps }
 import sbt.util.Level
 import sjsonnew.JsonFormat
-import scala.annotation.nowarn
 import xsbti.{ PathBasedFile, VirtualFileRef }
 
 private[sbt] object Clean {
@@ -155,7 +154,6 @@ private[sbt] object Clean {
     private def toSeqPath(using toSeqPath: ToSeqPath[T]): Seq[Path] = toSeqPath(t)
   }
 
-  @nowarn
   private[sbt] def cleanFileOutputTask[T: JsonFormat: ToSeqPath](
       taskKey: TaskKey[T]
   ): Def.Initialize[Task[Unit]] =

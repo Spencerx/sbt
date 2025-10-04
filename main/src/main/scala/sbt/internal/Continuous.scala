@@ -45,7 +45,6 @@ import scala.concurrent.duration.FiniteDuration.FiniteDurationIsOrdered
 import scala.concurrent.duration.*
 import scala.util.{ Failure, Success, Try }
 import scala.util.control.NonFatal
-import scala.annotation.nowarn
 
 /**
  * Provides the implementation of the `~` command and `watch` task. The implementation is quite
@@ -394,7 +393,6 @@ private[sbt] object Continuous {
     }
   }
 
-  @nowarn
   private def getOnStart(
       project: ProjectRef,
       commands: Seq[String],
@@ -428,7 +426,6 @@ private[sbt] object Continuous {
     }
   }
 
-  @nowarn
   private def getFileEvents(
       configs: Seq[Config],
       logger: Logger,
@@ -977,13 +974,11 @@ private[sbt] object Continuous {
     def arguments(logger: Logger): Arguments = new Arguments(logger, inputs())
   end Config
 
-  @nowarn
   private def getStartMessage(key: ScopedKey[?])(using Extracted): StartMessage = Some {
     lazy val default = key.get(watchStartMessage).getOrElse(Watch.defaultStartWatch)
     default
   }
 
-  @nowarn
   private def getTriggerMessage(
       key: ScopedKey[?]
   )(using Extracted): TriggerMessage = {

@@ -22,7 +22,6 @@ import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
 import java.nio.file.Path
 import java.util.Base64
-import scala.annotation.nowarn
 import scala.concurrent.*
 import scala.concurrent.duration.*
 
@@ -145,7 +144,6 @@ class SonaClient(reqTransform: Request => Request, uploadRequestTimeout: FiniteD
   /**
    * Retry future function on any error.
    */
-  @nowarn
   private def retryF[A1](maxAttempt: Int, waitDurationBetweenAttempt: FiniteDuration)(
       f: Int => Future[A1]
   ): Future[A1] = {

@@ -26,7 +26,6 @@ import sbt.librarymanagement.LibraryManagementCodec.given
 import java.io.File
 import org.apache.ivy.core.module.{ descriptor, id }
 import descriptor.ModuleDescriptor, id.ModuleRevisionId
-import scala.annotation.nowarn
 
 object GlobalPlugin {
   // constructs a sequence of settings that may be appended to a project's settings to
@@ -71,7 +70,6 @@ object GlobalPlugin {
     GlobalPlugin(data, structure, inject(data), base)
   }
 
-  @nowarn
   def extract(state: State, structure: BuildStructure): (State, GlobalPluginData) = {
     import structure.{ data, root, rootProject }
     val p: Scope = Scope.GlobalScope.rescope(ProjectRef(root, rootProject(root)))
@@ -112,7 +110,6 @@ object GlobalPlugin {
     }
   }
 
-  @nowarn
   val globalPluginSettings = Project.inScope(Scope.GlobalScope.rescope(LocalRootProject))(
     Seq(
       organization := SbtArtifacts.Organization,
