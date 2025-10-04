@@ -25,7 +25,6 @@ import sbt.nio.file.{ AllPass, FileAttributes, Glob, RecursiveGlob }
 import sbt.std.TaskExtra.*
 import sjsonnew.JsonFormat
 
-import scala.annotation.nowarn
 import scala.collection.immutable.VectorBuilder
 import java.io.File
 import xsbti.VirtualFileRef
@@ -67,7 +66,6 @@ private[sbt] object Settings {
    * @param fileOutputScopes the set of scopes for which the fileOutputs setting is defined
    * @return the injected settings
    */
-  @nowarn
   private def maybeAddOutputsAndFileStamps(
       setting: Def.Setting[?],
       fileOutputScopes: Set[Scope]
@@ -90,7 +88,6 @@ private[sbt] object Settings {
     }
   }
 
-  @nowarn
   private def addDefaultTasks(
       setting: Def.Setting[?],
       fileOutputScopes: Set[Scope]
@@ -105,7 +102,6 @@ private[sbt] object Settings {
     } else Nil
   }
 
-  @nowarn
   private def addOutputAndStampTasks[T: JsonFormat: ToSeqPath](
       setting: Def.Setting[?]
   ): List[Def.Setting[?]] = {
@@ -271,7 +267,6 @@ private[sbt] object Settings {
    * @param taskKey the task for which we add a custom clean implementation
    * @return a task specific clean implementation
    */
-  @nowarn
   private[sbt] def cleanImpl[T: JsonFormat: ToSeqPath](taskKey: TaskKey[T]): Def.Setting[?] = {
     val taskScope = taskKey.scope.rescope(taskKey.key)
     addTaskDefinition(
@@ -326,7 +321,6 @@ private[sbt] object Settings {
     })
   }
 
-  @nowarn
   private def outputsAndStamps[T: JsonFormat: ToSeqPath](
       taskKey: TaskKey[T]
   ): List[Def.Setting[?]] = {

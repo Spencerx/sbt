@@ -1283,7 +1283,6 @@ object Defaults extends BuildCommon {
       )
     }
 
-  @nowarn
   def inputTests(key: InputKey[?]): Initialize[InputTask[TestResult]] =
     inputTests0.mapReferenced(Def.mapScope((s) => s.rescope(key.key)))
 
@@ -4564,7 +4563,6 @@ trait BuildExtra extends BuildCommon with DefExtra {
 
   // public API
   /** Returns a vector of settings that create custom run input task. */
-  @nowarn
   def fullRunInputTask(
       scoped: InputKey[Unit],
       config: Configuration,

@@ -4,7 +4,6 @@ package internal
 import sbt.internal.util.complete.{ DefaultParsers, Parser }
 import sbt.Keys.scalaBinaryVersion
 import DefaultParsers.*
-import scala.annotation.nowarn
 import scala.util.matching.Regex
 import sbt.internal.util.AttributeKey
 
@@ -15,7 +14,6 @@ private[sbt] case class ProjectQuery(
   import ProjectQuery.*
   private lazy val pattern: Regex = Regex("^" + projectName.replace(wildcard, ".*") + "$")
 
-  @nowarn
   def buildQuery(structure: BuildStructure): ProjectRef => Boolean =
     (p: ProjectRef) =>
       val projectMatches =

@@ -11,7 +11,6 @@ package test
 
 import java.io.File
 import hedgehog.*
-import scala.annotation.nowarn
 import scala.reflect.ClassTag
 import _root_.sbt.io.IO
 import _root_.sbt.ScopeAxis.{ Select, This, Zero }
@@ -46,7 +45,6 @@ object BuildSettingsInstances:
       1133 -> genRootProject.map(x => x: Reference),
     )
 
-  @nowarn
   given Gen[ConfigKey] = Gen.frequency1(
     2 -> Gen.constant[ConfigKey](Compile),
     2 -> Gen.constant[ConfigKey](Test),

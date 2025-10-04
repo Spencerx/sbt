@@ -22,7 +22,6 @@ import sbt.io.syntax.*
 import sbt.ProjectExtra.*
 import sjsonnew.JsonFormat
 import scala.concurrent.duration.FiniteDuration
-import scala.annotation.nowarn
 
 private[sbt] object LibraryManagement {
   given linter: sbt.dsl.LinterLevel.Ignore.type = sbt.dsl.LinterLevel.Ignore
@@ -251,7 +250,6 @@ private[sbt] object LibraryManagement {
    * Resolves and optionally retrieves classified artifacts, such as javadocs and sources,
    * for dependency definitions, transitively.
    */
-  @nowarn
   def updateClassifiersTask: Def.Initialize[Task[UpdateReport]] =
     TupleWrap[
       (

@@ -3,7 +3,6 @@
  */
 package sbt.librarymanagement
 
-import scala.annotation.nowarn
 import scala.quoted.*
 
 object Configurations {
@@ -23,7 +22,6 @@ object Configurations {
   lazy val TestInternal = fullInternal(Test)
   lazy val CompileInternal = fullInternal(Compile)
 
-  @nowarn
   def internalMap(c: Configuration) = c match {
     case Compile => CompileInternal
     case Test    => TestInternal
@@ -62,7 +60,6 @@ object Configurations {
     configs.map(config => (config.name, config)).toMap.values.toSet
 
   /** Returns true if the configuration should be under the influence of scalaVersion. */
-  @nowarn
   private[sbt] def underScalaVersion(c: Configuration): Boolean =
     c match {
       case Default | Compile | Provided | Runtime | Test | Optional | CompilerPlugin |
