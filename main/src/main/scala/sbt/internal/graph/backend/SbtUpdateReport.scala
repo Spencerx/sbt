@@ -12,13 +12,14 @@ package graph
 package backend
 
 import scala.language.implicitConversions
-import scala.reflect.Selectable.reflectiveSelectable
-import sbt.librarymanagement.{ ModuleID, ModuleReport, ConfigurationReport }
+import sbt.librarymanagement.{
+  ModuleID,
+  ModuleReport,
+  ConfigurationReport,
+  OrganizationArtifactReport
+}
 
 object SbtUpdateReport {
-  type OrganizationArtifactReport = {
-    def modules: Seq[ModuleReport]
-  }
 
   def fromConfigurationReport(report: ConfigurationReport, rootInfo: ModuleID): ModuleGraph = {
     implicit def id(sbtId: ModuleID): GraphModuleId =
