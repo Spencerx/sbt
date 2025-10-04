@@ -979,7 +979,6 @@ object Defaults extends BuildCommon {
       },
       scalacOptions := {
         val old = scalacOptions.value
-        val converter = fileConverter.value
         if (exportPipelining.value)
           Def.uncached(
             Vector(
@@ -1955,7 +1954,6 @@ object Defaults extends BuildCommon {
           val hasJava = srcs.exists(_.name.endsWith(".java"))
           val cp = data(dependencyClasspath.value).toList
           val label = nameForSrc(configuration.value.name)
-          val fiOpts = fileInputOptions.value
           val reporter = (compile / bspReporter).value
           val converter = fileConverter.value
           val tFiles = tastyFiles.value
@@ -3343,7 +3341,6 @@ object Classpaths {
       val sbtOrg = scalaOrganization.value
       val version = scalaVersion.value
       val extResolvers = externalResolvers.value
-      val isScala3M123 = ScalaArtifacts.isScala3M123(version)
       val allToolDeps =
         if scalaHome.value.isDefined || scalaModuleInfo.value.isEmpty || !managedScalaInstance.value
         then Nil

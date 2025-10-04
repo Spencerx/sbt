@@ -18,7 +18,6 @@ object Compiler:
     Def.taskDyn {
       val sh = Keys.scalaHome.value
       val app = Keys.appConfiguration.value
-      val sv = Keys.scalaVersion.value
       val managed = Keys.managedScalaInstance.value
       sh match
         case Some(h) => scalaInstanceFromHome(h)

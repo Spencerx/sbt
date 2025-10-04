@@ -11,7 +11,6 @@ package internal
 
 import sbt.internal.util.{ AttributeKey, LineRange, MessageOnlyException, RangePosition }
 
-import java.io.File
 import java.nio.file.Path
 import sbt.internal.util.complete.DefaultParsers.validID
 import Def.{ ScopedKey, Setting, Settings }
@@ -50,9 +49,6 @@ private[sbt] object EvaluateConfigurations {
       val definitions: Seq[(String, LineRange)],
       val settings: Seq[(String, LineRange)]
   )
-
-  /** The keywords we look for when classifying a string as a definition. */
-  private val DefinitionKeywords = Seq("lazy val ", "def ", "val ")
 
   /**
    * Using an evaluating instance of the scala compiler, a sequence of files and
@@ -191,10 +187,6 @@ private[sbt] object EvaluateConfigurations {
       )
     }
   }
-
-  /** move a project to be relative to this file after we've evaluated it. */
-  private def resolveBase(f: File, p: Project) =
-    p.copy(base = IO.resolve(f, p.base))
 
   private def addOffset(offset: Int, lines: Seq[(String, Int)]): Seq[(String, Int)] =
     lines.map { (s, i) => (s, i + offset) }

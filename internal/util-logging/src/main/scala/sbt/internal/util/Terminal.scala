@@ -198,7 +198,6 @@ trait Terminal extends AutoCloseable {
     val in = System.in
     val ESC = '\u001B'
     val EOT = '\u0004'
-    var result: Int = -1
     def readBracket: Int =
       in.read() match {
         case '[' => readAnsiControl
