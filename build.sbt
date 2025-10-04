@@ -235,10 +235,7 @@ val collectionProj = project
     name := "Collections",
     testedBaseSettings,
     libraryDependencies ++= Seq(sjsonNewScalaJson.value),
-    libraryDependencies ++= (CrossVersion.partialVersion(scalaVersion.value) match {
-      case Some((2, major)) if major <= 12 => Seq()
-      case _                               => Seq(scalaPar)
-    }),
+    libraryDependencies ++= Seq(scalaPar),
     mimaSettings,
     conflictWarning := ConflictWarning.disable,
   )
@@ -699,10 +696,7 @@ lazy val mainProj = (project in file("main"))
         launcherInterface,
         caffeine,
       ),
-    libraryDependencies ++= (scalaVersion.value match {
-      case v if v.startsWith("2.12.") => List()
-      case _                          => List(scalaPar)
-    }),
+    libraryDependencies ++= List(scalaPar),
     contrabandSettings,
     Test / testOptions += Tests
       .Argument(TestFrameworks.ScalaCheck, "-minSuccessfulTests", "1000"),
@@ -1126,10 +1120,6 @@ lazy val lmCore = (project in file("lm-core"))
         )
       )
       .taskValue,
-    Compile / scalacOptions ++= (scalaVersion.value match {
-      case v if v.startsWith("2.12.") => List("-Ywarn-unused:-locals,-explicits,-privates")
-      case _                          => List()
-    }),
     contrabandSettings,
     // WORKAROUND sbt/sbt#2205 include managed sources in packageSrc
     Compile / packageSrc / mappings ++= {
