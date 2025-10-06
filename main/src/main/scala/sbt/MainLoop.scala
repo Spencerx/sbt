@@ -133,9 +133,9 @@ private[sbt] object MainLoop:
   // }
 
   enum RunNext:
-    case ClearGlobalLog(val state: State)
-    case KeepGlobalLog(val state: State)
-    case Return(val result: xsbti.MainResult)
+    case ClearGlobalLog(state: State)
+    case KeepGlobalLog(state: State)
+    case Return(result: xsbti.MainResult)
 
   def run(state: State): RunNext =
     val exchange = StandardMain.exchange

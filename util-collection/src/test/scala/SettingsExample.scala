@@ -41,7 +41,7 @@ case class SettingsExample() extends Init {
 }
 
 /** Usage Example * */
-case class SettingsUsage(val settingsExample: SettingsExample) {
+case class SettingsUsage(settingsExample: SettingsExample) {
   import settingsExample.*
 
   // Define some keys
