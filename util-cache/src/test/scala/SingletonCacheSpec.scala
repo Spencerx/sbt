@@ -18,7 +18,7 @@ import org.scalatest.flatspec.AnyFlatSpec
 
 class SingletonCacheSpec extends AnyFlatSpec {
 
-  case class ComplexType(val x: Int, y: String, z: List[Int])
+  case class ComplexType(x: Int, y: String, z: List[Int])
   object ComplexType {
     given format: JsonFormat[ComplexType] =
       new JsonFormat[ComplexType] {
