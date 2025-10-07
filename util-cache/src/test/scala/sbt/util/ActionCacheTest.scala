@@ -80,6 +80,31 @@ object ActionCacheTest extends BasicTestSuite:
       // check that the action has been invoked only once
       assert(called == 1)
 
+  test("Disk cache can recover gracefully from invalid JSON"):
+    withDiskCache(testActionCacheInvalidJson)
+
+  def testActionCacheInvalidJson(cache: DiskActionCacheStore): Unit =
+    import sjsonnew.BasicJsonProtocol.*
+    var called = 0
+    val action: ((Int, Int)) => InternalActionResult[Int] = { (a, b) =>
+      called += 1
+      InternalActionResult(a + b, Nil)
+    }
+    IO.withTemporaryDirectory: tempDir =>
+      val config = getCacheConfig(cache, tempDir)
+
+      val v1 = ActionCache.cache((1, 1), Digest.zero, Digest.zero, tags, config)(action)
+      assert(v1 == 2)
+
+      val acFiles = cache.acBase.toFile.listFiles
+      assert(acFiles.length == 1)
+      IO.write(acFiles.head, "{")
+
+      val v2 = ActionCache.cache((1, 1), Digest.zero, Digest.zero, tags, config)(action)
+      assert(v2 == 2)
+      // check that the action has been invoked twice
+      assert(called == 2)
+
   def withInMemoryCache(f: InMemoryActionCacheStore => Unit): Unit =
     val cache = InMemoryActionCacheStore()
     f(cache)
