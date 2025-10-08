@@ -195,9 +195,9 @@ class DiskActionCacheStore(base: Path, converter: FileConverter) extends Abstrac
   override def get(request: GetActionResultRequest): Either[Throwable, ActionResult] =
     val acFile = acBase.toFile / request.actionDigest.toString.replace("/", "-")
     if acFile.exists then
-      val str = IO.read(acFile)
-      val json = Parser.parseUnsafe(str)
       try
+        val str = IO.read(acFile)
+        val json = Parser.parseUnsafe(str)
         val value = Converter.fromJsonUnsafe[ActionResult](json)
         if request.inlineOutputFiles.isEmpty then Right(value)
         else
