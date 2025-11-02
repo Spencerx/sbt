@@ -1,6 +1,7 @@
 /*
  * sbt
- * Copyright 2011 - 2018, Lightbend, Inc.
+ * Copyright 2023, Scala center
+ * Copyright 2011 - 2022, Lightbend, Inc.
  * Copyright 2008 - 2010, Mark Harrah
  * Licensed under Apache License 2.0 (see LICENSE)
  */
@@ -12,16 +13,23 @@ import java.io.File
 import sbt.internal.inc.ScalaInstance
 import sbt.librarymanagement.{
   Artifact,
+  Configuration,
   Configurations,
   ConfigurationReport,
   ScalaArtifacts,
   SemanticSelector,
+  UpdateReport,
   VersionNumber
 }
 import xsbti.ScalaProvider
 
 private[sbt] object Compiler {
-  def scalaInstanceTask: Def.Initialize[Task[ScalaInstance]] =
+
+  /**
+   * Returns a ScalaInstance.
+   * extraToolConf is used for Scala 3 since it started splitting up scaladoc and repl.
+   */
+  def scalaInstanceTask(extraToolConf: Option[Configuration]): Def.Initialize[Task[ScalaInstance]] =
     Def.taskDyn {
       val sh = Keys.scalaHome.value
       val app = Keys.appConfiguration.value
@@ -35,7 +43,7 @@ private[sbt] object Compiler {
           val scalaProvider = app.provider.scalaProvider
           if (!managed) emptyScalaInstance
           else if (sv == scalaProvider.version) optimizedScalaInstance(sv, scalaProvider)
-          else scalaInstanceFromUpdate
+          else scalaInstanceFromUpdate(extraToolConf)
       }
     }
 
@@ -95,60 +103,49 @@ private[sbt] object Compiler {
     )
   }
 
-  def scalaInstanceFromUpdate: Def.Initialize[Task[ScalaInstance]] = Def.task {
-    val sv = Keys.scalaVersion.value
-    val fullReport = Keys.update.value
-    val s = Keys.streams.value
+  /**
+   * Returns a ScalaInstance.
+   * extraToolConf is used for Scala 3 since it started splitting up scaladoc and repl.
+   */
+  def scalaInstanceFromUpdate(
+      extraToolConf: Option[Configuration]
+  ): Def.Initialize[Task[ScalaInstance]] =
+    Def.task {
+      val sv = Keys.scalaVersion.value
+      val fullReport = Keys.update.value
+      val s = Keys.streams.value
 
-    // For Scala 3, update scala-library.jar in `scala-tool` and `scala-doc-tool` in case a newer version
-    // is present in the `compile` configuration. This is needed once forwards binary compatibility is dropped
-    // to avoid NoSuchMethod exceptions when expanding macros.
-    def updateLibraryToCompileConfiguration(report: ConfigurationReport) =
-      if (!ScalaArtifacts.isScala3(sv)) report
-      else
-        (for {
-          compileConf <- fullReport.configuration(Configurations.Compile)
-          compileLibMod <- compileConf.modules.find(_.module.name == ScalaArtifacts.LibraryID)
-          reportLibMod <- report.modules.find(_.module.name == ScalaArtifacts.LibraryID)
-          if VersionNumber(reportLibMod.module.revision)
-            .matchesSemVer(SemanticSelector(s"<${compileLibMod.module.revision}"))
-        } yield {
-          val newMods = report.modules
-            .filterNot(_.module.name == ScalaArtifacts.LibraryID) :+ compileLibMod
-          report.withModules(newMods)
-        }).getOrElse(report)
+      val toolReport = updateLibraryToCompileConfiguration(sv, fullReport)(
+        fullReport
+          .configuration(Configurations.ScalaTool)
+          .getOrElse(sys.error(noToolConfiguration(Keys.managedScalaInstance.value)))
+      )
 
-    val toolReport = updateLibraryToCompileConfiguration(
-      fullReport
-        .configuration(Configurations.ScalaTool)
-        .getOrElse(sys.error(noToolConfiguration(Keys.managedScalaInstance.value)))
-    )
-
-    if (Classpaths.isScala213(sv)) {
-      val scalaDeps = for {
-        compileReport <- fullReport.configuration(Configurations.Compile).iterator
-        libName <- ScalaArtifacts.Artifacts.iterator
-        lib <- compileReport.modules.find(_.module.name == libName)
-      } yield lib
-      for (lib <- scalaDeps.take(1)) {
-        val libVer = lib.module.revision
-        val libName = lib.module.name
-        val proj =
-          Def.displayBuildRelative(Keys.thisProjectRef.value.build, Keys.thisProjectRef.value)
-        if (VersionNumber(sv).matchesSemVer(SemanticSelector(s"<$libVer"))) {
-          val err = !Keys.allowUnsafeScalaLibUpgrade.value
-          val fix =
-            if (err)
-              """Upgrade the `scalaVersion` to fix the build. If upgrading the Scala compiler version is
+      if (Classpaths.isScala213(sv)) {
+        val scalaDeps = for {
+          compileReport <- fullReport.configuration(Configurations.Compile).iterator
+          libName <- ScalaArtifacts.Artifacts.iterator
+          lib <- compileReport.modules.find(_.module.name == libName)
+        } yield lib
+        for (lib <- scalaDeps.take(1)) {
+          val libVer = lib.module.revision
+          val libName = lib.module.name
+          val proj =
+            Def.displayBuildRelative(Keys.thisProjectRef.value.build, Keys.thisProjectRef.value)
+          if (VersionNumber(sv).matchesSemVer(SemanticSelector(s"<$libVer"))) {
+            val err = !Keys.allowUnsafeScalaLibUpgrade.value
+            val fix =
+              if (err)
+                """Upgrade the `scalaVersion` to fix the build. If upgrading the Scala compiler version is
                 |not possible (for example due to a regression in the compiler or a missing dependency),
                 |this error can be demoted by setting `allowUnsafeScalaLibUpgrade := true`.""".stripMargin
-            else
-              s"""Note that the dependency classpath and the runtime classpath of your project
+              else
+                s"""Note that the dependency classpath and the runtime classpath of your project
                  |contain the newer $libName $libVer, even if the scalaVersion is $sv.
                  |Compilation (macro expansion) or using the Scala REPL in sbt may fail with a LinkageError.""".stripMargin
 
-          val msg =
-            s"""Expected `$proj scalaVersion` to be $libVer or later, but found $sv.
+            val msg =
+              s"""Expected `$proj scalaVersion` to be $libVer or later, but found $sv.
                |To support backwards-only binary compatibility (SIP-51), the Scala 2.13 compiler
                |should not be older than $libName on the dependency classpath.
                |
@@ -156,60 +153,84 @@ private[sbt] object Compiler {
                |
                |See `$proj evicted` to know why $libName $libVer is getting pulled in.
                |""".stripMargin
-          if (err) sys.error(msg)
-          else s.log.warn(msg)
+            if (err) sys.error(msg)
+            else s.log.warn(msg)
+          }
         }
       }
-    }
-    def file(id: String): File = {
-      val files = for {
-        m <- toolReport.modules if m.module.name.startsWith(id)
-        (art, file) <- m.artifacts if art.`type` == Artifact.DefaultType
-      } yield file
-      files.headOption getOrElse sys.error(s"Missing $id jar file")
+      def file(id: String): File = {
+        val files = for {
+          m <- toolReport.modules if m.module.name.startsWith(id)
+          (art, file) <- m.artifacts if art.`type` == Artifact.DefaultType
+        } yield file
+        files.headOption getOrElse sys.error(s"Missing $id jar file")
+      }
+
+      val allCompilerJars = toolReport.modules.flatMap(_.artifacts.map(_._2))
+      val extraToolJars =
+        extraToolConf match {
+          case Some(extra) =>
+            fullReport
+              .configuration(extra)
+              .map(updateLibraryToCompileConfiguration(sv, fullReport))
+              .toSeq
+              .flatMap(_.modules)
+              .flatMap(_.artifacts.map(_._2))
+          case None => Nil
+        }
+      val libraryJars = ScalaArtifacts.libraryIds(sv).map(file)
+
+      makeScalaInstance(
+        sv,
+        libraryJars,
+        allCompilerJars,
+        extraToolJars,
+        Keys.state.value,
+        Keys.scalaInstanceTopLoader.value,
+      )
     }
 
-    val allCompilerJars = toolReport.modules.flatMap(_.artifacts.map(_._2))
-    val allDocJars =
-      fullReport
-        .configuration(Configurations.ScalaDocTool)
-        .map(updateLibraryToCompileConfiguration)
-        .toSeq
-        .flatMap(_.modules)
-        .flatMap(_.artifacts.map(_._2))
-    val libraryJars = ScalaArtifacts.libraryIds(sv).map(file)
-
-    makeScalaInstance(
-      sv,
-      libraryJars,
-      allCompilerJars,
-      allDocJars,
-      Keys.state.value,
-      Keys.scalaInstanceTopLoader.value,
-    )
-  }
+  // For Scala 3, update scala-library.jar in `scala-tool` and `scala-doc-tool` in case a newer version
+  // is present in the `compile` configuration. This is needed once forwards binary compatibility is dropped
+  // to avoid NoSuchMethod exceptions when expanding macros.
+  private def updateLibraryToCompileConfiguration(sv: String, fullReport: UpdateReport)(
+      report: ConfigurationReport
+  ) =
+    if (!ScalaArtifacts.isScala3(sv)) report
+    else
+      (for {
+        compileConf <- fullReport.configuration(Configurations.Compile)
+        compileLibMod <- compileConf.modules.find(_.module.name == ScalaArtifacts.LibraryID)
+        reportLibMod <- report.modules.find(_.module.name == ScalaArtifacts.LibraryID)
+        if VersionNumber(reportLibMod.module.revision)
+          .matchesSemVer(SemanticSelector(s"<${compileLibMod.module.revision}"))
+      } yield {
+        val newMods = report.modules
+          .filterNot(_.module.name == ScalaArtifacts.LibraryID) :+ compileLibMod
+        report.withModules(newMods)
+      }).getOrElse(report)
 
   def makeScalaInstance(
       version: String,
       libraryJars: Array[File],
       allCompilerJars: Seq[File],
-      allDocJars: Seq[File],
+      extraToolJars: Seq[File],
       state: State,
       topLoader: ClassLoader,
   ): ScalaInstance = {
     val classLoaderCache = state.extendedClassLoaderCache
     val compilerJars = allCompilerJars.filterNot(libraryJars.contains).distinct.toArray
-    val docJars = allDocJars
+    val toolJars = extraToolJars
       .filterNot(jar => libraryJars.contains(jar) || compilerJars.contains(jar))
       .distinct
       .toArray
-    val allJars = libraryJars ++ compilerJars ++ docJars
+    val allJars = libraryJars ++ compilerJars ++ toolJars
 
     val libraryLoader = classLoaderCache(libraryJars.toList, topLoader)
     val compilerLoader = classLoaderCache(compilerJars.toList, libraryLoader)
     val fullLoader =
-      if (docJars.isEmpty) compilerLoader
-      else classLoaderCache(docJars.distinct.toList, compilerLoader)
+      if (toolJars.isEmpty) compilerLoader
+      else classLoaderCache(toolJars.distinct.toList, compilerLoader)
     new ScalaInstance(
       version = version,
       loader = fullLoader,
