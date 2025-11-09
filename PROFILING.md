@@ -14,10 +14,11 @@ The first one I recommend is async-profiler. This is available for macOS and Lin
 and works fairly well. See their readme for the details, but see the following to get started.
 
 1. Download the installer from <https://github.com/async-profiler/async-profiler/releases/tag/v4.2>
-2. Make symbolic link from `asprof` to `$HOME/bin`, assuming you have PATH to `$HOME/bin`:
+2. Make symbolic link from `asprof` and `jfrconv` to `$HOME/bin`, assuming you have PATH to `$HOME/bin`:
 
 ```bash
 $ ln -s $HOME/Applications/async-profiler-4.2/bin/asprof $HOME/bin/asprof
+$ ln -s $HOME/Applications/async-profiler-4.2/bin/jfrconv $HOME/bin/jfrconv
 ```
 
 Next, close all Java applications and anything that may affect the profiling, and run sbt in one terminal:
@@ -72,6 +73,15 @@ $ asprof -d 60 -f /tmp/flamegraph.html <process id>
 This should produce `/tmp/flamegraph.html` at the end.
 
 ![flamegraph](project/flamegraph.png)
+
+### include line numbers
+
+With Scala, sometimes you would get a method name that looks like `sbt/Defaults$.$init$$anonfun$1`, which we'd have no idea which lambda expression it is pointing to. One workaround is to include the line numbers into the flamegraph by first generating in the Java Flight Recorder format.
+
+```bash
+$ asprof -d 60 -f /tmp/flamegraph.jfr <process id>
+$ jfrconv --lines /tmp/flamegraph.jfr /tmp/flamegraph.html
+```
 
 ### running sbt with standby
 
