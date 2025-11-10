@@ -8,6 +8,7 @@ import sbt.io.syntax.*
 import sbt.io.IO
 import sbt.nio.file.{ **, FileTreeView }
 import sbt.nio.file.syntax.*
+import sbt.util.CacheImplicits
 import scala.reflect.ClassTag
 import scala.annotation.{ meta, StaticAnnotation }
 import sjsonnew.{ HashWriter, JsonFormat }
@@ -127,6 +128,7 @@ object ActionCache:
       config: BuildWideCacheConfiguration,
   ): Either[Throwable, ActionResult] =
     // val logger = config.logger
+    CacheImplicits.setCacheSize(config.localDigestCacheByteSize)
     val (input, valuePath) = mkInput(key, codeContentHash, extraHash)
     val getRequest =
       GetActionResultRequest(input, inlineStdout = false, inlineStderr = false, Vector(valuePath))
@@ -210,7 +212,24 @@ class BuildWideCacheConfiguration(
     val fileConverter: FileConverter,
     val logger: Logger,
     val cacheEventLog: CacheEventLog,
+    val localDigestCacheByteSize: Long,
 ):
+  def this(
+      store: ActionCacheStore,
+      outputDirectory: Path,
+      fileConverter: FileConverter,
+      logger: Logger,
+      cacheEventLog: CacheEventLog
+  ) =
+    this(
+      store,
+      outputDirectory,
+      fileConverter,
+      logger,
+      cacheEventLog,
+      CacheImplicits.defaultLocalDigestCacheByteSize
+    )
+
   override def toString(): String =
     s"BuildWideCacheConfiguration(store = $store, outputDirectory = $outputDirectory)"
 end BuildWideCacheConfiguration

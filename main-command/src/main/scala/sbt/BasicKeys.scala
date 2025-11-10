@@ -123,6 +123,12 @@ object BasicKeys {
     10000
   )
 
+  val localDigestCacheByteSize = AttributeKey[Long](
+    "localDigestCacheByteSize",
+    "The maximum total size in the in-memory digest cache in bytes.",
+    10000
+  )
+
   // Unlike other BasicKeys, this is not used directly as a setting key,
   // and severLog / logLevel is used instead.
   private[sbt] val serverLogLevel =

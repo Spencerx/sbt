@@ -440,6 +440,7 @@ object Keys {
   val remoteCacheResolvers = settingKey[Seq[Resolver]]("Resolvers for remote cache.")
   val remoteCachePom = taskKey[HashedVirtualFileRef]("Generates a pom for publishing when publishing Maven-style.")
   val localCacheDirectory = settingKey[File]("Operating system specific cache directory.")
+  val localDigestCacheByteSize = SettingKey[Long](BasicKeys.localDigestCacheByteSize).withRank(DSetting)
   val usePipelining = settingKey[Boolean]("Use subproject pipelining for compilation.").withRank(BSetting)
   val exportPipelining = settingKey[Boolean]("Produce early output so downstream subprojects can do pipelining.").withRank(BSetting)
 

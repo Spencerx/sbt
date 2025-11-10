@@ -38,6 +38,7 @@ object LintUnused {
       evictionWarningOptions,
       initialize,
       lintUnusedKeysOnLoad,
+      localDigestCacheByteSize,
       onLoad,
       onLoadMessage,
       onUnload,
