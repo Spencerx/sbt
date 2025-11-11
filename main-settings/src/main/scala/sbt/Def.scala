@@ -274,6 +274,8 @@ object Def extends BuildSyntax with Init with InitializeImplicits:
 
   // These are here, as opposed to RemoteCache, since we need them from TaskMacro etc
   private[sbt] val cacheEventLog: CacheEventLog = CacheEventLog()
+  private[sbt] val localDigestCacheByteSizeKey =
+    SettingKey[Long](BasicKeys.localDigestCacheByteSize)
   @cacheLevel(include = Array.empty)
   val cacheConfiguration: Initialize[Task[BuildWideCacheConfiguration]] = Def.task {
     val state = stateKey.value
@@ -288,12 +290,14 @@ object Def extends BuildSyntax with Init with InitializeImplicits:
       .getOrElse(
         DiskActionCacheStore(state.baseDir.toPath.resolve("target/bootcache"), fileConverter)
       )
+    val cacheByteSize = localDigestCacheByteSizeKey.value
     BuildWideCacheConfiguration(
       cacheStore,
       outputDirectory,
       fileConverter,
       state.log,
-      cacheEventLog
+      cacheEventLog,
+      cacheByteSize
     )
   }
 

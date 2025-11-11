@@ -358,6 +358,7 @@ lazy val utilCache = project
     name := "Util Cache",
     libraryDependencies ++=
       Seq(
+        caffeine,
         sjsonNewCore.value,
         sjsonNewScalaJson.value,
         sjsonNewMurmurhash.value
@@ -365,6 +366,7 @@ lazy val utilCache = project
     contrabandSettings,
     mimaSettings,
     mimaBinaryIssueFilters ++= Seq(
+      exclude[ReversedMissingMethodProblem]("sbt.util.CacheImplicits.*"),
     ),
     Test / fork := true,
   )

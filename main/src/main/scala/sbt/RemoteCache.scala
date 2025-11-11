@@ -36,7 +36,7 @@ import sbt.nio.FileStamp
 import sbt.nio.Keys.{ inputFileStamps, outputFileStamps }
 import sbt.std.TaskExtra.*
 import sbt.util.InterfaceUtil.toOption
-import sbt.util.{ DiskActionCacheStore, Logger }
+import sbt.util.{ CacheImplicits, DiskActionCacheStore, Logger }
 import sbt.util.CacheImplicits.given
 import sjsonnew.JsonFormat
 import xsbti.{ FileConverter, HashedVirtualFileRef, VirtualFileRef }
@@ -78,6 +78,7 @@ object RemoteCache {
     remoteCacheIdCandidates :== Nil,
     pushRemoteCacheTo :== None,
     localCacheDirectory :== defaultCacheLocation,
+    localDigestCacheByteSize :== CacheImplicits.defaultLocalDigestCacheByteSize,
     pushRemoteCache / ivyPaths := {
       val app = appConfiguration.value
       val base = app.baseDirectory.getCanonicalFile
