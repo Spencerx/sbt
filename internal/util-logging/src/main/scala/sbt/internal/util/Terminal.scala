@@ -953,12 +953,12 @@ object Terminal {
         try JLine3.exitRawMode(system)
         catch { case _: java.io.IOError => }
       }
-    override def isColorEnabled: Boolean =
+    override lazy val isColorEnabled: Boolean =
       props
         .map(_.color)
         .getOrElse(isColorEnabledProp.getOrElse(Terminal.isColorEnabled))
 
-    override def isSupershellEnabled: Boolean =
+    override lazy val isSupershellEnabled: Boolean =
       props
         .map(_.supershell)
         .getOrElse(System.getProperty("sbt.supershell") match {
