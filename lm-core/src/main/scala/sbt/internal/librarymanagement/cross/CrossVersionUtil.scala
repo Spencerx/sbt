@@ -1,8 +1,6 @@
 package sbt.internal.librarymanagement
 package cross
 
-import sbt.librarymanagement.ScalaArtifacts
-
 object CrossVersionUtil {
   val trueString = "true"
   val falseString = "false"
@@ -111,11 +109,26 @@ object CrossVersionUtil {
     }
   }
 
-  def binaryScalaVersion(full: String): String = {
-    if (ScalaArtifacts.isScala3(full)) binaryScala3Version(full)
-    else
+  def binaryScalaVersion(full: String): String =
+    if full.startsWith("2.") then
       binaryVersionWithApi(full, TransitionScalaVersion)(scalaApiVersion) // Scala 2 binary version
-  }
+    else binaryScala3Version(full)
+
+  /**
+   * Returns the binary version of the Scala, except for
+   * prereleases version, returns the binary version of the release equivalent.
+   * This was called the partial version in Scala 2.x.
+   * In Scala 3 onwards, it would be the major version.
+   */
+  def earlyScalaVersion(full: String): String =
+    if full.startsWith("2.") then
+      partialVersion(full) match
+        case Some((major, minor)) => s"$major.$minor"
+        case None                 => full
+    else
+      partialVersion(full) match
+        case Some((major, minor)) => major.toString
+        case None                 => full
 
   def binarySbtVersion(full: String): String =
     sbtApiVersion(full) match {

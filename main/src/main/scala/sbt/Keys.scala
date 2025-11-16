@@ -217,6 +217,7 @@ object Keys {
   val scalaOrganization = settingKey[String]("Organization/group ID of the Scala used in the project. Default value is 'org.scala-lang'. This is an advanced setting used for clones of the Scala Language. It should be disregarded in standard use cases.").withRank(CSetting)
   val scalaVersion = settingKey[String]("The version of Scala used for building.").withRank(APlusSetting)
   val scalaBinaryVersion = settingKey[String]("The Scala version substring describing binary compatibility.").withRank(BPlusSetting)
+  val scalaEarlyVersion = settingKey[String]("The Scala version substring describing the binary compatibility, except for prereleases it returns the binary version of the release.").withRank(DSetting)
   val crossScalaVersions = settingKey[Seq[String]]("The versions of Scala used when cross-building.").withRank(BPlusSetting)
   val crossVersion = settingKey[CrossVersion]("Configures handling of the Scala version when cross-building.").withRank(CSetting)
   val platform = settingKey[String]("Configures the default suffix to be used for %% operator.").withRank(CSetting)

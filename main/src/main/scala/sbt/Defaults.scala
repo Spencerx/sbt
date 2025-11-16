@@ -566,12 +566,14 @@ object Defaults extends BuildCommon {
     scalaSource := sourceDirectory.value / "scala",
     javaSource := sourceDirectory.value / "java",
     unmanagedSourceDirectories := {
-      val isDotty = ScalaInstance.isDotty(scalaVersion.value)
-      val epochVersion = if (isDotty) "3" else "2"
+      val early = scalaEarlyVersion.value
+      val epochVersion =
+        if scalaVersion.value.startsWith("2.") then "2"
+        else early
       makeCrossSources(
         scalaSource.value,
         javaSource.value,
-        scalaBinaryVersion.value,
+        early,
         epochVersion,
         crossPaths.value
       ) ++
@@ -762,7 +764,8 @@ object Defaults extends BuildCommon {
       scalaVersion := appConfiguration.value.provider.scalaProvider.version,
       derive(crossScalaVersions := Seq(scalaVersion.value)),
       derive(compilersSetting),
-      derive(scalaBinaryVersion := binaryScalaVersion(scalaVersion.value))
+      derive(scalaBinaryVersion := binaryScalaVersion(scalaVersion.value)),
+      derive(scalaEarlyVersion := CrossVersion.earlyScalaVersion(scalaVersion.value)),
     )
   )
 
@@ -3490,6 +3493,7 @@ object Classpaths {
           // to fix https://github.com/sbt/sbt/issues/2686
           scalaVersion := appConfiguration.value.provider.scalaProvider.version,
           scalaBinaryVersion := binaryScalaVersion(scalaVersion.value),
+          scalaEarlyVersion := CrossVersion.earlyScalaVersion(scalaVersion.value),
           scalaOrganization := ScalaArtifacts.Organization,
           scalaModuleInfo := {
             Some(
