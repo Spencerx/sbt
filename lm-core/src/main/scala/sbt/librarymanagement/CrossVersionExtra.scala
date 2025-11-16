@@ -225,6 +225,14 @@ private[librarymanagement] abstract class CrossVersionFunctions {
   def partialVersion(s: String): Option[(Long, Long)] = CrossVersionUtil.partialVersion(s)
 
   /**
+   * Returns the binary version of the Scala, except for
+   * prereleases version, returns the binary version of the release equivalent.
+   * This was called the partial version in Scala 2.x.
+   * In Scala 3 onwards, it would be the major version.
+   */
+  def earlyScalaVersion(full: String): String = CrossVersionUtil.earlyScalaVersion(full)
+
+  /**
    * Computes the binary Scala version from the `full` version.
    * Full Scala versions earlier than [[sbt.librarymanagement.CrossVersion.TransitionScalaVersion]] are returned as is.
    */

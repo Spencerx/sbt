@@ -231,9 +231,6 @@ class CrossVersionTest extends UnitSpec {
   it should "for 3.0.0-RC1 return 3.0.0-RC1" in {
     binaryScalaVersion("3.0.0-RC1") shouldBe "3.0.0-RC1"
   }
-
-  // Not set in stone but 3 is the favorite candidate so far
-  // (see https://github.com/lampepfl/dotty/issues/10244)
   it should "for 3.0.0 return 3" in {
     binaryScalaVersion("3.0.0") shouldBe "3"
   }
@@ -263,6 +260,22 @@ class CrossVersionTest extends UnitSpec {
   }
   it should "for 3.0.1-SNAPSHOT return 3" in {
     binaryScalaVersion("3.0.1-SNAPSHOT") shouldBe "3"
+  }
+  it should "for 4.0.0-M2 return 4.0.0-M2" in {
+    binaryScalaVersion("4.0.0-M2") shouldBe "4.0.0-M2"
+  }
+
+  "earlyScalaVersion" should "for 2.9.2 return 2.9" in {
+    assert(earlyScalaVersion("2.9.2") == "2.9")
+  }
+  it should "for 2.13.0-M1 return 2.13" in {
+    assert(earlyScalaVersion("2.13.0-M1") == "2.13")
+  }
+  it should "for 3.0.0-M1 return 3" in {
+    assert(earlyScalaVersion("3.0.0-M1") == "3")
+  }
+  it should "for 4.0.0-M1 return 4" in {
+    assert(earlyScalaVersion("4.0.0-M1") == "4")
   }
 
   private def patchVersion(fullVersion: String) =
