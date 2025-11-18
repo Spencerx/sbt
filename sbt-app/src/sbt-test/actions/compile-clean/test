@@ -1,17 +1,17 @@
-$ touch target/out/jvm/scala-2.12.20/compile-clean/backend/cant-touch-this
+$ touch target/out/jvm/scala-2.12.20/compile-clean/classes/cant-touch-this
 
 > Test/compile
-$ exists target/**/compile-clean/backend/A.class
-$ exists target/**/compile-clean/backend/X.class
-$ exists target/**/compile-clean/test-backend/B.class
+$ exists target/**/compile-clean/classes/A.class
+$ exists target/**/compile-clean/classes/X.class
+$ exists target/**/compile-clean/test-classes/B.class
 
 > Test/clean
-$ exists target/**/compile-clean/backend/cant-touch-this
-$ exists target/**/compile-clean/backend/A.class
-$ exists target/**/compile-clean/backend/X.class
-$ absent target/**/compile-clean/test-backend/B.class
+$ exists target/**/compile-clean/classes/cant-touch-this
+$ exists target/**/compile-clean/classes/A.class
+$ exists target/**/compile-clean/classes/X.class
+$ absent target/**/compile-clean/test-classes/B.class
 
 > Compile/clean
-$ exists target/**/compile-clean/backend/cant-touch-this
-$ absent target/**/compile-clean/backend/A.class
-$ exists target/**/compile-clean/backend/X.class
+$ exists target/**/compile-clean/classes/cant-touch-this
+$ absent target/**/compile-clean/classes/A.class
+$ exists target/**/compile-clean/classes/X.class

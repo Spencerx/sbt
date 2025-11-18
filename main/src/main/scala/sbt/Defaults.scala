@@ -654,7 +654,7 @@ object Defaults extends BuildCommon {
     classDirectory := target.value / (prefix(configuration.value.name) + "classes"),
     backendOutput := {
       val converter = fileConverter.value
-      val dir = target.value / (prefix(configuration.value.name) + "backend")
+      val dir = classDirectory.value
       converter.toVirtualFile(dir.toPath)
     },
     earlyOutput / artifactPath := configArtifactPathSetting(artifact, "early").value,
@@ -4068,20 +4068,10 @@ object Classpaths {
 
   def makeProducts: Initialize[Task[Seq[File]]] = Def.task {
     val c = fileConverter.value
-    val resources = copyResources.value.map(_._2).toSet
-    val classDir = classDirectory.value
+    val resourceDirs = resourceDirectories.value
     val vfBackendDir = compileIncremental.value._2
     val backendDir = c.toPath(vfBackendDir)
-    // delete outdated files
-    Path
-      .allSubpaths(classDir)
-      .collect { case (f, _) if f.isFile() && !resources.contains(f) => f }
-      .foreach(IO.delete)
-    IO.copyDirectory(
-      source = backendDir.toFile(),
-      target = classDir,
-    )
-    classDir :: Nil
+    backendDir.toFile() :: resourceDirs.toList.filter(_.exists())
   }
 
   private[sbt] def makePickleProducts: Initialize[Task[Seq[VirtualFile]]] = Def.task {
