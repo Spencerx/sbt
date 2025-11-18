@@ -305,11 +305,9 @@ private[sbt] object MainLoop:
 
       val channel = channelName.flatMap(exchange.channelForName)
       val (canReload, useLoadp) = channel match
-        case Some(nc: NetworkChannel) =>
-          val isInteractive = nc.isInteractive
-          (isInteractive || exec.execId.nonEmpty, !isInteractive)
-        case Some(_: ConsoleChannel) => (true, false)
-        case _                       => (false, false)
+        case Some(nc: NetworkChannel) => (exec.execId.nonEmpty, true)
+        case Some(_: ConsoleChannel)  => (true, false)
+        case _                        => (false, false)
 
       state.get(CheckBuildSourcesKey) match {
         case Some(cbs) if canReload && cbs.needsReload(state, exec) =>
