@@ -727,27 +727,38 @@ object Defaults extends BuildCommon {
       }
       clean.value
     },
-    scalaCompilerBridgeBinaryJar := Def.uncached {
-      val sv = scalaVersion.value
-      val managed = managedScalaInstance.value
-      val hasSbtBridge = ScalaArtifacts.isScala3(sv) || ZincLmUtil.hasScala2SbtBridge(sv)
-      if hasSbtBridge && managed then
+    scalaCompilerBridgeBin := Def
+      .ifS(Def.task {
+        val sv = scalaVersion.value
+        val managed = managedScalaInstance.value
+        val hasSbtBridge = ScalaArtifacts.isScala3(sv) || ZincLmUtil.hasScala2SbtBridge(sv)
+        hasSbtBridge && managed
+      })(Def.cachedTask {
+        val sv = scalaVersion.value
+        val conv = fileConverter.value
+        val s = streams.value
+        val t = target.value
+        val r = dependencyResolution.value
+        val uc = updateConfiguration.value
         val jar = ZincLmUtil.fetchDefaultBridgeModule(
           sv,
-          dependencyResolution.value,
-          updateConfiguration.value,
+          r,
+          uc,
           (update / unresolvedWarningConfiguration).value,
-          streams.value.log
+          s.log
         )
-        Some(jar)
-      else None
-    },
+        val out = t / "compiler-bridge" / jar.getName()
+        val outVf = conv.toVirtualFile(out.toPath())
+        IO.copyFile(jar, out)
+        Def.declareOutput(outVf)
+        Vector(outVf: HashedVirtualFileRef)
+      })(Def.task(Vector.empty))
+      .value,
     scalaCompilerBridgeSource := ZincLmUtil.getDefaultBridgeSourceModule(scalaVersion.value),
     auxiliaryClassFiles ++= {
       if (ScalaArtifacts.isScala3(scalaVersion.value)) List(TastyFiles.instance)
       else Nil
     },
-    consoleProject / scalaCompilerBridgeBinaryJar := Def.uncached(None),
     consoleProject / scalaCompilerBridgeSource := ZincLmUtil.getDefaultBridgeSourceModule(
       appConfiguration.value.provider.scalaProvider.version
     ),
@@ -832,16 +843,17 @@ object Defaults extends BuildCommon {
       val app = appConfiguration.value
       val launcher = app.provider.scalaProvider.launcher
       val dr = scalaCompilerBridgeDependencyResolution.value
+      val conv = fileConverter.value
       val scalac =
-        scalaCompilerBridgeBinaryJar.value match {
-          case Some(jar) =>
+        scalaCompilerBridgeBin.value.toList match
+          case jar :: xs =>
             AlternativeZincUtil.scalaCompiler(
               scalaInstance = scalaInstance.value,
               classpathOptions = classpathOptions.value,
-              compilerBridgeJar = jar,
+              compilerBridgeJar = conv.toPath(jar).toFile(),
               classLoaderCache = st.get(BasicKeys.classLoaderCache)
             )
-          case _ =>
+          case Nil =>
             ZincLmUtil.scalaCompiler(
               scalaInstance = scalaInstance.value,
               classpathOptions = classpathOptions.value,
@@ -854,7 +866,6 @@ object Defaults extends BuildCommon {
               classLoaderCache = st.get(BasicKeys.classLoaderCache),
               log = streams.value.log
             )
-        }
       val compilers = ZincUtil.compilers(
         instance = scalaInstance.value,
         classpathOptions = classpathOptions.value,

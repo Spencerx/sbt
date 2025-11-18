@@ -27,8 +27,9 @@ object ConsoleProject {
     val unit = extracted.currentUnit
     val (state1, dependencyResolution) =
       extracted.runTask(Keys.dependencyResolution, state)
-    val (_, scalaCompilerBridgeBinaryJar) =
-      extracted.runTask(Keys.consoleProject / Keys.scalaCompilerBridgeBinaryJar, state1)
+    val (_, scalaCompilerBridgeBinaryBin) =
+      extracted.runTask(Keys.consoleProject / Keys.scalaCompilerBridgeBin, state1)
+    val conv = extracted.get(Keys.fileConverter)
     val scalaInstance = {
       val scalaProvider = state.configuration.provider.scalaProvider
       ScalaInstance(scalaProvider.version, scalaProvider)
@@ -37,15 +38,15 @@ object ConsoleProject {
     val zincDir = BuildPaths.getZincDirectory(state, g)
     val app = state.configuration
     val launcher = app.provider.scalaProvider.launcher
-    val compiler = scalaCompilerBridgeBinaryJar match {
-      case Some(jar) =>
+    val compiler = scalaCompilerBridgeBinaryBin.toList match
+      case jar :: xs =>
         AlternativeZincUtil.scalaCompiler(
           scalaInstance = scalaInstance,
           classpathOptions = ClasspathOptionsUtil.repl,
-          compilerBridgeJar = jar,
+          compilerBridgeJar = conv.toPath(jar).toFile(),
           classLoaderCache = state1.get(BasicKeys.classLoaderCache)
         )
-      case None =>
+      case Nil =>
         ZincLmUtil.scalaCompiler(
           scalaInstance = scalaInstance,
           classpathOptions = ClasspathOptionsUtil.repl,
@@ -59,7 +60,6 @@ object ConsoleProject {
           classLoaderCache = state1.get(BasicKeys.classLoaderCache),
           log = log
         )
-    }
     val imports = BuildUtil.getImports(unit.unit) ++ BuildUtil.importAll(bindings.map(_._1))
     val importString = imports.mkString("", ";\n", ";\n\n")
     val initCommands = importString + extra
