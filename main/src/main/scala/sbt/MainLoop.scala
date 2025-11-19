@@ -10,6 +10,7 @@ package sbt
 
 import sbt.BasicCommandStrings.{ StashOnFailure, networkExecPrefix }
 import sbt.ProjectExtra.extract
+import sbt.internal.{ ConsoleChannel, FastTrackCommands, ShutdownHooks, SysProp, TaskProgress }
 import sbt.internal.langserver.ErrorCodes
 import sbt.internal.nio.CheckBuildSources.CheckBuildSourcesKey
 import sbt.internal.protocol.JsonRpcResponseError
@@ -20,7 +21,6 @@ import sbt.internal.util.{
   Prompt,
   Terminal as ITerminal
 }
-import sbt.internal.{ FastTrackCommands, ShutdownHooks, SysProp, TaskProgress }
 import sbt.io.{ IO, Using }
 import sbt.protocol.*
 import sbt.util.{ Logger, LoggerContext }
@@ -31,6 +31,7 @@ import java.util.concurrent.RejectedExecutionException
 import scala.annotation.tailrec
 import scala.concurrent.duration.*
 import scala.util.control.NonFatal
+import sbt.internal.server.NetworkChannel
 
 import java.text.ParseException
 
@@ -301,10 +302,20 @@ private[sbt] object MainLoop:
           .remove(Keys.terminalKey)
           .remove(Keys.currentCommandProgress)
       }
+
+      val channel = channelName.flatMap(exchange.channelForName)
+      val (canReload, useLoadp) = channel match
+        case Some(nc: NetworkChannel) => (exec.execId.nonEmpty, true)
+        case Some(_: ConsoleChannel)  => (true, false)
+        case _                        => (false, false)
+
       state.get(CheckBuildSourcesKey) match {
-        case Some(cbs) =>
-          if (!cbs.needsReload(state, exec)) process()
-          else Exec("reload", None) +: exec +: state.remove(CheckBuildSourcesKey)
+        case Some(cbs) if canReload && cbs.needsReload(state, exec) =>
+          val loadExec =
+            if (useLoadp) Exec("loadp", exec.execId, exec.source)
+            else Exec("reload", exec.source)
+
+          loadExec +: exec +: state.remove(CheckBuildSourcesKey)
         case _ => process()
       }
     } catch {

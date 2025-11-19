@@ -62,7 +62,7 @@ object BuildServerProtocol {
     jvmTestEnvironmentProvider = true,
   )
 
-  private val bspReload = "bspReload"
+  val bspReload = "bspReload"
 
   private val targetIdentifierParser: Parser[Seq[BuildTargetIdentifier]] =
     Def
