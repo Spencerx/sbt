@@ -707,6 +707,7 @@ lazy val mainProj = (project in file("main"))
     Compile / doc / sources := Nil,
     mimaSettings,
     mimaBinaryIssueFilters ++= Vector(
+      exclude[DirectMissingMethodProblem]("sbt.Keys.scalaCompilerBridgeBinaryJar"),
     ),
   )
   .dependsOn(lmCore, lmIvy, lmCoursierShadedPublishing)
