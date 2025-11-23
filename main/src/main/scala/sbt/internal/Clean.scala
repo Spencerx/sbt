@@ -12,19 +12,23 @@ package internal
 import java.io.IOException
 import java.nio.file.{ DirectoryNotEmptyException, Files, Path }
 
+import sbt.BasicCommandStrings.*
 import sbt.Def.*
 import sbt.Keys.*
 // import sbt.Project.richInitializeTask
 import sbt.ProjectExtra.*
 import sbt.ScopeAxis.Zero
 import sbt.io.syntax.*
+import sbt.io.IO
 import sbt.nio.Keys.*
 import sbt.nio.file.*
 import sbt.nio.file.syntax.pathToPathOps
 import sbt.nio.file.Glob.{ GlobOps }
-import sbt.util.Level
+import sbt.util.{ DiskActionCacheStore, Level }
+import sbt.internal.util.complete.SizeParser
 import sjsonnew.JsonFormat
 import xsbti.{ PathBasedFile, VirtualFileRef }
+import xsbti.compile.CompilerCache
 
 private[sbt] object Clean {
 
@@ -187,4 +191,41 @@ private[sbt] object Clean {
         debug(s"Caught unexpected exception $e deleting $path")
     }
   }
+
+  val registerCompilerCache: State => State = (s: State) =>
+    s.get(Keys.stateCompilerCache).foreach(_.clear())
+    s.put(Keys.stateCompilerCache, CompilerCache.fresh)
+
+  val addCacheStoreFactoryFactory: State => State = (s: State) =>
+    val size = Project
+      .extract(s)
+      .getOpt(Keys.fileCacheSize)
+      .flatMap(SizeParser(_))
+      .getOrElse(SysProp.fileCacheSize)
+    s.get(Keys.cacheStoreFactoryFactory).foreach(_.close())
+    s.put(Keys.cacheStoreFactoryFactory, InMemoryCacheStore.factory(size))
+
+  private val clearCachesFun: State => State =
+    registerCompilerCache
+      .andThen(_.initializeClassLoaderCache)
+      .andThen(addCacheStoreFactoryFactory)
+
+  def clearCaches: Command =
+    val help = Help.more(ClearCaches, ClearCachesDetailed)
+    Command.command(ClearCaches, help)(clearCachesFun)
+
+  def cleanFull: Command =
+    val h = Help.more(CleanFull, cleanFullDetailed)
+    val expunge: State => State =
+      (s: State) =>
+        val outputDirectory = s
+          .get(BasicKeys.rootOutputDirectory)
+          .getOrElse(sys.error("outputDirectory has not been set"))
+        val cacheStore = s.get(BasicKeys.cacheStores).getOrElse(Nil)
+        cacheStore.foreach:
+          case d: DiskActionCacheStore => d.clear()
+          case _                       => ()
+        IO.delete(outputDirectory.toFile())
+        s
+    Command.command(CleanFull, h)(expunge andThen clearCachesFun)
 }

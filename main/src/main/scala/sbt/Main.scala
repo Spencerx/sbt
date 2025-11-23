@@ -28,13 +28,12 @@ import sbt.internal.nio.{ CheckBuildSources, FileTreeRepository }
 import sbt.internal.server.{ BuildServerProtocol, NetworkChannel }
 import sbt.internal.util.Terminal.hasConsole
 import sbt.internal.util.Types.{ const, idFun }
-import sbt.internal.util.complete.{ Parser, SizeParser }
+import sbt.internal.util.complete.Parser
 import sbt.internal.util.{ Terminal as ITerminal, * }
 import sbt.io.*
 import sbt.io.syntax.*
 import sbt.util.{ Level, Logger, Show }
 import xsbti.AppProvider
-import xsbti.compile.CompilerCache
 
 import scala.annotation.{ nowarn, tailrec }
 import scala.concurrent.ExecutionContext
@@ -352,6 +351,7 @@ object BuiltinCommands {
       act,
       continuous,
       clearCaches,
+      Clean.cleanFull,
       NetworkChannel.disconnect,
       waitCmd,
       promptChannel,
@@ -970,7 +970,7 @@ object BuiltinCommands {
       session,
       structure,
       s2,
-      st => setupGlobalFileTreeRepository(addCacheStoreFactoryFactory(st))
+      st => setupGlobalFileTreeRepository(Clean.addCacheStoreFactoryFactory(st))
     )
     val s4 = s3.put(Keys.useLog4J.key, Project.extract(s3).get(Keys.useLog4J))
     addSuperShellParams(CheckBuildSources.init(LintUnused.lintUnusedFunc(s4)))
@@ -992,27 +992,9 @@ object BuiltinCommands {
       .put(Keys.superShellThreshold.key, threshold)
       .put(Keys.superShellMaxTasks.key, maxItems)
   }
-  private val addCacheStoreFactoryFactory: State => State = (s: State) => {
-    val size = Project
-      .extract(s)
-      .getOpt(Keys.fileCacheSize)
-      .flatMap(SizeParser(_))
-      .getOrElse(SysProp.fileCacheSize)
-    s.get(Keys.cacheStoreFactoryFactory).foreach(_.close())
-    s.put(Keys.cacheStoreFactoryFactory, InMemoryCacheStore.factory(size))
-  }
 
-  def registerCompilerCache(s: State): State = {
-    s.get(Keys.stateCompilerCache).foreach(_.clear())
-    s.put(Keys.stateCompilerCache, CompilerCache.fresh)
-  }
-
-  def clearCaches: Command = {
-    val help = Help.more(ClearCaches, ClearCachesDetailed)
-    val f: State => State =
-      registerCompilerCache andThen (_.initializeClassLoaderCache) andThen addCacheStoreFactoryFactory
-    Command.command(ClearCaches, help)(f)
-  }
+  def registerCompilerCache(s: State): State = Clean.registerCompilerCache(s)
+  def clearCaches: Command = Clean.clearCaches
 
   private[sbt] def waitCmd: Command =
     Command.arb(_ =>

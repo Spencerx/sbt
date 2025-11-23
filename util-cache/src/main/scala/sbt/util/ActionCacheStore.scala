@@ -192,6 +192,10 @@ class DiskActionCacheStore(base: Path, converter: FileConverter) extends Abstrac
   private val symlinkSupported: AtomicBoolean = AtomicBoolean(true)
 
   override def storeName: String = "disk"
+
+  def clear(): Unit =
+    if Files.exists(base) then IO.delete(base.toFile())
+    else ()
   override def get(request: GetActionResultRequest): Either[Throwable, ActionResult] =
     val acFile = acBase.toFile / request.actionDigest.toString.replace("/", "-")
     if acFile.exists then
