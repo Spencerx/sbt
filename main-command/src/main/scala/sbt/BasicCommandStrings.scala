@@ -254,8 +254,8 @@ $AliasCommand name=
   def ClearCaches: String = "clearCaches"
   def ClearCachesDetailed: String = "Clears sbt's internal caches."
 
-  val CleanExpunge: String = "cleanExpunge"
-  def cleanExpungeDetailed: String = "Clears sbt's local caches."
+  val CleanFull: String = "cleanFull"
+  def cleanFullDetailed: String = "Clears sbt's local caches."
 
   private[sbt] val networkExecPrefix = "__"
   private[sbt] val DisconnectNetworkChannel = s"${networkExecPrefix}disconnectNetworkChannel"

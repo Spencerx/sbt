@@ -214,8 +214,8 @@ private[sbt] object Clean {
     val help = Help.more(ClearCaches, ClearCachesDetailed)
     Command.command(ClearCaches, help)(clearCachesFun)
 
-  def cleanExpunge: Command =
-    val h = Help.more(CleanExpunge, cleanExpungeDetailed)
+  def cleanFull: Command =
+    val h = Help.more(CleanFull, cleanFullDetailed)
     val expunge: State => State =
       (s: State) =>
         val outputDirectory = s
@@ -227,5 +227,5 @@ private[sbt] object Clean {
           case _                       => ()
         IO.delete(outputDirectory.toFile())
         s
-    Command.command(CleanExpunge, h)(expunge andThen clearCachesFun)
+    Command.command(CleanFull, h)(expunge andThen clearCachesFun)
 }

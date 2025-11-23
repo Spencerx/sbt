@@ -351,7 +351,7 @@ object BuiltinCommands {
       act,
       continuous,
       clearCaches,
-      Clean.cleanExpunge,
+      Clean.cleanFull,
       NetworkChannel.disconnect,
       waitCmd,
       promptChannel,
