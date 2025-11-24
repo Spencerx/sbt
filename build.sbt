@@ -47,7 +47,7 @@ ThisBuild / mimaFailOnNoPrevious := false
 
 Global / semanticdbEnabled := !(Global / insideCI).value
 // Change main/src/main/scala/sbt/plugins/SemanticdbPlugin.scala too, if you change this.
-Global / semanticdbVersion := "4.9.9"
+Global / semanticdbVersion := "4.14.1"
 val excludeLint = SettingKey[Set[Def.KeyedInitialize[?]]]("excludeLintKeys")
 Global / excludeLint := (Global / excludeLint).?.value.getOrElse(Set.empty)
 Global / excludeLint += Utils.componentID
@@ -708,6 +708,7 @@ lazy val mainProj = (project in file("main"))
     mimaSettings,
     mimaBinaryIssueFilters ++= Vector(
       exclude[DirectMissingMethodProblem]("sbt.Keys.scalaCompilerBridgeBinaryJar"),
+      exclude[DirectMissingMethodProblem]("sbt.internal.Compiler.*"),
     ),
   )
   .dependsOn(lmCore, lmIvy, lmCoursierShadedPublishing)
