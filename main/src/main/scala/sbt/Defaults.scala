@@ -2775,7 +2775,7 @@ object Classpaths {
         packagedDefaultArtifacts.value
       } else Map.empty[Artifact, HashedVirtualFileRef]
     }
-  ) ++ RemoteCache.projectSettings
+  )
 
   /**
    * Produces the Maven-compatible artifacts of an sbt plugin.
