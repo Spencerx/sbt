@@ -158,12 +158,11 @@ private[sbt] object Compiler {
           }
         }
       }
-      def file(id: String): File = {
-        val files = for {
-          m <- toolReport.modules if m.module.name.startsWith(id)
-          (art, file) <- m.artifacts if art.`type` == Artifact.DefaultType
+      def file(id: String): Option[File] = {
+        for {
+          m <- toolReport.modules.find(_.module.name.startsWith(id))
+          (_, file) <- m.artifacts.find(_._1.`type` == Artifact.DefaultType)
         } yield file
-        files.headOption getOrElse sys.error(s"Missing $id jar file")
       }
 
       val allCompilerJars = toolReport.modules.flatMap(_.artifacts.map(_._2))
@@ -178,7 +177,7 @@ private[sbt] object Compiler {
               .flatMap(_.artifacts.map(_._2))
           case None => Nil
         }
-      val libraryJars = ScalaArtifacts.libraryIds(sv).map(file)
+      val libraryJars = ScalaArtifacts.libraryIds(sv).flatMap(file)
 
       makeScalaInstance(
         sv,
