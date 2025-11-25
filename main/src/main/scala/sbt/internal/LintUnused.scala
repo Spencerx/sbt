@@ -43,7 +43,6 @@ object LintUnused {
       onLoadMessage,
       onUnload,
       pollInterval,
-      pushRemoteCacheArtifact,
       sbt.nio.Keys.outputFileStamper,
       sbt.nio.Keys.watchTriggers,
       serverConnectionType,

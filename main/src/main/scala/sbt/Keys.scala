@@ -23,7 +23,6 @@ import sbt.internal.bsp.*
 import sbt.internal.inc.ScalaInstance
 import sbt.internal.librarymanagement.{ CompatibilityWarningOptions, IvySbt }
 import sbt.internal.librarymanagement.ivy.{ IvyConfiguration, UpdateOptions }
-import sbt.internal.remotecache.RemoteCacheArtifact
 import sbt.internal.server.BuildServerProtocol.BspFullWorkspace
 import sbt.internal.server.{ BspCompileTask, BuildServerReporter, ServerHandler }
 import sbt.internal.util.{ AttributeKey, ProgressState, SourcePosition }
@@ -299,7 +298,6 @@ object Keys {
   val `package` = taskKey[HashedVirtualFileRef]("Produces the main artifact, such as a binary jar.  This is typically an alias for the task that actually does the packaging.").withRank(APlusTask)
   val packageDoc = taskKey[HashedVirtualFileRef]("Produces a documentation artifact, such as a jar containing API documentation.").withRank(AMinusTask)
   val packageSrc = taskKey[HashedVirtualFileRef]("Produces a source artifact, such as a jar containing sources and resources.").withRank(AMinusTask)
-  val packageCache = taskKey[HashedVirtualFileRef]("Produces the main artifact for caching.")
 
   val packageOptions = taskKey[Seq[PackageOption]]("Options for packaging.").withRank(BTask)
   val packageTimestamp = settingKey[Option[Long]]("Overwrites timestamps in JAR file to make the build reproducible; None keeps the existing timestamps (useful for web resources)").withRank(CSetting)
@@ -429,19 +427,6 @@ object Keys {
   val internalDependencyConfigurations = settingKey[Seq[(ProjectRef, Set[String])]]("The project configurations that this configuration depends on")
   val closeClassLoaders = settingKey[Boolean]("Close classloaders in run and test when the task completes.").withRank(DSetting)
   val allowZombieClassLoaders = settingKey[Boolean]("Allow a classloader that has previously been closed by `run` or `test` to continue loading classes.")
-  // val useRemoteCache = settingKey[Boolean]("Use remote cache.")
-  val remoteCacheId = taskKey[String]("Unique identifier for the remote cache.")
-  val remoteCacheProjectId = taskKey[ModuleID]("ModuleID used for remote cache JARs.")
-  val remoteCacheIdCandidates = taskKey[Seq[String]]("Remote cache ids to pull.")
-  val remoteCacheArtifacts = taskKey[Seq[RemoteCacheArtifact]]("Remote cache artifact definitions.")
-  val remoteCacheArtifact = taskKey[RemoteCacheArtifact]("The remote cache artifact definition.")
-  val pullRemoteCache = taskKey[Unit]("Retrieve remote cache.")
-  val pushRemoteCache = taskKey[Unit]("Push remote cache to the cache server.")
-  val pushRemoteCacheArtifact = settingKey[Boolean]("Enables publishing an artifact to remote cache.")
-  val pushRemoteCacheConfiguration = taskKey[PublishConfiguration]("")
-  val pushRemoteCacheTo = settingKey[Option[Resolver]]("The resolver to publish remote cache to.")
-  val remoteCacheResolvers = settingKey[Seq[Resolver]]("Resolvers for remote cache.")
-  val remoteCachePom = taskKey[HashedVirtualFileRef]("Generates a pom for publishing when publishing Maven-style.")
   val localCacheDirectory = settingKey[File]("Operating system specific cache directory.")
   val localDigestCacheByteSize = SettingKey[Long](BasicKeys.localDigestCacheByteSize).withRank(DSetting)
   val usePipelining = settingKey[Boolean]("Use subproject pipelining for compilation.").withRank(BSetting)
