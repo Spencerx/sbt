@@ -671,100 +671,105 @@ object Defaults extends BuildCommon {
   )
 
   // This is included into JvmPlugin.projectSettings
-  def compileBase = inTask(console)(compilersSetting :: Nil) ++ compileBaseGlobal ++ Seq(
-    useScalaReplJLine :== false,
-    scalaInstanceTopLoader := {
-      val topLoader = if (!useScalaReplJLine.value) {
-        // the JLineLoader contains the SbtInterfaceClassLoader
-        classOf[org.jline.terminal.Terminal].getClassLoader
-      } else classOf[Compilers].getClassLoader // the SbtInterfaceClassLoader
-
-      // Scala 2.10 shades jline in the console so we need to make sure that it loads a compatible
-      // jansi version. Because of the shading, console does not work with the thin client for 2.10.x.
-      if (scalaVersion.value.startsWith("2.10.")) new ClassLoader(topLoader) {
-        override protected def loadClass(name: String, resolve: Boolean): Class[?] = {
-          if (name.startsWith("org.fusesource")) throw new ClassNotFoundException(name)
-          super.loadClass(name, resolve)
+  def compileBase =
+    inTask(console)(
+      Seq(
+        scalaInstance := Compiler.scalaInstanceTask(Some(Configurations.ScalaReplTool)).value,
+      ) ++ compilersSetting
+    ) ++ compileBaseGlobal ++ Seq(
+      useScalaReplJLine :== false,
+      scalaInstanceTopLoader := {
+        val topLoader = if (!useScalaReplJLine.value) {
+          // the JLineLoader contains the SbtInterfaceClassLoader
+          classOf[org.jline.terminal.Terminal].getClassLoader
+        } else classOf[Compilers].getClassLoader // the SbtInterfaceClassLoader
+        // Scala 2.10 shades jline in the console so we need to make sure that it loads a compatible
+        // jansi version. Because of the shading, console does not work with the thin client for 2.10.x.
+        if (scalaVersion.value.startsWith("2.10.")) new ClassLoader(topLoader) {
+          override protected def loadClass(name: String, resolve: Boolean): Class[?] = {
+            if (name.startsWith("org.fusesource")) throw new ClassNotFoundException(name)
+            super.loadClass(name, resolve)
+          }
         }
-      }
-      else topLoader
-    },
-    scalaInstance := Def.uncached(Compiler.scalaInstanceTask.value),
-    crossVersion := (if (crossPaths.value) CrossVersion.binary else CrossVersion.disabled),
-    pluginCrossBuild / sbtBinaryVersion := binarySbtVersion(
-      (pluginCrossBuild / sbtVersion).value
-    ),
-    // Use (pluginCrossBuild / sbtVersion) to pick the sbt module to depend from the plugin.
-    // Because `pluginCrossBuild / sbtVersion` can be scoped to project level,
-    // this setting needs to be set here too.
-    pluginCrossBuild / sbtDependency := {
-      val app = appConfiguration.value
-      val id = app.provider.id
-      val sv = (pluginCrossBuild / sbtVersion).value
-      val scalaV = (pluginCrossBuild / scalaVersion).value
-      val binVersion = (pluginCrossBuild / scalaBinaryVersion).value
-      val cross = id.crossVersionedValue match {
-        case CrossValue.Disabled => Disabled()
-        case CrossValue.Full     => CrossVersion.full
-        case CrossValue.Binary   => CrossVersion.binary
-      }
-      val base = ModuleID(id.groupID, id.name, sv).withCrossVersion(cross).platform(Platform.jvm)
-      CrossVersion(scalaV, binVersion)(base).withCrossVersion(Disabled())
-    },
-    crossSbtVersions := Vector((pluginCrossBuild / sbtVersion).value),
-    crossTarget := target.value,
-    clean := {
-      try {
-        val store = AnalysisUtil.staticCachedStore(
-          analysisFile = (Compile / compileAnalysisFile).value.toPath,
-          useTextAnalysis = false,
-          useConsistent = true,
-        )
-        // TODO: Uncomment after Zinc update
-        // store.clearCache()
-      } catch {
-        case NonFatal(_) => ()
-      }
-      clean.value
-    },
-    scalaCompilerBridgeBin := Def
-      .ifS(Def.task {
-        val sv = scalaVersion.value
-        val managed = managedScalaInstance.value
-        val hasSbtBridge = ScalaArtifacts.isScala3(sv) || ZincLmUtil.hasScala2SbtBridge(sv)
-        hasSbtBridge && managed
-      })(Def.cachedTask {
-        val sv = scalaVersion.value
-        val conv = fileConverter.value
-        val s = streams.value
-        val t = target.value
-        val r = dependencyResolution.value
-        val uc = updateConfiguration.value
-        val jar = ZincLmUtil.fetchDefaultBridgeModule(
-          sv,
-          r,
-          uc,
-          (update / unresolvedWarningConfiguration).value,
-          s.log
-        )
-        val out = t / "compiler-bridge" / jar.getName()
-        val outVf = conv.toVirtualFile(out.toPath())
-        IO.copyFile(jar, out)
-        Def.declareOutput(outVf)
-        Vector(outVf: HashedVirtualFileRef)
-      })(Def.task(Vector.empty))
-      .value,
-    scalaCompilerBridgeSource := ZincLmUtil.getDefaultBridgeSourceModule(scalaVersion.value),
-    auxiliaryClassFiles ++= {
-      if (ScalaArtifacts.isScala3(scalaVersion.value)) List(TastyFiles.instance)
-      else Nil
-    },
-    consoleProject / scalaCompilerBridgeSource := ZincLmUtil.getDefaultBridgeSourceModule(
-      appConfiguration.value.provider.scalaProvider.version
-    ),
-    classpathOptions := ClasspathOptionsUtil.noboot(scalaVersion.value),
-    console / classpathOptions := ClasspathOptionsUtil.replNoboot(scalaVersion.value),
-  )
+        else topLoader
+      },
+      scalaInstance := Def.uncached(Compiler.scalaInstanceTask(None).value),
+      crossVersion := (if (crossPaths.value) CrossVersion.binary else CrossVersion.disabled),
+      pluginCrossBuild / sbtBinaryVersion := binarySbtVersion(
+        (pluginCrossBuild / sbtVersion).value
+      ),
+      // Use (pluginCrossBuild / sbtVersion) to pick the sbt module to depend from the plugin.
+      // Because `pluginCrossBuild / sbtVersion` can be scoped to project level,
+      // this setting needs to be set here too.
+      pluginCrossBuild / sbtDependency := {
+        val app = appConfiguration.value
+        val id = app.provider.id
+        val sv = (pluginCrossBuild / sbtVersion).value
+        val scalaV = (pluginCrossBuild / scalaVersion).value
+        val binVersion = (pluginCrossBuild / scalaBinaryVersion).value
+        val cross = id.crossVersionedValue match {
+          case CrossValue.Disabled => Disabled()
+          case CrossValue.Full     => CrossVersion.full
+          case CrossValue.Binary   => CrossVersion.binary
+        }
+        val base = ModuleID(id.groupID, id.name, sv).withCrossVersion(cross).platform(Platform.jvm)
+        CrossVersion(scalaV, binVersion)(base).withCrossVersion(Disabled())
+      },
+      crossSbtVersions := Vector((pluginCrossBuild / sbtVersion).value),
+      crossTarget := target.value,
+      clean := {
+        try {
+          val store = AnalysisUtil.staticCachedStore(
+            analysisFile = (Compile / compileAnalysisFile).value.toPath,
+            useTextAnalysis = false,
+            useConsistent = true,
+          )
+          // TODO: Uncomment after Zinc update
+          // store.clearCache()
+        } catch {
+          case NonFatal(_) => ()
+        }
+        clean.value
+      },
+      scalaCompilerBridgeBin := Def
+        .ifS(Def.task {
+          val sv = scalaVersion.value
+          val managed = managedScalaInstance.value
+          val hasSbtBridge = ScalaArtifacts.isScala3(sv) || ZincLmUtil.hasScala2SbtBridge(sv)
+          hasSbtBridge && managed
+        })(Def.cachedTask {
+          val sv = scalaVersion.value
+          val conv = fileConverter.value
+          val s = streams.value
+          val t = target.value
+          val r = dependencyResolution.value
+          val uc = updateConfiguration.value
+          val jar = ZincLmUtil.fetchDefaultBridgeModule(
+            sv,
+            r,
+            uc,
+            (update / unresolvedWarningConfiguration).value,
+            s.log
+          )
+          val out = t / "compiler-bridge" / jar.getName()
+          val outVf = conv.toVirtualFile(out.toPath())
+          IO.copyFile(jar, out)
+          Def.declareOutput(outVf)
+          Vector(outVf: HashedVirtualFileRef)
+        })(Def.task(Vector.empty))
+        .value,
+      scalaCompilerBridgeSource := ZincLmUtil.getDefaultBridgeSourceModule(scalaVersion.value),
+      auxiliaryClassFiles ++= {
+        if (ScalaArtifacts.isScala3(scalaVersion.value)) List(TastyFiles.instance)
+        else Nil
+      },
+      consoleProject / scalaCompilerBridgeSource := ZincLmUtil.getDefaultBridgeSourceModule(
+        appConfiguration.value.provider.scalaProvider.version
+      ),
+      classpathOptions := ClasspathOptionsUtil.noboot(scalaVersion.value),
+      console / classpathOptions := ClasspathOptionsUtil.replNoboot(scalaVersion.value),
+    )
+
   private lazy val compileBaseGlobal: Seq[Setting[?]] = globalDefaults(
     Seq(
       auxiliaryClassFiles :== Nil,
@@ -1935,6 +1940,7 @@ object Defaults extends BuildCommon {
   def docTaskSettings(key: TaskKey[File] = doc): Seq[Setting[?]] =
     inTask(key)(
       Seq(
+        scalaInstance := Compiler.scalaInstanceTask(Some(Configurations.ScalaDocTool)).value,
         apiMappings ++= {
           val dependencyCp = dependencyClasspath.value
           val log = streams.value.log
@@ -2017,7 +2023,7 @@ object Defaults extends BuildCommon {
           }
           out
         }
-      )
+      ) ++ compilersSetting
     )
 
   def discoverMainClasses(analysis: CompileAnalysis): Seq[String] = analysis match {
@@ -3127,7 +3133,7 @@ object Classpaths {
     ivyConfigurations ++= Configurations.auxiliary,
     ivyConfigurations ++= {
       if (managedScalaInstance.value && scalaHome.value.isEmpty)
-        Configurations.ScalaTool :: Configurations.ScalaDocTool :: Nil
+        Configurations.ScalaTool :: Configurations.ScalaDocTool :: Configurations.ScalaReplTool :: Nil
       else Nil
     },
     // Coursier needs these
@@ -3351,15 +3357,16 @@ object Classpaths {
       val pluginAdjust =
         if (isPlugin) sbtdeps +: base
         else base
-      val sbtOrg = scalaOrganization.value
+      val scalaOrg = scalaOrganization.value
       val version = scalaVersion.value
       val extResolvers = externalResolvers.value
       val allToolDeps =
         if scalaHome.value.isDefined || scalaModuleInfo.value.isEmpty || !managedScalaInstance.value
         then Nil
         else
-          ScalaArtifacts.toolDependencies(sbtOrg, version) ++
-            ScalaArtifacts.docToolDependencies(sbtOrg, version)
+          ScalaArtifacts.toolDependencies(scalaOrg, version) ++
+            ScalaArtifacts.docToolDependencies(scalaOrg, version) ++
+            ScalaArtifacts.replToolDependencies(scalaOrg, version)
       allToolDeps.map(_.platform(Platform.jvm)) ++ pluginAdjust
     },
     // in case of meta build, exclude all sbt modules from the dependency graph, so we can use the sbt resolved by the launcher
