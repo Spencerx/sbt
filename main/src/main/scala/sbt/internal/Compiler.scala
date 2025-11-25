@@ -1,3 +1,11 @@
+/*
+ * sbt
+ * Copyright 2023, Scala center
+ * Copyright 2011 - 2022, Lightbend, Inc.
+ * Copyright 2008 - 2010, Mark Harrah
+ * Licensed under Apache License 2.0 (see LICENSE)
+ */
+
 package sbt
 package internal
 
@@ -5,6 +13,7 @@ import java.io.File
 import sbt.internal.inc.ScalaInstance
 import sbt.librarymanagement.{
   Artifact,
+  Configuration,
   Configurations,
   ConfigurationReport,
   ScalaArtifacts,
@@ -14,7 +23,7 @@ import sbt.librarymanagement.{
 import xsbti.ScalaProvider
 
 object Compiler:
-  def scalaInstanceTask: Def.Initialize[Task[ScalaInstance]] =
+  def scalaInstanceTask(extraToolConf: Option[Configuration]): Def.Initialize[Task[ScalaInstance]] =
     Def.taskDyn {
       val sh = Keys.scalaHome.value
       val app = Keys.appConfiguration.value
@@ -24,7 +33,7 @@ object Compiler:
         case _ =>
           val scalaProvider = app.provider.scalaProvider
           if !managed then emptyScalaInstance
-          else scalaInstanceFromUpdate
+          else scalaInstanceFromUpdate(extraToolConf)
     }
 
   /**
@@ -84,7 +93,9 @@ object Compiler:
     )
   }
 
-  def scalaInstanceFromUpdate: Def.Initialize[Task[ScalaInstance]] = Def.task {
+  def scalaInstanceFromUpdate(
+      extraToolConf: Option[Configuration]
+  ): Def.Initialize[Task[ScalaInstance]] = Def.task {
     val sv = Keys.scalaVersion.value
     val fullReport = Keys.update.value
     val s = Keys.streams.value
@@ -147,13 +158,11 @@ object Compiler:
           else s.log.warn(msg)
         else ()
     else ()
-    def file(id: String): File = {
-      val files = for {
-        m <- toolReport.modules if m.module.name.startsWith(id)
-        (art, file) <- m.artifacts if art.`type` == Artifact.DefaultType
-      } yield file
-      files.headOption getOrElse sys.error(s"Missing $id jar file")
-    }
+    def file(id: String): Option[File] =
+      for
+        m <- toolReport.modules.find(_.module.name.startsWith(id))
+        (_, file) <- m.artifacts.find(_._1.`type` == Artifact.DefaultType)
+      yield file
 
     val allCompilerJars = toolReport.modules.flatMap(_.artifacts.map(_._2))
     val allDocJars =
@@ -163,7 +172,7 @@ object Compiler:
         .toSeq
         .flatMap(_.modules)
         .flatMap(_.artifacts.map(_._2))
-    val libraryJars = ScalaArtifacts.libraryIds(sv).map(file)
+    val libraryJars = ScalaArtifacts.libraryIds(sv).flatMap(file)
 
     makeScalaInstance(
       sv,
@@ -179,23 +188,23 @@ object Compiler:
       version: String,
       libraryJars: Array[File],
       allCompilerJars: Seq[File],
-      allDocJars: Seq[File],
+      extraToolJars: Seq[File],
       state: State,
       topLoader: ClassLoader,
   ): ScalaInstance =
     val classLoaderCache = State.StateOpsImpl(state).extendedClassLoaderCache
     val compilerJars = allCompilerJars.filterNot(libraryJars.contains).distinct.toArray
-    val docJars = allDocJars
+    val toolJars = extraToolJars
       .filterNot(jar => libraryJars.contains(jar) || compilerJars.contains(jar))
       .distinct
       .toArray
-    val allJars = libraryJars ++ compilerJars ++ docJars
+    val allJars = libraryJars ++ compilerJars ++ toolJars
 
     val libraryLoader = classLoaderCache(libraryJars.toList, topLoader)
     val compilerLoader = classLoaderCache(compilerJars.toList, libraryLoader)
     val fullLoader =
-      if (docJars.isEmpty) compilerLoader
-      else classLoaderCache(docJars.distinct.toList, compilerLoader)
+      if toolJars.isEmpty then compilerLoader
+      else classLoaderCache(toolJars.distinct.toList, compilerLoader)
     new ScalaInstance(
       version = version,
       loader = fullLoader,
