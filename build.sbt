@@ -117,7 +117,7 @@ def testedBaseSettings: Seq[Setting[?]] =
 
 val sbt20Plus =
   Seq(
-    "2.0.0-RC6",
+    "2.0.0-RC7",
   )
 val mimaSettings = mimaSettingsSince(sbt20Plus)
 def mimaSettingsSince(versions: Seq[String]): Seq[Def.Setting[?]] = Def settings (
@@ -366,7 +366,6 @@ lazy val utilCache = project
     contrabandSettings,
     mimaSettings,
     mimaBinaryIssueFilters ++= Seq(
-      exclude[ReversedMissingMethodProblem]("sbt.util.CacheImplicits.*"),
     ),
     Test / fork := true,
   )
@@ -707,35 +706,6 @@ lazy val mainProj = (project in file("main"))
     Compile / doc / sources := Nil,
     mimaSettings,
     mimaBinaryIssueFilters ++= Vector(
-      exclude[DirectMissingMethodProblem]("sbt.Keys.scalaCompilerBridgeBinaryJar"),
-      exclude[DirectMissingMethodProblem]("sbt.Keys.packageCache"),
-      exclude[DirectMissingMethodProblem]("sbt.Keys.pullRemoteCache"),
-      exclude[DirectMissingMethodProblem]("sbt.Keys.pushRemoteCache"),
-      exclude[DirectMissingMethodProblem]("sbt.Keys.pushRemoteCacheArtifact"),
-      exclude[DirectMissingMethodProblem]("sbt.Keys.pushRemoteCacheConfiguration"),
-      exclude[DirectMissingMethodProblem]("sbt.Keys.pushRemoteCacheTo"),
-      exclude[DirectMissingMethodProblem]("sbt.Keys.remoteCacheArtifact"),
-      exclude[DirectMissingMethodProblem]("sbt.Keys.remoteCacheArtifacts"),
-      exclude[DirectMissingMethodProblem]("sbt.Keys.remoteCacheId"),
-      exclude[DirectMissingMethodProblem]("sbt.Keys.remoteCacheIdCandidates"),
-      exclude[DirectMissingMethodProblem]("sbt.Keys.remoteCachePom"),
-      exclude[DirectMissingMethodProblem]("sbt.Keys.remoteCacheProjectId"),
-      exclude[DirectMissingMethodProblem]("sbt.Keys.remoteCacheResolvers"),
-      exclude[DirectMissingMethodProblem]("sbt.Keys.packageCache"),
-      exclude[DirectMissingMethodProblem]("sbt.Keys.remoteCacheId"),
-      exclude[DirectMissingMethodProblem]("sbt.Keys.remoteCacheProjectId"),
-      exclude[DirectMissingMethodProblem]("sbt.Keys.remoteCacheIdCandidates"),
-      exclude[DirectMissingMethodProblem]("sbt.Keys.remoteCacheArtifacts"),
-      exclude[DirectMissingMethodProblem]("sbt.Keys.remoteCacheArtifact"),
-      exclude[DirectMissingMethodProblem]("sbt.Keys.pullRemoteCache"),
-      exclude[DirectMissingMethodProblem]("sbt.Keys.pushRemoteCache"),
-      exclude[DirectMissingMethodProblem]("sbt.Keys.pushRemoteCacheArtifact"),
-      exclude[DirectMissingMethodProblem]("sbt.Keys.pushRemoteCacheConfiguration"),
-      exclude[DirectMissingMethodProblem]("sbt.Keys.pushRemoteCacheTo"),
-      exclude[DirectMissingMethodProblem]("sbt.Keys.remoteCacheResolvers"),
-      exclude[DirectMissingMethodProblem]("sbt.Keys.remoteCachePom"),
-      exclude[DirectMissingMethodProblem]("sbt.internal.RemoteCache.*"),
-      exclude[DirectMissingMethodProblem]("sbt.internal.Compiler.*"),
     ),
   )
   .dependsOn(lmCore, lmIvy, lmCoursierShadedPublishing)
