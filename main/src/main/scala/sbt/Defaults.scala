@@ -4084,6 +4084,7 @@ object Classpaths {
     val resourceDirs = resourceDirectories.value
     val vfBackendDir = compileIncremental.value._2
     val backendDir = c.toPath(vfBackendDir)
+    val _ = resources.value
     backendDir.toFile() :: resourceDirs.toList.filter(_.exists())
   }
 
