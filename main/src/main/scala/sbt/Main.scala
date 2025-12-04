@@ -893,8 +893,8 @@ object BuiltinCommands {
     StashOnFailure ::
       (OnFailure + " " + loadProjectCommand(LoadFailed, arg)) ::
       loadProjectCommand(LoadProjectImpl, arg) ::
-      PopOnFailure ::
       State.FailureWall ::
+      PopOnFailure ::
       Nil
 
   def loadProject: Command =
