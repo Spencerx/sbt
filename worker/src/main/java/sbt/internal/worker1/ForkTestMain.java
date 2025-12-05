@@ -325,6 +325,7 @@ public class ForkTestMain {
     }
 
     private void runTests(TestInfo info, ClassLoader classLoader) throws Exception {
+      Thread.currentThread().setContextClassLoader(classLoader);
       final ExecutorService executor = executorService(info.parallel);
       final TaskDef[] tests = info.taskDefs.toArray(new TaskDef[] {});
       final int nFrameworks = info.testRunners.size();
