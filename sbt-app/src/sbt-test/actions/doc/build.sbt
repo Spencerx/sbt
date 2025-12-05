@@ -7,7 +7,7 @@ lazy val root = (project in file("."))
     crossPaths := false,
     crossScalaVersions := Seq("2.12.20", "2.13.12"),
     scalaVersion := "2.12.20",
-    Compile / doc / scalacOptions += "-Xfatal-warnings",
+    Compile / doc / scalacOptions += "-Werror",
     commands += Command.command("excludeB") { s =>
       val impl = """val src = (Compile / sources).value; src.filterNot(_.getName.contains("B"))"""
       s"set Compile / doc / sources := { $impl }" :: s

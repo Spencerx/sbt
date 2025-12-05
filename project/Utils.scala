@@ -31,7 +31,7 @@ object Utils {
 
   lazy val baseScalacOptions = Seq(
     Compile / doc / scalacOptions -= "-Xlint",
-    Compile / doc / scalacOptions -= "-Xfatal-warnings",
+    Compile / doc / scalacOptions -= "-Werror",
   )
 
   def projectComponent: Setting[?] =
