@@ -14,7 +14,7 @@ object HouseRulesPlugin extends AutoPlugin {
     scalacOptions += "-language:implicitConversions",
     scalacOptions ++= "-Xfuture".ifScala213OrMinus.value.toList,
     scalacOptions ++= "-Xlint".ifScala2.value.toList,
-    scalacOptions ++= "-Xfatal-warnings"
+    scalacOptions ++= "-Werror"
       .ifScala3x(_ => {
         sys.props.get("sbt.build.fatal") match {
           case Some(_) => java.lang.Boolean.getBoolean("sbt.build.fatal")
