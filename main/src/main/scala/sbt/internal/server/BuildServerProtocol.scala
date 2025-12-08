@@ -26,7 +26,7 @@ import sbt.internal.protocol.JsonRpcRequestMessage
 import sbt.internal.util.{ Attributed, ErrorHandling }
 import sbt.internal.util.complete.{ Parser, Parsers }
 import sbt.librarymanagement.CrossVersion.binaryScalaVersion
-import sbt.librarymanagement.{ Configuration, ScalaArtifacts }
+import sbt.librarymanagement.{ Configuration, ScalaArtifacts, UpdateReport }
 import sbt.std.TaskExtra
 import sbt.util.Logger
 import sjsonnew.shaded.scalajson.ast.unsafe.{ JNull, JValue }
@@ -153,10 +153,18 @@ object BuildServerProtocol {
       state.value.respondEvent(result)
     }.evaluated,
     bspBuildTargetResources / aggregate := false,
-    bspBuildTargetDependencySources := bspInputTask { (_, filter) =>
+    bspBuildTargetDependencySources := bspInputTask { (workspace, filter) =>
       val items = bspBuildTargetDependencySourcesItem.result.all(filter).value
       val successfulItems = anyOrThrow(items)
-      val result = DependencySourcesResult(successfulItems.toVector)
+      val buildItems = workspace.builds
+        .map { case (targetId, loadedBuildUnit) =>
+          val projRef = ProjectRef(loadedBuildUnit.unit.uri, loadedBuildUnit.root)
+          (projRef / updateSbtClassifiers).map(getDependencySourceItem(targetId, _))
+        }
+        .toSeq
+        .join
+        .value
+      val result = DependencySourcesResult((successfulItems ++ buildItems).toVector)
       state.value.respondEvent(result)
     }.evaluated,
     bspBuildTargetDependencySources / aggregate := false,
@@ -845,8 +853,16 @@ object BuildServerProtocol {
   }
 
   private def dependencySourcesItemTask: Def.Initialize[Task[DependencySourcesItem]] = Def.task {
-    val targetId = Keys.bspTargetIdentifier.value
-    val updateReport = Keys.updateClassifiers.value
+    getDependencySourceItem(
+      Keys.bspTargetIdentifier.value,
+      Keys.updateClassifiers.value
+    )
+  }
+
+  private def getDependencySourceItem(
+      targetId: BuildTargetIdentifier,
+      updateReport: UpdateReport
+  ): DependencySourcesItem = {
     val sources = for {
       configuration <- updateReport.configurations.view
       module <- configuration.modules.view
