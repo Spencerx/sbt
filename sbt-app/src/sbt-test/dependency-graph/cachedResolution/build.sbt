@@ -1,4 +1,4 @@
-scalaVersion := "2.12.20"
+scalaVersion := "2.12.21"
 
 libraryDependencies += "org.slf4j" % "slf4j-api" % "1.7.28"
 updateOptions := updateOptions.value.withCachedResolution(true)

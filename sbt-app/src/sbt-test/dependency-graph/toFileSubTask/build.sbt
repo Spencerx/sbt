@@ -1,5 +1,5 @@
 // ThisBuild / useCoursier := false
-ThisBuild / scalaVersion := "2.12.20"
+ThisBuild / scalaVersion := "2.12.21"
 ThisBuild / organization := "org.example"
 ThisBuild / version := "0.1"
 

@@ -1,6 +1,6 @@
 val buildInfo = taskKey[Seq[File]]("generates the build info")
 
-ThisBuild / scalaVersion := "2.12.20"
+ThisBuild / scalaVersion := "2.12.21"
 
 lazy val root = (project in file("."))
   .settings(

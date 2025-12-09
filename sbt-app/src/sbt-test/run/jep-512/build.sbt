@@ -3,7 +3,7 @@ lazy val check = taskKey[Unit]("")
 
 lazy val common = Def.settings(
   // 2.12.x uses Zinc's compiler bridge
-  scalaVersion := "2.12.20",
+  scalaVersion := "2.12.21",
 )
 
 // use `runMain` instead of `run` because discoveredMainClasses return empty
