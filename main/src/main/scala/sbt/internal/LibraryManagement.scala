@@ -203,8 +203,12 @@ private[sbt] object LibraryManagement {
       case Left(w) =>
         throw w.resolveException
     }
+    val key = (m: ModuleID) => (m.organization, m.name, m.revision)
+    val originalKeys = dependencies.map(key).toSet
+    val transitiveOnly = report.allModules.filterNot(m => originalKeys contains key(m))
+    val mergedDependencies = dependencies ++ transitiveOnly
     val newConfig = config
-      .withModule(module.withDependencies(report.allModules))
+      .withModule(module.withDependencies(mergedDependencies))
     lm.updateClassifiers(newConfig, uwconfig, Vector(), log)
   }
 
