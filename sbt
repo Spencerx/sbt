@@ -434,7 +434,7 @@ findProperty() {
     "${java_opts_array[@]}"
     "${sbt_opts_array[@]}"
     "${_java_options_array[@]}"
-    "${java_tool_options_array[@]}")
+    "${java_tool_options_array[@]}"
     "${jdk_java_options_array[@]}")
 
   for opt in "${args_to_check[@]}"; do
