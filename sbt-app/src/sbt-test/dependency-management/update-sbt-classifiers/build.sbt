@@ -33,7 +33,6 @@ lazy val root = (project in file("."))
         "com.eed3si9n:sjson-new-scalajson_3",
         "com.github.ben-manes.caffeine:caffeine",
         "com.github.mwiede:jsch",
-        "com.google.code.gson:gson",
         "com.google.errorprone:error_prone_annotations",
         "com.lmax:disruptor",
         "com.swoval:file-tree-views",
@@ -77,6 +76,7 @@ lazy val root = (project in file("."))
         "org.scala-sbt:zinc-core_3",
         "org.scala-sbt:zinc-persist_3",
         "org.scala-sbt:zinc_3",
+        "org.scala-sbt.gson:shaded-gson",
         "org.slf4j:slf4j-api",
       )
       def assertCollectionsEqual(message: String, expected: Seq[String], actual: Seq[String]): Unit =

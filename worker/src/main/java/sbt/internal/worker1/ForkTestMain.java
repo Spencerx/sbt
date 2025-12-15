@@ -8,7 +8,7 @@
 
 package sbt.internal.worker1;
 
-import com.google.gson.Gson;
+import org.scalasbt.shadedgson.com.google.gson.Gson;
 
 import sbt.testing.*;
 

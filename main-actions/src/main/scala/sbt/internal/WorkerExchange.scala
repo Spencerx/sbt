@@ -9,7 +9,7 @@
 package sbt
 package internal
 
-import com.google.gson.Gson
+import org.scalasbt.shadedgson.com.google.gson.Gson
 import java.io.*
 import sbt.io.IO
 import sbt.internal.worker1.*
