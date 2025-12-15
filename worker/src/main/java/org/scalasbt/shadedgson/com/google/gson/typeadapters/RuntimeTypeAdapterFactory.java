@@ -14,19 +14,19 @@
  * limitations under the License.
  */
 
-package com.google.gson.typeadapters;
+package org.scalasbt.shadedgson.com.google.gson.typeadapters;
 
-import com.google.errorprone.annotations.CanIgnoreReturnValue;
-import com.google.gson.Gson;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParseException;
-import com.google.gson.JsonPrimitive;
-import com.google.gson.TypeAdapter;
-import com.google.gson.TypeAdapterFactory;
-import com.google.gson.reflect.TypeToken;
-import com.google.gson.stream.JsonReader;
-import com.google.gson.stream.JsonWriter;
+import org.scalasbt.shadedgson.com.google.errorprone.annotations.CanIgnoreReturnValue;
+import org.scalasbt.shadedgson.com.google.gson.Gson;
+import org.scalasbt.shadedgson.com.google.gson.JsonElement;
+import org.scalasbt.shadedgson.com.google.gson.JsonObject;
+import org.scalasbt.shadedgson.com.google.gson.JsonParseException;
+import org.scalasbt.shadedgson.com.google.gson.JsonPrimitive;
+import org.scalasbt.shadedgson.com.google.gson.TypeAdapter;
+import org.scalasbt.shadedgson.com.google.gson.TypeAdapterFactory;
+import org.scalasbt.shadedgson.com.google.gson.reflect.TypeToken;
+import org.scalasbt.shadedgson.com.google.gson.stream.JsonReader;
+import org.scalasbt.shadedgson.com.google.gson.stream.JsonWriter;
 import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.Map;

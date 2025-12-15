@@ -8,12 +8,12 @@
 
 package sbt.internal.worker1;
 
-import com.google.gson.Gson;
-import com.google.gson.TypeAdapter;
-import com.google.gson.TypeAdapterFactory;
-import com.google.gson.reflect.TypeToken;
-import com.google.gson.stream.JsonReader;
-import com.google.gson.stream.JsonWriter;
+import org.scalasbt.shadedgson.com.google.gson.Gson;
+import org.scalasbt.shadedgson.com.google.gson.TypeAdapter;
+import org.scalasbt.shadedgson.com.google.gson.TypeAdapterFactory;
+import org.scalasbt.shadedgson.com.google.gson.reflect.TypeToken;
+import org.scalasbt.shadedgson.com.google.gson.stream.JsonReader;
+import org.scalasbt.shadedgson.com.google.gson.stream.JsonWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 

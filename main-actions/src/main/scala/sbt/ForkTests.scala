@@ -8,7 +8,7 @@
 
 package sbt
 
-import com.google.gson.{ JsonObject, JsonParser, JsonSyntaxException }
+import org.scalasbt.shadedgson.com.google.gson.{ JsonObject, JsonParser, JsonSyntaxException }
 import testing.{ Logger as _, Task as _, * }
 import java.io.*
 import java.util.ArrayList

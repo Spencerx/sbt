@@ -433,6 +433,10 @@ lazy val workerProj = (project in file("worker"))
     // run / fork := false,
     Test / fork := true,
     mimaSettings,
+    mimaBinaryIssueFilters ++= Vector(
+      exclude[MissingClassProblem]("com.google.gson.typeadapters.RuntimeTypeAdapterFactory"),
+      exclude[IncompatibleResultTypeProblem]("sbt.internal.worker1.WorkerMain.mkGson"),
+    ),
   )
   .configure(addSbtIOForTest)
 
