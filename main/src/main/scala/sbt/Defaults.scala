@@ -3038,8 +3038,12 @@ object Classpaths {
     outputPath := {
       val p = platform.value
       val m = moduleName.value
+      val c = crossPaths.value
       val sv = scalaVersion.value
-      s"$p/scala-$sv/$m"
+      val sv1 =
+        if c then s"scala-$sv"
+        else "u"
+      s"$p/$sv1/$m"
     },
     ivyPaths := IvyPaths(
       baseDirectory.value.toString,
