@@ -165,20 +165,22 @@ object Compiler:
       yield file
 
     val allCompilerJars = toolReport.modules.flatMap(_.artifacts.map(_._2))
-    val allDocJars =
-      fullReport
-        .configuration(Configurations.ScalaDocTool)
-        .map(updateLibraryToCompileConfiguration)
-        .toSeq
-        .flatMap(_.modules)
-        .flatMap(_.artifacts.map(_._2))
+    val extraToolJars = extraToolConf match
+      case Some(extra) =>
+        fullReport
+          .configuration(extra)
+          .map(updateLibraryToCompileConfiguration)
+          .toSeq
+          .flatMap(_.modules)
+          .flatMap(_.artifacts.map(_._2))
+      case None => Nil
     val libraryJars = ScalaArtifacts.libraryIds(sv).flatMap(file)
 
     makeScalaInstance(
       sv,
       libraryJars,
       allCompilerJars,
-      allDocJars,
+      extraToolJars,
       Keys.state.value,
       Keys.scalaInstanceTopLoader.value,
     )
