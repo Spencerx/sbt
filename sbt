@@ -303,7 +303,7 @@ addMemory () {
 }
 
 addDefaultMemory() {
-  # if we detect any of these settings in ${JAVA_OPTS} or ${JAVA_TOOL_OPTIONS} we need to NOT output our settings.
+  # if we detect any of these settings in ${JAVA_OPTS} or ${JAVA_TOOL_OPTIONS} or ${JDK_JAVA_OPTIONS} we need to NOT output our settings.
   # The reason is the Xms/Xmx, if they don't line up, cause errors.
   if [[ "${java_args[@]}" == *-Xmx* ]] || \
      [[ "${java_args[@]}" == *-Xms* ]] || \
@@ -322,6 +322,15 @@ addDefaultMemory() {
        [[ "${JAVA_TOOL_OPTIONS}" == *-XX:InitialRAMPercentage* ]] || \
        [[ "${JAVA_TOOL_OPTIONS}" == *-XX:MaxRAMPercentage* ]] || \
        [[ "${JAVA_TOOL_OPTIONS}" == *-XX:MinRAMPercentage* ]] ; then
+    :
+  elif [[ "${JDK_JAVA_OPTIONS}" == *-Xmx* ]] || \
+       [[ "${JDK_JAVA_OPTIONS}" == *-Xms* ]] || \
+       [[ "${JDK_JAVA_OPTIONS}" == *-Xss* ]] || \
+       [[ "${JDK_JAVA_OPTIONS}" == *-XX:+UseCGroupMemoryLimitForHeap* ]] || \
+       [[ "${JDK_JAVA_OPTIONS}" == *-XX:MaxRAM* ]] || \
+       [[ "${JDK_JAVA_OPTIONS}" == *-XX:InitialRAMPercentage* ]] || \
+       [[ "${JDK_JAVA_OPTIONS}" == *-XX:MaxRAMPercentage* ]] || \
+       [[ "${JDK_JAVA_OPTIONS}" == *-XX:MinRAMPercentage* ]] ; then
     :
   elif [[ "${sbt_options[@]}" == *-Xmx* ]] || \
        [[ "${sbt_options[@]}" == *-Xms* ]] || \
@@ -406,23 +415,27 @@ jdk_version() {
 #   - SBT_OPTS environment variable,
 #   - _JAVA_OPTIONS environment variable and
 #   - JAVA_TOOL_OPTIONS environment variable
+#   - JDK_JAVA_OPTIONS environment variable
 # in that order.
 findProperty() {
   local -a java_opts_array
   local -a sbt_opts_array
   local -a _java_options_array
   local -a java_tool_options_array
+  local -a jdk_java_options_array
   read -a java_opts_array <<< "$JAVA_OPTS"
   read -a sbt_opts_array <<< "$SBT_OPTS"
   read -a _java_options_array <<< "$_JAVA_OPTIONS"
   read -a java_tool_options_array <<< "$JAVA_TOOL_OPTIONS"
+  read -a jdk_java_options_array <<< "$JDK_JAVA_OPTIONS"
 
   local args_to_check=(
     "${java_args[@]}"
     "${java_opts_array[@]}"
     "${sbt_opts_array[@]}"
     "${_java_options_array[@]}"
-    "${java_tool_options_array[@]}")
+    "${java_tool_options_array[@]}"
+    "${jdk_java_options_array[@]}")
 
   for opt in "${args_to_check[@]}"; do
     if [[ "$opt" == -D$1=* ]]; then
@@ -577,6 +590,7 @@ run() {
       "${java_args[@]}" \
       "${sbt_options[@]}" \
       "${java_tool_options[@]}" \
+      "${jdk_java_options[@]}" \
       -jar "$sbt_jar" \
       "${sbt_commands[@]}" \
       "${residual_args[@]}"
@@ -856,6 +870,7 @@ fi
 java_args=($JAVA_OPTS)
 sbt_options0=(${SBT_OPTS:-$default_sbt_opts})
 java_tool_options=($JAVA_TOOL_OPTIONS)
+jdk_java_options=($JDK_JAVA_OPTIONS)
 if [[ "$SBT_NATIVE_CLIENT" == "true" ]]; then
   use_sbtn=1
 fi
