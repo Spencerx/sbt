@@ -70,8 +70,9 @@ object DependencyTreeSettings {
       ),
       dependencyTreeModuleGraph0 := {
         val sv = scalaVersion.value
+        val internalConfig = Configurations.internalMap(configuration.value)
         val g = dependencyTreeIgnoreMissingUpdate.value
-          .configuration(configuration.value)
+          .configuration(internalConfig)
           .map(
             report =>
               SbtUpdateReport.fromConfigurationReport(report, dependencyTreeCrossProjectId.value)
