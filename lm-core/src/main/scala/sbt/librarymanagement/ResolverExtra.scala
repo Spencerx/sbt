@@ -203,6 +203,7 @@ private[librarymanagement] abstract class ResolverFunctions {
       mavenCentral: Boolean
   ): Vector[Resolver] =
     Vector(Resolver.defaultLocal) ++
+      userResolvers ++
       single(DefaultMavenRepository, mavenCentral)
 
   /**

@@ -1115,6 +1115,7 @@ lazy val lmCore = (project in file("lm-core"))
       scalatest % Test,
       scalacheck % Test,
       scalaVerify % Test,
+      hedgehog % Test,
     ),
     Compile / resourceGenerators += Def
       .task(
@@ -1157,6 +1158,7 @@ lazy val lmIvy = (project in file("lm-ivy"))
       scalatest % Test,
       scalacheck % Test,
       scalaVerify % Test,
+      hedgehog % Test,
     ),
     contrabandSettings,
     Test / classLoaderLayeringStrategy := ClassLoaderLayeringStrategy.Flat,
