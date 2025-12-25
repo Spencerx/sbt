@@ -254,22 +254,28 @@ class DiskActionCacheStore(base: Path, converter: FileConverter) extends Abstrac
 
   private def getBlobs(refs: Seq[HashedVirtualFileRef]): Seq[VirtualFile] =
     refs.flatMap: r =>
-      val casFile = toCasFile(Digest(r))
-      if casFile.toFile().exists then
-        r match
-          case p: PathBasedFile => Some(p)
-          case _ =>
-            val content = IO.read(casFile.toFile())
-            Some(StringVirtualFile1(r.id, content))
-      else None
+      try
+        val casFile = toCasFile(Digest(r))
+        if casFile.toFile().exists then
+          r match
+            case p: PathBasedFile => Some(p)
+            case _ =>
+              val content = IO.read(casFile.toFile())
+              Some(StringVirtualFile1(r.id, content))
+        else None
+      // Digest(r) can throw NoSuchFileException
+      catch case _: NoSuchFileException => None
 
   override def syncBlobs(refs: Seq[HashedVirtualFileRef], outputDirectory: Path): Seq[Path] =
     refs.flatMap: r =>
-      val casFile = toCasFile(Digest(r))
-      if casFile.toFile().exists then
-        // println(s"syncBlobs: $casFile exists for $r")
-        Some(syncFile(r, casFile, outputDirectory))
-      else None
+      try
+        val casFile = toCasFile(Digest(r))
+        if casFile.toFile().exists then
+          // println(s"syncBlobs: $casFile exists for $r")
+          Some(syncFile(r, casFile, outputDirectory))
+        else None
+      // Digest(r) can throw NoSuchFileException
+      catch case _: NoSuchFileException => None
 
   def syncFile(ref: HashedVirtualFileRef, casFile: Path, outputDirectory: Path): Path =
     val d = Digest(ref)
@@ -365,7 +371,10 @@ class DiskActionCacheStore(base: Path, converter: FileConverter) extends Abstrac
 
   override def findBlobs(refs: Seq[HashedVirtualFileRef]): Seq[HashedVirtualFileRef] =
     refs.flatMap: r =>
-      val casFile = toCasFile(Digest(r))
-      if casFile.toFile().exists then Some(r)
-      else None
+      try
+        val casFile = toCasFile(Digest(r))
+        if casFile.toFile().exists then Some(r)
+        else None
+      // Digest(r) can throw NoSuchFileException
+      catch case _: NoSuchFileException => None
 end DiskActionCacheStore
