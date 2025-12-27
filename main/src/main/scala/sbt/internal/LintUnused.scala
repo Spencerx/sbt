@@ -10,7 +10,7 @@ package sbt
 package internal
 
 import Keys.*
-import sbt.internal.util.{ FilePosition, NoPosition, SourcePosition }
+import sbt.internal.util.{ FilePosition, LinePosition, NoPosition, SourcePosition }
 import java.io.File
 import ProjectExtra.{ extract, scopedKeyData }
 import Scope.Global
@@ -163,6 +163,40 @@ object LintUnused {
         u
     }
     unusedKeys.map(u => (u.scoped, display.show(u.scoped), u.positions)).sortBy(_._2)
+  }
+
+  def lintScalaVersion(state: State): State = {
+    val log = state.log
+    val extracted = Project.extract(state)
+    val structure = extracted.structure
+    val comp = structure.compiledMap
+    for
+      p <- structure.allProjectRefs
+      scope = Scope.Global.rescope(p)
+      key = scalaVersion.rescope(scope)
+      data = Project.scopedKeyData(structure, key.scopedKey)
+      sv = extracted.get(key)
+      isPlugin = extracted.get(sbtPlugin.rescope(scope))
+      mb = extracted.get(isMetaBuild.rescope(scope))
+      auto = extracted.get(autoScalaLibrary.rescope(scope))
+      msi = extracted.get(managedScalaInstance.rescope(scope))
+      (_, sk) = extracted.runTask(skip.rescope(scope.rescope(publish.key)), state)
+      display = p match
+        case ProjectRef(_, id) => id
+        case _ | null          => Reference.display(p)
+      c <- comp.get(data.map(_.definingKey).getOrElse(key.scopedKey))
+      setting <- c.settings.headOption
+    do
+      if auto && msi && !isPlugin && !mb && !sk then
+        setting.pos match
+          case LinePosition(path, _) if path.endsWith("Defaults.scala") =>
+            log.warn(
+              s"""scalaVersion for subproject $display fell back to a default value $sv; declare it explicitly in build.sbt:
+  scalaVersion := "$sv""""
+            )
+          case _ => ()
+      else ()
+    state
   }
 
   private case class UnusedKey(

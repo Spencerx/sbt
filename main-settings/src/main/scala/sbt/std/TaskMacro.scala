@@ -12,7 +12,7 @@ package std
 import Def.{ Initialize, Setting }
 import sbt.internal.util.Types.Id
 import sbt.internal.util.appmacro.{ Cont, ContextUtil, ContextUtil0 }
-import sbt.internal.util.{ LinePosition, NoPosition, SourcePosition }
+import sbt.internal.util.{ SourcePosition, SourcePositionImpl }
 
 import language.experimental.macros
 import scala.quoted.*
@@ -184,13 +184,7 @@ object TaskMacro:
         }
 
   private[sbt] def sourcePosition(using qctx: Quotes): Expr[SourcePosition] =
-    import qctx.reflect.*
-    val pos = Position.ofMacroExpansion
-    if pos.startLine >= 0 && pos.sourceCode != None then
-      val name = Expr(pos.sourceCode.get)
-      val line = Expr(pos.startLine)
-      '{ LinePosition($name, $line) }
-    else '{ NoPosition }
+    SourcePositionImpl.fromEnclosingImpl
 
 end TaskMacro
 
