@@ -290,8 +290,11 @@ lazy val utilPosition = (project in file("internal") / "util-position")
     utilCommonSettings,
     name := "Util Position",
     scalacOptions += "-language:experimental.macros",
-    libraryDependencies ++= Seq(scalatest % "test"),
+    libraryDependencies ++= Seq(hedgehog % Test),
     mimaSettings,
+    mimaBinaryIssueFilters ++= Seq(
+      exclude[ReversedMissingMethodProblem]("sbt.internal.util.FilePosition.sourceCode"),
+    ),
   )
 
 lazy val utilCore = project
