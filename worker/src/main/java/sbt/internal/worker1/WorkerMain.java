@@ -19,6 +19,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.net.InetAddress;
+import java.net.Socket;
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -28,12 +30,16 @@ import java.util.Scanner;
 import sbt.testing.*;
 
 /**
- * WorkerMain that communicates via the stdin and stdout using JSON-RPC
+ * WorkerMain that communicates via the stdio or socket using JSON-RPC
  * (https://www.jsonrpc.org/specification).
  */
 public final class WorkerMain {
   private PrintStream originalOut;
   private InputStream originalIn;
+
+  // When using stdout, this is the original stdout
+  // When using tcp, this is going to be the socket out
+  private PrintStream jsonOut;
   private Scanner inScanner;
 
   public static Gson mkGson() {
@@ -61,6 +67,11 @@ public final class WorkerMain {
         WorkerMain app = new WorkerMain();
         app.consoleWork();
         System.exit(0);
+      } else if (args.length == 2 && args[0].equals("--tcp")) {
+        WorkerMain app = new WorkerMain();
+        int serverPort = Integer.parseInt(args[1]);
+        app.socketWork(serverPort);
+        System.exit(0);
       } else {
         System.err.println("missing args");
         System.exit(1);
@@ -73,13 +84,26 @@ public final class WorkerMain {
 
   WorkerMain() {
     this.originalOut = System.out;
-    ByteArrayOutputStream baos = new ByteArrayOutputStream();
-    System.setOut(new PrintStream(baos));
     this.originalIn = System.in;
-    this.inScanner = new Scanner(this.originalIn);
+    this.jsonOut = this.originalOut;
   }
 
   void consoleWork() throws Exception {
+    this.jsonOut = this.originalOut;
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    System.setOut(new PrintStream(baos));
+    this.inScanner = new Scanner(this.originalIn, "UTF-8");
+    if (this.inScanner.hasNextLine()) {
+      String line = this.inScanner.nextLine();
+      process(line);
+    }
+  }
+
+  void socketWork(int serverPort) throws Exception {
+    InetAddress loopback = InetAddress.getByName(null);
+    Socket client = new Socket(loopback, serverPort);
+    this.jsonOut = new PrintStream(client.getOutputStream(), true, "UTF-8");
+    this.inScanner = new Scanner(client.getInputStream(), "UTF-8");
     if (this.inScanner.hasNextLine()) {
       String line = this.inScanner.nextLine();
       process(line);
@@ -87,11 +111,11 @@ public final class WorkerMain {
   }
 
   /** This processes single request of supposed JSON line. */
-  void process(String json) {
+  void process(String json) throws Exception {
     JsonElement elem = JsonParser.parseString(json);
     JsonObject o = elem.getAsJsonObject();
     if (!o.has("jsonrpc")) {
-      return;
+      throw new IllegalArgumentException("jsonrpc expected but got: " + json);
     }
     Gson g = WorkerMain.mkGson();
     long id = o.getAsJsonPrimitive("id").getAsLong();
@@ -107,17 +131,20 @@ public final class WorkerMain {
           TestInfo testInfo = g.fromJson(params, TestInfo.class);
           test(id, testInfo);
           break;
+        case "bye":
+          break;
       }
       String response = String.format("{ \"jsonrpc\": \"2.0\", \"result\": 0, \"id\": %d }", id);
-      this.originalOut.println(response);
-      this.originalOut.flush();
+      this.jsonOut.println(response);
+      this.jsonOut.flush();
     } catch (Throwable e) {
       WorkerError err = new WorkerError(1, e.getMessage());
       String errMessage = g.toJson(err, err.getClass());
       String errJson =
           String.format("{ \"jsonrpc\": \"2.0\", \"error\": %s, \"id\": %d }", errMessage, id);
-      this.originalOut.println(errJson);
-      this.originalOut.flush();
+      this.jsonOut.println(errJson);
+      this.jsonOut.flush();
+      e.printStackTrace();
     }
   }
 
@@ -143,7 +170,7 @@ public final class WorkerMain {
       RunInfo.JvmRunInfo jvmRunInfo = info.jvmRunInfo;
       ClassLoader parent = new ForkTestMain().getClass().getClassLoader();
       try (URLClassLoader cl = createClassLoader(jvmRunInfo, parent)) {
-        ForkTestMain.main(id, info, this.originalOut, cl);
+        ForkTestMain.main(id, info, this.jsonOut, cl);
       }
     } else {
       throw new RuntimeException("only jvm is supported");

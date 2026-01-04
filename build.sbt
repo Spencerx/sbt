@@ -546,6 +546,8 @@ lazy val actionsProj = (project in file("main-actions"))
     Test / classLoaderLayeringStrategy := ClassLoaderLayeringStrategy.Flat,
     mimaSettings,
     mimaBinaryIssueFilters ++= Vector(
+      exclude[DirectMissingMethodProblem]("sbt.internal.WorkerExchange.*"),
+      exclude[DirectMissingMethodProblem]("sbt.internal.WorkerProxy.*"),
     ),
   )
   .dependsOn(lmCore)
