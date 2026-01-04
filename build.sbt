@@ -364,7 +364,7 @@ lazy val utilPosition = (project in file("internal") / "util-position")
     utilCommonSettings,
     name := "Util Position",
     scalacOptions += "-language:experimental.macros",
-    libraryDependencies ++= Seq(scalaReflect.value, scalatest % "test"),
+    libraryDependencies ++= Seq(scalaReflect.value, hedgehog % Test),
     utilMimaSettings,
   )
 

@@ -11,11 +11,12 @@ package internal
 
 import Keys._
 import Def.{ Setting, ScopedKey }
-import sbt.internal.util.{ FilePosition, NoPosition, SourcePosition }
+import sbt.internal.util.{ FilePosition, LinePosition, NoPosition, SourcePosition }
 import java.io.File
 import Scope.Global
 import sbt.SlashSyntax0._
 import sbt.Def._
+import scala.annotation.nowarn
 
 object LintUnused {
   lazy val lintSettings: Seq[Setting[_]] = Seq(
@@ -164,14 +165,53 @@ object LintUnused {
         u
     }
     (unusedKeys map { u =>
-      (u.scoped, display.show(u.scoped), u.positions)
+      (u.scoped, display.show(u.scoped), u.positions.toVector)
     }).sortBy(_._2)
   }
 
+  def lintScalaVersion(state: State): State = {
+    val log = state.log
+    val extracted = Project.extract(state)
+    val structure = extracted.structure
+    val comp = structure.compiledMap
+    for {
+      p <- structure.allProjectRefs
+      scope = (Scope.Global.in(p): @nowarn)
+      key = scalaVersion.in(scope)
+      definingScope = structure.data.definingScope(key.scope, key.key)
+      definingScoped = definingScope match {
+        case Some(sc) => Some(ScopedKey(sc, key.key))
+        case _        => None
+      }
+      sv <- extracted.getOpt(key)
+      isPlugin = extracted.get(sbtPlugin.in(scope))
+      mb = extracted.get(isMetaBuild.in(scope))
+      auto = extracted.get(autoScalaLibrary.in(scope))
+      msi = extracted.get(managedScalaInstance.in(scope))
+      (_, sk) = extracted.runTask(skip.in(scope.in(publish.key): @nowarn), state)
+      display = p match {
+        case ProjectRef(_, id) => id
+        case _ | null          => Reference.display(p)
+      }
+      c <- comp.get(definingScoped.getOrElse(key.scopedKey))
+      setting <- c.settings.headOption
+    } if (auto && msi && !isPlugin && !mb && !sk)
+      setting.pos match {
+        case LinePosition(path, _) if path.endsWith("Defaults.scala") =>
+          log.warn(
+            s"""scalaVersion for subproject $display fell back to a default value $sv; declare it explicitly in build.sbt:
+  scalaVersion := "$sv""""
+          )
+        case _ => ()
+      }
+    else ()
+    state
+  }
+
   private[this] case class UnusedKey(
-      scoped: ScopedKey[_],
-      positions: Vector[SourcePosition],
-      data: Option[ScopedKeyData[_]]
+      scoped: ScopedKey[?],
+      positions: Seq[SourcePosition],
+      data: Option[ScopedKeyData[?]]
   )
 
   private def definedAtString(settings: Vector[Setting[_]]): Vector[SourcePosition] = {

@@ -979,7 +979,11 @@ object BuiltinCommands {
       st => setupGlobalFileTreeRepository(addCacheStoreFactoryFactory(st))
     )
     val s4 = s3.put(Keys.useLog4J.key, Project.extract(s3).get(Keys.useLog4J))
-    addSuperShellParams(CheckBuildSources.init(LintUnused.lintUnusedFunc(s4)))
+    addSuperShellParams(
+      CheckBuildSources.init(
+        LintUnused.lintScalaVersion(LintUnused.lintUnusedFunc(s4))
+      )
+    )
   }
 
   private val setupGlobalFileTreeRepository: State => State = { state =>
