@@ -1,6 +1,6 @@
 
 libraryDependencies += "org.json4s" %% "json4s-native" % "[3.3.0,3.5.0)"
-scalaVersion := "2.12.20"
+scalaVersion := "2.12.21"
 
 lazy val actualVersionCheck = taskKey[Unit]("")
 actualVersionCheck := {

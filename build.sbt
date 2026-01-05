@@ -47,7 +47,7 @@ ThisBuild / mimaFailOnNoPrevious := false
 
 Global / semanticdbEnabled := !(Global / insideCI).value
 // Change main/src/main/scala/sbt/plugins/SemanticdbPlugin.scala too, if you change this.
-Global / semanticdbVersion := "4.14.1"
+Global / semanticdbVersion := "4.14.2"
 val excludeLint = SettingKey[Set[Def.KeyedInitialize[?]]]("excludeLintKeys")
 Global / excludeLint := (Global / excludeLint).?.value.getOrElse(Set.empty)
 Global / excludeLint += Utils.componentID

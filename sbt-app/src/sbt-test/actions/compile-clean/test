@@ -1,4 +1,4 @@
-$ touch target/out/jvm/scala-2.12.20/compile-clean/classes/cant-touch-this
+$ touch target/out/jvm/scala-2.12.21/compile-clean/classes/cant-touch-this
 
 > Test/compile
 $ exists target/**/compile-clean/classes/A.class

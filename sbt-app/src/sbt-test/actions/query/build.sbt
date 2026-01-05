@@ -12,7 +12,7 @@ lazy val foo = project
 lazy val bar = project
 lazy val baz = project
   .settings(
-    scalaVersion := "2.12.20",
+    scalaVersion := "2.12.21",
   )
 
 someTask := Def.uncached {

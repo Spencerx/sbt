@@ -1,5 +1,5 @@
 val scala3 = "3.3.3"
-val scala212 = "2.12.20"
+val scala212 = "2.12.21"
 
 organization := "com.example"
 version := "0.1.0-SNAPSHOT"

@@ -1,4 +1,5 @@
-scalaVersion := "2.12.20"
+scalaVersion := "2.12.21"
+
 libraryDependencies ++= Seq(
   "com.novocode" % "junit-interface" % "0.5" % Test,
   "junit" % "junit" % "4.13.1" % Test,

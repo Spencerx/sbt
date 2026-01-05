@@ -1,4 +1,4 @@
-scalaVersion := "2.12.20"
+scalaVersion := "2.12.21"
 
 // keeping the default cache policies here
 
