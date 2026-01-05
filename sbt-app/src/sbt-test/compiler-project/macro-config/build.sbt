@@ -5,7 +5,7 @@ val Macro = config("macro").hide.extend(Compile)
 
 lazy val root = (project in file("."))
   .settings(
-    scalaVersion := "2.12.20",
+    scalaVersion := "2.12.21",
 
     // Adds a "macro" configuration for macro dependencies.
     ivyConfigurations.value += Macro,

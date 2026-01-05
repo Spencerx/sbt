@@ -175,7 +175,7 @@ object LintUnused {
       scope = Scope.Global.rescope(p)
       key = scalaVersion.rescope(scope)
       data = Project.scopedKeyData(structure, key.scopedKey)
-      sv = extracted.get(key)
+      sv <- extracted.getOpt(key)
       isPlugin = extracted.get(sbtPlugin.rescope(scope))
       mb = extracted.get(isMetaBuild.rescope(scope))
       auto = extracted.get(autoScalaLibrary.rescope(scope))

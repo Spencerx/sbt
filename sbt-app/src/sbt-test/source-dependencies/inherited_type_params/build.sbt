@@ -1,6 +1,6 @@
 import sbt.internal.inc.Analysis
 name := "test"
-ThisBuild / scalaVersion := "2.12.20"
+ThisBuild / scalaVersion := "2.12.21"
 
 TaskKey[Unit]("checkSame") := ((Configurations.Compile / compile) map {
   case analysis: Analysis =>

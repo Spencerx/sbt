@@ -1,5 +1,5 @@
 lazy val scala213 = "2.13.15"
-lazy val scala212 = "2.12.20"
+lazy val scala212 = "2.12.21"
 lazy val check = taskKey[Unit]("")
 
 lazy val root = (project in file("."))

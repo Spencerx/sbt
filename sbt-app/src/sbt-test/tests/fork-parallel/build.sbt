@@ -1,7 +1,7 @@
 import Tests._
 import Defaults._
 
-scalaVersion := "2.12.20"
+scalaVersion := "2.12.21"
 val check = taskKey[Unit]("Check that tests are executed in parallel")
 
 libraryDependencies += "com.novocode" % "junit-interface" % "0.11" % Test

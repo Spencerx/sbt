@@ -12,7 +12,7 @@ def groupId(idx: Int) = "group_" + (idx + 1)
 def groupPrefix(idx: Int) = groupId(idx) + "_file_"
 
 Global / localCacheDirectory := baseDirectory.value / "diskcache"
-ThisBuild / scalaVersion := "2.12.20"
+ThisBuild / scalaVersion := "2.12.21"
 ThisBuild / organization := "org.example"
 
 lazy val root = (project in file("."))

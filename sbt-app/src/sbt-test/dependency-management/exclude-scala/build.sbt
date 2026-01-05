@@ -5,7 +5,7 @@ lazy val scalaOverride = taskKey[Unit]("Check that the proper version of Scala i
 lazy val root = (project in file(".")).
   settings(
     libraryDependencies ++= baseDirectory(dependencies).value,
-    scalaVersion := "2.12.20",
+    scalaVersion := "2.12.21",
     scalaModuleInfo := scalaModuleInfo.value map (_.withOverrideScalaVersion(sbtPlugin.value)),
     autoScalaLibrary := baseDirectory(base => !(base / "noscala").exists ).value,
     scalaOverride := check("scala.App").value

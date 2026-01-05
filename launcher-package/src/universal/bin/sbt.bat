@@ -718,6 +718,7 @@ if defined sbt_args_verbose (
   if defined _JAVA_OPTS ( call :echolist !_JAVA_OPTS! )
   if defined _SBT_OPTS ( call :echolist !_SBT_OPTS! )
   if defined JAVA_TOOL_OPTIONS ( call :echolist %JAVA_TOOL_OPTIONS% )
+  if defined JDK_JAVA_OPTIONS ( call :echolist %JDK_JAVA_OPTIONS% )
   echo -cp
   echo "!sbt_jar!"
   echo xsbt.boot.Boot
@@ -725,7 +726,7 @@ if defined sbt_args_verbose (
   echo.
 )
 
-"!_JAVACMD!" !_JAVA_OPTS! !_SBT_OPTS! %JAVA_TOOL_OPTIONS% -cp "!sbt_jar!" xsbt.boot.Boot %*
+"!_JAVACMD!" !_JAVA_OPTS! !_SBT_OPTS! %JAVA_TOOL_OPTIONS% %JDK_JAVA_OPTIONS% -cp "!sbt_jar!" xsbt.boot.Boot %*
 
 goto :eof
 
@@ -859,7 +860,7 @@ exit /B 0
 exit /B 0
 
 :addDefaultMemory
-  rem if we detect any of these settings in ${JAVA_OPTS} or ${JAVA_TOOL_OPTIONS} we need to NOT output our settings.
+  rem if we detect any of these settings in ${JAVA_OPTS} or ${JAVA_TOOL_OPTIONS} or ${JDK_JAVA_OPTIONS} we need to NOT output our settings.
   rem The reason is the Xms/Xmx, if they don't line up, cause errors.
 
   set _has_memory_args=
@@ -872,6 +873,13 @@ exit /B 0
   )
 
   if defined JAVA_TOOL_OPTIONS for %%g in (%JAVA_TOOL_OPTIONS%) do (
+    set "p=%%g"
+    if "!p:~0,4!" == "-Xmx" set _has_memory_args=1
+    if "!p:~0,4!" == "-Xms" set _has_memory_args=1
+    if "!p:~0,4!" == "-Xss" set _has_memory_args=1
+  )
+
+  if defined JDK_JAVA_OPTIONS for %%g in (%JDK_JAVA_OPTIONS%) do (
     set "p=%%g"
     if "!p:~0,4!" == "-Xmx" set _has_memory_args=1
     if "!p:~0,4!" == "-Xms" set _has_memory_args=1
