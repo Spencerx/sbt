@@ -208,6 +208,17 @@ object SbtScriptTest extends SimpleTestSuite with PowerAssertions {
     )
   }
 
+  // Regression test for https://github.com/sbt/sbt/issues/8100
+  // Debug agent output in SBT_OPTS should not break the launcher on Windows
+  makeTest(
+    "sbt with debug agent in SBT_OPTS",
+    sbtOpts = "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=12346"
+  )("-v") { out: List[String] =>
+    assert(
+      out.contains[String]("-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=12346")
+    )
+  }
+
   makeTest("sbt --no-share adds three system properties")("--no-share") { out: List[String] =>
     assert(out.contains[String]("-Dsbt.global.base=project/.sbtboot"))
     assert(out.contains[String]("-Dsbt.boot.directory=project/.boot"))
