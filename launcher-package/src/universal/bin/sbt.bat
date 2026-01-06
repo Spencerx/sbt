@@ -980,7 +980,9 @@ exit /B 1
 :copyrt
 if /I !JAVA_VERSION! GEQ 9 (
   "!_JAVACMD!" !_JAVA_OPTS! !_SBT_OPTS! -jar "!sbt_jar!" --rt-ext-dir > "%TEMP%.\rtext.txt"
-  set /p java9_ext= < "%TEMP%.\rtext.txt"
+  rem Filter for the line containing java9-rt-ext- to avoid picking up debug agent output
+  set "java9_ext="
+  for /f "tokens=*" %%a in ('findstr /c:"java9-rt-ext-" "%TEMP%.\rtext.txt"') do set "java9_ext=%%a"
   set "java9_rt=!java9_ext!\rt.jar"
 
   if not exist "!java9_rt!" (
