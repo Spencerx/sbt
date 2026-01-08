@@ -25,7 +25,7 @@ trait ScriptedKeys {
 
 object Scripted {
   // This is to workaround https://github.com/sbt/io/issues/110
-  sys.props.put("jna.nosys", "true")
+  if (!sys.props.contains("jna.nosys")) sys.props.put("jna.nosys", "true")
 
   val RepoOverrideTest = config("repoOverrideTest") extend Compile
 
