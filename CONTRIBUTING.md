@@ -1,7 +1,7 @@
   [StackOverflow]: https://stackoverflow.com/tags/sbt
   [Setup]: https://www.scala-sbt.org/release/docs/Getting-Started/Setup
   [Issues]: https://github.com/sbt/sbt/issues
-  [sbt-contrib]: https://gitter.im/sbt/sbt-contrib
+  [Discussions]: https://github.com/sbt/sbt/discussions
   [327]: https://github.com/sbt/sbt/issues/327
   [documentation]: https://github.com/sbt/website
 
@@ -31,7 +31,7 @@ Effective bug reports are more likely to be fixed. These guidelines explain how 
 
 Please open a GitHub issue when you are 90% sure it's an actual bug.
 
-If you have an enhancement idea, or a general discussion, bring it up to [sbt-contrib].
+If you have an enhancement idea, or a general discussion, please follow the [sbt 2.0 RFC process](https://eed3si9n.com/sbt-2.0-rfc-process) or start a [Discussion][Discussions].
 
 ### Notes about Documentation
 
