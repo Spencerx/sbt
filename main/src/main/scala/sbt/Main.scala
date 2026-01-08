@@ -869,25 +869,30 @@ object BuiltinCommands {
 
   @tailrec
   private def doLoadFailed(s: State, loadArg: String): State = {
-    s.log.warn("Project loading failed: (r)etry, (q)uit, (l)ast, or (i)gnore? (default: r)")
-    val result: Int =
-      try
-        ITerminal.get.withRawInput(System.in.read) match {
-          case -1 => 'q'.toInt
-          case b  => b
-        }
-      catch { case _: ClosedChannelException => 'q' }
-    def retry: State = loadProjectCommand(LoadProject, loadArg) :: s.clearGlobalLog
-    def ignoreMsg: String =
-      if (Project.isProjectLoaded(s)) "using previously loaded project" else "no project loaded"
+    // In batch mode, exit with failure to avoid infinite retry loops on persistent errors
+    if (ITerminal.console.prompt == Prompt.Batch) {
+      s.exit(ok = false)
+    } else {
+      s.log.warn("Project loading failed: (r)etry, (q)uit, (l)ast, or (i)gnore? (default: r)")
+      val result: Int =
+        try
+          ITerminal.get.withRawInput(System.in.read) match {
+            case -1 => 'q'.toInt
+            case b  => b
+          }
+        catch { case _: ClosedChannelException => 'q' }
+      def retry: State = loadProjectCommand(LoadProject, loadArg) :: s.clearGlobalLog
+      def ignoreMsg: String =
+        if (Project.isProjectLoaded(s)) "using previously loaded project" else "no project loaded"
 
-    result.toChar match {
-      case '\n' | '\r' => retry
-      case 'r' | 'R'   => retry
-      case 'q' | 'Q'   => s.exit(ok = false)
-      case 'i' | 'I'   => s.log.warn(s"Ignoring load failure: $ignoreMsg."); s
-      case 'l' | 'L'   => LastCommand :: loadProjectCommand(LoadFailed, loadArg) :: s
-      case c           => println(s"Invalid response: '$c'"); doLoadFailed(s, loadArg)
+      result.toChar match {
+        case '\n' | '\r' => retry
+        case 'r' | 'R'   => retry
+        case 'q' | 'Q'   => s.exit(ok = false)
+        case 'i' | 'I'   => s.log.warn(s"Ignoring load failure: $ignoreMsg."); s
+        case 'l' | 'L'   => LastCommand :: loadProjectCommand(LoadFailed, loadArg) :: s
+        case c           => println(s"Invalid response: '$c'"); doLoadFailed(s, loadArg)
+      }
     }
   }
 
