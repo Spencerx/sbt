@@ -1,3 +1,11 @@
+/*
+ * sbt
+ * Copyright 2023, Scala center
+ * Copyright 2011 - 2022, Lightbend, Inc.
+ * Copyright 2008 - 2010, Mark Harrah
+ * Licensed under Apache License 2.0 (see LICENSE)
+ */
+
 package sbt.util
 
 import java.io.File
@@ -97,15 +105,14 @@ object ActionCache:
 
     // Optimization: Check if we can read directly from symlinked value file
     val (input, valuePath) = mkInput(key, codeContentHash, extraHash)
-    val resolvedValuePath =
-      config.outputDirectory.resolve(valuePath.drop(6)) // Remove "${OUT}/" prefix
+    val resolvedValuePath = config.fileConverter.toPath(VirtualFileRef.of(valuePath))
 
     def readFromSymlink(): Option[O] =
       if java.nio.file.Files.isSymbolicLink(resolvedValuePath) && java.nio.file.Files
           .exists(resolvedValuePath)
       then
         try
-          val str = IO.read(resolvedValuePath.toFile())
+          val str = IO.read(resolvedValuePath.toFile(), StandardCharsets.UTF_8)
           Some(valueFromStr(str, Some("symlink")))
         catch case _: Exception => None
       else None
