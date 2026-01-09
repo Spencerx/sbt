@@ -94,19 +94,38 @@ object ActionCache:
       config.cacheEventLog.append(ActionCacheEvent.Found(origin.getOrElse("unknown")))
       val json = Parser.parseUnsafe(str)
       Converter.fromJsonUnsafe[O](json)
-    findActionResult(key, codeContentHash, extraHash, config) match
-      case Right(result) =>
-        // some protocol can embed values into the result
-        result.contents.headOption match
-          case Some(head) =>
-            store.syncBlobs(result.outputFiles, config.outputDirectory)
-            val str = String(head.array(), StandardCharsets.UTF_8)
-            Some(valueFromStr(str, result.origin))
-          case _ =>
-            val paths = store.syncBlobs(result.outputFiles, config.outputDirectory)
-            if paths.isEmpty then None
-            else Some(valueFromStr(IO.read(paths.head.toFile()), result.origin))
-      case Left(_) => None
+
+    // Optimization: Check if we can read directly from symlinked value file
+    val (input, valuePath) = mkInput(key, codeContentHash, extraHash)
+    val resolvedValuePath =
+      config.outputDirectory.resolve(valuePath.drop(6)) // Remove "${OUT}/" prefix
+
+    def readFromSymlink(): Option[O] =
+      if java.nio.file.Files.isSymbolicLink(resolvedValuePath) && java.nio.file.Files
+          .exists(resolvedValuePath)
+      then
+        try
+          val str = IO.read(resolvedValuePath.toFile())
+          Some(valueFromStr(str, Some("symlink")))
+        catch case _: Exception => None
+      else None
+
+    readFromSymlink() match
+      case Some(value) => Some(value)
+      case None =>
+        findActionResult(key, codeContentHash, extraHash, config) match
+          case Right(result) =>
+            // some protocol can embed values into the result
+            result.contents.headOption match
+              case Some(head) =>
+                store.syncBlobs(result.outputFiles, config.outputDirectory)
+                val str = String(head.array(), StandardCharsets.UTF_8)
+                Some(valueFromStr(str, result.origin))
+              case _ =>
+                val paths = store.syncBlobs(result.outputFiles, config.outputDirectory)
+                if paths.isEmpty then None
+                else Some(valueFromStr(IO.read(paths.head.toFile()), result.origin))
+          case Left(_) => None
 
   /**
    * Checks if the ActionResult exists in the cache.
