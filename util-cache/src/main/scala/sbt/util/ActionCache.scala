@@ -114,7 +114,13 @@ object ActionCache:
       then
         Exception.nonFatalCatch
           .opt(IO.read(resolvedValuePath.toFile(), StandardCharsets.UTF_8))
-          .map(valueFromStr(_, Some("symlink")))
+          .map: str =>
+            // We still need to sync output files for side effects
+            findActionResult(key, codeContentHash, extraHash, config) match
+              case Right(result) =>
+                store.syncBlobs(result.outputFiles, config.outputDirectory)
+              case Left(_) => // Ignore if we can't find ActionResult
+            valueFromStr(str, Some("symlink"))
       else None
 
     readFromSymlink() match
