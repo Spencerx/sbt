@@ -19,6 +19,7 @@ import sbt.nio.file.syntax.*
 import sbt.util.CacheImplicits
 import scala.reflect.ClassTag
 import scala.annotation.{ meta, StaticAnnotation }
+import scala.util.control.Exception
 import sjsonnew.{ HashWriter, JsonFormat }
 import sjsonnew.support.murmurhash.Hasher
 import sjsonnew.support.scalajson.unsafe.{ CompactPrinter, Converter, Parser }
@@ -111,10 +112,9 @@ object ActionCache:
       if java.nio.file.Files.isSymbolicLink(resolvedValuePath) && java.nio.file.Files
           .exists(resolvedValuePath)
       then
-        try
-          val str = IO.read(resolvedValuePath.toFile(), StandardCharsets.UTF_8)
-          Some(valueFromStr(str, Some("symlink")))
-        catch case _: Exception => None
+        Exception.nonFatalCatch
+          .opt(IO.read(resolvedValuePath.toFile(), StandardCharsets.UTF_8))
+          .map(valueFromStr(_, Some("symlink")))
       else None
 
     readFromSymlink() match
