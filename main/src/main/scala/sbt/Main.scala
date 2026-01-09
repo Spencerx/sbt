@@ -61,6 +61,7 @@ private[sbt] object xMain:
 
   private[sbt] def run(configuration: xsbti.AppConfiguration): xsbti.MainResult = boundary {
     try {
+      if (!sys.props.contains("jna.nosys")) sys.props.put("jna.nosys", "true")
       import BasicCommandStrings.{ JavaClient, DashDashClient, DashDashServer, runEarly }
       import BasicCommands.early
       import BuiltinCommands.defaults
@@ -265,7 +266,7 @@ object StandardMain {
       preCommands: Seq[String]
   ): State = {
     // This is to workaround https://github.com/sbt/io/issues/110
-    sys.props.put("jna.nosys", "true")
+    if (!sys.props.contains("jna.nosys")) sys.props.put("jna.nosys", "true")
 
     import BasicCommandStrings.{ DashDashDetachStdio, DashDashServer, isEarlyCommand }
     val userCommands =
