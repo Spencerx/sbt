@@ -104,7 +104,7 @@ object Scripted {
       launcherJar: File,
       logger: Logger
   ): Unit = {
-    logger.info(s"About to run tests: ${args.mkString("\n * ", "\n * ", "\n")}")
+    logger.info(s"Tests selected: ${args.mkString("\n * ", "\n * ", "\n")}")
     logger.info("")
 
     // Force Log4J to not use a thread context classloader otherwise it throws a CCE

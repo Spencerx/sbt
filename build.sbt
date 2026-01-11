@@ -439,6 +439,7 @@ lazy val workerProj = (project in file("worker"))
     mimaBinaryIssueFilters ++= Vector(
       exclude[MissingClassProblem]("com.google.gson.typeadapters.RuntimeTypeAdapterFactory"),
       exclude[IncompatibleResultTypeProblem]("sbt.internal.worker1.WorkerMain.mkGson"),
+      exclude[DirectMissingMethodProblem]("sbt.internal.worker1.TestInfo.this"),
     ),
   )
   .configure(addSbtIOForTest)
@@ -716,6 +717,7 @@ lazy val mainProj = (project in file("main"))
     mimaSettings,
     mimaBinaryIssueFilters ++= Vector(
       exclude[ReversedMissingMethodProblem]("sbt.ProjectMatrix.*"),
+      exclude[DirectMissingMethodProblem]("sbt.internal.ConsoleProject.*"),
     ),
   )
   .dependsOn(lmCore, lmIvy, lmCoursierShadedPublishing)
