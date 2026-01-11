@@ -21,7 +21,7 @@ If you have an enhancement idea, or a general discussion, please follow the [sbt
 Reporting Issues
 ----------------
 
-See [CONTRIBUTING](../CONTRIBUTINTG.md).
+See [CONTRIBUTING](../CONTRIBUTING.md).
 
 Patching the core (sending pull request)
 ----------------------------------------
