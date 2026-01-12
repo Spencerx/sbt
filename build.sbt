@@ -568,6 +568,8 @@ lazy val protocolProj = (project in file("protocol"))
     contrabandSettings,
     mimaSettings,
     mimaBinaryIssueFilters ++= Seq(
+      exclude[DirectMissingMethodProblem]("sbt.internal.worker.RunInfo.apply"),
+      exclude[IncompatibleMethTypeProblem]("sbt.internal.worker.RunInfo.apply"),
     )
   )
 
