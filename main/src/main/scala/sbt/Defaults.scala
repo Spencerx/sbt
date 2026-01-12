@@ -3550,7 +3550,13 @@ object Classpaths {
           classifiersModule := Def.uncached(classifiersModuleTask.value),
           // Redefine scalaVersion and scalaBinaryVersion specifically for the dependency graph used for updateSbtClassifiers task.
           // to fix https://github.com/sbt/sbt/issues/2686
-          scalaVersion := appConfiguration.value.provider.scalaProvider.version,
+          // For sbt plugins, use the Scala version corresponding to the sbt binary version being targeted.
+          // to fix https://github.com/sbt/sbt/issues/8026
+          scalaVersion := {
+            val isPlugin = sbtPlugin.value
+            if (isPlugin) (pluginCrossBuild / scalaVersion).value
+            else appConfiguration.value.provider.scalaProvider.version
+          },
           scalaBinaryVersion := binaryScalaVersion(scalaVersion.value),
           scalaEarlyVersion := CrossVersion.earlyScalaVersion(scalaVersion.value),
           scalaOrganization := ScalaArtifacts.Organization,
