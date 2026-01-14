@@ -654,7 +654,7 @@ private[sbt] object Load {
     if (base.isFile)
       sys.error("Not a directory: " + base)
     else if (!base.exists)
-      IO createDirectory base
+      IO.createDirectory(base)
   }
 
   def checkAll(
