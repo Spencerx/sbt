@@ -10,7 +10,7 @@ import dotty.tools.dotc.Driver
 import dotty.tools.dotc.Run
 import dotty.tools.dotc.util.SourceFile
 import dotty.tools.io.{ PlainDirectory, Directory, VirtualDirectory, VirtualFile }
-import dotty.tools.repl.AbstractFileClassLoader
+import dotty.tools.io.AbstractFileClassLoader
 import java.io.File
 import java.net.URLClassLoader
 import java.nio.charset.StandardCharsets
