@@ -13,13 +13,13 @@ jobs:
       matrix:
         include:
           - os: ubuntu-latest
-            java: 8
+            java: 17
             distribution: zulu
           - os: macos-latest
             java: 17
             distribution: temurin
           - os: windows-latest
-            java: 8
+            java: 17
             distribution: zulu
     runs-on: ${{ matrix.os }}
     env:
