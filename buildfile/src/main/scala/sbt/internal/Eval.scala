@@ -6,6 +6,7 @@ import dotty.tools.dotc.ast.tpd
 import dotty.tools.dotc.CompilationUnit
 import dotty.tools.dotc.core.Contexts.{ atPhase, Context }
 import dotty.tools.dotc.core.{ Flags, NameKinds, Names, Phases, Symbols, Types }
+import dotty.tools.dotc.core.Periods.Period
 import dotty.tools.dotc.Driver
 import dotty.tools.dotc.Run
 import dotty.tools.dotc.util.SourceFile
@@ -70,6 +71,7 @@ class Eval(
       case Some((_, ctx)) => ctx
       case _              => sys.error(s"initialization failed for $options")
     val compileCtx2 = compileCtx1.fresh
+      .setPeriod(Period(2, 1)) // RunId 2 is the actually the first one in the compiler
       .setSetting(
         compileCtx1.settings.outputDir,
         outputDir
@@ -194,7 +196,12 @@ class Eval(
       override def extraHash: String = extraHash0
 
     val inter = evalCommon[Seq[String]](definitions.map(_._1), imports, tpeName = Some(""), ev)
-    EvalDefinitions(inter.loader, inter.generated, inter.enclosingModule, inter.extra.reverse)
+    EvalDefinitions(
+      inter.loader,
+      inter.generated,
+      inter.enclosingModule,
+      inter.extra.reverse.distinct
+    )
 
   end evalDefinitions
 
