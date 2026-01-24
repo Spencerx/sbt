@@ -428,9 +428,10 @@ object Eval:
             if isTopLevelModule(tree.symbol.owner) && isAcceptableType(tpt.tpe) =>
           vals ::= name.mangledString
         case tpd.ValDef(name, tpt, _) if name.is(NameKinds.LazyLocalName) =>
-          val methodName = name.underlying
-          val m = tree.symbol.owner.requiredMethod(methodName)
-          if isAcceptableType(m.info) then vals ::= methodName.mangledString
+          val str = name.mangledString
+          val methodName = str.take(str.indexOf("$lzy"))
+          val m = tree.symbol.owner.requiredMethod(methodName.replace("$minus", "-"))
+          if isAcceptableType(m.info) then vals ::= methodName
         case t: tpd.Template   => this((), t.body)
         case t: tpd.PackageDef => this((), t.stats)
         case t: tpd.TypeDef    => this((), t.rhs)
