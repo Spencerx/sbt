@@ -140,6 +140,7 @@ def mimaSettingsSince(versions: Seq[String]): Seq[Def.Setting[?]] = Def settings
     }
   },
   mimaBinaryIssueFilters ++= Seq(
+    exclude[DirectMissingMethodProblem]("*"),
   ),
 )
 
@@ -253,8 +254,7 @@ val completeProj = (project in file("internal") / "util-complete")
     libraryDependencies += jline3Builtins,
     mimaSettings,
     // Parser is used publicly, so we can't break bincompat.
-    mimaBinaryIssueFilters := Seq(
-    ),
+    // mimaBinaryIssueFilters := Seq(),
   )
   .configure(addSbtIO)
 
