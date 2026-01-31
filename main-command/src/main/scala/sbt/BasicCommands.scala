@@ -471,19 +471,40 @@ object BasicCommands {
     }(runAlias)
 
   def runAlias(s: State, args: Option[(String, Option[Option[String]])]): State =
+    runAlias(s, args, _ => Set.empty)
+
+  def runAlias(
+      s: State,
+      args: Option[(String, Option[Option[String]])],
+      definedKeyNames: State => Set[String]
+  ): State =
     args match {
       case Some(x ~ None) if !x.isEmpty   => printAlias(s, x.trim); s
       case Some(name ~ Some(None))        => removeAlias(s, name.trim)
-      case Some(name ~ Some(Some(value))) => addAlias(s, name.trim, value.trim)
+      case Some(name ~ Some(Some(value))) => addAlias(s, name.trim, value.trim, definedKeyNames)
       case _                              => printAliases(s); s
     }
   def addAlias(s: State, name: String, value: String): State =
-    if Command.validID(name) then
-      val removed = removeAlias(s, name)
-      if value.isEmpty then removed else addAlias0(removed, name, value)
-    else
+    addAlias(s, name, value, _ => Set.empty)
+
+  def addAlias(
+      s: State,
+      name: String,
+      value: String,
+      definedKeyNames: State => Set[String]
+  ): State =
+    if !Command.validID(name) then
       System.err.println("Invalid alias name '" + name + "'.")
       s.fail
+    else if definedKeyNames(s).contains(name) then
+      System.err.println(
+        s"Alias '$name' conflicts with a task or setting key of the same name. " +
+          "Use a different alias name to avoid ambiguity."
+      )
+      s.fail
+    else
+      val removed = removeAlias(s, name)
+      if value.isEmpty then removed else addAlias0(removed, name, value)
   private def addAlias0(s: State, name: String, value: String): State =
     s.copy(definedCommands = newAlias(name, value) +: s.definedCommands)
 

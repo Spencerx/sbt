@@ -237,6 +237,18 @@ trait ProjectExtra extends Scoped.Syntax:
     def isProjectLoaded(state: State): Boolean =
       (state has Keys.sessionSettings) && (state has Keys.stateBuildStructure)
 
+    def definedKeyNames(state: State): Set[String] =
+      if !isProjectLoaded(state) then Set.empty
+      else
+        val keyIndex = structure(state).index.keyIndex
+        val globalKeys = keyIndex.keys(None)
+        val projectKeys = for
+          uri <- keyIndex.buildURIs
+          project <- keyIndex.projects(uri)
+          key <- keyIndex.keys(Some(ProjectRef(uri, project)))
+        yield key
+        globalKeys ++ projectKeys
+
     def extract(state: State): Extracted = {
       val se = Project.session(state)
       val st = Project.structure(state)
@@ -281,11 +293,10 @@ trait ProjectExtra extends Scoped.Syntax:
         .put(sessionSettings, session)
         .put(Keys.onUnload.key, onUnload)
       val newState = unloaded.copy(attributes = newAttrs)
-      // TODO: Fix this
       onLoad(
         preOnLoad(
           updateCurrent(newState)
-        ) /*LogManager.setGlobalLogLevels(updateCurrent(newState), structure.data)*/
+        )
       )
     }
 
