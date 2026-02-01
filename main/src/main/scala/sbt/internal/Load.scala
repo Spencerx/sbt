@@ -668,6 +668,7 @@ private[sbt] object Load {
     do
       ref match
         case LocalAggregate => ()
+        case ThisProject    => ()
         case _ =>
           val ProjectRef(refURI, refID) = Scope.resolveProjectRef(uri, rootProject, ref)
           val loadedUnit = builds(refURI)
@@ -714,6 +715,7 @@ private[sbt] object Load {
     val resolve: Project => ResolvedProject = (p: Project) =>
       p.resolve:
         case LocalAggregate => resolveAutoAggregate(uri, p, ps)
+        case ThisProject    => Vector(ProjectRef(uri, p.id))
         case ref            => Vector(Scope.resolveProjectRef(uri, rootProject, ref))
     LoadedBuildUnit(
       unit.unit,
