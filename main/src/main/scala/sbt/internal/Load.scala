@@ -715,7 +715,7 @@ private[sbt] object Load {
     val resolve: Project => ResolvedProject = (p: Project) =>
       p.resolve:
         case LocalAggregate => resolveAutoAggregate(uri, p, ps)
-        case ThisProject    => Vector(ProjectRef(uri, p.id))
+        case ThisProject    => Vector.empty // self-reference; treat as no-op to avoid cycle
         case ref            => Vector(Scope.resolveProjectRef(uri, rootProject, ref))
     LoadedBuildUnit(
       unit.unit,
