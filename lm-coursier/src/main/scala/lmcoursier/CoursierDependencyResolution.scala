@@ -28,8 +28,7 @@ import lmcoursier.syntax.*
 import sbt.internal.librarymanagement.IvySbt
 import sbt.librarymanagement.*
 import sbt.util.Logger
-import coursier.core.Dependency
-import coursier.core.Publication
+import coursier.core.{ BomDependency, Dependency, Publication }
 
 import scala.util.{ Try, Failure }
 
@@ -217,14 +216,42 @@ class CoursierDependencyResolution(
     val interProjectRepo = InterProjectRepository(interProjectDependencies)
     val extraProjectsRepo = InterProjectRepository(extraProjects)
 
-    val dependencies = module0.dependencies
+    // BOM (Bill of Materials): deps with only pom artifact (e.g. .pomOnly()) go to Resolve.addBom (sbt#4531)
+    def isBom(m: ModuleID): Boolean =
+      m.explicitArtifacts.nonEmpty && m.explicitArtifacts.forall(_.`type` == "pom")
+    val (bomModules, regularModules) = module0.dependencies.partition(isBom)
+    val boms: Seq[BomDependency] = bomModules.map { m =>
+      val (mod, ver) =
+        FromSbt.moduleVersion(
+          m,
+          sv,
+          sbv,
+          optionalCrossVer = true,
+          projectPlatform = projectPlatform
+        )
+      BomDependency(ToCoursier.module(mod), ver, Configuration.empty)
+    }
+    // Coursier fills version from BOM only when versionConstraint is empty (Resolution.processedRootDependencies).
+    // So for deps with "*" or "" and BOMs present, pass empty version so BOM can supply it (sbt#4531).
+    val dependencies = regularModules
       .flatMap { d =>
-        // crossVersion sometimes already taken into account (when called via the update task), sometimes not
-        // (e.g. sbt-dotty 0.13.0-RC1)
-        FromSbt.dependencies(d, sv, sbv, optionalCrossVer = true)
+        FromSbt.dependencies(d, sv, sbv, optionalCrossVer = true, projectPlatform = projectPlatform)
       }
       .map { (config, dep) =>
-        (ToCoursier.configuration(config), ToCoursier.dependency(dep))
+        val depForResolve =
+          if (boms.nonEmpty && (dep.version == "*" || dep.version.isEmpty))
+            lmcoursier.definitions.Dependency(
+              dep.module,
+              "",
+              dep.configuration,
+              dep.exclusions,
+              dep.publication,
+              dep.optional,
+              dep.transitive
+            )
+          else
+            dep
+        (ToCoursier.configuration(config), ToCoursier.dependency(depForResolve))
       }
 
     val orderedConfigs = Inputs
@@ -275,6 +302,7 @@ class CoursierDependencyResolution(
       strictOpt = conf.strict.map(ToCoursier.strict),
       missingOk = conf.missingOk,
       retry = conf.retry.getOrElse(ResolutionParams.defaultRetry),
+      boms = boms,
     )
 
     def artifactsParams(resolutions: Map[Configuration, Resolution]): ArtifactsParams =

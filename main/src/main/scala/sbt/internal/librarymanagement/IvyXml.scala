@@ -26,7 +26,8 @@ object IvyXml {
 
   private def rawContent(
       currentProject: Project,
-      shadedConfigOpt: Option[Configuration]
+      shadedConfigOpt: Option[Configuration],
+      bomForcedDeps: Seq[(String, String, String)]
   ): String = {
 
     // Important: width = Int.MaxValue, so that no tag gets truncated.
@@ -38,7 +39,7 @@ object IvyXml {
     val printer = new scala.xml.PrettyPrinter(Int.MaxValue, 2)
 
     """<?xml version="1.0" encoding="UTF-8"?>""" + '\n' +
-      printer.format(content(currentProject, shadedConfigOpt))
+      printer.format(content(currentProject, shadedConfigOpt, bomForcedDeps))
   }
 
   // These are required for publish to be fine, later on.
@@ -46,8 +47,10 @@ object IvyXml {
       currentProject: Project,
       shadedConfigOpt: Option[Configuration],
       ivySbt: IvySbt,
-      log: sbt.util.Logger
+      log: sbt.util.Logger,
+      resolvedDeps: Seq[sbt.librarymanagement.ModuleID]
   ): Unit = {
+    val bomForcedDeps = resolvedDeps.map(m => (m.organization, m.name, m.revision))
 
     val ivyCacheManager = ivySbt.withIvy(log)(ivy => ivy.getResolutionCacheManager)
 
@@ -61,7 +64,7 @@ object IvyXml {
     val cacheIvyFile = ivyCacheManager.getResolvedIvyFileInCache(ivyModule)
     val cacheIvyPropertiesFile = ivyCacheManager.getResolvedIvyPropertiesInCache(ivyModule)
 
-    val content0 = rawContent(currentProject, shadedConfigOpt)
+    val content0 = rawContent(currentProject, shadedConfigOpt, bomForcedDeps)
     cacheIvyFile.getParentFile.mkdirs()
     log.debug(s"writing Ivy file $cacheIvyFile")
     Files.write(cacheIvyFile.toPath, content0.getBytes(UTF_8))
@@ -72,7 +75,11 @@ object IvyXml {
     ()
   }
 
-  private def content(project0: Project, shadedConfigOpt: Option[Configuration]): Node = {
+  private def content(
+      project0: Project,
+      shadedConfigOpt: Option[Configuration],
+      bomForcedDeps: Seq[(String, String, String)]
+  ): Node = {
 
     val filterOutDependencies =
       shadedConfigOpt.toSet[Configuration].flatMap { shadedConfig =>
@@ -144,6 +151,7 @@ object IvyXml {
         n
     }
 
+    val bomForcedSet = bomForcedDeps.toSet
     val dependencyElems = project.dependencies.toVector.map { (conf, dep) =>
       val classifier = {
         val pub = dep.publication
@@ -165,10 +173,18 @@ object IvyXml {
         } name="*" type="*" ext="*" conf="" matcher="exact"/>
       }
 
+      val org0 = dep.module.organization.value
+      val name0 = dep.module.name.value
+      val rev0 = dep.version
+      val forced = bomForcedSet((org0, name0, rev0))
+      val forceAttr =
+        if (forced) new scala.xml.UnprefixedAttribute("force", "true", scala.xml.Null)
+        else scala.xml.Null
+
       val n =
-        <dependency org={dep.module.organization.value} name={dep.module.name.value} rev={
-          dep.version
-        } conf={s"${conf.value}->${dep.configuration.value}"}>
+        <dependency org={org0} name={name0} rev={rev0} conf={
+          s"${conf.value}->${dep.configuration.value}"
+        }>
           {classifier}
           {excludes}
         </dependency>
@@ -178,7 +194,7 @@ object IvyXml {
           new PrefixedAttribute("e", k, v, acc)
       }
 
-      n % moduleAttrs
+      n % moduleAttrs % forceAttr
     }
 
     <ivy-module version="2.0" xmlns:e="http://ant.apache.org/ivy/extra">
@@ -200,11 +216,13 @@ object IvyXml {
           val publications = csrPublications.value
           proj.withPublications(publications)
         }
+        val resolved = sbt.Keys.resolvedDependencies.value
         IvyXml.writeFiles(
           currentProject,
           shadedConfigOpt,
           sbt.Keys.ivySbt.value,
-          sbt.Keys.streams.value.log
+          sbt.Keys.streams.value.log,
+          resolved
         )
       }
     }.value)

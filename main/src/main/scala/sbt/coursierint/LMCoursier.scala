@@ -153,6 +153,7 @@ object LMCoursier {
     val sv = scalaVersion.value
     val lockFile = dependencyLockFile.value
     val lockFileOpt = if (lockFile.exists()) Some(lockFile) else None
+    val ivyHomeOpt = ivyPaths.value.ivyHome.map(new File(_))
     coursierConfiguration(
       csrRecursiveResolvers.value,
       csrInterProjectDependencies.value.toVector,
@@ -170,7 +171,7 @@ object LMCoursier {
       csrLogger.value,
       csrCacheDirectory.value,
       csrReconciliations.value,
-      ivyPaths.value.ivyHome.map(new File(_)),
+      ivyHomeOpt,
       CoursierInputsTasks.strictTask.value,
       dependencyOverrides.value,
       Some(updateConfiguration.value),

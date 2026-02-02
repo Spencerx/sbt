@@ -97,8 +97,18 @@ class MakePom(val log: Logger) {
        {extra}
        {
       val deps = depsInConfs(module, configurations)
+      val (bomDeps, regularDeps) =
+        deps.partition(d =>
+          d.getAllDependencyArtifacts.nonEmpty &&
+            d.getAllDependencyArtifacts.forall(_.getType == Artifact.PomType)
+        )
       makeProperties(module, deps) ++
-        makeDependencies(deps, includeTypes, ArraySeq.unsafeWrapArray(module.getAllExcludeRules))
+        makeDependencyManagement(bomDeps) ++
+        makeDependencies(
+          regularDeps,
+          includeTypes,
+          ArraySeq.unsafeWrapArray(module.getAllExcludeRules)
+        )
     }
        {makeRepositories(ivy.getSettings, allRepositories, filterRepositories)}
      </project>)
@@ -238,6 +248,28 @@ class MakePom(val log: Logger) {
     }
   val IgnoreTypes: Set[String] = Set(Artifact.SourceType, Artifact.DocType, Artifact.PomType)
 
+  /** BOM (Bill of Materials) deps: output under &lt;dependencyManagement&gt; with type pom, scope import (sbt#4531). */
+  def makeDependencyManagement(dependencies: Seq[DependencyDescriptor]): NodeSeq =
+    if (dependencies.isEmpty)
+      NodeSeq.Empty
+    else
+      <dependencyManagement>
+        <dependencies>
+          {dependencies.map(makeBomDependencyElem)}
+        </dependencies>
+      </dependencyManagement>
+
+  def makeBomDependencyElem(dependency: DependencyDescriptor): Elem = {
+    val mrid = dependency.getDependencyRevisionId
+    <dependency>
+      <groupId>{mrid.getOrganisation}</groupId>
+      <artifactId>{mrid.getName}</artifactId>
+      <version>{makeDependencyVersion(mrid.getRevision)}</version>
+      <type>pom</type>
+      <scope>import</scope>
+    </dependency>
+  }
+
   def makeDependencies(
       dependencies: Seq[DependencyDescriptor],
       includeTypes: Set[String],
@@ -301,16 +333,22 @@ class MakePom(val log: Logger) {
       excludes: Seq[ExcludeRule]
   ): Elem = {
     val mrid = dependency.getDependencyRevisionId
-    <dependency>
-      <groupId>{mrid.getOrganisation}</groupId>
-      <artifactId>{mrid.getName}</artifactId>
-      <version>{makeDependencyVersion(mrid.getRevision)}</version>
-      {scopeElem(scope)}
-      {optionalElem(optional)}
-      {classifierElem(classifier)}
-      {typeElem(tpe)}
-      {exclusions(dependency, excludes)}
-    </dependency>
+    val rev = mrid.getRevision
+    val versionNode: NodeSeq =
+      if (rev == null || rev == "*" || rev.isEmpty) NodeSeq.Empty
+      else <version>{makeDependencyVersion(rev)}</version>
+    val result: Elem =
+      <dependency>
+        <groupId>{mrid.getOrganisation}</groupId>
+        <artifactId>{mrid.getName}</artifactId>
+        {versionNode}
+        {scopeElem(scope)}
+        {optionalElem(optional)}
+        {classifierElem(classifier)}
+        {typeElem(tpe)}
+        {exclusions(dependency, excludes)}
+      </dependency>
+    result
   }
 
   def artifactType(artifact: DependencyArtifactDescriptor): Option[String] =
