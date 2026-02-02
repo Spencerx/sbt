@@ -1064,8 +1064,10 @@ object Defaults extends BuildCommon {
       },
       compileIncSetup := Def.uncached(compileIncSetupTask.value),
       console := Compiler.consoleTask.value,
+      console / forkOptions := Def.uncached(Compiler.consoleForkOptions.value),
       collectAnalyses := Definition.collectAnalysesTask.map(_ => ()).value,
       consoleQuick := consoleQuickTask.value,
+      consoleQuick / forkOptions := Def.uncached((console / forkOptions).value),
       discoveredMainClasses := compile
         .map(discoverMainClasses)
         .storeAs(discoveredMainClasses)
@@ -2109,10 +2111,11 @@ object Defaults extends BuildCommon {
   }
 
   def consoleProjectTask = ConsoleProject.consoleProjectTask
-  def consoleTask: Initialize[Task[Unit]] = Compiler.consoleTask(fullClasspath, console)
+  def consoleTask: Initialize[Task[Unit]] =
+    Compiler.consoleTask(console, exportedProductJars, fullClasspathAsJars)
   def consoleQuickTask = consoleTask(externalDependencyClasspath, consoleQuick)
   def consoleTask(classpath: TaskKey[Classpath], task: TaskKey[?]): Initialize[Task[Unit]] =
-    Compiler.consoleTask(classpath, task)
+    Compiler.consoleTask(task, Def.task(Nil), classpath)
 
   /**
    * Handles traditional Scalac compilation. For non-pipelined compilation,
