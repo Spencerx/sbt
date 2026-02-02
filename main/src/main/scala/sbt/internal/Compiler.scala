@@ -9,9 +9,13 @@
 package sbt
 package internal
 
-import java.io.File
-import sbt.internal.inc.{ ScalaInstance, ZincLmUtil }
+import java.io.{ File, PrintWriter }
+import sbt.internal.CommandStrings
+import sbt.internal.inc.{ AnalyzingCompiler, ScalaInstance, ZincLmUtil }
+import sbt.internal.inc.classpath.ClasspathUtil
 import sbt.internal.worker.ScalaInstanceConfig
+import sbt.internal.util.{ Attributed, MessageOnlyException, Terminal as ITerminal }
+import sbt.io.IO
 import sbt.librarymanagement.{
   Artifact,
   Configuration,
@@ -281,4 +285,80 @@ object Compiler:
       val conv = Keys.fileConverter.value
       jars.map(jar => (conv.toVirtualFile(jar.toPath()): HashedVirtualFileRef))
     }
+
+  def consoleTask: Def.Initialize[Task[Unit]] =
+    consoleTask(Keys.fullClasspath, Keys.console)
+
+  def consoleTask(
+      classpath: TaskKey[Keys.Classpath],
+      task: TaskKey[?]
+  ): Def.Initialize[Task[Unit]] =
+    Def.taskIf {
+      if (task / Keys.fork).value then forkedConsoleTask(classpath, task).value
+      else serverSideConsoleTask(classpath, task).value
+    }
+
+  private def serverSideConsoleTask(
+      classpath: TaskKey[Keys.Classpath],
+      task: TaskKey[?]
+  ): Def.Initialize[Task[Unit]] =
+    Def.task {
+      val si = (task / Keys.scalaInstance).value
+      val s = Keys.streams.value
+      val cp = Attributed.data((task / classpath).value)
+      val converter = Keys.fileConverter.value
+      val cpFiles = cp.map(converter.toPath).map(_.toFile())
+      val fullcp = (cpFiles ++ si.allJars).distinct
+      val tempDir = IO.createUniqueDirectory((task / Keys.taskTemporaryDirectory).value).toPath
+      val loader = ClasspathUtil.makeLoader(fullcp.map(_.toPath), si, tempDir)
+      val compiler =
+        (task / Keys.compilers).value.scalac match
+          case ac: AnalyzingCompiler => ac.onArgs(exported(s, "scala"))
+      val sc = (task / Keys.scalacOptions).value
+      val ic = (task / Keys.initialCommands).value
+      val cc = (task / Keys.cleanupCommands).value
+      (new Console(compiler))(cpFiles, sc, loader, ic, cc)()(using s.log).get
+      println()
+    }
+
+  private def forkedConsoleTask(
+      classpath: TaskKey[Keys.Classpath],
+      task: TaskKey[?]
+  ): Def.Initialize[Task[Unit]] =
+    Def.task {
+      import sbt.internal.worker.ConsoleConfig
+      val s = Keys.streams.value
+      val conv = Keys.fileConverter.value
+      val depsJars = (task / Keys.externalDependencyClasspath).value.toVector
+        .map(_.data)
+        .map(conv.toPath)
+      val siConfig = (Keys.console / Keys.scalaInstanceConfig).value
+      val bridgeJars = Keys.scalaCompilerBridgeJars.value
+      val config = ConsoleConfig(
+        scalaInstanceConfig = siConfig,
+        bridgeJars = bridgeJars.toVector.map(vf => conv.toPath(vf).toUri()),
+        externalDependencyJars = depsJars.map(_.toString),
+        scalacOptions = (task / Keys.scalacOptions).value.toVector,
+        initialCommands = (task / Keys.initialCommands).value,
+        cleanupCommands = (task / Keys.cleanupCommands).value,
+      )
+      val fo = (task / Keys.forkOptions).value
+      val terminal = ITerminal.console
+      s.log.info("running console (fork)")
+      try
+        terminal.restore()
+        val exitCode = ForkConsole(config, fo)
+        if exitCode != 0 then
+          throw MessageOnlyException(s"Forked console exited with code $exitCode")
+      finally terminal.restore()
+      println()
+    }
+
+  private[sbt] def exported(w: PrintWriter, command: String): Seq[String] => Unit =
+    args => w.println((command +: args).mkString(" "))
+
+  private[sbt] def exported(s: Keys.TaskStreams, command: String): Seq[String] => Unit =
+    val w = s.text(CommandStrings.ExportStream)
+    try exported(w, command)
+    finally w.close() // workaround for gh-937
 end Compiler
