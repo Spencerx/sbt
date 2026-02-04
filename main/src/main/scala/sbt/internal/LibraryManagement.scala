@@ -9,9 +9,12 @@
 package sbt
 package internal
 
-import java.io.File
+import java.io.{ File, IOException }
+import java.net.{ URI, URL }
 import java.util.concurrent.Callable
 
+import gigahorse.{ AuthScheme }
+import gigahorse.support.apachehttp.Gigahorse
 import sbt.Def.ScopedKey
 import sbt.internal.librarymanagement.*
 import sbt.librarymanagement.*
@@ -21,7 +24,8 @@ import sbt.io.IO
 import sbt.io.syntax.*
 import sbt.ProjectExtra.*
 import sjsonnew.JsonFormat
-import scala.concurrent.duration.FiniteDuration
+import scala.concurrent.*
+import scala.concurrent.duration.*
 import lmcoursier.definitions.Project as CsrProject
 
 private[sbt] object LibraryManagement {
@@ -588,6 +592,17 @@ private[sbt] object LibraryManagement {
         IO.write(checksumFile, digest.hashHexString)
         log.debug(s"Wrote checksum: $checksumFile")
 
+    // Write ivy.xml first (so ivys/ exists even if artifact copy fails)
+    val ivysDir = moduleDir / "ivys"
+    val ivyXmlFile = ivysDir / "ivy.xml"
+    IO.createDirectory(ivysDir)
+    val ivyXmlContent = lmcoursier.IvyXml(project, Nil, Nil)
+    if !ivyXmlFile.exists || overwrite then
+      IO.write(ivyXmlFile, ivyXmlContent)
+      log.info(s"Published $ivyXmlFile")
+      writeChecksums(ivyXmlFile)
+    else log.warn(s"$ivyXmlFile already exists, skipping (overwrite=$overwrite)")
+
     // Publish each artifact
     artifacts.foreach: (artifact, sourceFile) =>
       val folder = typeToFolder(artifact.`type`)
@@ -604,18 +619,268 @@ private[sbt] object LibraryManagement {
         log.info(s"Published $targetFile")
         writeChecksums(targetFile)
       else log.warn(s"$targetFile already exists, skipping (overwrite=$overwrite)")
-
-    // Generate and write ivy.xml
-    val ivyXmlContent = lmcoursier.IvyXml(project, Nil, Nil)
-    val ivysDir = moduleDir / "ivys"
-    val ivyXmlFile = ivysDir / "ivy.xml"
-    if !ivyXmlFile.exists || overwrite then
-      IO.createDirectory(ivysDir)
-      IO.write(ivyXmlFile, ivyXmlContent)
-      log.info(s"Published $ivyXmlFile")
-      writeChecksums(ivyXmlFile)
-    else log.warn(s"$ivyXmlFile already exists, skipping (overwrite=$overwrite)")
   end ivylessPublishLocal
+
+  /**
+   * Substitutes Ivy pattern placeholders for artifact URL.
+   * Matches ivylessPublishLocal layout: [organisation]/[module]/[revision]/[type]s/[artifact](-[classifier]).[ext]
+   */
+  private def substituteIvyArtifactPattern(
+      pattern: String,
+      org: String,
+      moduleName: String,
+      version: String,
+      typeFolder: String,
+      artifactName: String,
+      classifier: String,
+      ext: String
+  ): String = {
+    var s = pattern
+    s = s.replace("[organisation]", org)
+    s = s.replace("[module]", moduleName)
+    s = s.replace("[revision]", version)
+    s = s.replace("[type]s", typeFolder)
+    s = s.replace("[artifact]", artifactName)
+    s = s.replace("[ext]", ext)
+    if (classifier.nonEmpty) s = s.replace("(-[classifier])", s"-$classifier")
+    else s = s.replace("(-[classifier])", "")
+    // Remove optional Ivy pattern parts (scala/sbt version, branch) for ivyless layout
+    s = s.replaceAll("\\(scala_[^)]+/\\)", "").replaceAll("\\(sbt_[^)]+/\\)", "")
+    s = s.replaceAll("\\(\\[branch\\]/\\)", "")
+    s
+  }
+
+  /**
+   * HTTP PUT a file to a URL with optional Basic auth.
+   * Uses Gigahorse (Apache HttpClient) per sbt tech stack.
+   */
+  private def httpPut(
+      url: URL,
+      sourceFile: File,
+      credentials: Option[Credentials.DirectCredentials],
+      log: Logger
+  ): Unit = {
+    val baseReq = Gigahorse.url(url.toString).put(sourceFile)
+    val req = credentials.filter(_.host == url.getHost) match {
+      case Some(dc) => baseReq.withAuth(dc.userName, dc.passwd, AuthScheme.Basic)
+      case None     => baseReq
+    }
+    val f = sbt.librarymanagement.Http.http.processFull(req)
+    val response = Await.result(f, 5.minutes)
+    if (response.status < 200 || response.status >= 300) {
+      val body = response.bodyAsString
+      throw new IOException(
+        s"PUT $url failed: ${response.status} ${response.statusText}$body"
+      )
+    }
+    log.info(s"Published $url")
+  }
+
+  /**
+   * Publishes artifacts to a remote Ivy repo (URLRepository) without using Apache Ivy.
+   * Uses HTTP PUT; supports credentials. Produces the same layout as ivylessPublishLocal.
+   */
+  def ivylessPublish(
+      project: CsrProject,
+      artifacts: Vector[(Artifact, File)],
+      checksumAlgorithms: Vector[String],
+      urlRepo: sbt.librarymanagement.URLRepository,
+      credentials: Seq[Credentials],
+      overwrite: Boolean,
+      log: Logger
+  ): Unit = {
+    val org = project.module.organization.value
+    val moduleName = project.module.name.value
+    val version = project.version
+    val artifactPattern = urlRepo.patterns.artifactPatterns.headOption.getOrElse(
+      sys.error("URLRepository has no artifact pattern")
+    )
+    val ivyPattern = urlRepo.patterns.ivyPatterns.headOption.getOrElse(
+      sys.error("URLRepository has no ivy pattern")
+    )
+    val directCreds = credentials.collect { case d: Credentials.DirectCredentials => d }
+
+    def typeToFolder(tpe: String): String = tpe match
+      case "jar"                                   => "jars"
+      case "src" | "source" | "sources"            => "srcs"
+      case "doc" | "docs" | "javadoc" | "javadocs" => "docs"
+      case "pom"                                   => "poms"
+      case "ivy"                                   => "ivys"
+      case other                                   => other + "s"
+
+    def writeChecksums(file: File): Vector[(File, String)] =
+      checksumAlgorithms.map { algo =>
+        val digestAlgo = algo.toLowerCase match
+          case "md5"  => sbt.util.Digest.Md5
+          case "sha1" => sbt.util.Digest.Sha1
+          case other =>
+            throw new IllegalArgumentException(s"Unsupported checksum algorithm: $other")
+        val digest = sbt.util.Digest(digestAlgo, file.toPath)
+        val content = digest.hashHexString
+        val suffix = "." + algo.toLowerCase
+        val tmpFile = File.createTempFile("checksum", suffix)
+        IO.write(tmpFile, content)
+        (tmpFile, suffix)
+      }.toVector
+
+    artifacts.foreach { case (artifact, sourceFile) =>
+      val folder = typeToFolder(artifact.`type`)
+      val classifier = artifact.classifier.map("-" + _).getOrElse("")
+      val artifactName = moduleName
+      val pathPattern = substituteIvyArtifactPattern(
+        artifactPattern,
+        org,
+        moduleName,
+        version,
+        folder,
+        artifactName,
+        classifier,
+        artifact.extension
+      )
+      val url = URI.create(pathPattern).toURL()
+      httpPut(url, sourceFile, directCreds.find(_.host == url.getHost), log)
+      val checksums = writeChecksums(sourceFile)
+      checksums.foreach { case (cf, suffix) =>
+        val checksumUrl = URI.create(pathPattern + suffix).toURL()
+        try httpPut(checksumUrl, cf, directCreds.find(_.host == url.getHost), log)
+        finally cf.delete()
+      }
+    }
+
+    val ivyXmlContent = lmcoursier.IvyXml(project, Nil, Nil)
+    val ivyPathPattern = substituteIvyArtifactPattern(
+      ivyPattern,
+      org,
+      moduleName,
+      version,
+      "ivys",
+      "ivy",
+      "",
+      "xml"
+    )
+    val ivyUrl = URI.create(ivyPathPattern).toURL()
+    val ivyTmp = File.createTempFile("ivy", ".xml")
+    try {
+      IO.write(ivyTmp, ivyXmlContent)
+      httpPut(ivyUrl, ivyTmp, directCreds.find(_.host == ivyUrl.getHost), log)
+      val checksums = writeChecksums(ivyTmp)
+      checksums.foreach { case (cf, suffix) =>
+        val checksumUrl = URI.create(ivyPathPattern + suffix).toURL()
+        try httpPut(checksumUrl, cf, directCreds.find(_.host == ivyUrl.getHost), log)
+        finally cf.delete()
+      }
+    } finally ivyTmp.delete()
+  }
+
+  /**
+   * Publishes artifacts to a local file repo (FileRepository) without using Apache Ivy.
+   * Same layout as ivylessPublishLocal; used for testing without an HTTP server.
+   */
+  def ivylessPublishToFile(
+      project: CsrProject,
+      artifacts: Vector[(Artifact, File)],
+      checksumAlgorithms: Vector[String],
+      fileRepo: sbt.librarymanagement.FileRepository,
+      overwrite: Boolean,
+      log: Logger
+  ): Unit = {
+    val pattern = fileRepo.patterns.artifactPatterns.headOption.getOrElse(
+      sys.error("FileRepository has no artifact pattern")
+    )
+    val baseStr =
+      if (pattern.contains("[organisation]"))
+        pattern.substring(0, pattern.indexOf("[organisation]"))
+      else pattern
+    val normalized = baseStr.replace('\\', '/').stripSuffix("/")
+    val localRepoBase =
+      if (normalized.startsWith("file:")) new File(new java.net.URI(normalized))
+      else new File(normalized)
+    val repoDir = localRepoBase.getAbsoluteFile
+    log.info(s"Ivyless publish to file repo: $repoDir")
+    ivylessPublishLocal(project, artifacts, checksumAlgorithms, repoDir, overwrite, log)
+  }
+
+  /**
+   * Task initializer for ivyless publish (remote Ivy repo or file repo).
+   * When useIvy is false and publishTo is URLRepository or FileRepository, uses ivyless publish; otherwise uses Ivy.
+   */
+  def ivylessPublishTask: Def.Initialize[Task[Unit]] =
+    import Keys.*
+    Def.ifS(Def.task { (publish / skip).value })(
+      Def.task {
+        val log = streams.value.log
+        val ref = thisProjectRef.value
+        log.debug(s"Skipping publish for ${Reference.display(ref)}")
+      }
+    )(
+      Def.ifS(Def.task { useIvy.value })(
+        Def.task {
+          val log = streams.value.log
+          val conf = publishConfiguration.value
+          val module = ivyModule.value
+          val publisherInterface = publisher.value
+          publisherInterface.publish(module, conf, log)
+        }
+      )(
+        Def.task {
+          val log = streams.value.log
+          val resolver = sbt.Classpaths.getPublishTo(publishTo.value)
+          val project = csrProject.value.withPublications(csrPublications.value)
+          val config = publishConfiguration.value
+          val artifacts = config.artifacts.map { case (a, f) => (a, f) }
+          resolver match {
+            case urlRepo: sbt.librarymanagement.URLRepository =>
+              val creds = allCredentials.value
+              ivylessPublish(
+                project,
+                artifacts,
+                config.checksums,
+                urlRepo,
+                creds,
+                config.overwrite,
+                log
+              )
+            case fileRepo: sbt.librarymanagement.FileRepository =>
+              ivylessPublishToFile(
+                project,
+                artifacts,
+                config.checksums,
+                fileRepo,
+                config.overwrite,
+                log
+              )
+            case pbr: sbt.librarymanagement.PatternsBasedRepository
+                if pbr.patterns.artifactPatterns.headOption.exists { pat =>
+                  pat.contains("[organisation]") && !pat.trim.startsWith("http")
+                } =>
+              // File repo detected by pattern (e.g. scripted classloader makes type match fail)
+              val pat = pbr.patterns.artifactPatterns.head
+              val baseStr =
+                pat.substring(0, pat.indexOf("[organisation]")).replace('\\', '/').stripSuffix("/")
+              val repoDir =
+                (if (baseStr.startsWith("file:")) new File(new java.net.URI(baseStr))
+                 else new File(baseStr)).getAbsoluteFile
+              log.info(s"Ivyless publish to file repo: $repoDir")
+              ivylessPublishLocal(
+                project,
+                artifacts,
+                config.checksums,
+                repoDir,
+                config.overwrite,
+                log
+              )
+            case _ =>
+              log.warn(
+                "Ivyless publish only supports URLRepository (Resolver.url) or FileRepository (Resolver.file). Falling back to Ivy."
+              )
+              val conf = publishConfiguration.value
+              val module = ivyModule.value
+              val publisherInterface = publisher.value
+              publisherInterface.publish(module, conf, log)
+          }
+        }
+      )
+    )
 
   /**
    * Task initializer for ivyless publishLocal.
