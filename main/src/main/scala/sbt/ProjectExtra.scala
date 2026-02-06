@@ -42,6 +42,7 @@ import Def.{ Flattened, Initialize, ScopedKey, Setting }
 import sbt.internal.{
   Load,
   BuildStructure,
+  KeyIndex,
   LoadedBuild,
   LoadedBuildUnit,
   SettingGraph,
@@ -199,16 +200,11 @@ trait ProjectExtra extends Scoped.Syntax:
       showContextKey(state, None)
 
     def showContextKey(state: State, keyNameColor: Option[String]): Show[ScopedKey[?]] =
-      if (isProjectLoaded(state)) showContextKey2(session(state), keyNameColor)
+      if isProjectLoaded(state) then
+        val se = session(state)
+        val st = structure(state)
+        showContextKey2(se, st.index.keyIndex, keyNameColor)
       else Def.showFullKey
-
-    // @deprecated("Use showContextKey2 which doesn't take the unused structure param", "1.1.1")
-    // def showContextKey(
-    //     session: SessionSettings,
-    //     structure: BuildStructure,
-    //     keyNameColor: Option[String] = None
-    // ): Show[ScopedKey[_]] =
-    //   showContextKey2(session, keyNameColor)
 
     def showContextKey2(
         session: SessionSettings,
@@ -216,14 +212,57 @@ trait ProjectExtra extends Scoped.Syntax:
     ): Show[ScopedKey[?]] =
       Def.showRelativeKey2(session.current, keyNameColor)
 
+    def showContextKey2(
+        session: SessionSettings,
+        keyIndex: KeyIndex,
+        keyNameColor: Option[String]
+    ): Show[ScopedKey[?]] =
+      val current = session.current
+      val configNameToIdent: String => String = name => keyIndex.toConfigIdent(Some(current))(name)
+      Show[ScopedKey[?]]: key =>
+        val color: String => String = Def.withColor(_, keyNameColor)
+        key.scope.extra.toOption
+          .flatMap(_.get(Scope.customShowString).map(color))
+          .getOrElse:
+            Scope.display(
+              key.scope,
+              color(key.key.label),
+              ref => Def.displayRelative2(current, ref),
+              configNameToIdent
+            )
+
     def showLoadingKey(
         loaded: LoadedBuild,
         keyNameColor: Option[String] = None
     ): Show[ScopedKey[?]] =
-      Def.showRelativeKey2(
-        ProjectRef(loaded.root, loaded.units(loaded.root).rootProjects.head),
-        keyNameColor
-      )
+      val configNameToIdent = buildConfigNameToIdent(loaded)
+      val current = ProjectRef(loaded.root, loaded.units(loaded.root).rootProjects.head)
+      Show[ScopedKey[?]]: key =>
+        val color: String => String = Def.withColor(_, keyNameColor)
+        key.scope.extra.toOption
+          .flatMap(_.get(Scope.customShowString).map(color))
+          .getOrElse:
+            Scope.display(
+              key.scope,
+              color(key.key.label),
+              ref => Def.displayRelative2(current, ref),
+              configNameToIdent
+            )
+
+    private[sbt] def configNameToIdent(state: State): String => String =
+      if isProjectLoaded(state) then buildConfigNameToIdent(structure(state).units)
+      else Scope.guessConfigIdent
+
+    private def buildConfigNameToIdent(loaded: LoadedBuild): String => String =
+      buildConfigNameToIdent(loaded.units)
+
+    private def buildConfigNameToIdent(units: Map[URI, LoadedBuildUnit]): String => String =
+      val configMap = (for
+        (_, unit) <- units.iterator
+        (_, project) <- unit.defined.iterator
+        config <- project.configurations.iterator
+      yield config.name -> config.id).toMap
+      name => configMap.getOrElse(name, Scope.guessConfigIdent(name))
 
     def getOrError[T](state: State, key: AttributeKey[T], msg: String): T =
       state.get(key).getOrElse(sys.error(msg))
@@ -253,11 +292,11 @@ trait ProjectExtra extends Scoped.Syntax:
       val se = Project.session(state)
       val st = Project.structure(state)
       val currentRef = internal.ProjectNavigation.effectiveCurrentRef(state)
-      Extracted(st, se, currentRef)(using Project.showContextKey2(se))
+      Extracted(st, se, currentRef)(using Project.showContextKey2(se, st.index.keyIndex, None))
     }
 
     private[sbt] def extract(se: SessionSettings, st: BuildStructure): Extracted =
-      Extracted(st, se, se.current)(using Project.showContextKey2(se))
+      Extracted(st, se, se.current)(using Project.showContextKey2(se, st.index.keyIndex, None))
 
     def getProjectForReference(ref: Reference, structure: BuildStructure): Option[ResolvedProject] =
       ref match
@@ -401,7 +440,7 @@ trait ProjectExtra extends Scoped.Syntax:
         case None       => ""
 
       val (definingKey, providedBy) = structure.data.definingKey(key) match
-        case Some(k) => k -> s"Provided by:\n\t${Scope.display(k.scope, key.key.label)}\n"
+        case Some(k) => k -> s"Provided by:\n\t${display.show(ScopedKey(k.scope, key.key))}\n"
         case None    => key -> ""
       val comp =
         Def.compiled(structure.settings, actual)(using
