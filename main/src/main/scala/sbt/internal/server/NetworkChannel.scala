@@ -253,7 +253,7 @@ final class NetworkChannel(
         f orElse i.onNotification
       }
 
-    def handleBody(chunk: Seq[Byte]): Unit = {
+    def handleBody(chunk: Seq[Byte]): Unit =
       Serialization.deserializeJsonMessage(chunk) match {
         case Right(req: JsonRpcRequestMessage) =>
           try {
@@ -281,7 +281,6 @@ final class NetworkChannel(
           log.error(msg)
           logMessage("error", msg)
       }
-    }
   }
 
   private[sbt] def isLanguageServerProtocol: Boolean = true
@@ -963,6 +962,7 @@ final class NetworkChannel(
     }
   }
   private[sbt] def isAttached: Boolean = attached.get
+  private[sbt] def isInitialized: Boolean = initialized
 
   thread.start()
   writeThread.start()
