@@ -812,10 +812,17 @@ private[sbt] object Load {
           mkReporter,
         )
       }
+      val projectsFromBuildDef = defsScala.flatMap(b => projectsFromBuild(b, normBase))
+      val rootFromExtra =
+        buildLevelExtraProjects.filter(p => isRootPath(p.base, normBase))
       val initialProjects =
-        defsScala.flatMap(b => projectsFromBuild(b, normBase)) ++ buildLevelExtraProjects
-
-      val hasRootAlreadyDefined = defsScala.exists(_.rootProject.isDefined)
+        if rootFromExtra.nonEmpty then
+          projectsFromBuildDef.filterNot(p =>
+            isRootPath(p.base, normBase)
+          ) ++ buildLevelExtraProjects
+        else projectsFromBuildDef ++ buildLevelExtraProjects
+      val hasRootAlreadyDefined =
+        defsScala.exists(_.rootProject.isDefined) || rootFromExtra.nonEmpty
 
       val memoSettings = new mutable.HashMap[VirtualFile, LoadedSbtFile]
       def loadProjects(ps: Seq[Project], createRoot: Boolean) =
@@ -1086,11 +1093,9 @@ private[sbt] object Load {
       val DiscoveredProjects(rootOpt, discovered, files, extraFiles, generated) = discover(
         p.base
       )
-
-      // TODO: We assume here the project defined in a build.sbt WINS because the original was a
-      // phony.  However, we may want to 'merge' the two, or only do this if the original was a
-      // default generated project.
-      val root = rootOpt.getOrElse(p)
+      val root =
+        if p.projectOrigin == ProjectOrigin.ExtraProject && isRootPath(p.base, buildBase) then p
+        else rootOpt.getOrElse(p)
       val (finalRoot, projectLevelExtra) = processProject(root, files, extraFiles, true)
       val newProjects = rest ++ discovered ++ projectLevelExtra
       val newAcc = acc :+ finalRoot
