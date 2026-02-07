@@ -3151,16 +3151,24 @@ object Classpaths {
       }).value),
     csrSameVersions ++= {
       partialVersion(scalaVersion.value) match {
-        case Some((major, minor)) if major == 2 && minor < 13 =>
+        // See https://github.com/sbt/sbt/issues/8689
+        // Scala 2.x should align all Scala 2 artifacts (scala-library, scala-compiler, scala-reflect, etc.)
+        case Some((major, _)) if major == 2 =>
           ScalaArtifacts.Artifacts
             .map(a => InclExclRule(scalaOrganization.value, a))
             .toSet :: Nil
-        // Due to the Scala 2.13-3.x sandwich, the absence of scala-reflect
-        // that corresponds with scala-library 3.8.x propagates to 2.13 builds as well.
-        case _ =>
+        // Scala 3.0-3.7 uses the Scala 2.13 standard library, so align all Scala 2 artifacts
+        case Some((3, minor)) if minor < 8 =>
+          ScalaArtifacts.Artifacts
+            .map(a => InclExclRule(scalaOrganization.value, a))
+            .toSet :: Nil
+        // Scala 3.8+ has its own scala-library, only align library artifacts
+        // See https://github.com/sbt/sbt/issues/8224
+        case Some((3, _)) =>
           ScalaArtifacts.Scala3_8Artifacts
             .map(a => InclExclRule(scalaOrganization.value, a))
             .toSet :: Nil
+        case _ => Nil
       }
     },
     moduleName := normalizedName.value,
