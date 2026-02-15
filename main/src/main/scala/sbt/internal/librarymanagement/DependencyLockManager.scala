@@ -44,7 +44,11 @@ object DependencyLockManager:
       isValid
     }
 
-  private def artifactUrlForLock(rawUrl: String, cacheDir: Option[File], moduleDesc: String): String =
+  private def artifactUrlForLock(
+      rawUrl: String,
+      cacheDir: Option[File],
+      moduleDesc: String
+  ): String =
     if !rawUrl.startsWith(CacheUrlConversion.FileUrlPrefix) then rawUrl
     else
       cacheDir match

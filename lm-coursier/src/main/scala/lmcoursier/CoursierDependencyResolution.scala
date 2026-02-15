@@ -382,7 +382,8 @@ class CoursierDependencyResolution(
             .groupBy(_._1)
             .view
             .mapValues(_.map { case (_, pub, art, _) =>
-              val originalUrl = lmcoursier.internal.CacheUrlConversion.cacheFileToOriginalUrl(art.url, cache)
+              val originalUrl =
+                lmcoursier.internal.CacheUrlConversion.cacheFileToOriginalUrl(art.url, cache)
               (originalUrl, pub.classifier.value, pub.ext.value)
             })
             .toMap
