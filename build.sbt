@@ -972,6 +972,18 @@ def scriptedTask(launch: Boolean): Def.Initialize[InputTask[Unit]] = Def.inputTa
 
 lazy val publishLauncher = TaskKey[Unit]("publish-launcher")
 
+lazy val sbtwProj = (project in file("sbtw"))
+  .settings(
+    commonSettings,
+    name := "sbtw",
+    description := "Windows drop-in launcher for sbt (replaces sbt.bat)",
+    scalaVersion := "3.8.1",
+    crossPaths := false,
+    Compile / mainClass := Some("sbtw.Main"),
+    libraryDependencies += "com.github.scopt" %% "scopt" % "4.1.0",
+    Utils.noPublish,
+  )
+
 def allProjects =
   Seq(
     logicProj,
@@ -990,6 +1002,7 @@ def allProjects =
     sbtProj,
     bundledLauncherProj,
     sbtClientProj,
+    sbtwProj,
     buildFileProj,
     utilCache,
     utilTracking,
@@ -1347,6 +1360,7 @@ lazy val lmCoursierShadedPublishing = project
 lazy val launcherPackage = (project in file("launcher-package"))
 lazy val launcherPackageIntegrationTest =
   (project in (file("launcher-package") / "integration-test"))
+    .dependsOn(sbtwProj)
     .settings(
       name := "integration-test",
       scalaVersion := scala3,
@@ -1359,6 +1373,14 @@ lazy val launcherPackageIntegrationTest =
       ),
       testFrameworks += TestFramework("hedgehog.sbt.Framework"),
       testFrameworks += TestFramework("verify.runner.Framework"),
+      Test / fork := true,
+      Test / javaOptions += {
+        val cp = (Test / fullClasspath).value
+          .map(_.data.getAbsolutePath)
+          .mkString(java.io.File.pathSeparator)
+        s"-Dsbt.test.classpath=$cp"
+      },
+      Test / javaOptions += s"-Dsbt.test.integrationtest.basedir=${(baseDirectory).value.getAbsolutePath}",
       Test / test := {
         (Test / test)
           .dependsOn(launcherPackage / Universal / packageBin)
