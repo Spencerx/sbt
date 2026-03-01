@@ -17,7 +17,7 @@ There are lots of ways to contribute to sbt ecosystem depending on your interest
 - Review pull requests.
 - Documentation fixes and contributions are as much welcome as to patching the core. Visit [sbt/website][documentation] to learn about how to contribute.
 
-For the issue reporting guideslins, jump to [issues](#issues).
+For the issue reporting guidelines, jump to [issues](#issues).
 
 Ideas and proposals
 -------------------
