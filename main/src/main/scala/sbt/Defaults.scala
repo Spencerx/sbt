@@ -2782,7 +2782,7 @@ object Classpaths {
       Seq(
         publishMavenStyle :== true,
         sbtPluginPublishLegacyMavenStyle :== false,
-        useIvy :== true,
+        useIvy :== false,
         publishArtifact :== true,
         (Test / publishArtifact) :== false
       )
@@ -2912,7 +2912,7 @@ object Classpaths {
     }.value,
     publish := LibraryManagement.ivylessPublishTask.tag(Tags.Publish, Tags.Network).value,
     publishLocal := LibraryManagement.ivylessPublishLocalTask.value,
-    publishM2 := publishOrSkip(publishM2Configuration, publishM2 / skip).value,
+    publishM2 := LibraryManagement.ivylessPublishM2Task.tag(Tags.Publish, Tags.Network).value,
     credentials ++= Def.uncached {
       val alreadyContainsCentralCredentials: Boolean = credentials.value.exists {
         case d: Credentials.DirectCredentials => d.host == Sona.host
@@ -3352,8 +3352,11 @@ object Classpaths {
       import ShowLines.*
       val report = updateTask.value
       val log = streams.value.log
+      val module = dependencyResolution.value.moduleDescriptor(
+        moduleSettings.value.asInstanceOf[ModuleDescriptorConfiguration]
+      )
       val ew =
-        EvictionWarning(ivyModule.value, (evicted / evictionWarningOptions).value, report)
+        EvictionWarning(module, (evicted / evictionWarningOptions).value, report)
       ew.lines foreach { log.warn(_) }
       ew.infoAllTheThings foreach { log.info(_) }
       ew
@@ -3721,6 +3724,7 @@ object Classpaths {
   def deliverTask(config: TaskKey[PublishConfiguration]): Initialize[Task[File]] =
     Def.task {
       Def.unit(update.value)
+      if !useIvy.value then sys.error("deliver/makeIvyXml requires useIvy := true")
       IvyActions.deliver(ivyModule.value, config.value, streams.value.log)
     }
 
@@ -3752,6 +3756,10 @@ object Classpaths {
           val log = streams.value.log
           val ref = thisProjectRef.value
           logSkipPublish(log, ref)
+        } else if (!useIvy.value) {
+          sys.error(
+            "publishOrSkip requires useIvy := true. Use publish/publishLocal for ivyless publishing."
+          )
         } else {
           val conf = config.value
           val log = streams.value.log
@@ -4209,10 +4217,10 @@ object Classpaths {
 
   private[sbt] def depMap: Initialize[Task[Map[ModuleRevisionId, ModuleDescriptor]]] =
     import sbt.TupleSyntax.*
-    (buildDependencies.toTaskable, thisProjectRef.toTaskable, settingsData, streams).flatMapN {
-      (bd, thisProj, data, s) =>
+    (buildDependencies.toTaskable, thisProjectRef.toTaskable, settingsData, streams)
+      .flatMapN { (bd, thisProj, data, s) =>
         depMap(bd.classpathTransitiveRefs(thisProj), data, s.log)
-    }
+      }
 
   private[sbt] def depMap(
       projects: Seq[ProjectRef],
