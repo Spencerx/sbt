@@ -1,0 +1,14 @@
+# Checks that `d` project:
+# - Receives changes from a transitive dependency
+# - Calls `git pull` on a indirectly depended VCS project
+
+$ exec bash setup.sh
+$ copy-file changes/build-with-deps.sbt build.sbt
+> reload
+> d/run
+
+$ exec bash add-newservice.sh
+$ copy-file changes/MainWithNew.scala d/src/main/scala/Main.scala
+> d/update
+> reload
+> d/run

@@ -1,0 +1,11 @@
+$ exec bash setup.sh
+$ copy-file changes/build-with-branch.sbt build.sbt
+> reload
+> run
+
+# Ensures that update fetches from the correct branch
+$ exec bash add-branch-class.sh
+$ copy-file changes/MainWithBranchOnly.scala src/main/scala/Main.scala
+> update
+> reload
+> run
