@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 set -e
 
+rm -rf global/staging upstream-repo
 mkdir -p upstream-repo/src/main/scala/upstream
 cd upstream-repo
 git init

@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 set -e
 
+rm -rf global/staging upstream-repo
 mkdir -p upstream-repo/a/src/main/scala/upstream
 mkdir -p upstream-repo/b/src/main/scala/upstream
 cd upstream-repo
