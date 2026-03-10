@@ -340,6 +340,7 @@ lazy val utilLogging = project
     Test / fork := true,
     mimaSettings,
     mimaBinaryIssueFilters ++= Seq(
+      ProblemFilters.exclude[MissingClassProblem]("com.github.ghik.silencer.silent")
     ),
   )
   .configure(addSbtIO)
