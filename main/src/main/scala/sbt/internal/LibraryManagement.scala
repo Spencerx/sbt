@@ -310,7 +310,7 @@ private[sbt] object LibraryManagement {
           Seq[ScopedKey[?]],
           ScopedKey[?],
           Option[FiniteDuration],
-          IvySbt#Module,
+          ModuleSettings,
           String,
           ProjectRef,
           Boolean,
@@ -318,7 +318,6 @@ private[sbt] object LibraryManagement {
           UnresolvedWarningConfiguration,
           Boolean,
           CompatibilityWarningOptions,
-          IvySbt,
           GetClassifiersModule,
           File,
           xsbti.AppConfiguration,
@@ -334,7 +333,7 @@ private[sbt] object LibraryManagement {
       Keys.executionRoots,
       Keys.resolvedScoped.toTaskable,
       Keys.forceUpdatePeriod.toTaskable,
-      Keys.ivyModule.toTaskable,
+      Keys.moduleSettings.toTaskable,
       Keys.updateCacheName.toTaskable,
       Keys.thisProjectRef.toTaskable,
       (Keys.update / Keys.skip).toTaskable,
@@ -342,7 +341,6 @@ private[sbt] object LibraryManagement {
       (Keys.update / Keys.unresolvedWarningConfiguration).toTaskable,
       Keys.publishMavenStyle.toTaskable,
       Keys.compatibilityWarningOptions.toTaskable,
-      Keys.ivySbt,
       Keys.classifiersModule,
       Keys.dependencyCacheDirectory,
       Keys.appConfiguration.toTaskable,
@@ -358,7 +356,7 @@ private[sbt] object LibraryManagement {
           er,
           rs,
           fup,
-          im,
+          ms,
           ucn,
           thisRef,
           sk,
@@ -366,7 +364,6 @@ private[sbt] object LibraryManagement {
           uwConfig,
           mavenStyle,
           cwo,
-          ivySbt0,
           mod,
           dcd,
           app,
@@ -400,10 +397,8 @@ private[sbt] object LibraryManagement {
           conf1.withLogicalClock(LogicalClock(state0.hashCode))
         }
         cachedUpdate(
-          // LM API
           lm = lm,
-          // Ivy-free ModuleDescriptor
-          module = im,
+          module = lm.moduleDescriptor(ms.asInstanceOf[ModuleDescriptorConfiguration]),
           s.cacheStoreFactory.sub(ucn),
           Reference.display(thisRef),
           updateConf,
@@ -446,12 +441,12 @@ private[sbt] object LibraryManagement {
               )
           val report = f(excludes)
           val allExcludes: Map[ModuleID, Vector[ConfigRef]] = excludes ++
-            IvyActions
+            UpdateClassifiersUtil
               .extractExcludes(report)
               .view
               .mapValues(cs => cs.map(c => ConfigRef(c)).toVector)
           store.write(allExcludes)
-          IvyActions
+          UpdateClassifiersUtil
             .addExcluded(
               report,
               classifiers.toVector,
@@ -986,7 +981,7 @@ private[sbt] object LibraryManagement {
         Def.task {
           val log = streams.value.log
           val conf = publishConfiguration.value
-          val module = ivyModule.value
+          val module = ivyModule.value.asInstanceOf[ModuleDescriptor]
           val publisherInterface = publisher.value
           publisherInterface.publish(module, conf, log)
         }
@@ -1114,7 +1109,7 @@ private[sbt] object LibraryManagement {
         Def.task {
           val log = streams.value.log
           val conf = publishLocalConfiguration.value
-          val module = ivyModule.value
+          val module = ivyModule.value.asInstanceOf[ModuleDescriptor]
           val publisherInterface = publisher.value
           publisherInterface.publish(module, conf, log)
         }
@@ -1157,7 +1152,7 @@ private[sbt] object LibraryManagement {
         Def.task {
           val log = streams.value.log
           val conf = publishM2Configuration.value
-          val module = ivyModule.value
+          val module = ivyModule.value.asInstanceOf[ModuleDescriptor]
           val publisherInterface = publisher.value
           publisherInterface.publish(module, conf, log)
         }

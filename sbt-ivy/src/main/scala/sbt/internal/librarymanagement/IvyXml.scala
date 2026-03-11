@@ -210,21 +210,25 @@ object IvyXml {
       shadedConfigOpt: Option[Configuration]
   ): Setting[Task[T]] =
     task := Def.uncached(task.dependsOnTask {
-      Def.task {
-        val currentProject = {
-          val proj = csrProject.value
-          val publications = csrPublications.value
-          proj.withPublications(publications)
+      Def.ifS(Def.task { sbt.Keys.useIvy.value })(
+        Def.task {
+          val currentProject = {
+            val proj = csrProject.value
+            val publications = csrPublications.value
+            proj.withPublications(publications)
+          }
+          val resolved = sbt.Keys.resolvedDependencies.value
+          IvyXml.writeFiles(
+            currentProject,
+            shadedConfigOpt,
+            sbt.Keys.ivySbt.value.asInstanceOf[IvySbt],
+            sbt.Keys.streams.value.log,
+            resolved
+          )
         }
-        val resolved = sbt.Keys.resolvedDependencies.value
-        IvyXml.writeFiles(
-          currentProject,
-          shadedConfigOpt,
-          sbt.Keys.ivySbt.value,
-          sbt.Keys.streams.value.log,
-          resolved
-        )
-      }
+      )(
+        Def.task { () }
+      )
     }.value)
 
   private lazy val needsIvyXmlLocal = Seq(publishLocalConfiguration) ++ getPubConf(
