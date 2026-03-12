@@ -16,20 +16,18 @@ import scala.concurrent.duration.FiniteDuration
  * Used with the `repositoryUpdateStrategy` setting key to control when
  * remote project dependencies are updated from their upstream repositories.
  */
-sealed trait RepositoryUpdateStrategy
-
-object RepositoryUpdateStrategy {
+enum RepositoryUpdateStrategy {
 
   /**
    * Never update automatically.
    * Users must manually delete staging directories or run `updateRemoteProjects`.
    */
-  case object Manual extends RepositoryUpdateStrategy
+  case Manual
 
   /** Update on every `update` task invocation. */
-  case object Always extends RepositoryUpdateStrategy
+  case Always
 
   /** Update at most once per the given interval. */
-  final case class Every(interval: FiniteDuration) extends RepositoryUpdateStrategy
+  case Every(interval: FiniteDuration)
 
 }

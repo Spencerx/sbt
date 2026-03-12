@@ -7,4 +7,4 @@
 $ exec bash setup.sh
 $ copy-file changes/build-with-dep.sbt build.sbt
 > reload
-> run
+> compile

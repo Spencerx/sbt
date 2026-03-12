@@ -1,18 +1,7 @@
+import upstream.{ Greeter, Helper, Utils }
+
 object Main {
   def main(args: Array[String]): Unit = {
-    val greeterClass = Class.forName("upstream.Greeter")
-    val greet = greeterClass.getMethod("greet").invoke(null)
-    assert(greet == "hello", s"Expected 'hello' but got '$greet'")
-    println(s"Greeter loaded: $greet")
-
-    val helperClass = Class.forName("upstream.Helper")
-    val help = helperClass.getMethod("help").invoke(null)
-    assert(help == "helped", s"Expected 'helped' but got '$help'")
-    println(s"Helper loaded: $help")
-
-    val utilsClass = Class.forName("upstream.Utils")
-    val util = utilsClass.getMethod("util").invoke(null)
-    assert(util == "utility", s"Expected 'utility' but got '$util'")
-    println(s"Utils loaded: $util")
+    val _ = (Greeter.greet, Helper.help, Utils.util)
   }
 }

@@ -22,7 +22,7 @@ import java.util.Locale
 import scala.sys.process.{ BasicIO, Process }
 import scala.util.control.NonFatal
 import sbt.internal.util.Util
-import sbt.internal.{ BuildDependencies, LoadedBuild }
+import sbt.internal.{ BuildDependencies, LoadedBuild, LoadedBuildUnit }
 import sbt.util.Logger
 import sbt.internal.RetrieveUnit
 
@@ -209,17 +209,19 @@ object Resolvers {
       extracted: Extracted,
       force: Boolean
   ): Boolean = {
+    def needsUpdate(uri: URI, unit: LoadedBuildUnit): Boolean = {
+      val rootProjectId = unit.rootProjects.headOption.getOrElse("root")
+      val projectRef = ProjectRef(uri, rootProjectId)
+      val strategy = extracted
+        .getOpt(projectRef / Keys.repositoryUpdateStrategy)
+        .getOrElse(RepositoryUpdateStrategy.Manual)
+      shouldUpdate(unit.localBase, strategy)
+    }
+
     log.info("Updating remote repos")
     val repos = (for {
       (uri, unit) <- lb.units if unit.localBase.exists()
-      vcs <- RetrieveUnit(uri) if (force || {
-        val rootProjectId = unit.rootProjects.headOption.getOrElse("root")
-        val projectRef = ProjectRef(uri, rootProjectId)
-        val strategy = extracted
-          .getOpt(projectRef / Keys.repositoryUpdateStrategy)
-          .getOrElse(RepositoryUpdateStrategy.Manual)
-        shouldUpdate(unit.localBase, strategy)
-      })
+      vcs <- RetrieveUnit(uri) if force || needsUpdate(uri, unit)
     } yield (unit.localBase, vcs))
 
     val isUpdated = repos.foldLeft(false) { case (acc, (repo, vcs)) =>
@@ -270,7 +272,10 @@ object Resolvers {
   }
 
   private[sbt] def updateRepository(localCopy: File, uri: URI, log: Logger): Boolean =
-    RetrieveUnit(uri).exists(updateRepository(localCopy, _, log))
+    RetrieveUnit(uri) match {
+      case Some(vcs) => updateRepository(localCopy, vcs, log)
+      case None      => false
+    }
 
   private[sbt] def updateRepository(localCopy: File, vcs: RemoteVcs, log: Logger): Boolean =
     vcs match {
@@ -281,12 +286,21 @@ object Resolvers {
 
   private def updateGit(localCopy: File, uri: URI, log: Logger): Boolean =
     try {
-      val headBefore = captureOutput(Some(localCopy), "git", "rev-parse", "HEAD")
-      val ref = if (fromURI(uri).hasFragment) uri.getFragment else "HEAD"
-      run(Some(localCopy), Some(log), "git", "fetch", "origin", ref)
-      run(Some(localCopy), Some(log), "git", "reset", "--hard", "FETCH_HEAD")
-      markUpdated(localCopy)
-      captureOutput(Some(localCopy), "git", "rev-parse", "HEAD") != headBefore
+      val status = captureOutput(Some(localCopy), "git", "status", "--porcelain", "-uno")
+      if (status.nonEmpty) {
+        log.warn(
+          s"Skipping update of $localCopy: uncommitted changes detected. " +
+            "Commit or discard them before updating."
+        )
+        false
+      } else {
+        val headBefore = captureOutput(Some(localCopy), "git", "rev-parse", "HEAD")
+        val ref = if (fromURI(uri).hasFragment) uri.getFragment else "HEAD"
+        run(Some(localCopy), Some(log), "git", "fetch", "origin", ref)
+        run(Some(localCopy), Some(log), "git", "reset", "--hard", "FETCH_HEAD")
+        markUpdated(localCopy)
+        captureOutput(Some(localCopy), "git", "rev-parse", "HEAD") != headBefore
+      }
     } catch {
       case NonFatal(e) =>
         log.error(
@@ -303,6 +317,7 @@ object Resolvers {
 
   private def updateMercurial(localCopy: File, uri: URI, log: Logger): Boolean =
     try {
+      val idBefore = captureOutput(Some(localCopy), "hg", "id", "-i")
       if (fromURI(uri).hasFragment) {
         val branch = uri.getFragment
         run(Some(localCopy), Some(log), "hg", "pull")
@@ -311,7 +326,7 @@ object Resolvers {
         run(Some(localCopy), Some(log), "hg", "pull", "-u")
       }
       markUpdated(localCopy)
-      true
+      captureOutput(Some(localCopy), "hg", "id", "-i") != idBefore
     } catch {
       case NonFatal(e) =>
         log.error(
@@ -322,6 +337,7 @@ object Resolvers {
 
   private def updateSubversion(localCopy: File, uri: URI, log: Logger): Boolean =
     try {
+      val revBefore = captureOutput(Some(localCopy), "svn", "info", "--show-item", "revision")
       if (fromURI(uri).hasFragment) {
         val revision = uri.getFragment
         run(Some(localCopy), Some(log), "svn", "update", "-q", "-r", revision)
@@ -329,7 +345,7 @@ object Resolvers {
         run(Some(localCopy), Some(log), "svn", "update", "-q")
       }
       markUpdated(localCopy)
-      true
+      captureOutput(Some(localCopy), "svn", "info", "--show-item", "revision") != revBefore
     } catch {
       case NonFatal(e) =>
         log.error(
