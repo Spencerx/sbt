@@ -1,0 +1,10 @@
+# Given:
+# - VCS project `b`
+# - VCS project `a`, which depends on `b`
+# - Project `root`, which depends on `a`
+# Ensures that `root` has access to `b`
+
+$ exec bash setup.sh
+$ copy-file changes/build-with-dep.sbt build.sbt
+> reload
+> compile

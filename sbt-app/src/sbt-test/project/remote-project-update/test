@@ -1,0 +1,39 @@
+# Ensures that initial fetch works correctly
+$ exec bash setup.sh
+$ copy-file changes/build-with-dep.sbt build.sbt
+> reload
+> compile
+
+# Ensures that `updateRemoteProjects` works correctly
+$ exec bash add-helper.sh
+$ copy-file changes/MainWithHelper.scala src/main/scala/Main.scala
+> updateRemoteProjects
+> compile
+
+# Ensures update with `Always` strategy
+$ exec bash add-utils.sh
+$ copy-file changes/MainWithUtils.scala src/main/scala/Main.scala
+> update
+> reload
+> compile
+
+# Ensures that `Manual` strategy does nothing on `update`
+# compile must fail
+$ copy-file changes/build-with-dep-manual.sbt build.sbt
+> reload
+$ exec bash add-manual-class.sh
+$ copy-file changes/MainCheckManual.scala src/main/scala/Main.scala
+> update
+-> compile
+
+# Ensures that `Every` strategy updates after interval elapses
+# compile must fail and succeed after sleep
+$ copy-file changes/build-with-dep-every.sbt build.sbt
+> reload
+$ exec bash add-every-class.sh
+$ copy-file changes/MainCheckEvery.scala src/main/scala/Main.scala
+-> compile
+$ sleep 3000
+> update
+> reload
+> compile

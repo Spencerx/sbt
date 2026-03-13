@@ -387,6 +387,7 @@ object BuiltinCommands {
       act,
       continuous,
       clearCaches,
+      updateRemoteProjectsCommand,
       Clean.cleanFull,
       NetworkChannel.disconnect,
       waitCmd,
@@ -1044,6 +1045,35 @@ object BuiltinCommands {
 
   def registerCompilerCache(s: State): State = Clean.registerCompilerCache(s)
   def clearCaches: Command = Clean.clearCaches
+
+  def updateRemoteProjectsCommand: Command =
+    Command.command(
+      "updateRemoteProjects",
+      Help.more(
+        "updateRemoteProjects",
+        "Force-updates all remote VCS project dependencies."
+      )
+    ) { s =>
+      if (s.get(BuildPaths.repositoryUpdateCompleted).getOrElse(false)) {
+        s.remove(BuildPaths.repositoryUpdateCompleted)
+      } else {
+        val log = s.log
+        val extracted = Project.extract(s)
+        val isUpdated = Resolvers.updateLoadedBuild(
+          lb = extracted.get(Keys.loadedBuild),
+          log = log,
+          extracted = extracted,
+          force = true
+        )
+
+        if (isUpdated) {
+          log.warn("Remote dependencies updated. Reloading...")
+          "reload" :: s.put(BuildPaths.repositoryUpdateCompleted, true)
+        } else {
+          s
+        }
+      }
+    }
 
   private[sbt] def waitCmd: Command =
     Command.arb(_ =>

@@ -42,6 +42,12 @@ object BuildPaths:
   val globalZincDirectory =
     AttributeKey[File]("global-zinc-directory", "The base directory for Zinc internals.", DSetting)
 
+  val repositoryUpdateCompleted = AttributeKey[Boolean](
+    "repository-update-completed",
+    "Indicates that remote project repositories have been updated.",
+    DSetting
+  )
+
   import sbt.io.syntax.*
 
   def getGlobalBase(state: State): File = {

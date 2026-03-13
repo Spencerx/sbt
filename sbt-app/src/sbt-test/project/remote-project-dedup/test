@@ -1,0 +1,15 @@
+$ exec bash setup.sh
+$ copy-file changes/build-with-deps.sbt build.sbt
+> reload
+> compile
+
+$ exec bash add-newservice.sh
+$ copy-file changes/MainWithNew.scala d/src/main/scala/Main.scala
+
+# Snapshot HEAD reflog, update, verify exactly 1 fetch (dedup across diamond)
+> snapshotReflog
+> d/update
+> checkFetchCount 1
+
+> reload
+> compile

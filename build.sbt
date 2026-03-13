@@ -764,6 +764,11 @@ lazy val mainProj = (project in file("main"))
       exclude[IncompatibleResultTypeProblem]("sbt.internal.GlobalPluginData._3"),
       exclude[IncompatibleResultTypeProblem]("sbt.internal.GlobalPluginData._4"),
       exclude[DirectMissingMethodProblem]("sbt.internal.GlobalPluginData._6"),
+      // Updating remote vcs projects (sbt#1284)
+      exclude[DirectMissingMethodProblem]("sbt.Resolvers.creates"),
+      exclude[DirectMissingMethodProblem]("sbt.Resolvers.uniqueSubdirectoryFor"),
+      exclude[DirectMissingMethodProblem]("sbt.Resolvers.run"),
+      exclude[MissingClassProblem]("sbt.Resolvers$DistributedVCS")
     ),
   )
   .dependsOn(lmCore, lmCoursierShadedPublishing)

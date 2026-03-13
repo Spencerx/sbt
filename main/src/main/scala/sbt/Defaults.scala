@@ -123,7 +123,7 @@ import xsbti.compile.{
   TransactionalManagerType
 }
 
-object Defaults extends BuildCommon {
+object Defaults extends BuildCommon with DefExtra {
   final val CacheDirectoryName = "cache"
 
   def configSrcSub(key: SettingKey[File]): Initialize[File] =
@@ -324,6 +324,7 @@ object Defaults extends BuildCommon {
         else TaskCancellationStrategy.Null
       },
       envVars :== Map.empty,
+      repositoryUpdateStrategy :== RepositoryUpdateStrategy.Manual,
       sbtVersion := appConfiguration.value.provider.id.version,
       sbtBinaryVersion := binarySbtVersion(sbtVersion.value),
       pluginCrossBuild / sbtVersion := sbtVersion.value,
@@ -2511,7 +2512,23 @@ object Defaults extends BuildCommon {
         else ClassLoaderLayeringStrategy.ScalaLibrary
       },
       publishLocal / skip := (publish / skip).value,
-      publishM2 / skip := (publish / skip).value
+      publishM2 / skip := (publish / skip).value,
+      fetchSource := Def.uncached {
+        val uri = thisProjectRef.value.build
+        val log = streams.value.log
+        RetrieveUnit(uri) match {
+          case None => ()
+          case Some(vcs) =>
+            val strategy = repositoryUpdateStrategy.value
+            val lb = Project.extract(state.value).get(Keys.loadedBuild)
+            val vcsRoot = lb.units.get(uri).map(_.localBase).getOrElse(baseDirectory.value)
+            if (Resolvers.shouldUpdate(vcsRoot, strategy)) {
+              log.info(s"Updating remote project: $vcsRoot ...")
+              if (Resolvers.updateRepository(vcsRoot, vcs, log))
+                log.warn("Remote dependencies updated. Run `reload` to pick up changes.")
+            }
+        }
+      },
     )
   // build.sbt is treated a Scala source of metabuild, so to enable deprecation flag on build.sbt we set the option here.
   lazy val deprecationSettings: Seq[Setting[?]] =
@@ -3317,12 +3334,19 @@ object Classpaths {
         dependencyPositions.value
       )
     ),
+    maybeUpdateRemoteProjects := Def.uncached(Def.taskDyn {
+      val buildDeps = buildDependencies.value
+      val thisRef = thisProjectRef.value
+      val lb = Project.extract(state.value).get(Keys.loadedBuild)
+      val vcsRootRefs = Resolvers.transitiveVcsRootRefs(thisRef, buildDeps, lb)
+      if (vcsRootRefs.isEmpty) Def.task(())
+      else Def.sequential(vcsRootRefs.map(_ / fetchSource).toSeq)
+    }.value),
     updateFull := Def.uncached(updateTask.value),
-    update := Def.uncached(updateWithoutDetails("update").value),
     update := Def.uncached {
-      val report = update.value
-      val log = streams.value.log
-      ConflictWarning(conflictWarning.value, report, log)
+      val _ = maybeUpdateRemoteProjects.value
+      val report = updateWithoutDetails("update").value
+      ConflictWarning(conflictWarning.value, report, streams.value.log)
       report
     },
     update / evictionWarningOptions := evictionWarningOptions.value,
