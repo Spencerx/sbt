@@ -1,4 +1,5 @@
 ThisBuild / scalaVersion := "3-latest.candidate"
+ThisBuild / allowUnsafeScalaLibUpgrade := true  // dynamic scalaVersion (3-latest.candidate) vs resolved scala3-library_3; demote to warn
 
 lazy val checkDynVersion = taskKey[Unit]("Check that scalaDynVersion resolves correctly")
 
