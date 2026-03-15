@@ -16,6 +16,7 @@ lazy val a3 = project.settings(
 )
 
 lazy val b3 = project.dependsOn(a3).settings(
+  allowUnsafeScalaLibUpgrade := true, // b3 has 3.3.2, a3 brings 3.3.4; demote to warn so b3/run still passes
   scalaVersion := "3.3.2", // 2.13.12 library
   TaskKey[Unit]("checkScala") := {
     val i = scalaInstance.value

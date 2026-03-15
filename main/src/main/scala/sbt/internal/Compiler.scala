@@ -215,6 +215,39 @@ object Compiler:
           if err then sys.error(msg)
           else s.log.warn(msg)
         else ()
+    else if ScalaArtifacts.isScala3(sv) then
+      val scala3LibOpt = for
+        compileReport <- fullReport.configuration(Configurations.Compile)
+        lib <- compileReport.modules.find(
+          _.module.name.startsWith(ScalaArtifacts.Scala3LibraryPrefix)
+        )
+      yield lib
+      for lib <- scala3LibOpt do
+        val libVer = lib.module.revision
+        val libName = lib.module.name
+        val proj =
+          Def.displayBuildRelative(Keys.thisProjectRef.value.build, Keys.thisProjectRef.value)
+        if VersionNumber(sv).matchesSemVer(SemanticSelector(s"<$libVer")) then
+          val err = !Keys.allowUnsafeScalaLibUpgrade.value
+          val fix =
+            if err then
+              """Upgrade the `scalaVersion` to fix the build. If upgrading the Scala compiler version is
+                |not possible (for example due to a regression in the compiler or a missing dependency),
+                |this error can be demoted by setting `allowUnsafeScalaLibUpgrade := true`.""".stripMargin
+            else s"""Note that the dependency classpath and the runtime classpath of your project
+                 |contain the newer $libName $libVer, even if the scalaVersion is $sv.
+                 |Compilation (macro expansion) or using the Scala REPL in sbt may fail with a LinkageError.""".stripMargin
+          val msg =
+            s"""Expected `$proj scalaVersion` to be $libVer or later, but found $sv.
+               |To maintain the compile-time alignment, the Scala compiler cannot be older than $libName on the dependency classpath.
+               |
+               |$fix
+               |
+               |See `$proj evicted` to know why $libName was upgraded from $sv to $libVer.
+               |""".stripMargin
+          if err then sys.error(msg)
+          else s.log.warn(msg)
+        else ()
     else ()
     def file(id: String): Option[File] =
       for
