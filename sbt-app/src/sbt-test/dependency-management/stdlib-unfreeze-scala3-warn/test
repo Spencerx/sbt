@@ -1,0 +1,3 @@
+# With allowUnsafeScalaLibUpgrade := true, compile and run succeed (eviction is a warning only)
+> low/compile
+> low/run

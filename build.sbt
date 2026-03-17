@@ -826,6 +826,7 @@ lazy val serverTestProj = (project in file("server-test"))
   .dependsOn(sbtProj % "compile->test", scriptedSbtProj % "compile->test")
   .settings(
     testedBaseSettings,
+    allowUnsafeScalaLibUpgrade := true, // demote Scala 3 eviction to warn if deps bring newer scala3-library_3
     Utils.noPublish,
     // make server tests serial
     Test / watchTriggers += baseDirectory.value.toGlob / "src" / "server-test" / **,
