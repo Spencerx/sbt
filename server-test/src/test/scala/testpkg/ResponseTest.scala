@@ -7,110 +7,93 @@
 
 package testpkg
 
+import java.util.concurrent.TimeoutException
 import scala.concurrent.duration.*
+import scala.util.{ Failure, Success }
+import sjsonnew.support.scalajson.unsafe.CompactPrinter
 
 // starts svr using server-test/response and perform custom server tests
 class ResponseTest extends AbstractServerTest {
   override val testDirectory: String = "response"
 
   test("response from a command") {
-    svr.sendJsonRpc("""{ "jsonrpc": "2.0", "id": "10", "method": "foo/export", "params": {} }""")
-    assert(svr.waitForString(10.seconds) { s =>
-      if (!s.contains("systemOut"))
-        println(s)
-      s.contains(""""id":"10"""") &&
-      s.contains("scala-library-2.12.21.jar")
-    })
+    val id = svr.session.nextId()
+    svr.session.sendJsonRpc(id, "foo/export", "{}").get
+    val response = svr.session.waitForResponseMsg(10.seconds, id).get
+    assert(response.result.exists(r => CompactPrinter(r).contains("scala-library-2.12.21.jar")))
   }
 
   test("response from a task") {
-    svr.sendJsonRpc(
-      """{ "jsonrpc": "2.0", "id": "11", "method": "foo/rootClasspath", "params": {} }"""
-    )
-    assert(svr.waitForString(10.seconds) { s =>
-      if (!s.contains("systemOut")) println(s)
-      s.contains(""""id":"11"""") &&
-      s.contains("scala-library-2.12.21.jar")
-    })
+    val id = svr.session.nextId()
+    svr.session.sendJsonRpc(id, "foo/rootClasspath", "{}").get
+    val response = svr.session.waitForResponseMsg(10.seconds, id).get
+    assert(response.result.exists(r => CompactPrinter(r).contains("scala-library-2.12.21.jar")))
   }
 
   test("a command failure") {
-    svr.sendJsonRpc(
-      """{ "jsonrpc": "2.0", "id": "12", "method": "foo/fail", "params": {} }"""
-    )
-    assert(svr.waitForString(10.seconds) { s =>
-      if (!s.contains("systemOut")) println(s)
-      s.contains(""""error":{"code":-33000,"message":"fail message"""")
-    })
+    val id = svr.session.nextId()
+    svr.session.sendJsonRpc(id, "foo/fail", "{}").get
+    val response = svr.session.waitForResponseMsg(10.seconds, id).get
+    assert(response.error.exists(err => err.code == -33000 && err.message == "fail message"))
   }
 
   test("a command failure with custom code") {
-    svr.sendJsonRpc(
-      """{ "jsonrpc": "2.0", "id": "13", "method": "foo/customfail", "params": {} }"""
-    )
-    assert(svr.waitForString(10.seconds) { s =>
-      if (!s.contains("systemOut")) println(s)
-      s.contains(""""error":{"code":500,"message":"some error"""")
-    })
+    val id = svr.session.nextId()
+    svr.session.sendJsonRpc(id, "foo/customfail", "{}").get
+    val response = svr.session.waitForResponseMsg(10.seconds, id).get
+    assert(response.error.exists(err => err.code == 500 && err.message == "some error"))
   }
 
   test("a command with a notification") {
-    svr.sendJsonRpc(
-      """{ "jsonrpc": "2.0", "id": "14", "method": "foo/notification", "params": {} }"""
-    )
-    assert(svr.waitForString(10.seconds) { s =>
-      if (!s.contains("systemOut")) println(s)
-      s.contains("""{"jsonrpc":"2.0","method":"foo/something","params":"something"}""")
-    })
+    val id = svr.session.nextId()
+    svr.session.sendJsonRpc(id, "foo/notification", "{}").get
+    svr.session
+      .waitForNotificationMsg(10.seconds) { n =>
+        n.method == "foo/something" &&
+        n.params.exists(p => CompactPrinter(p) == "\"something\"")
+      }
+      .get
   }
 
   test("respond concurrently from a task and the handler") {
-    svr.sendJsonRpc(
-      """{ "jsonrpc": "2.0", "id": "15", "method": "foo/respondTwice", "params": {} }"""
-    )
-    assert {
-      svr.waitForString(10.seconds) { s =>
-        if (!s.contains("systemOut")) println(s)
-        s.contains("\"id\":\"15\"")
-      }
-    }
-    assert {
-      // the second response should never be sent
-      svr.neverReceive(500.milliseconds) { s =>
-        if (!s.contains("systemOut")) println(s)
-        s.contains("\"id\":\"15\"")
-      }
-    }
+    val id = svr.session.nextId()
+    svr.session.sendJsonRpc(id, "foo/respondTwice", "{}").get
+    svr.session.waitForResponseMsg(10.seconds, id).get
+    // the second response should never be sent
+    neverReceiveResponseWithId(500.milliseconds, id)
   }
 
   test("concurrent result and error") {
-    svr.sendJsonRpc(
-      """{ "jsonrpc": "2.0", "id": "16", "method": "foo/resultAndError", "params": {} }"""
-    )
-    assert {
-      svr.waitForString(10.seconds) { s =>
-        if (!s.contains("systemOut")) println(s)
-        s.contains("\"id\":\"16\"")
-      }
-    }
-    assert {
-      // the second response (result or error) should never be sent
-      svr.neverReceive(500.milliseconds) { s =>
-        if (!s.contains("systemOut")) println(s)
-        s.contains("\"id\":\"16\"")
-      }
-    }
+    val id = svr.session.nextId()
+    svr.session.sendJsonRpc(id, "foo/resultAndError", "{}").get
+    svr.session.waitForResponseMsg(10.seconds, id).get
+    // the second response (result or error) should never be sent
+    neverReceiveResponseWithId(500.milliseconds, id)
   }
 
   test("response to a notification should not be sent") {
-    svr.sendJsonRpc(
-      """{ "jsonrpc": "2.0", "method": "foo/customNotification", "params": {} }"""
-    )
-    assert {
-      svr.neverReceive(500.milliseconds) { s =>
-        if (!s.contains("systemOut")) println(s)
-        s.contains("\"result\":\"notification result\"")
-      }
+    val id = svr.session.nextId()
+    svr.session.sendJsonRpc(id, "foo/customNotification", "{}").get
+    neverReceiveResponse(500.milliseconds) { r =>
+      r.result.exists(v => CompactPrinter(v) == "\"notification result\"")
     }
   }
+
+  private def neverReceiveResponse(
+      duration: FiniteDuration
+  )(predicate: sbt.internal.protocol.JsonRpcResponseMessage => Boolean): Unit =
+    svr.session.waitForResponseMsg(duration)(predicate) match {
+      case Success(matched) =>
+        fail(s"Expected no matching response, but received: $matched")
+      case Failure(_: TimeoutException) => ()
+      case Failure(e)                   => throw e
+    }
+
+  private def neverReceiveResponseWithId(duration: FiniteDuration, id: String): Unit =
+    svr.session.waitForResponseMsg(duration, id) match {
+      case Success(matched) =>
+        fail(s"Expected no response for request $id, but received: $matched")
+      case Failure(_: TimeoutException) => ()
+      case Failure(e)                   => throw e
+    }
 }

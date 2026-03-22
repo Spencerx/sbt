@@ -8,144 +8,68 @@
 
 package testpkg
 
-import java.io.IOException
-import java.net.Socket
-import java.util.concurrent.{ LinkedBlockingQueue, TimeUnit }
-import java.util.concurrent.atomic.AtomicBoolean
-import sbt.protocol.ClientSocket
-
-import scala.annotation.tailrec
 import scala.concurrent.duration.*
+import sbt.protocol.{ ExecStatusEvent, ServerSession }
+import sbt.protocol.codec.JsonProtocol.given
+import sbt.internal.langserver.{ LogMessageParams, SbtExecParams }
+import sbt.internal.langserver.codec.JsonProtocol.given
 
 class ChannelCursorTest extends AbstractServerTest {
   override val testDirectory: String = "channel-cursor"
 
-  private def createSecondConnection()
-      : (Socket, java.io.OutputStream, LinkedBlockingQueue[String], AtomicBoolean) = {
-    val portfile = testPath.resolve("project/target/active.json").toFile
-    @tailrec
-    def connect(attempt: Int): Socket = {
-      val res =
-        try Some(ClientSocket.socket(portfile)._1)
-        catch { case _: IOException if attempt < 10 => None }
-      res match {
-        case Some(s) => s
-        case _ =>
-          Thread.sleep(100)
-          connect(attempt + 1)
-      }
-    }
-    val sk = connect(0)
-    val out = sk.getOutputStream
-    val in = sk.getInputStream
-    val lines = new LinkedBlockingQueue[String]
-    val running = new AtomicBoolean(true)
-    new Thread(
-      () => {
-        while (running.get) {
-          try lines.put(sbt.ReadJson(in, running))
-          catch { case _: Exception => running.set(false) }
-        }
-      },
-      "sbt-server-test-read-thread-2"
-    ) {
-      setDaemon(true)
-      start()
-    }
-    (sk, out, lines, running)
-  }
-
-  private def sendJsonRpc(out: java.io.OutputStream, message: String): Unit = {
-    def writeLine(s: String): Unit = {
-      val retByte: Byte = '\r'.toByte
-      val delimiter: Byte = '\n'.toByte
-      if (s != "") {
-        out.write(s.getBytes("UTF-8"))
-      }
-      out.write(retByte.toInt)
-      out.write(delimiter.toInt)
-      out.flush
-    }
-    writeLine(s"""Content-Length: ${message.size + 2}""")
-    writeLine("")
-    writeLine(message)
-  }
-
-  private def waitForString(lines: LinkedBlockingQueue[String], duration: FiniteDuration)(
-      f: String => Boolean
-  ): Boolean = {
-    val deadline = duration.fromNow
-    @tailrec def impl(): Boolean =
-      lines.poll(deadline.timeLeft.toMillis, TimeUnit.MILLISECONDS) match {
-        case null => false
-        case s    => if (!f(s) && !deadline.isOverdue) impl() else !deadline.isOverdue()
-      }
-    impl()
-  }
-
   test("channel cursor - independent project cursors") {
-    val (sk2, out2, lines2, running2) = createSecondConnection()
+    val portfile = testPath.resolve("project/target/active.json").toFile
+    val session2 = ServerSession.connect(portfile)
     try {
-      sendJsonRpc(
-        out2,
-        """{ "jsonrpc": "2.0", "id": 1, "method": "initialize", "params": { "initializationOptions": { "skipAnalysis": true } } }"""
-      )
-      waitForString(lines2, 10.seconds)(_.contains(""""capabilities":{"""))
+      session2.initialize(10.seconds, subscribeToAll = false)
 
-      svr.sendJsonRpc(
-        """{ "jsonrpc": "2.0", "id": 10, "method": "sbt/exec", "params": { "commandLine": "project projectA" } }"""
-      )
-      assert(
-        svr.waitForString(10.seconds) { s =>
-          println(s"[channel1] $s")
-          s.contains("projectA") || s.contains("\"execId\":10")
-        },
-        "Channel 1 should switch to projectA"
-      )
+      val switchToAResult = svr.session
+        .sendJsonRpcAwaitResult[ExecStatusEvent](
+          "sbt/exec",
+          SbtExecParams("project projectA")
+        )
+        .get
+      assert(switchToAResult.status == "Done")
 
-      sendJsonRpc(
-        out2,
-        """{ "jsonrpc": "2.0", "id": 20, "method": "sbt/exec", "params": { "commandLine": "project projectB" } }"""
-      )
-      assert(
-        waitForString(lines2, 10.seconds) { s =>
-          println(s"[channel2] $s")
-          s.contains("projectB") || s.contains("\"execId\":20")
-        },
-        "Channel 2 should switch to projectB"
-      )
+      val switchToBResult = session2
+        .sendJsonRpcAwaitResult[ExecStatusEvent](
+          "sbt/exec",
+          SbtExecParams("project projectB")
+        )
+        .get
+      assert(switchToBResult.status == "Done")
 
-      svr.sendJsonRpc(
-        """{ "jsonrpc": "2.0", "id": 11, "method": "sbt/exec", "params": { "commandLine": "printCurrentProject" } }"""
-      )
-      var foundProjectA = false
+      val printA = svr.session.nextId()
+      svr.session.sendJsonRpc(printA, "sbt/exec", SbtExecParams("printCurrentProject")).get
+      val logA = svr.session
+        .waitForParamsInNotificationMsg[LogMessageParams](30.seconds) { p =>
+          p.message.startsWith("CURRENT_PROJECT_IS:")
+        }
+        .get
       assert(
-        svr.waitForString(30.seconds) { s =>
-          println(s"[channel1 name] $s")
-          if (s.contains("CURRENT_PROJECT_IS:project-a")) foundProjectA = true
-          s.contains("\"execId\":11") && s.contains("\"status\":\"Done\"")
-        },
-        "First channel printCurrentProject command should complete"
+        logA.message == "CURRENT_PROJECT_IS:project-a",
+        "First channel should still be on projectA"
       )
-      assert(foundProjectA, "First channel should still be on projectA")
+      svr.session.waitForResultInResponseMsg[ExecStatusEvent](30.seconds, printA).get
 
-      sendJsonRpc(
-        out2,
-        """{ "jsonrpc": "2.0", "id": 21, "method": "sbt/exec", "params": { "commandLine": "printCurrentProject" } }"""
-      )
-      var foundProjectB = false
+      val printB = session2.nextId()
+      session2.sendJsonRpc(printB, "sbt/exec", SbtExecParams("printCurrentProject")).get
+      val logB = session2
+        .waitForParamsInNotificationMsg[LogMessageParams](30.seconds) { p =>
+          p.message.startsWith("CURRENT_PROJECT_IS:")
+        }
+        .get
       assert(
-        waitForString(lines2, 30.seconds) { s =>
-          println(s"[channel2 name] $s")
-          if (s.contains("CURRENT_PROJECT_IS:project-b")) foundProjectB = true
-          s.contains("\"execId\":21") && s.contains("\"status\":\"Done\"")
-        },
-        "Second channel printCurrentProject command should complete"
+        logB.message == "CURRENT_PROJECT_IS:project-b",
+        "Second channel should still be on projectB"
       )
-      assert(foundProjectB, "Second channel should still be on projectB")
+      session2.waitForResultInResponseMsg[ExecStatusEvent](30.seconds, printB).get
     } finally {
-      running2.set(false)
-      sk2.close()
+      // close() may fail to join the read thread because UnixDomainSocket
+      // input streams block until the server process exits (which happens
+      // later in afterAll). Swallow the timeout.
+      try session2.close()
+      catch { case _: Exception => }
     }
   }
 }

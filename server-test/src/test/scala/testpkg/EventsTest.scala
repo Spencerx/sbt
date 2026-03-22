@@ -8,80 +8,60 @@
 package testpkg
 
 import scala.concurrent.duration.*
-import java.util.concurrent.atomic.AtomicInteger
+import sbt.protocol.ExecStatusEvent
+import sbt.protocol.codec.JsonProtocol.given
+import sbt.internal.langserver.{ LogMessageParams, SbtExecParams, CancelRequestParams }
+import sbt.internal.langserver.codec.JsonProtocol.given
 
 // starts svr using server-test/events and perform event related tests
 class EventsTest extends AbstractServerTest {
   override val testDirectory: String = "events"
-  val currentID = new AtomicInteger(1000)
 
   test("report task failures in case of exceptions") {
-    val id = currentID.getAndIncrement()
-    svr.sendJsonRpc(
-      s"""{ "jsonrpc": "2.0", "id": $id, "method": "sbt/exec", "params": { "commandLine": "hello" } }"""
-    )
-    assert(svr.waitForString(10.seconds) { s =>
-      s.contains(s""""id":$id""") && s.contains(""""error":""")
-    })
+    val id = svr.session.nextId()
+    svr.session.sendJsonRpc(id, "sbt/exec", SbtExecParams("hello")).get
+    val response = svr.session.waitForResponseMsg(10.seconds, id).get
+    assert(response.error.nonEmpty)
   }
 
   test("return error if cancelling non-matched task id") {
-    val id = currentID.getAndIncrement()
-    svr.sendJsonRpc(
-      s"""{ "jsonrpc": "2.0", "id":$id, "method": "sbt/exec", "params": { "commandLine": "run" } }"""
-    )
+    val id = svr.session.nextId()
+    svr.session.sendJsonRpc(id, "sbt/exec", SbtExecParams("blockForever")).get
+
     Thread.sleep(1000)
-    val cancelID = currentID.getAndIncrement()
-    val invalidID = currentID.getAndIncrement()
-    svr.sendJsonRpc(
-      s"""{ "jsonrpc": "2.0", "id":$cancelID, "method": "sbt/cancelRequest", "params": { "id": "$invalidID" } }"""
-    )
-    assert(svr.waitForString(20.seconds) { s =>
-      s.contains(""""error":{"code":-32800""")
-    })
+
+    val invalidID = svr.session.nextId()
+    val cancelId = svr.session.nextId()
+    svr.session
+      .sendJsonRpc(cancelId, "sbt/cancelRequest", CancelRequestParams(invalidID.toString))
+      .get
+    val response = svr.session.waitForResponseMsg(20.seconds, cancelId).get
+    assert(response.error.exists(_.code == -32800))
+
+    // cancel the actual blockForever task so it doesn't block subsequent tests
+    val cleanupId = svr.session.nextId()
+    svr.session.sendJsonRpc(cleanupId, "sbt/cancelRequest", CancelRequestParams(id.toString)).get
+    svr.session.waitForResponseMsg(10.seconds, cleanupId).get
   }
 
-  /*
-  test("cancel on-going task with numeric id") { _ =>
-    val id = currentID.getAndIncrement()
-    svr.sendJsonRpc(
-      s"""{ "jsonrpc": "2.0", "id":$id, "method": "sbt/exec", "params": { "commandLine": "run" } }"""
-    )
-    assert(svr.waitForString(20.seconds) { s =>
-      s contains "Compiled events"
-    })
-    assert(svr.waitForString(10.seconds) { s =>
-      s contains "running Main"
-    })
-    val cancelID = currentID.getAndIncrement()
-    svr.sendJsonRpc(
-      s"""{ "jsonrpc": "2.0", "id":$cancelID, "method": "sbt/cancelRequest", "params": { "id": "$id" } }"""
-    )
-    assert(svr.waitForString(11.seconds) { s =>
-      println(s)
-      s contains """"result":{"status":"Task cancelled""""
-    })
-  }
-   */
+  test("cancel on-going task") {
+    val id = svr.session.nextId()
+    svr.session.sendJsonRpc(id, "sbt/exec", SbtExecParams("blockForever")).get
+    svr.session
+      .waitForParamsInNotificationMsg[LogMessageParams](10.seconds) { p =>
+        p.message.contains("Processing sbt/exec")
+      }
+      .get
 
-  /*
-  test("cancel on-going task with string id") { _ =>
-    import sbt.Exec
-    val id = Exec.newExecId
-    svr.sendJsonRpc(
-      s"""{ "jsonrpc": "2.0", "id": "$id", "method": "sbt/exec", "params": { "commandLine": "run" } }"""
-    )
-    assert(svr.waitForString(20.seconds) { s =>
-      s contains "Compiled events"
-    })
-    val cancelID = Exec.newExecId
-    svr.sendJsonRpc(
-      s"""{ "jsonrpc": "2.0", "id": "$cancelID", "method": "sbt/cancelRequest", "params": { "id": "$id" } }"""
-    )
-    assert(svr.waitForString(11.seconds) { s =>
-      println(s)
-      s contains """"result":{"status":"Task cancelled""""
-    })
+    Thread.sleep(1000)
+
+    val cancelResult = svr.session
+      .sendJsonRpcAwaitResult[ExecStatusEvent](
+        "sbt/cancelRequest",
+        CancelRequestParams(id.toString),
+        11.seconds
+      )
+      .get
+    assert(cancelResult.status == "Task cancelled")
   }
-   */
 }

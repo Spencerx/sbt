@@ -8,35 +8,35 @@
 package testpkg
 
 import scala.concurrent.duration.*
-import java.util.concurrent.atomic.AtomicInteger
+import sbt.internal.langserver.SbtExecParams
+import sbt.protocol.ExecStatusEvent
+import sbt.protocol.codec.JsonProtocol.given
+import sbt.internal.langserver.codec.JsonProtocol.given
 
 class QueuedNotificationTest extends AbstractServerTest {
   override val testDirectory: String = "queued"
-  val currentID = new AtomicInteger(2000)
 
   test("send Queued notification when command is queued behind another") {
-    val slowId = currentID.getAndIncrement()
-    svr.sendJsonRpc(
-      s"""{ "jsonrpc": "2.0", "id": $slowId, "method": "sbt/exec", "params": { "commandLine": "slowTask" } }"""
-    )
+    val slowId = svr.session.nextId()
+    svr.session.sendJsonRpc(slowId, "sbt/exec", SbtExecParams("slowTask")).get
 
     Thread.sleep(500)
 
-    val quickId = currentID.getAndIncrement()
-    svr.sendJsonRpc(
-      s"""{ "jsonrpc": "2.0", "id": $quickId, "method": "sbt/exec", "params": { "commandLine": "quickTask" } }"""
-    )
+    val quickId = svr.session.nextId()
+    svr.session.sendJsonRpc(quickId, "sbt/exec", SbtExecParams("quickTask")).get
 
-    assert(svr.waitForString(10.seconds) { s =>
-      s.contains(""""status":"Queued"""") && s.contains(""""waiting for: slowTask"""")
-    })
+    svr.session
+      .waitForParamsInNotificationMsg[ExecStatusEvent](10.seconds) { s =>
+        s.status == "Queued" && s.message.contains("waiting for: slowTask")
+      }
+      .get
 
-    assert(svr.waitForString(10.seconds) { s =>
-      s.contains(s""""id":$slowId""") && s.contains(""""status":"Done"""")
-    })
+    val slowResponse =
+      svr.session.waitForResultInResponseMsg[ExecStatusEvent](10.seconds, slowId).get
+    assert(slowResponse.status == "Done")
 
-    assert(svr.waitForString(10.seconds) { s =>
-      s.contains(s""""id":$quickId""") && s.contains(""""status":"Done"""")
-    })
+    val quickResponse =
+      svr.session.waitForResultInResponseMsg[ExecStatusEvent](10.seconds, quickId).get
+    assert(quickResponse.status == "Done")
   }
 }

@@ -612,6 +612,13 @@ lazy val commandProj = (project in file("main-command"))
     contrabandSettings,
     mimaSettings,
     mimaBinaryIssueFilters ++= Vector(
+      exclude[MissingClassProblem]("sbt.internal.util.JoinThread"),
+      exclude[MissingClassProblem]("sbt.internal.util.JoinThread$"),
+      exclude[MissingClassProblem]("sbt.internal.util.ReadJsonFromInputStream"),
+      exclude[MissingClassProblem]("sbt.internal.util.ReadJsonFromInputStream$"),
+      exclude[MissingClassProblem]("sbt.internal.client.ServerConnection"),
+      exclude[IncompatibleResultTypeProblem]("sbt.internal.client.NetworkClient.connection"),
+      exclude[IncompatibleResultTypeProblem]("sbt.internal.client.NetworkClient.init")
     ),
     Compile / headerCreate / unmanagedSources := {
       val old = (Compile / headerCreate / unmanagedSources).value

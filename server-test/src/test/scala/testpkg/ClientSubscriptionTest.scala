@@ -9,22 +9,16 @@
 package testpkg
 
 import scala.concurrent.duration.*
+import sbt.internal.langserver.SbtExecParams
+import sbt.internal.langserver.codec.JsonProtocol.given
 
 class ClientSubscriptionTest extends AbstractServerTest {
   override val testDirectory: String = "handshake"
 
   test("subscribe-to-all (default) client receives broadcast build/logMessage when command runs") {
-    svr.sendJsonRpc(
-      """{ "jsonrpc": "2.0", "id": 2, "method": "sbt/exec", "params": { "commandLine": "show name" } }"""
-    )
-    def isLogMessageNotification(line: String): Boolean =
-      line.contains("\"method\":\"build/logMessage\"") || line.contains(
-        "\"method\": \"build/logMessage\""
-      )
-    assert(
-      svr.waitForString(10.seconds)(isLogMessageNotification),
-      "subscribe-to-all client must receive broadcast build/logMessage when a command produces log output"
-    )
+    val id = svr.session.nextId()
+    svr.session.sendJsonRpc(id, "sbt/exec", SbtExecParams("show name")).get
+    svr.session.waitForNotificationMsg(10.seconds)(_.method == "build/logMessage").get
   }
 }
 
@@ -33,16 +27,8 @@ class ClientNoSubscriptionTest extends AbstractServerTest {
   override def subscribeToAllForTest: Boolean = false
 
   test("non-subscribed client receives build/logMessage for its own command") {
-    svr.sendJsonRpc(
-      """{ "jsonrpc": "2.0", "id": 2, "method": "sbt/exec", "params": { "commandLine": "show name" } }"""
-    )
-    def isLogMessageNotification(line: String): Boolean =
-      line.contains("\"method\":\"build/logMessage\"") || line.contains(
-        "\"method\": \"build/logMessage\""
-      )
-    assert(
-      svr.waitForString(10.seconds)(isLogMessageNotification),
-      "non-subscribed client must still receive build/logMessage for its own command"
-    )
+    val id = svr.session.nextId()
+    svr.session.sendJsonRpc(id, "sbt/exec", SbtExecParams("show name")).get
+    svr.session.waitForNotificationMsg(10.seconds)(_.method == "build/logMessage").get
   }
 }

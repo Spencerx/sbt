@@ -7,27 +7,26 @@
 
 package testpkg
 
-import scala.concurrent.duration.*
+import sbt.protocol.SettingQuery
+import sbt.protocol.codec.JsonProtocol.given
+import sbt.protocol.SettingQuerySuccess
+import sjsonnew.shaded.scalajson.ast.unsafe.JString
 
 // starts svr using server-test/handshake and perform basic tests
 class HandshakeTest extends AbstractServerTest {
   override val testDirectory: String = "handshake"
 
   test("handshake") {
-    svr.sendJsonRpc(
-      """{ "jsonrpc": "2.0", "id": "3", "method": "sbt/setting", "params": { "setting": "root/name" } }"""
-    )
-    assert(svr.waitForString(10.seconds) { s =>
-      s.contains(""""id":"3"""")
-    })
+    val response = svr.session
+      .sendJsonRpcAwaitResult[SettingQuerySuccess]("sbt/setting", SettingQuery("root/name"))
+      .get
+    assert(response.value == JString("handshake"))
   }
 
   test("return number id when number id is sent") {
-    svr.sendJsonRpc(
-      """{ "jsonrpc": "2.0", "id": 3, "method": "sbt/setting", "params": { "setting": "root/name" } }"""
-    )
-    assert(svr.waitForString(10.seconds) { s =>
-      s.contains(""""id":3""")
-    })
+    val response = svr.session
+      .sendJsonRpcAwaitResult[SettingQuerySuccess]("sbt/setting", SettingQuery("root/name"))
+      .get
+    assert(response.value == JString("handshake"))
   }
 }
