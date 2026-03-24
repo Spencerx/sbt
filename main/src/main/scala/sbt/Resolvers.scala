@@ -21,10 +21,9 @@ import java.util.Locale
 
 import scala.sys.process.{ BasicIO, Process }
 import scala.util.control.NonFatal
-import sbt.internal.util.Util
 import sbt.internal.{ BuildDependencies, LoadedBuild, LoadedBuildUnit }
 import sbt.util.Logger
-import sbt.internal.RetrieveUnit
+import sbt.internal.{ RetrieveUnit, VcsUriFragment }
 
 object Resolvers {
 
@@ -67,6 +66,7 @@ object Resolvers {
 
     if (uri.hasFragment) {
       val revision = uri.getFragment
+      VcsUriFragment.validate(revision)
       Some { () =>
         creates(localCopy) {
           run(cwd = None, log = None, "svn", "checkout", "-q", "-r", revision, from, to)
@@ -87,6 +87,7 @@ object Resolvers {
 
     if (uri.hasFragment) {
       val branch = uri.getFragment
+      VcsUriFragment.validate(branch)
       Some { () =>
         creates(localCopy) {
           run(cwd = None, log = None, "hg", "clone", "-q", from, localCopy.getAbsolutePath)
@@ -108,6 +109,7 @@ object Resolvers {
 
     if (uri.hasFragment) {
       val branch = uri.getFragment
+      VcsUriFragment.validate(branch)
       Some { () =>
         creates(localCopy) {
           run(cwd = None, log = None, "git", "clone", from, localCopy.getAbsolutePath)
@@ -132,11 +134,7 @@ object Resolvers {
   }
 
   private def run(cwd: Option[File], log: Option[Logger], command: String*): Unit = {
-    val process = Process(
-      if (Util.isNonCygwinWindows) "cmd" +: "/c" +: command
-      else command,
-      cwd
-    )
+    val process = Process(command, cwd)
     val result = (log match {
       case Some(log) =>
         val io = BasicIO(false, log).withInput(_.close())
@@ -295,7 +293,11 @@ object Resolvers {
         false
       } else {
         val headBefore = captureOutput(Some(localCopy), "git", "rev-parse", "HEAD")
-        val ref = if (fromURI(uri).hasFragment) uri.getFragment else "HEAD"
+        val ref = if (fromURI(uri).hasFragment) {
+          val f = uri.getFragment
+          VcsUriFragment.validate(f)
+          f
+        } else "HEAD"
         run(Some(localCopy), Some(log), "git", "fetch", "origin", ref)
         run(Some(localCopy), Some(log), "git", "reset", "--hard", "FETCH_HEAD")
         markUpdated(localCopy)
@@ -310,16 +312,14 @@ object Resolvers {
     }
 
   private def captureOutput(cwd: Option[File], command: String*): String =
-    Process(
-      if (Util.isNonCygwinWindows) "cmd" +: "/c" +: command else command,
-      cwd
-    ).!!.trim
+    Process(command, cwd).!!.trim
 
   private def updateMercurial(localCopy: File, uri: URI, log: Logger): Boolean =
     try {
       val idBefore = captureOutput(Some(localCopy), "hg", "id", "-i")
       if (fromURI(uri).hasFragment) {
         val branch = uri.getFragment
+        VcsUriFragment.validate(branch)
         run(Some(localCopy), Some(log), "hg", "pull")
         run(Some(localCopy), Some(log), "hg", "update", branch)
       } else {
@@ -340,6 +340,7 @@ object Resolvers {
       val revBefore = captureOutput(Some(localCopy), "svn", "info", "--show-item", "revision")
       if (fromURI(uri).hasFragment) {
         val revision = uri.getFragment
+        VcsUriFragment.validate(revision)
         run(Some(localCopy), Some(log), "svn", "update", "-q", "-r", revision)
       } else {
         run(Some(localCopy), Some(log), "svn", "update", "-q")
