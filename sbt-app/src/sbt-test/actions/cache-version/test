@@ -1,0 +1,21 @@
+# bumpCounter is a cached task that increments a file counter on each execution.
+# When the cache is hit, the task body is NOT re-executed, so the counter stays the same.
+
+# First call: body runs, counter goes to 1
+> bumpCounter
+> checkCounter 1
+
+# Second call: cache hit, body does NOT run, counter stays at 1
+> bumpCounter
+> checkCounter 1
+
+# Change cacheVersion: invalidates all caches
+> set Global / cacheVersion := 1L
+
+# Third call: cache miss (version changed), body runs, counter goes to 2
+> bumpCounter
+> checkCounter 2
+
+# Fourth call: cache hit again, counter stays at 2
+> bumpCounter
+> checkCounter 2
