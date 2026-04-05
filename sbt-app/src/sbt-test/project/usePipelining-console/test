@@ -1,0 +1,5 @@
+# Verify pipelining flags are stripped from console/scalacOptions (#8921).
+
+> compile
+> subproject/checkConsoleScalacOptions
+> checkConsoleScalacOptions

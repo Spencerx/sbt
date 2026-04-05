@@ -1087,9 +1087,16 @@ object Defaults extends BuildCommon with DefExtra {
       },
       compileIncSetup := Def.uncached(compileIncSetupTask.value),
       console := Compiler.consoleTask.value,
+      // Strip pipelining flags before they reach the REPL (#8921).
+      console / scalacOptions := Def.uncached {
+        Compiler.toConsoleScalacOptions(scalacOptions.value)
+      },
       console / forkOptions := Def.uncached(Compiler.consoleForkOptions.value),
       collectAnalyses := Definition.collectAnalysesTask.map(_ => ()).value,
       consoleQuick := consoleQuickTask.value,
+      consoleQuick / scalacOptions := Def.uncached {
+        Compiler.toConsoleScalacOptions(scalacOptions.value)
+      },
       consoleQuick / forkOptions := Def.uncached((console / forkOptions).value),
       discoveredMainClasses := compile
         .map(discoverMainClasses)
