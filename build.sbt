@@ -188,7 +188,6 @@ lazy val sbtRoot: Project = (project in file("."))
     },
     Utils.baseScalacOptions,
     Docs.settings,
-    scalacOptions += "-Ymacro-expand:none", // for both sxr and doc
     Utils.publishPomSettings,
     otherRootSettings,
     Utils.noPublish,
