@@ -37,7 +37,6 @@ object HouseRulesPlugin extends AutoPlugin {
       }
     },
     scalacOptions ++= "-Xsource:3".ifScala2.value.toList,
-    testFrameworks += TestFramework("hedgehog.sbt.Framework"),
     testFrameworks += TestFramework("verify.runner.Framework"),
   ) ++ Seq(Compile, Test).flatMap(c =>
     (c / console / scalacOptions) --= Seq("-Ywarn-unused-import", "-Xlint")

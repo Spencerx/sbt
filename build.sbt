@@ -74,7 +74,6 @@ def commonSettings: Seq[Setting[?]] = Def.settings(
   evictionErrorLevel := Level.Info,
   Utils.componentID := None,
   resolvers += Resolver.sonatypeCentralSnapshots,
-  testFrameworks += TestFramework("hedgehog.sbt.Framework"),
   testFrameworks += TestFramework("verify.runner.Framework"),
   Global / concurrentRestrictions += Utils.testExclusiveRestriction,
   // On Windows, limit to one task at a time to avoid OverlappingFileLockException when
@@ -1411,7 +1410,6 @@ lazy val launcherPackageIntegrationTest =
         // This needs to be hardcoded here, and not use addSbtIO
         "org.scala-sbt" %% "io" % "1.10.5" % Test,
       ),
-      testFrameworks += TestFramework("hedgehog.sbt.Framework"),
       testFrameworks += TestFramework("verify.runner.Framework"),
       Test / fork := true,
       Test / javaOptions += {
