@@ -169,6 +169,7 @@ class NetworkClient(
   private val inLock = new Object
   private val inputThread = new AtomicReference[RawInputThread]
   private val exitClean = new AtomicBoolean(true)
+  private val inClientSideRun = new AtomicBoolean(false)
   private val sbtProcess = new AtomicReference[Process](null)
   private class ConnectionRefusedException(t: Throwable) extends Throwable(t)
   private class ServerFailedException extends Exception
@@ -816,9 +817,12 @@ class NetworkClient(
         }
       Run.processExitCode(exitCode, "runner")
     }
-    if (runInfo.jvm)
-      RunHandler.jvmRun(runInfo.jvmRunInfo.getOrElse(sys.error("missing jvmRunInfo")), log)
-    else nativeRun(runInfo.nativeRunInfo.getOrElse(sys.error("missing nativeRunInfo")))
+    inClientSideRun.set(true)
+    try
+      if (runInfo.jvm)
+        RunHandler.jvmRun(runInfo.jvmRunInfo.getOrElse(sys.error("missing jvmRunInfo")), log)
+      else nativeRun(runInfo.nativeRunInfo.getOrElse(sys.error("missing nativeRunInfo")))
+    finally inClientSideRun.set(false)
   }
 
   def onRequest(msg: JsonRpcRequestMessage): Unit = {
@@ -941,14 +945,15 @@ class NetworkClient(
           exitClean.set(false)
           close()
         }
-        if (cancelled.compareAndSet(false, true)) {
+        if inClientSideRun.get() then ()
+        else if cancelled.compareAndSet(false, true) then
           val cancelledTasks = {
             val queue = sendCancelAllCommand()
             Option(queue.poll(1, TimeUnit.SECONDS)).getOrElse(true)
           }
-          if ((batchMode.get && pendingResults.isEmpty) || !cancelledTasks) exitAbruptly()
+          if (batchMode.get && pendingResults.isEmpty) || !cancelledTasks then exitAbruptly()
           else cancelled.set(false)
-        } else exitAbruptly() // handles double ctrl+c to force a shutdown
+        else exitAbruptly() // handles double ctrl+c to force a shutdown
       }
       withSignalHandler(handler, Signals.INT) {
         def block(): Int = {
