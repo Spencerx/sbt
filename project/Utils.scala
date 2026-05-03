@@ -18,11 +18,6 @@ object Utils {
     publish / skip := true,
   )
 
-  def crossBuild: Seq[Setting[?]] =
-    Seq(
-      crossPaths := true
-    )
-
   lazy val javaOnlySettings: Seq[Setting[?]] = Seq(
     // crossPaths := false,
     // compileOrder := CompileOrder.JavaThenScala,
@@ -40,37 +35,6 @@ object Utils {
       case None     => projectID.value
     })
 
-  lazy val apiDefinitions = TaskKey[Seq[File]]("api-definitions")
-
-  def generateAPICached(
-      defs: Seq[File],
-      cp: Classpath,
-      out: File,
-      main: Option[String],
-      run: ScalaRun,
-      s: TaskStreams
-  ): Seq[File] = {
-    def gen() = generateAPI(defs, cp, out, main, run, s)
-    val f = FileFunction.cached(s.cacheDirectory / "gen-api", FilesInfo.hash) { _ =>
-      gen().toSet
-    } // TODO: check if output directory changed
-    f(defs.toSet).toSeq
-  }
-  def generateAPI(
-      defs: Seq[File],
-      cp: Classpath,
-      out: File,
-      main: Option[String],
-      run: ScalaRun,
-      s: TaskStreams
-  ): Seq[File] = {
-    IO.delete(out)
-    IO.createDirectory(out)
-    val args = "xsbti.api" :: out.getAbsolutePath :: defs.map(_.getAbsolutePath).toList
-    val mainClass = main getOrElse "No main class defined for datatype generator"
-    run.run(mainClass, cp.files, args, s.log).failed foreach (e => sys error e.getMessage)
-    (out ** "*.java").get()
-  }
   def lastCompilationTime(analysis: Analysis): Long = {
     val lastCompilation = analysis.compilations.allCompilations.lastOption
     lastCompilation.map(_.getStartTime) getOrElse 0L
@@ -100,9 +64,6 @@ object Utils {
   def versionLine(version: String): String = "version=" + version
   def containsVersion(propFile: File, version: String): Boolean =
     IO.read(propFile).contains(versionLine(version))
-
-  def binID = "compiler-interface-bin"
-  def srcID = "compiler-interface-src"
 
   def publishPomSettings: Seq[Setting[?]] = Seq(
     pomPostProcess := cleanPom _
