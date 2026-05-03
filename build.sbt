@@ -589,7 +589,6 @@ lazy val protocolProj = (project in file("protocol"))
     testedBaseSettings,
     name := "Protocol",
     libraryDependencies ++= Seq(sjsonNewScalaJson.value, sjsonNewCore.value, ipcSocket),
-    Compile / scalacOptions += "-source:3.7",
     contrabandSettings,
     mimaSettings,
     mimaBinaryIssueFilters ++= Seq(
