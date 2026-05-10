@@ -687,8 +687,9 @@ lazy val zincLmIntegrationProj = (project in file("zinc-lm-integration"))
     mimaBinaryIssueFilters ++= Seq(
     ),
     libraryDependencies += launcherInterface,
+    libraryDependencies += scalaCollectionCompat % Test,
   )
-  .dependsOn(lmCore, lmIvy)
+  .dependsOn(lmCore, lmCoursierShadedPublishing % Test)
   .configure(addSbtZincCompileCore)
 
 lazy val buildFileProj = (project in file("buildfile"))
@@ -714,6 +715,7 @@ lazy val mainProj = (project in file("main"))
     runProj,
     commandProj,
     collectionProj,
+    lmIvy,
     zincLmIntegrationProj,
     utilLogging,
   )
@@ -1307,6 +1309,7 @@ lazy val lmCoursierDependencies = Def.settings(
     "net.hamnaberg" %% "dataclass-annotation" % dataclassScalafixVersion % Provided,
   ),
   libraryDependencies ++= Dependencies.scalatest,
+  libraryDependencies += scalaVerify % Test,
   excludeDependencies ++= Seq(
     ExclusionRule("org.scala-lang.modules", "scala-xml_2.13"),
   ),
