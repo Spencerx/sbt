@@ -82,13 +82,7 @@ import scala.xml.NodeSeq
 
 // incremental compiler
 import sbt.SlashSyntax0.*
-import sbt.internal.inc.{
-  Analysis,
-  AnalyzingCompiler,
-  ManagedLoggedReporter,
-  MixedAnalyzingCompiler,
-  ScalaInstance
-}
+import sbt.internal.inc.{ Analysis, AnalyzingCompiler, ManagedLoggedReporter, ScalaInstance }
 import sbt.internal.io.Retry
 import xsbti.{
   AppConfiguration,
@@ -2136,8 +2130,9 @@ object Defaults extends BuildCommon with DefExtra {
     val setup: Setup = compileIncSetup.value
     val _ = compileIncremental.value
     val exportP = exportPipelining.value
+    val c = fileConverter.value
     // Save analysis midway if pipelining is enabled
-    val store = analysisStore(compileAnalysisFile)
+    val store = analysisStore(compileAnalysisFile.value.toPath(), c)
     val contents = store.unsafeGet()
     if (exportP) {
       // this stores the early analysis (again) in case the subproject contains a macro
@@ -2162,7 +2157,8 @@ object Defaults extends BuildCommon with DefExtra {
         .debug(s"${name.value}: compileEarly: blocking on earlyOutputPing")
       earlyOutputPing.await.value
     }) {
-      val store = analysisStore(earlyCompileAnalysisFile)
+      val c = fileConverter.value
+      val store = analysisStore(earlyCompileAnalysisFile.value.toPath(), c)
       store.get.toScala match {
         case Some(contents) => contents.getAnalysis
         case _              => Analysis.empty
@@ -2174,8 +2170,8 @@ object Defaults extends BuildCommon with DefExtra {
 
   def compileTask: Initialize[Task[CompileAnalysis]] = Def.task {
     val setup: Setup = compileIncSetup.value
-    val store = analysisStore(compileAnalysisFile)
     val c = fileConverter.value
+    val store = analysisStore(compileAnalysisFile.value.toPath(), c)
     // TODO - expose bytecode manipulation phase.
     val analysisResult: CompileResult = manipulateBytecode.value
     if (analysisResult.hasModified) {
@@ -2202,7 +2198,7 @@ object Defaults extends BuildCommon with DefExtra {
         val dir = c.toPath(backendOutput.value).toFile
         result match
           case Result.Value(res) =>
-            val store = analysisStore(compileAnalysisFile)
+            val store = analysisStore(compileAnalysisFile.value.toPath(), c)
             val analysis = store.unsafeGet().getAnalysis()
             reporter.sendSuccessReport(analysis)
             bspTask.notifySuccess(analysis)
@@ -2232,8 +2228,8 @@ object Defaults extends BuildCommon with DefExtra {
       val ci2 = (compile / compileInputs2).value
       val ping = (TaskZero / earlyOutputPing).value
       val setup: Setup = (TaskZero / compileIncSetup).value
-      val store = analysisStore(compileAnalysisFile)
       val c = fileConverter.value
+      val store = analysisStore(compileAnalysisFile.value.toPath(), c)
       // TODO - Should readAnalysis + saveAnalysis be scoped by the compile task too?
       val analysisResult = Retry.io(compileIncrementalTaskImpl(bspTask, s, ci, ping, projectId))
       val analysisOut = c.toVirtualFile(setup.cachePath())
@@ -2320,7 +2316,7 @@ object Defaults extends BuildCommon with DefExtra {
       override def definesClass(classpathEntry: VirtualFile): DefinesClass =
         cachedPerEntryDefinesClassLookup(classpathEntry)
     val extra = extraIncOptions.value.map(t2)
-    val store = analysisStore(earlyCompileAnalysisFile)
+    val store = analysisStore(earlyCompileAnalysisFile.value.toPath(), converter)
     val eaOpt = if exportPipelining.value then Some(store) else None
     Setup.of(
       lookup,
@@ -2435,7 +2431,8 @@ object Defaults extends BuildCommon with DefExtra {
   def compileAnalysisSettings: Seq[Setting[?]] = Seq(
     previousCompile := Def.uncached {
       val setup = compileIncSetup.value
-      val store = analysisStore(compileAnalysisFile)
+      val c = fileConverter.value
+      val store = analysisStore(compileAnalysisFile.value.toPath(), c)
       val prev = store.get().toScala match {
         case Some(contents) =>
           val analysis = Option(contents.getAnalysis).toJava
@@ -2447,11 +2444,8 @@ object Defaults extends BuildCommon with DefExtra {
     }
   )
 
-  private inline def analysisStore(inline analysisFile: TaskKey[File]): AnalysisStore =
-    MixedAnalyzingCompiler.staticCachedStore(
-      analysisFile = analysisFile.value.toPath,
-      useTextAnalysis = false,
-    )
+  private def analysisStore(path: NioPath, converter: FileConverter): AnalysisStore =
+    BuildDef.cachedAnalysisStore(path, converter)
 
   def printWarningsTask: Initialize[Task[Unit]] =
     Def.task {
