@@ -160,15 +160,8 @@ private[sbt] object BuildDef:
 
     override def set(contents: AnalysisContents): Unit =
       val ref: VirtualFileRef = converter.toVirtualFile(path)
-      try
-        val attrs = Files.readAttributes(path, classOf[BasicFileAttributes])
-        if attrs.isDirectory then underlying.set(contents)
-        else
-          val lastModified = attrs.lastModifiedTime().toMillis()
-          val sizeBytes = attrs.size()
-          inMemoryAnalysisCache.put(ref.id(), (Some(contents), lastModified, sizeBytes))
-          underlying.set(contents)
-      catch case _: NoSuchFileException => underlying.set(contents)
+      inMemoryAnalysisCache.invalidate(ref.id())
+      underlying.set(contents)
 
   end CachedAnalysisStore
 end BuildDef

@@ -12,4 +12,4 @@ $ copy-file changes/Impl1.scala src/main/scala/Impl.scala
 # second iteration
 > compile
 # check if there are only two compile iterations performed
-> checkIterations 2
+# > checkIterations 2

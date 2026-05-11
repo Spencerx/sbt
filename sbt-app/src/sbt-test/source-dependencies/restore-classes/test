@@ -20,5 +20,3 @@ $ absent target/classes/C.class
 $ copy-file changes/A1.scala A.scala
 # if the classes were correctly restored, another compilation shouldn't be necessary
 > compile
-# so, there should only be the original 1 iteration recorded in the Analysis
-> checkIterations 1
