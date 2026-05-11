@@ -13,5 +13,4 @@ $ exists A.scala
 > show Compile/sources
 
 # if we recompile, we should regain stamp size 1
-> debug
 > checkStampSize 1
