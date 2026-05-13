@@ -17,7 +17,7 @@ foo := {
 watchAntiEntropy := 0.seconds
 watchOnFileInputEvent := { (count, event: Watch.Event) =>
   assert(event.path.getFileName.toString == "foo.txt")
-  if (new String(Files.readAllBytes(event.path)) == "foo") {
+  if (Files.readString(event.path) == "foo") {
     if (count < 3) Watch.Trigger
     else Watch.CancelWatch
   } else new Watch.HandleError(new IllegalStateException("Wrong stamp was set"))

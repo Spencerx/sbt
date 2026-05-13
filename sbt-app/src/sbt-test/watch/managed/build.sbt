@@ -15,7 +15,7 @@ runTest := Def.taskDyn {
 runTest / watchTriggers += baseDirectory.value.toGlob / "*.txt"
 watchAntiEntropy := 0.milliseconds
 watchOnFileInputEvent := { (count, e) =>
-  if (new String(Files.readAllBytes(e.path)) == "ok") Watch.CancelWatch
+  if (Files.readString(e.path) == "ok") Watch.CancelWatch
   else if (count < 2) Watch.Trigger
   else new Watch.HandleError(new IllegalStateException(s"Wrong event triggered the build: $e"))
 }

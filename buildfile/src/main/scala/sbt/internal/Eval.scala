@@ -123,7 +123,7 @@ class Eval(
         }
 
       override def read(file: Path): String =
-        String(Files.readAllBytes(file), StandardCharsets.UTF_8)
+        Files.readString(file)
 
       override def write(value: String, file: Path): Unit =
         Files.write(
@@ -185,7 +185,7 @@ class Eval(
         }(using run.runContext)
 
       override def read(file: Path): Seq[String] =
-        new String(Files.readAllBytes(file), StandardCharsets.UTF_8).linesIterator.toList
+        Files.readString(file).linesIterator.toList
 
       override def write(value: Seq[String], file: Path): Unit =
         Files.write(

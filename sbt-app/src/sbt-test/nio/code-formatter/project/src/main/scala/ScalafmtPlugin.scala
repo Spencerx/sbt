@@ -33,7 +33,7 @@ object ScalafmtPlugin extends AutoPlugin {
         case (p, s) =>
           try {
             println(s"Formatting $p")
-            Files.write(p, formatter.format(config, p, new String(Files.readAllBytes(p))).getBytes)
+            Files.write(p, formatter.format(config, p, Files.readString(p)).getBytes)
             Some(p)
           } catch {
             case e: Exception =>
