@@ -10,7 +10,7 @@ object Resource {
       val fileSystem =
         if (uri.getScheme != "jar") None
         else Some(FileSystems.newFileSystem(uri, Collections.emptyMap[String, Object]))
-      try new String(Files.readAllBytes(Paths.get(uri)))
+      try Files.readString(Paths.get(uri))
       finally fileSystem.foreach(_.close())
   }
   def getStringResource(name: String): String = {

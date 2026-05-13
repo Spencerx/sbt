@@ -17,7 +17,7 @@ watchOnIteration := { (i: Int, _, _) =>
   val changes = base.resolve("changes")
   def copy(fileName: String): Unit = {
     val content =
-      new String(Files.readAllBytes(changes.resolve(fileName))) + "\n" + ("//" * i)
+      Files.readString(changes.resolve(fileName)) + "\n" + ("//" * i)
     Files.write(src.resolve(fileName), content.getBytes)
   }
   val c = src.resolve("C.scala")

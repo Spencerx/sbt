@@ -2,7 +2,6 @@ package lmcoursier.internal
 
 import java.io.File
 import java.nio.file.Files
-import java.nio.charset.StandardCharsets
 import sjsonnew.support.scalajson.unsafe.{ Converter, Parser, PrettyPrinter }
 import scala.util.{ Try, Success, Failure }
 
@@ -16,7 +15,7 @@ object LockFile {
       Left(s"Lock file does not exist: ${lockFile.getAbsolutePath}")
     } else {
       Try {
-        val content = new String(Files.readAllBytes(lockFile.toPath), StandardCharsets.UTF_8)
+        val content = Files.readString(lockFile.toPath)
         val json = Parser.parseFromString(content).get
         Converter.fromJson[LockFileData](json).get
       } match {
