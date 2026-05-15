@@ -1274,7 +1274,22 @@ object Defaults extends BuildCommon with DefExtra {
       try
         val output = executeTests.value
         trl.run(streams.value.log, output, taskName)
+        // Throw with task name + Output so the cross-project recap
+        // (TestRecap.collect) can surface them. The throw lives here
+        // rather than in TestResultLogger so user-overridden loggers
+        // cannot accidentally suppress the failure signal.
+        output.overall match
+          case TestResult.Error | TestResult.Failed =>
+            throw new TestsFailedException(taskName, Some(output))
+          case _ => ()
         output.overall
+      catch
+        // Tag any no-detail TestsFailedException (legacy executeTests
+        // adapters, third-party Tests.Setup actions, anything constructing
+        // `new TestsFailedException()` via the back-compat ctor) with the
+        // task name on its way out so the recap doesn't render <unknown>.
+        case e: TestsFailedException if e.taskName.isEmpty =>
+          throw new TestsFailedException(taskName, e.testOutput)
       finally close(testLoader.value)
     },
     testSelected := {
@@ -1447,8 +1462,18 @@ object Defaults extends BuildCommon with DefExtra {
       (Def
         .value[Task[Tests.Output]] { output })
         .map: out =>
-          trl.run(s.log, out, taskName)
-          out.overall
+          try
+            trl.run(s.log, out, taskName)
+            out.overall match
+              case TestResult.Error | TestResult.Failed =>
+                throw new TestsFailedException(taskName, Some(out))
+              case _ => ()
+            out.overall
+          catch
+            // Tag any no-detail TestsFailedException with the task name
+            // on its way out, mirroring the catch in `testFull`.
+            case e: TestsFailedException if e.taskName.isEmpty =>
+              throw new TestsFailedException(taskName, e.testOutput)
     }
   }
 

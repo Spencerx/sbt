@@ -142,7 +142,13 @@ object Aggregation {
     val complete = timedRun[A1](s, ts, extra)
     showRun(complete, show)
     complete.results match
-      case Result.Inc(i)   => complete.state.handleError(i)
+      case Result.Inc(i) =>
+        val failures = sbt.internal.testing.TestRecap.collect(i)
+        val afterHandle = complete.state.handleError(i)
+        if failures.nonEmpty then
+          sbt.internal.testing.TestRecap.formatTo(afterHandle.log, failures)
+          afterHandle.put(sbt.internal.testing.TestRecap.recapKey, failures)
+        else afterHandle
       case Result.Value(_) => complete.state
 
   def printSuccess(
