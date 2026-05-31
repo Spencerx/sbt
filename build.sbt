@@ -300,6 +300,7 @@ lazy val utilControl = (project in file("internal") / "util-control")
       scalacheck % Test,
       scalaVerify % Test,
       hedgehog % Test,
+      zeroAllocationHashing % Test,
     ),
     mimaSettings,
   )
@@ -635,7 +636,9 @@ lazy val commandProj = (project in file("main-command"))
       exclude[MissingClassProblem]("sbt.internal.util.ReadJsonFromInputStream$"),
       exclude[MissingClassProblem]("sbt.internal.client.ServerConnection"),
       exclude[IncompatibleResultTypeProblem]("sbt.internal.client.NetworkClient.connection"),
-      exclude[IncompatibleResultTypeProblem]("sbt.internal.client.NetworkClient.init")
+      exclude[IncompatibleResultTypeProblem]("sbt.internal.client.NetworkClient.init"),
+      exclude[DirectMissingMethodProblem]("sbt.internal.BootServerSocket.this"),
+      exclude[DirectMissingMethodProblem]("sbt.internal.BootServerSocket.socketLocation"),
     ),
     Compile / headerCreate / unmanagedSources := {
       val old = (Compile / headerCreate / unmanagedSources).value

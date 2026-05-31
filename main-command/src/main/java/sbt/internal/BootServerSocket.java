@@ -278,18 +278,18 @@ public class BootServerSocket implements AutoCloseable {
         }
       };
 
-  public BootServerSocket(final AppConfiguration configuration)
+  public BootServerSocket(final AppConfiguration configuration, final long farmHash)
       throws ServerAlreadyBootingException, IOException {
     final Path base = configuration.baseDirectory().toPath().toRealPath();
     if (!isWindows) {
-      final String actualSocketLocation = socketLocation(base);
+      final String actualSocketLocation = socketLocation(base, farmHash);
       final Path target = Paths.get(actualSocketLocation).getParent();
       if (!Files.isDirectory(target)) Files.createDirectories(target);
       socketFile = Paths.get(actualSocketLocation);
     } else {
       socketFile = null;
     }
-    serverSocket = newSocket(socketLocation(base));
+    serverSocket = newSocket(socketLocation(base, farmHash));
     if (serverSocket != null) {
       running.set(true);
       acceptFuture = service.submit(acceptRunnable);
@@ -299,20 +299,17 @@ public class BootServerSocket implements AutoCloseable {
     }
   }
 
-  public static String socketLocation(final Path base)
+  public static String socketLocation(final Path base, final long farmHash)
       throws UnsupportedEncodingException, IOException {
     final Path target = base.resolve("project").resolve("target");
-    long hash =
-        ((long) target.toString().hashCode() << 32)
-            | (target.toString().length() * 31 & 0xffffffffL);
     if (isWindows) {
-      return "sbt-load" + hash;
+      return "sbt-load" + farmHash;
     } else {
       final String alternativeSocketLocation =
           System.getenv().getOrDefault("XDG_RUNTIME_DIR", System.getProperty("java.io.tmpdir"));
       final Path alternativeSocketLocationRoot =
           Paths.get(alternativeSocketLocation).resolve(".sbt");
-      final Path locationForSocket = alternativeSocketLocationRoot.resolve("sbt-socket" + hash);
+      final Path locationForSocket = alternativeSocketLocationRoot.resolve("sbt-socket" + farmHash);
       final Path pathForSocket = locationForSocket.resolve("sbt-load.sock");
       return pathForSocket.toString();
     }

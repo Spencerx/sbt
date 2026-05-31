@@ -4,6 +4,9 @@ import java.nio.file.Path as NioPath
 import sbt.internal.util.hashing.Hashing
 
 object HashUtil:
+  private[sbt] def farmHash(bytes: Array[Byte]): Long =
+    Hashing.farmNaHash64.hash(bytes, 0, bytes.size)
+
   private[sbt] def xxhash64(bytes: Array[Byte]): Long =
     Hashing.xxhash64(0L).hash(bytes, 0, bytes.size)
 

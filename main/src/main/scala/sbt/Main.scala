@@ -32,7 +32,7 @@ import sbt.internal.util.complete.Parser
 import sbt.internal.util.{ RunningProcesses, Terminal as ITerminal, * }
 import sbt.io.*
 import sbt.io.syntax.*
-import sbt.util.{ ActionCache, Level, Logger, Show }
+import sbt.util.{ ActionCache, HashUtil, Level, Logger, Show }
 import xsbti.AppProvider
 
 import scala.annotation.{ nowarn, tailrec }
@@ -157,7 +157,10 @@ private[sbt] object xMain:
       e.printStackTrace()
     }
 
-    try Some(new BootServerSocket(configuration)) -> None
+    val target =
+      configuration.baseDirectory().toPath().toRealPath().resolve("project").resolve("target")
+    val hash = HashUtil.farmHash(target.toString().getBytes("UTF-8"));
+    try Some(new BootServerSocket(configuration, hash)) -> None
     catch {
       case e: ServerAlreadyBootingException if hasConsole && !ITerminal.startedByRemoteClient =>
         printThrowable(e)

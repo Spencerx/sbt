@@ -34,7 +34,7 @@ import sbt.internal.util.{
 import sbt.io.IO
 import sbt.io.syntax.*
 import sbt.protocol.*
-import sbt.util.{ Level, Logger }
+import sbt.util.{ HashUtil, Level, Logger }
 import sjsonnew.BasicJsonProtocol.*
 import sjsonnew.shaded.scalajson.ast.unsafe.{ JObject, JValue }
 import sjsonnew.support.scalajson.unsafe.Converter
@@ -342,8 +342,10 @@ class NetworkClient(
    * This instance must be shutdown explicitly via `sbt -client shutdown`
    */
   def waitForServer(portfile: File, log: Boolean, startServer: Boolean): Unit = {
-    val bootSocketName =
-      BootServerSocket.socketLocation(arguments.baseDirectory.toPath.toRealPath())
+    val base = arguments.baseDirectory.toPath.toRealPath()
+    val target = base.resolve("project").resolve("target")
+    val hash = HashUtil.farmHash(target.toString().getBytes("UTF-8"))
+    val bootSocketName = BootServerSocket.socketLocation(base, hash)
 
     /*
      * For unknown reasons, linux sometimes struggles to connect to the socket in some

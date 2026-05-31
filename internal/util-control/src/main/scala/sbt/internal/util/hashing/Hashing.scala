@@ -12,6 +12,9 @@ package sbt.internal.util.hashing
 import java.nio.ByteBuffer
 
 object Hashing:
+  def farmNaHash64: HashAlgo[Array[Byte]] =
+    FarmNaSeedlessHash64.byteArray
+
   def xxhash64(seed: Long): HashAlgo[Array[Byte]] =
     XXHash64.byteArray(seed)
 
