@@ -24,14 +24,14 @@ end AbstractHashBenchmark
 
 class XXHash64HashBenchmark extends AbstractHashBenchmark:
   override def hash(buf: Array[Byte]): String =
-    val h = Hashing.xxhash64
-    val hash = h.hash(buf, 0, buf.size, 0)
+    val h = Hashing.xxhash64(0L)
+    val hash = h.hash(buf, 0, buf.size)
     java.lang.Long.toHexString(hash)
 
 class WyHash64HashBenchmark extends AbstractHashBenchmark:
   override def hash(buf: Array[Byte]): String =
-    val h = Hashing.wyhash64
-    val hash = h.hash(buf, 0, buf.size, 0)
+    val h = Hashing.wyhash64(0L)
+    val hash = h.hash(buf, 0, buf.size)
     java.lang.Long.toHexString(hash)
 
 class FarmHashHashBenchmark extends AbstractHashBenchmark:
