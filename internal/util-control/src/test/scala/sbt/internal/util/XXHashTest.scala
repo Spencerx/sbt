@@ -9,10 +9,19 @@
 
 package sbt.internal.util.hashing
 
-object XXHashTest extends AbstractHashTest:
-  override val hash64: HashAlgo = Hashing.xxhash64
+import java.nio.ByteBuffer
+
+object XXHashByteArrayTest extends AbstractHashTest:
+  override val hash64: HashAlgo[Array[Byte]] = Hashing.xxhash64(0L)
   override def newStreaming(seed: Int): StreamingHashAlgo =
     Hashing.newStreamingXXHash64(seed)
   override val emptyHash = -1205034819632174695L
   override val zeroHash = -1642502924627794072L
-end XXHashTest
+end XXHashByteArrayTest
+
+object XXHashByteBufferHashTest extends AbstractByteBufferHashTest:
+  override val hash64: HashAlgo[ByteBuffer] =
+    Hashing.xxhash64ByteBuffer(0L)
+  override val emptyHash = -1205034819632174695L
+  override val zeroHash = -1642502924627794072L
+end XXHashByteBufferHashTest

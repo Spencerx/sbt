@@ -9,9 +9,8 @@
 
 package sbt.internal.util.hashing
 
-import WyHash64VarHandle.*
+import WyHash64.*
 import WyHashConstants.*
-import VarHandleUtils.*
 
 class StreamingWyHash64VarHandle(seed: Long) extends StreamingHashAlgo(seed):
   protected var a: Long = 0
@@ -23,6 +22,7 @@ class StreamingWyHash64VarHandle(seed: Long) extends StreamingHashAlgo(seed):
   protected var totalLen: Long = 0L
   protected val memory = new Array[Byte](48)
   protected var memoryLen: Int = 0
+  private val access = summon[Access[Array[Byte]]]
   reset()
 
   override def reset(): Unit =
@@ -47,10 +47,10 @@ class StreamingWyHash64VarHandle(seed: Long) extends StreamingHashAlgo(seed):
       if inputLen >= 4 then
         val end = inputLen - 4
         val quarter = (inputLen >> 3) << 2
-        _a = (readIntLE(input, 0).toLong << 32)
-          | (readIntLE(input, quarter) & 0xffffffffL)
-        _b = (readIntLE(input, end) << 32).toLong
-          | (readIntLE(input, end - quarter) & 0xffffffffL)
+        _a = (access.readIntLE(input, 0).toLong << 32)
+          | (access.readIntLE(input, quarter) & 0xffffffffL)
+        _b = (access.readIntLE(input, end) << 32).toLong
+          | (access.readIntLE(input, end - quarter) & 0xffffffffL)
       else if inputLen > 0 then
         _a = ((input(0) & 0xffL) << 16) | ((input(inputLen >> 1) & 0xffL) << 8)
           | (input(inputLen - 1) & 0xffL)
@@ -73,11 +73,11 @@ class StreamingWyHash64VarHandle(seed: Long) extends StreamingHashAlgo(seed):
 
       var i = 0
       while i + 16 < inputLen do
-        v0 = mix(readLongLE(input, i) ^ PRIME64_1, readLongLE(input, i + 8) ^ v0)
+        v0 = mix(access.readLongLE(input, i) ^ PRIME64_1, access.readLongLE(input, i + 8) ^ v0)
         i += 16
 
-      _a = readLongLE(input, inputLen - 16)
-      _b = readLongLE(input, inputLen - 8)
+      _a = access.readLongLE(input, inputLen - 16)
+      _b = access.readLongLE(input, inputLen - 8)
     end if
 
     finishHash(_a, _b, v0, this.totalLen)
@@ -113,8 +113,10 @@ class StreamingWyHash64VarHandle(seed: Long) extends StreamingHashAlgo(seed):
   end update
 
   private def round(buf: Array[Byte], p: Int): Unit =
-    this.v0 = mix(readLongLE(buf, p) ^ PRIME64_1, readLongLE(buf, p + 8) ^ this.v0)
-    this.v1 = mix(readLongLE(buf, p + 16) ^ PRIME64_2, readLongLE(buf, p + 24) ^ this.v1)
-    this.v2 = mix(readLongLE(buf, p + 32) ^ PRIME64_3, readLongLE(buf, p + 40) ^ this.v2)
+    this.v0 = mix(access.readLongLE(buf, p) ^ PRIME64_1, access.readLongLE(buf, p + 8) ^ this.v0)
+    this.v1 =
+      mix(access.readLongLE(buf, p + 16) ^ PRIME64_2, access.readLongLE(buf, p + 24) ^ this.v1)
+    this.v2 =
+      mix(access.readLongLE(buf, p + 32) ^ PRIME64_3, access.readLongLE(buf, p + 40) ^ this.v2)
 
 end StreamingWyHash64VarHandle

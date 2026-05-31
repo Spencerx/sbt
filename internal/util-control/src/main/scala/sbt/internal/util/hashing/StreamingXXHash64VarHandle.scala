@@ -11,7 +11,6 @@ package sbt.internal.util.hashing
 
 import java.lang.Long.rotateLeft
 import SafeUtils.checkRange
-import VarHandleUtils.*
 import XXHashConstants.*
 
 /**
@@ -22,6 +21,7 @@ import XXHashConstants.*
  * Streaming xxhash.
  */
 class StreamingXXHash64VarHandle(seed: Long) extends AbstractStreamingXXHash64Scala(seed):
+  private val access = summon[Access[Array[Byte]]]
 
   override def getValue: Long =
     var h64: Long = 0L
@@ -61,7 +61,7 @@ class StreamingXXHash64VarHandle(seed: Long) extends AbstractStreamingXXHash64Sc
 
     var off: Int = 0
     while off <= memSize - 8 do
-      var k1: Long = readLongLE(memory, off)
+      var k1: Long = access.readLongLE(memory, off)
       k1 *= PRIME64_2
       k1 = rotateLeft(k1, 31)
       k1 *= PRIME64_1
@@ -70,7 +70,7 @@ class StreamingXXHash64VarHandle(seed: Long) extends AbstractStreamingXXHash64Sc
       off += 8
 
     if off <= memSize - 4 then
-      h64 ^= (readIntLE(memory, off) & 0xffffffffL) * PRIME64_1
+      h64 ^= (access.readIntLE(memory, off) & 0xffffffffL) * PRIME64_1
       h64 = rotateLeft(h64, 23) * PRIME64_2 + PRIME64_3
       off += 4
     else ()
@@ -104,19 +104,19 @@ class StreamingXXHash64VarHandle(seed: Long) extends AbstractStreamingXXHash64Sc
       if memSize > 0 then // data left from previous update
         System.arraycopy(buf, off, memory, memSize, 32 - memSize)
 
-        v1 += readLongLE(memory, 0) * PRIME64_2
+        v1 += access.readLongLE(memory, 0) * PRIME64_2
         v1 = rotateLeft(v1, 31)
         v1 *= PRIME64_1
 
-        v2 += readLongLE(memory, 8) * PRIME64_2
+        v2 += access.readLongLE(memory, 8) * PRIME64_2
         v2 = rotateLeft(v2, 31)
         v2 *= PRIME64_1
 
-        v3 += readLongLE(memory, 16) * PRIME64_2
+        v3 += access.readLongLE(memory, 16) * PRIME64_2
         v3 = rotateLeft(v3, 31)
         v3 *= PRIME64_1
 
-        v4 += readLongLE(memory, 24) * PRIME64_2
+        v4 += access.readLongLE(memory, 24) * PRIME64_2
         v4 = rotateLeft(v4, 31)
         v4 *= PRIME64_1
 
@@ -132,22 +132,22 @@ class StreamingXXHash64VarHandle(seed: Long) extends AbstractStreamingXXHash64Sc
         var v4: Long = this.v4
 
         while off <= limit do
-          v1 += readLongLE(buf, off) * PRIME64_2
+          v1 += access.readLongLE(buf, off) * PRIME64_2
           v1 = rotateLeft(v1, 31)
           v1 *= PRIME64_1
           off += 8
 
-          v2 += readLongLE(buf, off) * PRIME64_2
+          v2 += access.readLongLE(buf, off) * PRIME64_2
           v2 = rotateLeft(v2, 31)
           v2 *= PRIME64_1
           off += 8
 
-          v3 += readLongLE(buf, off) * PRIME64_2
+          v3 += access.readLongLE(buf, off) * PRIME64_2
           v3 = rotateLeft(v3, 31)
           v3 *= PRIME64_1
           off += 8
 
-          v4 += readLongLE(buf, off) * PRIME64_2
+          v4 += access.readLongLE(buf, off) * PRIME64_2
           v4 = rotateLeft(v4, 31)
           v4 *= PRIME64_1
           off += 8
