@@ -11,13 +11,6 @@ abstract class RemoteCacheArtifact(
   
   
   
-  override def equals(o: Any): Boolean = this.eq(o.asInstanceOf[AnyRef]) || (o match {
-    case x: RemoteCacheArtifact => (this.artifact == x.artifact) && (this.packaged == x.packaged)
-    case _ => false
-  })
-  override def hashCode: Int = {
-    37 * (37 * (37 * (17 + "sbt.internal.remotecache.RemoteCacheArtifact".##) + artifact.##) + packaged.##)
-  }
   override def toString: String = {
     "RemoteCacheArtifact(" + artifact + ", " + packaged + ")"
   }

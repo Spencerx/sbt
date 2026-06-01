@@ -11,13 +11,6 @@ abstract class JsonRpcMessage(
   
   
   
-  override def equals(o: Any): Boolean = this.eq(o.asInstanceOf[AnyRef]) || (o match {
-    case x: JsonRpcMessage => (this.jsonrpc == x.jsonrpc)
-    case _ => false
-  })
-  override def hashCode: Int = {
-    37 * (37 * (17 + "sbt.internal.protocol.JsonRpcMessage".##) + jsonrpc.##)
-  }
   override def toString: String = {
     "JsonRpcMessage(" + jsonrpc + ")"
   }
