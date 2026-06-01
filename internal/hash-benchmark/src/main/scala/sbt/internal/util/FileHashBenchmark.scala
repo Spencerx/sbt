@@ -8,7 +8,7 @@ import sbt.io.syntax.*
 import sbt.util.Digest
 import scala.util.Using
 import org.openjdk.jmh.annotations.*
-import pt.kcry.blake3.{ Blake3 as Blake3Impl }
+import pt.kcry.blake3.Blake3 as Blake3Impl
 
 @State(Scope.Benchmark)
 abstract class AbstractFileHashBenchmark:
