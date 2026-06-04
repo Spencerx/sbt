@@ -1,0 +1,14 @@
+# sbt/sbt#9117: published artifact names must carry the platform suffix (_native0.5),
+# matching the coordinate, on both the ivyless and Ivy backends.
+
+# publishLocal (ivy layout): filenames + POM artifactId
+> ivyless/publishLocal
+> ivyless/check
+> ivyfull/publishLocal
+> ivyfull/check
+
+# publish to a local Maven repo, then resolve the artifacts back under their platform
+# coordinate
+> ivyless/publish
+> ivyfull/publish
+> consumer/update
