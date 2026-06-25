@@ -869,10 +869,10 @@ appendSbtoptsFromFile() {
 }
 
 loadPropFile() {
-  # trim key and value so as to be more forgiving with spaces around the '=':
-  k=$(trimString $k)
-  v=$(trimString $v)
   while IFS='=' read -r k v; do
+    # trim key and value so as to be more forgiving with spaces around the '=':
+    k=$(trimString "$k")
+    v=$(trimString "$v")
     if [[ "$k" == "sbt.version" ]]; then
       build_props_sbt_version="$v"
     fi
