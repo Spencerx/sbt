@@ -6,11 +6,11 @@ import sbt.internal.librarymanagement.UnitSpec
 
 class ResolverTest extends UnitSpec {
 
-  "Resolver url" should "propagate pattern descriptorOptional and skipConsistencyCheck." in {
+  "Resolver uri" should "propagate pattern descriptorOptional and skipConsistencyCheck." in {
     val pats = Vector("[orgPath]")
     val patsExpected = Vector("http://foo.com/test/[orgPath]")
     val patterns = Resolver
-      .url("test", new URI("http://foo.com/test").toURL)(using
+      .uri("test", new URI("http://foo.com/test"))(using
         Patterns(
           pats,
           pats,

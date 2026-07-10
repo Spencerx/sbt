@@ -13,7 +13,7 @@ val publishPort = 3030
 // Publish to HTTP server (localhost) - ivyless publish uses PUT
 // Resolver.url expects java.net.URL; in build.sbt "url" is sbt.URI, so use java.net.URL explicitly
 publishTo := Some(
-  Resolver.url("test-repo", new java.net.URI(s"http://localhost:$publishPort/").toURL)(using Resolver.ivyStylePatterns)
+  Resolver.uri("test-repo", uri(s"http://localhost:$publishPort/"))(using Resolver.ivyStylePatterns)
     .withAllowInsecureProtocol(true)
 )
 
