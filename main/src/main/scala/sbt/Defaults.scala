@@ -2325,13 +2325,11 @@ object Defaults extends BuildCommon with DefExtra {
     val reporter = (compile / bspReporter).value
     val log = CompileDebugLogger(projectId, s.log)
     try {
-      if (r.hasModified) {
-        val result0 = incCompiler
-          .asInstanceOf[sbt.internal.inc.IncrementalCompilerImpl]
-          .compileAllJava(in, log)
-        reporter.sendSuccessReport(result0.analysis())
-        result0.withHasModified(result0.hasModified || r.hasModified)
-      } else r
+      val result0 = incCompiler
+        .asInstanceOf[sbt.internal.inc.IncrementalCompilerImpl]
+        .compileAllJava(in, log)
+      reporter.sendSuccessReport(result0.analysis())
+      result0.withHasModified(result0.hasModified || r.hasModified)
     } catch {
       case NonFatal(e) =>
         reporter.sendFailureReport(in.options.sources)
@@ -4415,8 +4413,8 @@ object Classpaths {
   def makeProducts: Initialize[Task[Seq[File]]] = Def.task {
     val c = fileConverter.value
     val resourceDirs = resourceDirectories.value
-    val vfBackendDir = compileIncremental.value._2
-    val backendDir = c.toPath(vfBackendDir)
+    val _ = compile.value
+    val backendDir = c.toPath(backendOutput.value)
     val _ = resources.value
     backendDir.toFile() :: resourceDirs.toList.filter(_.exists())
   }
