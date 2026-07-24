@@ -670,8 +670,12 @@ lazy val coreMacrosProj = (project in file("core-macros"))
     SettingKey[Boolean]("exportPipelining") := false,
     mimaSettings,
     mimaBinaryIssueFilters ++= Seq(
-      exclude[ReversedMissingMethodProblem]("sbt.internal.util.appmacro.ContextUtil.*"),
+      // macro-expansion internals; Output's per-call-site var codegen members were removed
+      ProblemFilters.exclude[DirectMissingMethodProblem](
+        "sbt.internal.util.appmacro.ContextUtil#Output.*"
+      ),
       exclude[DirectMissingMethodProblem]("sbt.internal.util.appmacro.ContextUtil#Input.*"),
+      exclude[ReversedMissingMethodProblem]("sbt.internal.util.appmacro.ContextUtil.*"),
     ),
   )
 
