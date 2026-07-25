@@ -391,6 +391,7 @@ lazy val utilCache = project
     contrabandSettings,
     mimaSettings,
     mimaBinaryIssueFilters ++= Seq(
+      exclude[DirectMissingMethodProblem]("sbt.internal.util.CacheEventSummary#Data.*"),
     ),
     Test / fork := true,
   )
