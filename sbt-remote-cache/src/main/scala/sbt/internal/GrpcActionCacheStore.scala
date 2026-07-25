@@ -44,8 +44,10 @@ import sbt.util.{
   GetActionResultRequest,
   UpdateActionResultRequest,
 }
+import scala.collection.concurrent.TrieMap
 import scala.concurrent.{ Await, ExecutionContext, Future, Promise, TimeoutException }
 import scala.concurrent.duration.*
+import scala.ref.WeakReference
 import scala.util.Using
 import scala.util.control.NonFatal
 import scala.jdk.CollectionConverters.*
@@ -57,7 +59,47 @@ object GrpcActionCacheStore:
   val remoteTimeoutInSec = 60
   val remoteTimeout = (remoteTimeoutInSec + 2).second
 
+  private case class CacheValue(
+      rootCerts: Option[Path],
+      clientCertChain: Option[Path],
+      clientPrivateKey: Option[Path],
+      remoteHeaders: List[String],
+      store: WeakReference[GrpcActionCacheStore],
+  )
+
+  private val instances: TrieMap[URI, CacheValue] = TrieMap.empty
+
   def apply(
+      uri: URI,
+      rootCerts: Option[Path],
+      clientCertChain: Option[Path],
+      clientPrivateKey: Option[Path],
+      remoteHeaders: List[String],
+      disk: DiskActionCacheStore,
+  ): GrpcActionCacheStore =
+    def mkStore(): GrpcActionCacheStore =
+      val store = build(uri, rootCerts, clientCertChain, clientPrivateKey, remoteHeaders, disk)
+      instances.put(
+        uri,
+        CacheValue(
+          rootCerts,
+          clientCertChain,
+          clientPrivateKey,
+          remoteHeaders,
+          WeakReference(store)
+        )
+      )
+      store
+    instances.get(uri) match
+      case Some(v)
+          if v.rootCerts == rootCerts && v.clientCertChain == clientCertChain
+            && v.clientPrivateKey == clientPrivateKey && v.remoteHeaders == remoteHeaders =>
+        v.store.get match
+          case Some(existing) => existing
+          case None           => mkStore()
+      case _ => mkStore()
+
+  private def build(
       uri: URI,
       rootCerts: Option[Path],
       clientCertChain: Option[Path],
@@ -96,7 +138,7 @@ object GrpcActionCacheStore:
       case Some(x) if x.startsWith("/") => x.drop(1)
       case Some(x)                      => x
       case None                         => ""
-    new GrpcActionCacheStore(channel, instanceName, remoteHeaders, disk)
+    new GrpcActionCacheStore(channel, instanceName, remoteHeaders, disk, uri)
 
   class AuthCallCredentials(remoteHeaders: List[String]) extends CallCredentials:
     val pairs = remoteHeaders.map: h =>
@@ -132,12 +174,14 @@ end GrpcActionCacheStore
  * https://github.com/bazelbuild/remote-apis/blob/main/build/bazel/remote/execution/v2/remote_execution.proto
  * https://github.com/googleapis/googleapis/blob/ff15be54722218705740b9fc6223d264c4cdb6dd/google/bytestream/bytestream.proto
  */
-class GrpcActionCacheStore(
+class GrpcActionCacheStore private (
     channel: ManagedChannel,
     instanceName: String,
     remoteHeaders: List[String],
     disk: DiskActionCacheStore,
-) extends AbstractActionCacheStore:
+    cacheKey: URI,
+) extends AbstractActionCacheStore
+    with AutoCloseable:
   import GrpcActionCacheStore.*
 
   lazy val creds = GrpcActionCacheStore.AuthCallCredentials(remoteHeaders)
@@ -166,6 +210,17 @@ class GrpcActionCacheStore(
 
   val fixedThreadPool = Executors.newFixedThreadPool(100)
   given ExecutionContext = ExecutionContext.fromExecutor(fixedThreadPool)
+
+  override def close(): Unit =
+    instances.get(cacheKey).foreach { v =>
+      if v.store.get.contains(this) then instances.remove(cacheKey, v)
+    }
+    try
+      try
+        channel.shutdown()
+        if !channel.awaitTermination(5, TimeUnit.SECONDS) then channel.shutdownNow()
+      catch case NonFatal(_) => channel.shutdownNow()
+    finally fixedThreadPool.shutdown()
 
   /**
    * https://github.com/bazelbuild/remote-apis/blob/9ff14cecffe5287ba337f857731ceadfc2d80de9/build/bazel/remote/execution/v2/remote_execution.proto#L170
