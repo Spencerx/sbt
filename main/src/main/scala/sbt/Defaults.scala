@@ -1407,6 +1407,7 @@ object Defaults extends BuildCommon with DefExtra {
       )
     )
   }
+
   def forkOptionsTask: Initialize[Task[ForkOptions]] =
     Def.task {
       val canUseArgumentsFile = sys.props
@@ -1424,6 +1425,10 @@ object Defaults extends BuildCommon with DefExtra {
         canUseArgumentsFile = Some(canUseArgumentsFile)
       )
     }
+
+  /** Fork options for run-like tasks: the forked process inherits sbt's working directory. */
+  private[sbt] def runForkOptionsTask: Initialize[Task[ForkOptions]] =
+    Def.task(forkOptionsTask.value.withWorkingDirectory(None))
 
   def testExecutionTask(task: Scoped): Initialize[Task[Tests.Execution]] =
     Def.task {
@@ -2604,7 +2609,7 @@ object Defaults extends BuildCommon with DefExtra {
   private lazy val newRunnerSettings: Seq[Setting[?]] =
     Seq(
       runner := Def.uncached(ClassLoaders.runner.value),
-      forkOptions := Def.uncached(forkOptionsTask.value)
+      forkOptions := Def.uncached(runForkOptionsTask.value)
     )
 
   lazy val baseTasks: Seq[Setting[?]] = projectTasks ++ packageBase
@@ -4974,7 +4979,7 @@ trait BuildExtra extends BuildCommon with DefExtra {
           }
         }
       }.evaluated
-    ) ++ inTask(scoped)((config / forkOptions) := Def.uncached(forkOptionsTask.value))
+    ) ++ inTask(scoped)((config / forkOptions) := Def.uncached(runForkOptionsTask.value))
   }
 
   // public API
@@ -4996,7 +5001,7 @@ trait BuildExtra extends BuildCommon with DefExtra {
             r.run(mainClass, cp.files, arguments, s.log).get
           }
       }.value
-    ) ++ inTask(scoped)((config / forkOptions) := Def.uncached(forkOptionsTask.value))
+    ) ++ inTask(scoped)((config / forkOptions) := Def.uncached(runForkOptionsTask.value))
 
   def initScoped[T](sk: ScopedKey[?], i: Initialize[T]): Initialize[T] =
     initScope(fillTaskAxis(sk.scope, sk.key), i)
