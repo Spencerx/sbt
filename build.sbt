@@ -391,6 +391,7 @@ lazy val utilCache = project
     contrabandSettings,
     mimaSettings,
     mimaBinaryIssueFilters ++= Seq(
+      exclude[DirectMissingMethodProblem]("sbt.internal.util.CacheEventSummary#Data.*"),
     ),
     Test / fork := true,
   )
@@ -558,8 +559,11 @@ lazy val remoteCacheProj = (project in file("sbt-remote-cache"))
     name := "sbt-remote-cache",
     pluginCrossBuild / sbtVersion := version.value,
     publishMavenStyle := true,
-    mimaSettings,
     libraryDependencies ++= Seq(remoteapis, scalaVerify % Test),
+    mimaSettings,
+    mimaBinaryIssueFilters ++= Seq(
+      exclude[DirectMissingMethodProblem]("sbt.internal.GrpcActionCacheStore.this"),
+    ),
   )
 
 // Implementation and support code for defining actions.
