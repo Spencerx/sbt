@@ -26,32 +26,13 @@ final case class UpdateReportCache(
 object UpdateReportPersistence:
 
   /**
-   * The generated library-management codecs, with the artifact content hash disabled. Persisted update
-   * reports are the only thing that uses them; everything else keeps the stock `LibraryManagementCodec`
-   * object, including the `inputs` store, so `Tracked.inputChanged` still hashes contents for
-   * invalidation.
+   * The generated library-management codecs, with the artifact content hash disabled: nothing reads the
+   * hash back, and computing it re-reads the whole downloaded classpath.
    *
-   * sjsonnew serializes a `File` as a `(uri, Long)` pair whose Long is
-   * `HashUtil.sha256ToLong(file.toPath())` -- a full content hash of the file. Nothing reads it back:
-   * `IsoStringLong[File].from` parses the URI and drops the Long, and `update` decides staleness in
-   * `LibraryManagement.fileUptodate`, which checks `File.exists` and the modification time against
-   * `UpdateReport.stamps`. Meanwhile a report names an artifact once per configuration it resolved in,
-   * and the projects of a build largely share their dependencies, so writing the caches re-reads the
-   * whole downloaded classpath many times over -- easily the dominant cost of writing them -- to produce
-   * bytes no reader looks at.
-   *
-   * `fileStringLongIso` is an `implicit lazy val` in `sjsonnew.FileIsoStringLongs`, so it is a virtual
-   * member and every generated format resolves `JsonFormat[File]` as
-   * `isoStringLongFormat[File](fileStringLongIso)` through its self-type. Overriding it here therefore
-   * also reaches the `Vector[(Artifact, File)]` nested inside the generated `ModuleReportFormat`, which
-   * a locally-scoped `JsonFormat[File]` could not.
-   *
-   * The JSON shape is unchanged -- only the Long's value is -- so caches stay readable by sbt versions
-   * that still write the hash, and the ones written here stay readable by them.
+   * `fileStringLongIso` is virtual, so overriding it also reaches the `Vector[(Artifact, File)]` nested
+   * inside the generated `ModuleReportFormat`.
    */
   private[sbt] object CacheCodec extends LibraryManagementCodec:
-
-    /** `IO.toURI` emits the same text the stock iso puts in `first`, and `IO.toFile` inverts it. */
     override implicit lazy val fileStringLongIso: IsoStringLong[File] =
       IsoStringLong.iso[File](
         (f: File) => (IO.toURI(f).toASCIIString, 0L),
@@ -60,9 +41,26 @@ object UpdateReportPersistence:
 
   end CacheCodec
 
-  // Not the stock `LibraryManagementCodec`: see `CacheCodec` for why persisted reports must not
-  // content-hash the artifacts they name.
   import CacheCodec.given
+
+  /** Interns the modules of a decoded cache, in a pass since the generated reader has no hook. */
+  private def internModules(cache: UpdateReportCache): UpdateReportCache =
+    cache.copy(lite =
+      UpdateReportLite(
+        cache.lite.configurations.map(cr =>
+          ConfigurationReportLite(
+            cr.configuration,
+            cr.details.map(d =>
+              OrganizationArtifactReport(
+                d.organization,
+                d.name,
+                d.modules.map(UpdateReportInterner.intern)
+              )
+            )
+          )
+        )
+      )
+    )
 
   given updateReportCacheFormat: JsonFormat[UpdateReportCache] =
     new JsonFormat[UpdateReportCache]:
@@ -78,7 +76,7 @@ object UpdateReportPersistence:
             val stamps = unbuilder.readField[Map[String, Long]]("stamps")
             val cachedDescriptor = unbuilder.readField[File]("cachedDescriptor")
             unbuilder.endObject()
-            UpdateReportCache(lite, stats, stamps, cachedDescriptor)
+            internModules(UpdateReportCache(lite, stats, stamps, cachedDescriptor))
           case None =>
             deserializationError("Expected JsObject but found None")
 
@@ -109,6 +107,7 @@ object UpdateReportPersistence:
       .orElse(
         Try(store.read[UpdateReport]()).toOption
           .map(toCache)
+          .map(internModules)
       )
 
   def writeTo(store: CacheStore, cache: UpdateReportCache): Unit =

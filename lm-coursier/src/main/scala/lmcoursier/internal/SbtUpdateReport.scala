@@ -16,6 +16,7 @@ import coursier.core.{
 }
 import coursier.maven.MavenAttributes
 import coursier.util.Artifact
+import sbt.internal.librarymanagement.UpdateReportInterner
 import sbt.librarymanagement.{ Artifact as _, Configuration as _, * }
 import sbt.util.Logger
 import scala.annotation.nowarn
@@ -147,23 +148,26 @@ private[internal] object SbtUpdateReport {
       sbtMissingArtifacts.toVector
     )
 
-    rep
-      // .withStatus(None)
-      .withPublicationDate(publicationDate)
-      // .withResolver(None)
-      // .withArtifactResolver(None)
-      // .withEvicted(false)
-      // .withEvictedData(None)
-      // .withEvictedReason(None)
-      // .withProblem(None)
-      .withHomepage(Some(project.info.homePage).filter(_.nonEmpty))
-      .withLicenses(project.info.licenses.toVector)
-      .withExtraAttributes(dependency.module.attributes ++ infoProperties(project))
-      // .withIsDefault(None)
-      // .withBranch(None)
-      .withConfigurations(project.configurations.keys.toVector.map(c => ConfigRef(c.value)))
-      .withLicenses(project.info.licenses.toVector)
-      .withCallers(callers.toVector)
+    // Intern as each report is built, so a coordinate is one instance across every project.
+    UpdateReportInterner.intern(
+      rep
+        // .withStatus(None)
+        .withPublicationDate(publicationDate)
+        // .withResolver(None)
+        // .withArtifactResolver(None)
+        // .withEvicted(false)
+        // .withEvictedData(None)
+        // .withEvictedReason(None)
+        // .withProblem(None)
+        .withHomepage(Some(project.info.homePage).filter(_.nonEmpty))
+        .withLicenses(project.info.licenses.toVector)
+        .withExtraAttributes(dependency.module.attributes ++ infoProperties(project))
+        // .withIsDefault(None)
+        // .withBranch(None)
+        .withConfigurations(project.configurations.keys.toVector.map(c => ConfigRef(c.value)))
+        .withLicenses(project.info.licenses.toVector)
+        .withCallers(callers.toVector)
+    )
   }
 
   @nowarn
