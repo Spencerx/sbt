@@ -265,7 +265,12 @@ private[sbt] object LibraryManagement {
       else
         crs1 map { cr =>
           val mrs0 = cr.modules
-          val mrs1 = mrs0 map { _.withCallers(Vector()) }
+          // Re-intern what stripping rebuilds: dropping the callers is what makes two projects'
+          // reports of the same coordinate value-equal, so this is where they collapse to one.
+          val mrs1 = mrs0 map { mr =>
+            if (mr.callers.isEmpty) mr
+            else UpdateReportInterner.intern(mr.withCallers(Vector()))
+          }
           cr.withModules(mrs1)
         }
     ur.withConfigurations(crs2)
