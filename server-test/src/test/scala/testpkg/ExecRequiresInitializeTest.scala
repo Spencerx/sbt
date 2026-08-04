@@ -26,10 +26,10 @@ import org.scalatest.funsuite.AnyFunSuite
 /**
  * Reproduces the reported vulnerability: a TCP server configured with token auth
  * (the default whenever `serverConnectionType` is Tcp) must reject requests that
- * mutate or read through the server (`sbt/exec`, `textDocument/definition`) from a
- * client that never completed a token-authenticated `initialize`. Unlike the other
- * tests in this suite, these deliberately skip `ServerSession#initialize` to play
- * the part of an attacker who can reach the socket but does not know the token.
+ * mutate or read through the server from a client that never completed a
+ * token-authenticated `initialize`. Unlike the other tests in this suite, these
+ * deliberately skip `ServerSession#initialize` to play the part of an attacker who
+ * can reach the socket but does not know the token.
  */
 class ExecRequiresInitializeTest extends AnyFunSuite {
   private val testDirectory = "tcp"
@@ -81,7 +81,11 @@ class ExecRequiresInitializeTest extends AnyFunSuite {
   }
 
   /** Sends `method`/`params` on `session` and asserts the server rejected it pre-auth. */
-  private def assertRejected[A: JsonWriter](session: ServerSession, method: String, params: A): Unit = {
+  private def assertRejected[A: JsonWriter](
+      session: ServerSession,
+      method: String,
+      params: A
+  ): Unit = {
     val id = session.nextId()
     session.sendJsonRpc(id, method, params).get
     val response = session.waitForResponseMsg(30.seconds, id).get
@@ -96,14 +100,6 @@ class ExecRequiresInitializeTest extends AnyFunSuite {
   test("sbt/exec is rejected over TCP before a token-authenticated initialize") {
     withUnauthenticatedSession { session =>
       assertRejected(session, "sbt/exec", SbtExecParams("compile"))
-    }
-  }
-
-  test("textDocument/definition is rejected over TCP before a token-authenticated initialize") {
-    withUnauthenticatedSession { session =>
-      // The gate runs before params are ever parsed, so a bogus payload is enough
-      // to prove the request never reaches Definition.lspDefinition's file reads.
-      assertRejected(session, "textDocument/definition", "")
     }
   }
 

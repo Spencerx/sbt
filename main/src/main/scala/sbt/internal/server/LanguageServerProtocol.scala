@@ -41,7 +41,7 @@ private[sbt] object LanguageServerProtocol {
     ServerCapabilities(
       textDocumentSync = TextDocumentSyncOptions(true, 0, false, false, SaveOptions(false)),
       hoverProvider = false,
-      definitionProvider = true
+      definitionProvider = false
     )
   }
 
@@ -77,14 +77,6 @@ private[sbt] object LanguageServerProtocol {
           setInitialized(true)
           if (!opt.skipAnalysis.getOrElse(false)) appendExec("collectAnalyses", None)
           jsonRpcRespond(InitializeResult(serverCapabilities), Some(r.id))
-
-        case r: JsonRpcRequestMessage if r.method == "textDocument/definition" =>
-          checkAuthenticated(r) {
-            val _ =
-              Definition.lspDefinition(json(r), r.id, CommandSource(name), converter, log)(using
-                StandardMain.executionContext
-              )
-          }
 
         case r: JsonRpcRequestMessage if r.method == "sbt/exec" =>
           checkAuthenticated(r) {
