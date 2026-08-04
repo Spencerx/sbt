@@ -630,6 +630,7 @@ lazy val commandProj = (project in file("main-command"))
     contrabandSettings,
     mimaSettings,
     mimaBinaryIssueFilters ++= Vector(
+      exclude[ReversedMissingMethodProblem]("sbt.internal.server.ServerCallback.*"),
       exclude[MissingClassProblem]("sbt.internal.util.JoinThread"),
       exclude[MissingClassProblem]("sbt.internal.util.JoinThread$"),
       exclude[MissingClassProblem]("sbt.internal.util.ReadJsonFromInputStream"),
