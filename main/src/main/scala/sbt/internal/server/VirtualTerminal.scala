@@ -12,6 +12,7 @@ package server
 
 import java.util.concurrent.{ ArrayBlockingQueue, ConcurrentHashMap }
 import java.util.UUID
+import sbt.internal.langserver.ErrorCodes
 import sbt.internal.protocol.{
   JsonRpcNotificationMessage,
   JsonRpcRequestMessage,
@@ -196,13 +197,20 @@ object VirtualTerminal {
   private val requestHandler: Handler[JsonRpcRequestMessage] =
     callback => {
       case r if r.method == attach =>
-        val isInteractive = r.params
-          .flatMap(Converter.fromJson[Attach](_).toOption.map(_.interactive))
-          .exists(identity)
-        StandardMain.exchange.channelForName(callback.name) match {
-          case Some(nc: NetworkChannel) => nc.setInteractive(r.id, isInteractive)
-          case _                        =>
-        }
+        if (callback.isAuthenticated) {
+          val isInteractive = r.params
+            .flatMap(Converter.fromJson[Attach](_).toOption.map(_.interactive))
+            .exists(identity)
+          StandardMain.exchange.channelForName(callback.name) match {
+            case Some(nc: NetworkChannel) => nc.setInteractive(r.id, isInteractive)
+            case _                        =>
+          }
+        } else
+          callback.jsonRpcRespondError(
+            Some(r.id),
+            ErrorCodes.InvalidRequest,
+            s"'$attach' is not allowed before authentication."
+          )
     }
   private val responseHandler: Handler[JsonRpcResponseMessage] =
     callback => {
@@ -265,12 +273,14 @@ object VirtualTerminal {
   private val notificationHandler: Handler[JsonRpcNotificationMessage] =
     callback => {
       case n if n.method == systemIn =>
-        import sjsonnew.BasicJsonProtocol.*
-        n.params.flatMap(Converter.fromJson[Byte](_).toOption).foreach { byte =>
-          StandardMain.exchange.channelForName(callback.name) match {
-            case Some(nc: NetworkChannel) => nc.write(byte)
-            case _                        =>
+        if (callback.isAuthenticated) {
+          import sjsonnew.BasicJsonProtocol.*
+          n.params.flatMap(Converter.fromJson[Byte](_).toOption).foreach { byte =>
+            StandardMain.exchange.channelForName(callback.name) match {
+              case Some(nc: NetworkChannel) => nc.write(byte)
+              case _                        =>
+            }
           }
-        }
+        } else callback.log.warn(s"ignoring '$systemIn' before authentication")
     }
 }
