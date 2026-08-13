@@ -87,7 +87,8 @@ if exist "!SBT_CONFIG!" (
 )
 
 rem poor man's jenv (which is not available on Windows)
-if defined JAVA_HOMES (
+rem explicit -java-home wins over the project .java-version
+if not defined SBT_EXPLICIT_JAVA_HOME if defined JAVA_HOMES (
   if exist .java-version for /F %%A in (.java-version) do (
     set JAVA_HOME=%JAVA_HOMES%\%%A
     set JDK_HOME=%JAVA_HOMES%\%%A
@@ -511,8 +512,11 @@ if defined _java_home_arg (
   if not "%~1" == "" (
     if exist "%~1\bin\java.exe" (
       set "_JAVACMD=%~1\bin\java.exe"
+      set "JAVACMD=%~1\bin\java.exe"
       set "JAVA_HOME=%~1"
       set "JDK_HOME=%~1"
+      set "SBT_EXPLICIT_JAVA_HOME=1"
+      set "PATH=%~1\bin;!PATH!"
       shift
       goto args_loop
     ) else (
@@ -793,6 +797,9 @@ if defined sbt_args_verbose (
   if not "%~1" == "" ( call :echolist %* )
   echo.
 )
+
+rem one-hop marker: drop it before the server JVM
+set "SBT_EXPLICIT_JAVA_HOME="
 
 "!_JAVACMD!" !_JAVA_OPTS! !_SBT_OPTS! %JAVA_TOOL_OPTIONS% %JDK_JAVA_OPTIONS% -cp "!sbt_jar!" xsbt.boot.Boot %*
 
