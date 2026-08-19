@@ -19,4 +19,16 @@ object ArgParserSpec extends verify.BasicTestSuite:
     val opts = ArgParser.parse(Array("--java-home", "C:\\jdk", "new")).get
     assert(opts.sbtNew)
   }
+
+  test("standalone -V requests the runner version") {
+    val options = ArgParser.parse(Array("-V")).get
+    assert(options.version)
+    assert(options.residual.isEmpty)
+  }
+
+  test("-V after a command is forwarded to sbt") {
+    val options = ArgParser.parse(Array("tasks", "-V")).get
+    assert(!options.version)
+    assert(options.residual == Seq("tasks", "-V"))
+  }
 end ArgParserSpec
