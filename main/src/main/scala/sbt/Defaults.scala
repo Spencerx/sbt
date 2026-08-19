@@ -1812,6 +1812,8 @@ object Defaults extends BuildCommon with DefExtra {
       packageTaskSettings(packageBin, packageBinMappings) ++
       packageTaskSettings(packageSrc, packageSrcMappings) ++
       packageTaskSettings(packageDoc, packageDocMappings) ++
+      packageTaskSettings(packageInternal, packageBin / mappings) ++
+      inTask(packageInternal)(Seq(artifactName :== Artifact.internalArtifactName)) ++
       Seq(Keys.`package` := packageBin.value)
 
   def packageBinMappings: Initialize[Task[Seq[(HashedVirtualFileRef, String)]]] =
@@ -2884,12 +2886,30 @@ object Classpaths {
       exportedProductsNoTracking := ClasspathImpl
         .trackedExportedProducts(TrackLevel.NoTracking)
         .value,
+      exportedProductsVersioned := Def.uncached(
+        ClasspathImpl.trackedExportedProductsVersioned(TrackLevel.TrackAlways).value
+      ),
+      exportedProductsVersionedIfMissing := ClasspathImpl
+        .trackedExportedProductsVersioned(TrackLevel.TrackIfMissing)
+        .value,
+      exportedProductsVersionedNoTracking := ClasspathImpl
+        .trackedExportedProductsVersioned(TrackLevel.NoTracking)
+        .value,
       exportedProductJars := ClasspathImpl.trackedExportedJarProducts(TrackLevel.TrackAlways).value,
       exportedProductJarsIfMissing := ClasspathImpl
         .trackedExportedJarProducts(TrackLevel.TrackIfMissing)
         .value,
       exportedProductJarsNoTracking := ClasspathImpl
         .trackedExportedJarProducts(TrackLevel.NoTracking)
+        .value,
+      exportedProductJarsVersioned := ClasspathImpl
+        .trackedExportedJarProductsVersioned(TrackLevel.TrackAlways)
+        .value,
+      exportedProductJarsVersionedIfMissing := ClasspathImpl
+        .trackedExportedJarProductsVersioned(TrackLevel.TrackIfMissing)
+        .value,
+      exportedProductJarsVersionedNoTracking := ClasspathImpl
+        .trackedExportedJarProductsVersioned(TrackLevel.NoTracking)
         .value,
       internalDependencyAsJars := Def.uncached(internalDependencyJarsTask.value),
       dependencyClasspathAsJars := Def.uncached(
