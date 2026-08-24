@@ -73,11 +73,21 @@ object Tests {
    * @param events The result of each test group (suite) executed during this test run.
    * @param summaries Explicit summaries directly provided by test frameworks.  This may be empty, in which case a default summary will be generated.
    */
-  private[sbt] final case class Output(
+  final case class Output(
       overall: TestResult,
       events: Map[String, SuiteResult],
       summaries: Iterable[Summary]
-  )
+  ) {
+
+    /**
+     * Returns a copy with the throwables removed from every suite result.
+     *
+     * Use this before retaining test results beyond the lifetime of the test task.
+     * See [[SuiteResult.throwables]] for why retaining those exceptions can keep the test class loader alive.
+     */
+    def withoutThrowables: Output =
+      copy(events = events.view.mapValues(_.withoutThrowables).toMap)
+  }
 
   /**
    * Summarizes a test run.
