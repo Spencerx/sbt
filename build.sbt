@@ -7,6 +7,7 @@ import java.util.Locale
 import sbt.internal.inc.Analysis
 import sbt.Tags
 import com.eed3si9n.jarjarabrams.ModuleCoordinate
+import Utils.JDK17
 
 // ThisBuild settings take lower precedence,
 // but can be shared across the multi projects.
@@ -465,8 +466,10 @@ lazy val testingProj = (project in file("testing"))
 
 lazy val workerProj = (project in file("worker"))
   .dependsOn(exampleWorkProj % Test)
+  .configs(JDK17)
   .settings(
     name := "worker",
+    inConfig(JDK17)(Defaults.compileSettings),
     Test / classLoaderLayeringStrategy := ClassLoaderLayeringStrategy.Raw,
     testedBaseSettings,
     Compile / doc / javacOptions := Nil,
@@ -474,8 +477,23 @@ lazy val workerProj = (project in file("worker"))
     autoScalaLibrary := false,
     libraryDependencies ++= Seq(gson, testInterface),
     libraryDependencies += "org.scala-lang" %% "scala3-library" % scalaVersion.value % Test,
-    // run / fork := false,
     Test / fork := true,
+    Compile / javacOptions := Seq("--release", "8"),
+    JDK17 / javacOptions := Seq("--release", "17"),
+    Compile / packageBin / packageOptions += Pkg.ManifestAttributes("Multi-Release" -> "true"),
+    Compile / packageBin / mappings ++= {
+      val _ = (JDK17 / compile).value
+      val conv = fileConverter.value
+      val dir = (Utils.JDK17 / classDirectory).value
+      fileTreeView.value
+        .list(Glob(dir) / **)
+        .map(_._1)
+        .map(_.toFile())
+        .pair(Path.rebase(dir, "META-INF/versions/17"))
+        .map: (file, rel) =>
+          val vf: xsbti.HashedVirtualFileRef = conv.toVirtualFile(file.toPath())
+          vf -> rel
+    },
     mimaSettings,
     mimaBinaryIssueFilters ++= Vector(
     ),
@@ -590,6 +608,11 @@ lazy val actionsProj = (project in file("main-actions"))
     Test / classLoaderLayeringStrategy := ClassLoaderLayeringStrategy.Flat,
     mimaSettings,
     mimaBinaryIssueFilters ++= Vector(
+      // WorkerConnection gained an Ipc(path) case; mixing a parameterized case into
+      // the enum drops the synthetic values()/valueOf() Java-enum forwarders. This is
+      // an internal (sbt.internal) type not meant for external consumption.
+      exclude[DirectMissingMethodProblem]("sbt.internal.WorkerConnection.valueOf"),
+      exclude[DirectMissingMethodProblem]("sbt.internal.WorkerConnection.values"),
     ),
   )
   .dependsOn(lmCore)

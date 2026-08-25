@@ -17,6 +17,7 @@ import java.net.MalformedURLException;
 import java.net.Socket;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.nio.channels.SocketChannel;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -76,6 +77,10 @@ public final class WorkerMain {
         int serverPort = Integer.parseInt(args[1]);
         app.socketWork(serverPort);
         System.exit(0);
+      } else if (args.length == 2 && args[0].equals("--ipc")) {
+        WorkerMain app = new WorkerMain();
+        app.ipcWork(Paths.get(args[1]));
+        System.exit(0);
       } else {
         System.err.println("missing args");
         System.exit(1);
@@ -115,6 +120,16 @@ public final class WorkerMain {
     Socket client = new Socket(loopback, serverPort);
     this.jsonOut = new PrintStream(client.getOutputStream(), true, "UTF-8");
     this.inScanner = new Scanner(client.getInputStream(), "UTF-8");
+    if (this.inScanner.hasNextLine()) {
+      String line = this.inScanner.nextLine();
+      process(line);
+    }
+  }
+
+  void ipcWork(Path socketPath) throws Exception {
+    SocketChannel client = JdkCompat.connectUnixSocket(socketPath);
+    this.jsonOut = new PrintStream(DuplexChannels.newOutputStream(client), true, "UTF-8");
+    this.inScanner = new Scanner(DuplexChannels.newInputStream(client), "UTF-8");
     if (this.inScanner.hasNextLine()) {
       String line = this.inScanner.nextLine();
       process(line);
