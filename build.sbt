@@ -385,6 +385,7 @@ lazy val utilCache = project
     libraryDependencies ++=
       Seq(
         caffeine,
+        scalaPar,
         sjsonNewCore.value,
         sjsonNewScalaJson.value,
         sjsonNewMurmurhash.value
